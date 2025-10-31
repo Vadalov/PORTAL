@@ -29,11 +29,13 @@ This project is configured for maximum autonomous operation. When working on thi
 8. **BATCH OPERATIONS**: When multiple related tasks are needed, complete them all in sequence without asking permission between steps.
 
 **Example Workflow:**
+
 - User: "Add a new donations report feature"
 - Agent: Directly creates route → adds validation → creates API → adds UI → tests → done
 - NO intermediate "Should I create the route?", "Should I add validation?" questions
 
 **Exceptions (ONLY ask if):**
+
 - About to delete production data
 - About to expose API keys or secrets
 - Fundamentally unclear what feature/behavior is desired
@@ -48,6 +50,7 @@ This is a **Dernek Yönetim Sistemi** (Association Management System) - a compre
 ## Commands
 
 ### Development
+
 ```bash
 npm install        # Install dependencies
 npm run dev        # Start development server (http://localhost:3000)
@@ -59,6 +62,7 @@ npm run analyze    # Analyze bundle size
 ```
 
 ### Testing
+
 ```bash
 # Unit/Integration tests (Vitest)
 npm test              # Run tests in watch mode
@@ -79,8 +83,37 @@ npx playwright test --headed  # Run with visible browser
 npx playwright test --debug   # Run in debug mode
 ```
 
+### Code Quality Checks
+
+```bash
+# Run all quality checks
+npm run lint              # ESLint code linting
+npm run typecheck         # TypeScript type checking
+npm run test:run          # Run all tests
+npm run build             # Production build check
+
+# Auto-fix issues
+npm run lint -- --fix     # Auto-fix ESLint issues
+
+# Pre-commit hooks (automatically runs on git commit)
+# - ESLint with auto-fix
+# - Prettier formatting
+# - TypeScript type check
+# - Tests for changed files
+
+# GitHub Actions workflows (automatically run on push/PR)
+# See .github/workflows/ for CI/CD configurations
+# - ci.yml: Main CI pipeline (lint, typecheck, test, build, security)
+# - pr-checks.yml: PR-specific checks (semantic PR, size, code review)
+# - code-quality.yml: Weekly quality metrics (stats, duplicates, bundle size)
+```
+
+**📊 For detailed code quality documentation, see [docs/CODE_QUALITY.md](docs/CODE_QUALITY.md)**
+
 ### Environment Setup
+
 Create a `.env.local` file with the following variables:
+
 ```bash
 # Appwrite Configuration (Required)
 NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
@@ -100,12 +133,15 @@ SESSION_SECRET=your-session-secret
 ```
 
 ### Appwrite Test Users
+
 The system uses Appwrite authentication. Test accounts can be created using:
+
 ```bash
 npx tsx src/scripts/create-test-users.ts
 ```
 
 Default test credentials (if created):
+
 - Admin: `admin@test.com` / `admin123`
 - Manager: `manager@test.com` / `manager123`
 - Member: `member@test.com` / `member123`
@@ -114,6 +150,7 @@ Default test credentials (if created):
 ## Architecture
 
 ### Tech Stack
+
 - **Framework:** Next.js 16 (App Router)
 - **Backend:** Appwrite (Cloud BaaS)
 - **Language:** TypeScript (Strict mode)
@@ -128,6 +165,7 @@ Default test credentials (if created):
 - **Testing:** Vitest (unit/integration) + Playwright (E2E)
 
 ### Project Structure
+
 ```
 src/
 ├── app/                       # Next.js App Router
@@ -175,12 +213,14 @@ src/
 **Critical Architecture Principle:** This project uses **two different Appwrite SDKs** for client and server operations.
 
 #### 1. Client SDK (`appwrite` package)
+
 **File:** `src/lib/appwrite/client.ts`
 **Directive:** `'use client'` (required for Next.js App Router)
 **Environment:** Browser/React Components
 **Authentication:** User sessions (no API key)
 
 **Use Cases:**
+
 - ✅ Client Components (`'use client'`)
 - ✅ User authentication (login/logout)
 - ✅ Session management
@@ -188,6 +228,7 @@ src/
 - ✅ File uploads from browser
 
 **Example:**
+
 ```typescript
 'use client';
 import { account, databases } from '@/lib/appwrite/client';
@@ -197,11 +238,13 @@ const data = await databases.listDocuments(DB_ID, COLLECTION_ID);
 ```
 
 #### 2. Server SDK (`node-appwrite` package)
+
 **File:** `src/lib/appwrite/server.ts`
 **Environment:** Server Components/API Routes
 **Authentication:** API Key (admin permissions)
 
 **Use Cases:**
+
 - ✅ Server Components (no 'use client')
 - ✅ API Routes (`/app/api/*`)
 - ✅ Server Actions
@@ -209,6 +252,7 @@ const data = await databases.listDocuments(DB_ID, COLLECTION_ID);
 - ✅ Bulk operations
 
 **Example:**
+
 ```typescript
 import { serverDatabases, serverUsers } from '@/lib/appwrite/server';
 
@@ -217,22 +261,24 @@ const data = await serverDatabases.listDocuments(DB_ID, COLLECTION_ID);
 ```
 
 #### Security Model
-| Aspect | Client SDK | Server SDK |
-|--------|-----------|------------|
-| **Permissions** | User-level | Admin-level |
-| **API Key** | ❌ Not used | ✅ Required |
-| **Exposed to Browser** | ✅ Yes | ❌ No |
+
+| Aspect                 | Client SDK  | Server SDK  |
+| ---------------------- | ----------- | ----------- |
+| **Permissions**        | User-level  | Admin-level |
+| **API Key**            | ❌ Not used | ✅ Required |
+| **Exposed to Browser** | ✅ Yes      | ❌ No       |
 
 ⚠️ **Never import server SDK in client components!** This will expose your API key.
 
 #### Common Mistakes to Avoid
+
 ```typescript
 // ❌ WRONG: Using server SDK in client component
 'use client';
 import { serverDatabases } from '@/lib/appwrite/server'; // ERROR!
 
 // ✅ CORRECT: Using client SDK in client component
-'use client';
+('use client');
 import { databases } from '@/lib/appwrite/client';
 
 // ✅ CORRECT: Using server SDK in server component or API route
@@ -272,12 +318,14 @@ import { serverDatabases } from '@/lib/appwrite/server';
 ### State Management
 
 **Zustand Pattern:**
+
 - Store setup: `create()` + `devtools()` + `subscribeWithSelector()` + `persist()` + `immer()`
 - State and actions separated in TypeScript interfaces
 - Selectors exported for performance optimization
 - Uses Immer for immutable state updates
 
 **Example from authStore:**
+
 ```typescript
 export const useAuthStore = create<AuthStore>()(
   devtools(
@@ -286,9 +334,11 @@ export const useAuthStore = create<AuthStore>()(
         immer((set, get) => ({
           // state...
           login: async (email, password) => {
-            set((state) => { state.isLoading = true; });
+            set((state) => {
+              state.isLoading = true;
+            });
             // ...
-          }
+          },
         }))
       )
     )
@@ -299,12 +349,14 @@ export const useAuthStore = create<AuthStore>()(
 ### Data Fetching
 
 **TanStack Query Setup:**
+
 - QueryClient configured in `src/app/providers.tsx`
 - Default staleTime: 60 seconds
 - `refetchOnWindowFocus: false`
 - DevTools enabled in development
 
 **API Layer:**
+
 - Primary: `src/lib/api/appwrite-api.ts` (Appwrite integration)
 - Fallback: `src/lib/api/mock-api.ts` (development/testing)
 - Returns `ApiResponse<T>` with data/error structure
@@ -313,12 +365,14 @@ export const useAuthStore = create<AuthStore>()(
 ### UI Components (shadcn/ui)
 
 **Configuration:**
+
 - Style: "new-york"
 - Base color: neutral
 - CSS variables enabled
 - Path aliases: `@/components`, `@/lib/utils`, etc.
 
 **Important:** When adding new shadcn components, use:
+
 ```bash
 npx shadcn@latest add <component-name>
 ```
@@ -326,12 +380,14 @@ npx shadcn@latest add <component-name>
 ### Routing
 
 **App Router Structure:**
+
 - Route groups: `(dashboard)` for protected routes
 - Turkish route naming (e.g., `/yardim/ihtiyac-sahipleri`)
 - Dynamic routes: `[id]` for detail pages
 - Middleware-protected routes
 
 **Main Routes:**
+
 - `/login` - Login page
 - `/genel` - Dashboard (default after login)
 - `/yardim/ihtiyac-sahipleri` - Beneficiaries list
@@ -343,6 +399,7 @@ npx shadcn@latest add <component-name>
 ### Path Aliases
 
 Configured in `tsconfig.json`:
+
 ```json
 {
   "@/*": ["./src/*"],
@@ -360,6 +417,7 @@ Configured in `tsconfig.json`:
 **Database ID:** `dernek_db` (configured in `.env.local`)
 
 **Collections:**
+
 - `users` - User accounts and profiles
 - `beneficiaries` - İhtiyaç sahipleri (beneficiaries)
 - `donations` - Bağışlar (donations)
@@ -376,12 +434,14 @@ Configured in `tsconfig.json`:
 - `campaigns` - Kampanyalar
 
 **Storage Buckets:**
+
 - `documents` - General documents
 - `receipts` - Donation receipts (makbuzlar)
 - `photos` - Photos and images
 - `reports` - Generated reports
 
 **Setup Scripts:**
+
 ```bash
 # Test Appwrite connection
 npx tsx src/scripts/test-appwrite-connection.ts
@@ -397,6 +457,7 @@ npx tsx src/scripts/migrate-to-appwrite.ts
 
 **Sidebar Navigation** (`src/components/layouts/Sidebar.tsx`):
 The application is organized into modules, each with subpages:
+
 - Ana Sayfa (Home) - Dashboard
 - Bağışlar (Donations) - List, Reports, Piggy Bank
 - Yardımlar (Aid) - Beneficiaries, Applications, Lists, Cash Vault
@@ -425,9 +486,11 @@ The application is organized into modules, each with subpages:
 ## Security & Validation
 
 ### Input Sanitization
+
 Location: `src/lib/sanitization.ts`
 
 Functions available:
+
 - `sanitizeTcNo()` - Turkish ID validation with algorithm check
 - `sanitizePhone()` - Turkish phone format (+90 5XX XXX XX XX)
 - `sanitizeEmail()` - Email format validation and lowercase
@@ -435,27 +498,33 @@ Functions available:
 - Many more specialized sanitizers
 
 ### Form Validation
+
 Location: `src/lib/validations/`
 
 All forms use Zod schemas with:
+
 - Turkish-specific validations (TC Kimlik, phone format)
 - Conditional validation (age vs marital status)
 - Comprehensive field validation (100+ fields for beneficiary)
 
 **Example:**
+
 ```typescript
 import { beneficiarySchema } from '@/lib/validations/beneficiary';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const form = useForm({
   resolver: zodResolver(beneficiarySchema),
-  defaultValues: { /* ... */ }
+  defaultValues: {
+    /* ... */
+  },
 });
 ```
 
 ## Common Development Workflows
 
 ### Adding a New Feature Module
+
 1. Create route in `src/app/(dashboard)/[module-name]/`
 2. Add Zod validation schema in `src/lib/validations/[module].ts`
 3. Add API methods in `src/lib/api/appwrite-api.ts`
@@ -464,6 +533,7 @@ const form = useForm({
 6. Add permission checks using `hasPermission()` helper
 
 ### Adding a New API Endpoint
+
 1. Create API route in `src/app/api/[endpoint]/route.ts`
 2. Use server SDK: `import { serverDatabases } from '@/lib/appwrite/server'`
 3. Add CSRF protection for mutations
@@ -472,6 +542,7 @@ const form = useForm({
 6. Add error handling with Sentry
 
 ### Adding a New Form
+
 1. Create Zod schema in `src/lib/validations/`
 2. Create form component with React Hook Form
 3. Add sanitization for all inputs
@@ -480,6 +551,7 @@ const form = useForm({
 6. Add loading states and error handling
 
 ### Running Tests for a Feature
+
 ```bash
 # Test specific component/utility
 npx vitest src/__tests__/lib/[feature].test.ts
@@ -496,6 +568,7 @@ npx playwright test e2e/[feature].spec.ts --headed
 ### Decision Making Framework
 
 **ALWAYS DO (No Permission Needed):**
+
 - Create new files, components, routes
 - Update existing code (bug fixes, features, refactoring)
 - Install npm packages (ensure security best practices)
@@ -512,6 +585,7 @@ npx playwright test e2e/[feature].spec.ts --headed
 - Update configurations (tsconfig, tailwind, etc.)
 
 **ASSUME & DOCUMENT (Use Best Judgment):**
+
 - API response formats → Use existing patterns
 - Component structure → Follow shadcn/ui patterns
 - State management → Use Zustand with immer pattern
@@ -522,6 +596,7 @@ npx playwright test e2e/[feature].spec.ts --headed
 - File organization → Follow existing src/ structure
 
 **ONLY ASK IF:**
+
 - Deleting user data or collections
 - Changing authentication flow significantly
 - Exposing sensitive information
@@ -532,6 +607,7 @@ npx playwright test e2e/[feature].spec.ts --headed
 ### Execution Patterns
 
 **Single Task → Full Implementation:**
+
 ```
 User: "Add export to Excel feature for beneficiaries"
 
@@ -546,6 +622,7 @@ Agent executes automatically:
 ```
 
 **Multiple Tasks → Batch Execute:**
+
 ```
 User: "Fix the donations page"
 
@@ -559,6 +636,7 @@ Agent executes automatically:
 ```
 
 **Error Encountered → Auto Fix:**
+
 ```
 - TypeScript error → Fix types automatically
 - Test failure → Debug and fix automatically
@@ -569,12 +647,14 @@ Agent executes automatically:
 ### Communication Style
 
 **DO:**
+
 - ✅ Report what you're doing briefly
 - ✅ Show final results
 - ✅ Mention important decisions made
 - ✅ Report completion status
 
 **DON'T:**
+
 - ❌ Ask "Should I create...?"
 - ❌ Ask "Would you like me to...?"
 - ❌ Ask "Do you want...?"
@@ -582,11 +662,13 @@ Agent executes automatically:
 - ❌ Present plans and wait for confirmation
 
 **Example - GOOD:**
+
 ```
 "Adding export feature for beneficiaries. Installing dependencies, creating export utility, updating UI... Done. Users can now export beneficiaries to Excel format."
 ```
 
 **Example - BAD:**
+
 ```
 "I can add an export feature. Should I install the xlsx library first? Would you like me to create a new utility file? Where should I place the export button?"
 ```
@@ -594,6 +676,7 @@ Agent executes automatically:
 ### Turkish Context Awareness
 
 When implementing features, automatically apply Turkish-specific rules:
+
 - Phone numbers: +90 5XX XXX XX XX format
 - TC Kimlik No: 11 digits with checksum validation
 - Currency: Turkish Lira (₺) with proper formatting
@@ -605,6 +688,7 @@ When implementing features, automatically apply Turkish-specific rules:
 ### Package Installation Policy
 
 When packages are needed:
+
 1. Check package security and reputation automatically
 2. Install with `npm install <package>`
 3. Update TypeScript types if needed
@@ -616,6 +700,7 @@ No need to ask "Should I install X package?" - just do it if it's a reputable, c
 ### Testing Philosophy
 
 After implementing features:
+
 1. Run relevant tests automatically
 2. If tests fail, fix automatically
 3. If no tests exist, note it but continue

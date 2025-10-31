@@ -2,6 +2,12 @@
 
 Modern, kapsamlı kar amacı gütmeyen dernekler için yönetim sistemi. **Next.js 16 + React 19 + TypeScript + Tailwind CSS + Appwrite Backend** ile geliştirilmiştir.
 
+[![CI Pipeline](https://github.com/Vadalov/PORTAL/actions/workflows/ci.yml/badge.svg)](https://github.com/Vadalov/PORTAL/actions/workflows/ci.yml)
+[![Code Quality](https://github.com/Vadalov/PORTAL/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Vadalov/PORTAL/actions/workflows/code-quality.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.0-black.svg)](https://nextjs.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 ## 🎯 Proje Durumu
 
 **✅ MVP TAMAMLANDI** - Temel özellikler çalışır durumda!
@@ -32,12 +38,12 @@ npm run dev
 
 ### Test Hesapları
 
-| Rol     | Email               | Şifre      |
-|---------|---------------------|------------|
-| Admin   | admin@test.com      | admin123   |
-| Manager | manager@test.com    | manager123 |
-| Member  | member@test.com     | member123  |
-| Viewer  | viewer@test.com     | viewer123  |
+| Rol     | Email            | Şifre      |
+| ------- | ---------------- | ---------- |
+| Admin   | admin@test.com   | admin123   |
+| Manager | manager@test.com | manager123 |
+| Member  | member@test.com  | member123  |
+| Viewer  | viewer@test.com  | viewer123  |
 
 ---
 
@@ -234,10 +240,10 @@ This project implements comprehensive error handling and loading state managemen
 
 Bu proje **iki farklı Appwrite SDK** kullanır:
 
-| SDK | Version | Environment | File | Purpose |
-|-----|---------|-------------|------|----------|
-| `appwrite` | v21.2.1 | Browser | `client.ts` | Client-side operations |
-| `node-appwrite` | v20.2.1 | Node.js | `server.ts` | Server-side operations |
+| SDK             | Version | Environment | File        | Purpose                |
+| --------------- | ------- | ----------- | ----------- | ---------------------- |
+| `appwrite`      | v21.2.1 | Browser     | `client.ts` | Client-side operations |
+| `node-appwrite` | v20.2.1 | Node.js     | `server.ts` | Server-side operations |
 
 ---
 
@@ -248,6 +254,7 @@ Bu proje **iki farklı Appwrite SDK** kullanır:
 **🔑 Auth:** User sessions (no API key)
 
 **Use Cases:**
+
 - ✅ Client Components (`'use client'`)
 - ✅ User authentication (login/logout)
 - ✅ Session management
@@ -255,6 +262,7 @@ Bu proje **iki farklı Appwrite SDK** kullanır:
 - ✅ File uploads from browser
 
 **Example:**
+
 ```typescript
 'use client';
 import { account, databases } from '@/lib/appwrite/client';
@@ -272,6 +280,7 @@ const data = await databases.listDocuments(DB_ID, COLLECTION_ID);
 **🔑 Auth:** API Key (admin permissions)
 
 **Use Cases:**
+
 - ✅ Server Components
 - ✅ API Routes (`/app/api/*`)
 - ✅ Server Actions
@@ -279,6 +288,7 @@ const data = await databases.listDocuments(DB_ID, COLLECTION_ID);
 - ✅ Bulk operations
 
 **Example:**
+
 ```typescript
 import { serverDatabases, serverUsers } from '@/lib/appwrite/server';
 
@@ -290,12 +300,12 @@ const data = await serverDatabases.listDocuments(DB_ID, COLLECTION_ID);
 
 ### 🔒 Security Model
 
-| Aspect | Client SDK | Server SDK |
-|--------|-----------|------------|
-| **Permissions** | User-level | Admin-level |
-| **API Key** | ❌ Not used | ✅ Required |
-| **Exposed to Browser** | ✅ Yes | ❌ No |
-| **Bundle Size** | Included | Server-only |
+| Aspect                 | Client SDK  | Server SDK  |
+| ---------------------- | ----------- | ----------- |
+| **Permissions**        | User-level  | Admin-level |
+| **API Key**            | ❌ Not used | ✅ Required |
+| **Exposed to Browser** | ✅ Yes      | ❌ No       |
+| **Bundle Size**        | Included    | Server-only |
 
 ⚠️ **Never expose `APPWRITE_API_KEY` to the client!**
 
@@ -304,6 +314,7 @@ const data = await serverDatabases.listDocuments(DB_ID, COLLECTION_ID);
 ### 🚫 Common Mistakes
 
 ❌ **Wrong:**
+
 ```typescript
 // Using server SDK in client component
 'use client';
@@ -311,6 +322,7 @@ import { serverDatabases } from '@/lib/appwrite/server'; // ERROR!
 ```
 
 ✅ **Correct:**
+
 ```typescript
 // Client component
 'use client';
@@ -325,12 +337,14 @@ import { serverDatabases } from '@/lib/appwrite/server';
 ### 🔧 Environment Variables
 
 **Client (public - exposed to browser):**
+
 ```bash
 NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
 NEXT_PUBLIC_APPWRITE_PROJECT_ID=your-project-id
 ```
 
 **Server (private - never exposed):**
+
 ```bash
 APPWRITE_API_KEY=your-secret-api-key
 ```
@@ -357,30 +371,35 @@ See `.env.example` for complete configuration.
 ### Features
 
 **User CRUD Operations:**
+
 - Create new users with role assignment
 - Edit user details (name, role, avatar, status)
 - Delete users (with confirmation)
 - Toggle user status (active/inactive)
 
 **Role-Based Access Control:**
+
 - 6 roles: SUPER_ADMIN, ADMIN, MANAGER, MEMBER, VIEWER, VOLUNTEER
 - Permission display (read-only, based on ROLE_PERMISSIONS)
 - Current user can't create users with higher role
 - Can't delete or deactivate self
 
 **Search & Filters:**
+
 - Search by name or email
 - Filter by role (All, SUPER_ADMIN, ADMIN, etc.)
 - Filter by status (All, Active, Inactive)
 - Pagination (20 users per page)
 
 **Permissions Required:**
+
 - `USERS_READ` - View user list
 - `USERS_CREATE` - Create new users
 - `USERS_UPDATE` - Edit users and toggle status
 - `USERS_DELETE` - Delete users
 
 **Usage:**
+
 ```typescript
 import { appwriteApi } from '@/lib/api/appwrite-api';
 
@@ -391,8 +410,8 @@ const { data } = await appwriteApi.users.getUsers({
   search: 'john',
   filters: {
     role: 'ADMIN',
-    isActive: true
-  }
+    isActive: true,
+  },
 });
 
 // Create user
@@ -400,13 +419,13 @@ await appwriteApi.users.createUser({
   name: 'John Doe',
   email: 'john@example.com',
   role: 'MEMBER',
-  isActive: true
+  isActive: true,
 });
 
 // Update user
 await appwriteApi.users.updateUser(userId, {
   role: 'MANAGER',
-  isActive: false
+  isActive: false,
 });
 
 // Delete user
@@ -415,16 +434,17 @@ await appwriteApi.users.deleteUser(userId);
 
 **Role Permissions:**
 
-| Role | Description | Key Permissions |
-|------|-------------|----------------|
-| SUPER_ADMIN | Full system access | All permissions |
-| ADMIN | Administrative access | Most permissions (can't manage super admins) |
-| MANAGER | Business operations | CRUD on beneficiaries, donations, tasks, meetings |
-| MEMBER | Standard user | Read most, create/update own items |
-| VIEWER | Read-only access | Read-only permissions |
-| VOLUNTEER | Limited access | Limited create/read permissions |
+| Role        | Description           | Key Permissions                                   |
+| ----------- | --------------------- | ------------------------------------------------- |
+| SUPER_ADMIN | Full system access    | All permissions                                   |
+| ADMIN       | Administrative access | Most permissions (can't manage super admins)      |
+| MANAGER     | Business operations   | CRUD on beneficiaries, donations, tasks, meetings |
+| MEMBER      | Standard user         | Read most, create/update own items                |
+| VIEWER      | Read-only access      | Read-only permissions                             |
+| VOLUNTEER   | Limited access        | Limited create/read permissions                   |
 
 **Validation:**
+
 - Name: 2-100 characters, required
 - Email: Valid email format, required, unique
 - Role: One of 6 valid roles, required
@@ -432,6 +452,7 @@ await appwriteApi.users.deleteUser(userId);
 - Status: Boolean, default true
 
 **Security:**
+
 - Email field disabled in edit mode (can't change email)
 - Role-based UI (buttons hidden if no permission)
 - Self-protection (can't delete/deactivate self)
@@ -441,14 +462,14 @@ await appwriteApi.users.deleteUser(userId);
 
 ## ⌨️ Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Cmd+K` / `Ctrl+K` | Open global search |
-| `Esc` | Close dialogs/modals |
-| `Arrow Up/Down` | Navigate search results |
-| `Enter` | Select search result |
-| `Tab` | Navigate form fields |
-| `Shift+Tab` | Navigate backwards |
+| Shortcut           | Action                  |
+| ------------------ | ----------------------- |
+| `Cmd+K` / `Ctrl+K` | Open global search      |
+| `Esc`              | Close dialogs/modals    |
+| `Arrow Up/Down`    | Navigate search results |
+| `Enter`            | Select search result    |
+| `Tab`              | Navigate form fields    |
+| `Shift+Tab`        | Navigate backwards      |
 
 ---
 
@@ -503,6 +524,7 @@ Mock data kullanılıyor. Gerçek backend için `src/lib/api/mock-api.ts` dosyas
 See `docs/PRODUCTION-BUILD-GUIDE.md` for detailed deployment instructions.
 
 **Quick Deploy:**
+
 ```bash
 # Build
 npm run build
@@ -590,6 +612,7 @@ npm run test:coverage
 ```
 
 **Test Dosyaları:**
+
 - `lib/sanitization.test.ts` - Sanitization testleri (79 test)
 - `lib/beneficiary-validation.test.ts` - Validation testleri (20+ test)
 - `integration/beneficiary-sanitization.test.ts` - Integration testleri (15+ test)
@@ -613,6 +636,7 @@ npx playwright test beneficiary-edit.spec.ts
 ```
 
 **Test Dosyaları:**
+
 - `beneficiaries.spec.ts` - Beneficiary list testleri
 - `beneficiary-edit.spec.ts` - Edit flow testleri (10 test)
 - `auth.spec.ts` - Authentication testleri
@@ -620,6 +644,7 @@ npx playwright test beneficiary-edit.spec.ts
 ### Test Coverage
 
 **Mevcut Coverage:**
+
 - ✅ **Unit Tests:** 100+ test passing
 - ✅ **E2E Tests:** 35+ test passing
 - ✅ **Sanitization:** %100 coverage
@@ -629,20 +654,24 @@ npx playwright test beneficiary-edit.spec.ts
 ### Boundary Testing
 
 **Error Boundary Testing:**
+
 - **Manual:** Navigate to `/test-error-boundary` (development only)
 - **Automated:** `npm run test:error-boundaries`
 - **Documentation:** [`docs/ERROR-BOUNDARY-TESTING-GUIDE.md`](docs/ERROR-BOUNDARY-TESTING-GUIDE.md)
 
 **Loading State Testing:**
+
 - **Manual:** Navigate to `/test-loading-states` (development only)
 - **Automated:** `npm run test:loading-states`
 - **Documentation:** [`docs/LOADING-STATES-GUIDE.md`](docs/LOADING-STATES-GUIDE.md)
 
 **Suspense Boundary Testing:**
+
 - **Automated:** `npm run test:suspense`
 - **Documentation:** [`docs/SUSPENSE-BOUNDARIES-GUIDE.md`](docs/SUSPENSE-BOUNDARIES-GUIDE.md)
 
 **All Boundary Tests:**
+
 - **Run all:** `npm run test:all-boundaries`
 
 ---
@@ -663,21 +692,25 @@ npx playwright test beneficiary-edit.spec.ts
 ### Validation Rules
 
 **TC Kimlik No:**
+
 - 11 hane
 - İlk hane 0 olamaz
 - Algoritma kontrolü (10. ve 11. hane checksum)
 
 **Telefon:**
+
 - Türk mobil format: +90 5XX XXX XX XX
 - Sabit hat kabul edilmez
 - Otomatik format düzeltme
 
 **Email:**
+
 - RFC 5322 compliant
 - Lowercase conversion
 - Trim whitespace
 
 **Conditional Validation:**
+
 - TC Kimlik varsa Mernis kontrolü zorunlu
 - 18 yaş altı evli olamaz
 - Kronik hastalık varsa detay zorunlu
@@ -759,10 +792,12 @@ try {
 ### Development Tools
 
 **Test Pages (Development Only):**
+
 - `/test-error-boundary` - Error boundary testing interface
 - `/test-loading-states` - Loading state testing interface
 
 **Debug Utilities (Development Only):**
+
 - `window.__ERROR_SIMULATOR__` - Programmatic error simulation
 - `window.__LOADING_STATE_TESTER__` - Loading state testing utilities
 - `window.__LAST_ERROR__` - Last error caught by route boundary
@@ -772,6 +807,7 @@ try {
 ## 🔧 Common Issues
 
 **1. Quick Diagnostic Commands (at top of section):**
+
 ```bash
 # First, run comprehensive diagnostics
 npm run diagnose
@@ -786,6 +822,7 @@ npm run test:browsers        # Browser compatibility issues
 **2. Critical Issues (High Priority):**
 
 **Beyaz Ekran (White Screen) - CRITICAL**
+
 - **Symptoms:** Page doesn't load, white screen, or partial render
 - **Quick Fix:**
   ```bash
@@ -808,6 +845,7 @@ npm run test:browsers        # Browser compatibility issues
 - **Related Issues:** Hydration Mismatch, Browser Extensions
 
 **Application Not Starting - CRITICAL**
+
 - **Symptoms:** `npm run dev` fails or crashes immediately
 - **Quick Fix:**
   ```bash
@@ -831,6 +869,7 @@ npm run test:browsers        # Browser compatibility issues
 **3. Configuration Issues:**
 
 **Environment Variables Missing**
+
 - **Symptoms:** "MISSING_ENV_VARIABLES" error, Appwrite connection fails
 - **Quick Fix:**
   ```bash
@@ -847,8 +886,10 @@ npm run test:browsers        # Browser compatibility issues
 - **Detailed Guide:** [`docs/CONFIGURATION-TROUBLESHOOTING.md`](docs/CONFIGURATION-TROUBLESHOOTING.md)
 
 **Appwrite Connection Failed**
+
 - **Symptoms:** API calls fail, "Cannot connect to Appwrite" errors
 - **Quick Fix:**
+
   ```bash
   # Test connectivity
   npm run test:connectivity
@@ -857,6 +898,7 @@ npm run test:browsers        # Browser compatibility issues
   # In .env.local:
   NEXT_PUBLIC_BACKEND_PROVIDER=mock
   ```
+
 - **Common Causes:**
   1. Invalid endpoint URL (must end with /v1)
   2. Wrong project ID
@@ -872,12 +914,13 @@ npm run test:browsers        # Browser compatibility issues
 **4. Runtime Issues:**
 
 **Loading State Stuck**
+
 - **Symptoms:** Loading overlay never disappears, infinite spinner
 - **Quick Fix:**
   ```javascript
   // In browser console:
-  useAuthStore.getState()._hasHydrated  // Should be true
-  useAuthStore.getState().isInitialized  // Should be true
+  useAuthStore.getState()._hasHydrated; // Should be true
+  useAuthStore.getState().isInitialized; // Should be true
   ```
 - **Root Causes:**
   1. Hydration not completing (`_hasHydrated` stuck at false)
@@ -891,6 +934,7 @@ npm run test:browsers        # Browser compatibility issues
 - **Detailed Guide:** [`docs/LOADING-STATES-GUIDE.md`](docs/LOADING-STATES-GUIDE.md)
 
 **Hydration Mismatch Errors**
+
 - **Symptoms:** Console warnings about "Text content does not match", "Hydration failed"
 - **Quick Fix:**
   ```bash
@@ -911,6 +955,7 @@ npm run test:browsers        # Browser compatibility issues
 - **Detailed Guide:** [`docs/TROUBLESHOOTING.md#hydration-mismatch-debug`](docs/TROUBLESHOOTING.md#hydration-mismatch-debug)
 
 **Auth Redirect Loop**
+
 - **Symptoms:** Infinite redirects between login and dashboard
 - **Quick Fix:**
   ```bash
@@ -926,17 +971,20 @@ npm run test:browsers        # Browser compatibility issues
 **5. Browser-Specific Issues:**
 
 **Chrome Issues**
+
 - **React DevTools Interference:** Disable during hydration testing
 - **Service Worker Caching:** Clear in DevTools → Application → Service Workers
 - **Extension Conflicts:** Test in Incognito mode
 
 **Firefox Issues**
+
 - **Stricter CSP:** May block inline scripts (check console)
 - **localStorage Timing:** May need small delay after writes
 - **CSS Animation Performance:** Use `will-change` property
 - **Solution:** CSP configured in `next.config.ts` for Firefox compatibility
 
 **Safari Issues**
+
 - **iOS Hydration Timing:** Different JavaScript execution timing
 - **localStorage Quota:** 5MB limit (stricter than other browsers)
 - **Viewport Height:** Use `dvh` units instead of `vh` for iOS
@@ -946,6 +994,7 @@ npm run test:browsers        # Browser compatibility issues
 **6. Build & Deployment Issues:**
 
 **Production Build Fails**
+
 - **Symptoms:** `npm run build` exits with errors
 - **Quick Fix:**
   ```bash
@@ -964,6 +1013,7 @@ npm run test:browsers        # Browser compatibility issues
 - **Diagnostic:** Run `npm run test:prod-enhanced` for comprehensive validation
 
 **Large Bundle Size**
+
 - **Symptoms:** Slow page load, bundle > 1MB
 - **Quick Fix:**
   ```bash
@@ -979,6 +1029,7 @@ npm run test:browsers        # Browser compatibility issues
 - **Target:** Total bundle < 500KB (gzipped)
 
 **Slow Performance**
+
 - **Symptoms:** TTI > 5s, low Lighthouse score
 - **Quick Fix:**
   ```bash
@@ -1000,6 +1051,7 @@ npm run test:browsers        # Browser compatibility issues
 **7. Testing Issues:**
 
 **E2E Tests Failing**
+
 - **Symptoms:** Playwright tests fail, timeouts
 - **Quick Fix:**
   ```bash
@@ -1015,6 +1067,7 @@ npm run test:browsers        # Browser compatibility issues
 - **Solution:** Add explicit waits, verify test data exists
 
 **Unit Tests Failing After Updates**
+
 - **Symptoms:** Tests pass locally but fail in CI
 - **Quick Fix:**
   ```bash
@@ -1031,6 +1084,7 @@ npm run test:browsers        # Browser compatibility issues
 **8. Cache & Dependency Issues:**
 
 **Peer Dependency Warnings**
+
 - **Symptoms:** npm install shows peer dependency warnings
 - **Quick Fix:**
   ```bash
@@ -1041,6 +1095,7 @@ npm run test:browsers        # Browser compatibility issues
 - **Verification:** `npm ls react react-dom` should show 19.2.0
 
 **Cache Issues**
+
 - **Symptoms:** Unexpected behavior, old code running
 - **Quick Fix:**
   ```bash
@@ -1057,30 +1112,32 @@ npm run test:browsers        # Browser compatibility issues
 
 **9. Quick Reference Table:**
 
-| Symptom | Quick Command | Detailed Section |
-|---------|---------------|------------------|
-| White screen | `localStorage.clear()` + reload | Beyaz Ekran |
-| App won't start | `npm run clean:all` | Application Not Starting |
-| Missing env vars | `npm run validate:config` | Environment Variables |
-| Appwrite connection | `npm run test:connectivity` | Appwrite Connection |
-| Loading stuck | Check `_hasHydrated` in console | Loading State Stuck |
-| Hydration error | Test in Incognito mode | Hydration Mismatch |
-| Redirect loop | Clear auth storage | Auth Redirect Loop |
-| Build fails | `npm run typecheck` | Production Build Fails |
-| Large bundle | `ANALYZE=true npm run build` | Large Bundle Size |
-| Slow performance | `npm run test:prod-enhanced` | Slow Performance |
-| Tests failing | `npx playwright test --headed` | E2E Tests Failing |
-| Peer warnings | `npm install --legacy-peer-deps` | Peer Dependency Warnings |
-| Cache issues | `rm -rf .next` | Cache Issues |
+| Symptom             | Quick Command                    | Detailed Section         |
+| ------------------- | -------------------------------- | ------------------------ |
+| White screen        | `localStorage.clear()` + reload  | Beyaz Ekran              |
+| App won't start     | `npm run clean:all`              | Application Not Starting |
+| Missing env vars    | `npm run validate:config`        | Environment Variables    |
+| Appwrite connection | `npm run test:connectivity`      | Appwrite Connection      |
+| Loading stuck       | Check `_hasHydrated` in console  | Loading State Stuck      |
+| Hydration error     | Test in Incognito mode           | Hydration Mismatch       |
+| Redirect loop       | Clear auth storage               | Auth Redirect Loop       |
+| Build fails         | `npm run typecheck`              | Production Build Fails   |
+| Large bundle        | `ANALYZE=true npm run build`     | Large Bundle Size        |
+| Slow performance    | `npm run test:prod-enhanced`     | Slow Performance         |
+| Tests failing       | `npx playwright test --headed`   | E2E Tests Failing        |
+| Peer warnings       | `npm install --legacy-peer-deps` | Peer Dependency Warnings |
+| Cache issues        | `rm -rf .next`                   | Cache Issues             |
 
 **10. Getting Help:**
 
 If issues persist after trying solutions above:
 
 1. **Run Full Diagnostics:**
+
    ```bash
    npm run diagnose
    ```
+
    This generates a comprehensive report you can share.
 
 2. **Check Detailed Guides:**
