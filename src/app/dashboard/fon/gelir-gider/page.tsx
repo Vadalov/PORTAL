@@ -188,7 +188,7 @@ export default function GelirGiderPage() {
 
       if (result.success) {
         setShowAddForm(false);
-        setEditingTransaction(null);
+        _setEditingTransaction(null);
         resetForm();
         fetchTransactions(); // Refresh the list
         fetchStats(); // Refresh the stats
