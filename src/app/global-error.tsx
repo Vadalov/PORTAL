@@ -2,28 +2,26 @@
 
 import { useEffect } from 'react';
 
-// TypeScript interfaces for window objects
-interface WindowWithSentry extends Window {
-  Sentry?: {
-    captureException: (error: Error, options?: Record<string, unknown>) => void;
-    showReportDialog?: () => void;
-  };
-  __GLOBAL_ERROR__?: {
-    error: Error & { digest?: string };
-    digest?: string;
-    timestamp: Date;
-  };
-}
-
 interface PerformanceMemory {
   usedJSHeapSize?: number;
   totalJSHeapSize?: number;
 }
 
-interface WindowWithPerformance extends Window {
-  performance?: {
-    memory?: PerformanceMemory;
-  };
+declare global {
+  interface Window {
+    Sentry?: {
+      captureException: (error: Error, options?: Record<string, unknown>) => void;
+      showReportDialog?: () => void;
+    };
+    __GLOBAL_ERROR__?: {
+      error: Error & { digest?: string };
+      digest?: string;
+      timestamp: Date;
+    };
+    performance?: {
+      memory?: PerformanceMemory;
+    };
+  }
 }
 
 /**
@@ -61,11 +59,8 @@ export default function GlobalError({
 
     // Send to Sentry with high priority
     if (typeof window !== 'undefined') {
-      const windowWithSentry = window as WindowWithSentry;
-      const windowWithPerformance = window as WindowWithPerformance;
-      
-      if (windowWithSentry.Sentry) {
-        windowWithSentry.Sentry.captureException(error, {
+      if (window.Sentry) {
+        window.Sentry.captureException(error, {
           level: 'fatal',
           tags: { digest: error.digest, type: 'global-error' },
           contexts: {
@@ -74,8 +69,8 @@ export default function GlobalError({
               screen: `${window.screen.width}x${window.screen.height}`,
             },
             memory: {
-              used: windowWithPerformance.performance?.memory?.usedJSHeapSize,
-              total: windowWithPerformance.performance?.memory?.totalJSHeapSize,
+              used: window.performance?.memory?.usedJSHeapSize,
+              total: window.performance?.memory?.totalJSHeapSize,
             },
           },
           user: {
@@ -84,14 +79,14 @@ export default function GlobalError({
         });
 
         // Add user feedback mechanism if Sentry feedback widget available
-        if (windowWithSentry.Sentry.showReportDialog) {
-          windowWithSentry.Sentry.showReportDialog();
+        if (window.Sentry.showReportDialog) {
+          window.Sentry.showReportDialog();
         }
       }
 
       // Add error tracking to window (development only)
       if (process.env.NODE_ENV === 'development') {
-        windowWithSentry.__GLOBAL_ERROR__ = { error, digest: error.digest, timestamp: new Date() };
+        window.__GLOBAL_ERROR__ = { error, digest: error.digest, timestamp: new Date() };
       }
     }
   }, [error]);

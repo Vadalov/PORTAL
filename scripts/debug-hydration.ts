@@ -133,8 +133,8 @@ try {
   log.info('  1. Ensure skipHydration: true is set in persist middleware');
   log.info('  2. Call persist.rehydrate() manually in useEffect');
   log.info('  3. Check _hasHydrated field before rendering');
-} catch (error: any) {
-  log.error(`Failed to test store: ${error.message}`);
+} catch (error: unknown) {
+  log.error(`Error testing Zustand store: ${error}`);
 }
 
 // Step 5: Check for common hydration issues

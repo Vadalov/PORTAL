@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
-import { QueryParams } from '@/types/collections';
+import { QueryParams, BeneficiaryDocument, CreateDocumentData } from '@/types/collections';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 
 // TypeScript interfaces
@@ -28,6 +28,10 @@ interface BeneficiaryData {
   address?: string;
   email?: string;
   status?: string;
+  city?: string;
+  district?: string;
+  neighborhood?: string;
+  family_size?: number;
   [key: string]: unknown;
 }
 
@@ -170,9 +174,17 @@ async function createBeneficiaryHandler(request: NextRequest) {
     }
 
     // Set default status if not provided
-    const beneficiaryData = {
-      ...body,
-      status: body.status || 'TASLAK',
+    const beneficiaryData: CreateDocumentData<BeneficiaryDocument> = {
+      name: body.name || '',
+      tc_no: body.tc_no || '',
+      phone: body.phone || '',
+      address: body.address || '',
+      city: body.city || '',
+      district: body.district || '',
+      neighborhood: body.neighborhood || '',
+      family_size: body.family_size || 1,
+      status: (body.status as BeneficiaryDocument['status']) || 'TASLAK',
+      email: body.email,
     };
 
     const response = (await api.beneficiaries.createBeneficiary(beneficiaryData)) as ApiResponse;

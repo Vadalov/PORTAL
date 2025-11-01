@@ -82,13 +82,13 @@ export const authApi = {
    * @param updates.password - Current password (required when updating email)
    * @returns Updated user object
    * @throws Error if email update is attempted without password
-   * 
+   *
    * Note: Email updates require password verification for security.
    * After email change, email verification status is reset.
    */
   async updateProfile(userId: string, updates: { name?: string; email?: string; password?: string }) {
     return await handleAppwriteError(async () => {
-      const results: any = {};
+      const results: Record<string, unknown> = {};
       
       // Update name if provided
       if (updates.name) {
@@ -190,8 +190,8 @@ export const usersApi = {
  * Sanitize beneficiary data before database operations
  * Server-side sanitization guard with Zod validation
  */
-function sanitizeBeneficiaryData(data: any): any {
-  const sanitized = { ...data };
+function sanitizeBeneficiaryData(data: CreateDocumentData<BeneficiaryDocument> | UpdateDocumentData<BeneficiaryDocument>): CreateDocumentData<BeneficiaryDocument> | UpdateDocumentData<BeneficiaryDocument> {
+  const sanitized = { ...data } as Record<string, unknown>;
   
   // Handle legacy field mapping: aid_amount -> totalAidAmount
   if (sanitized.aid_amount !== undefined && sanitized.totalAidAmount === undefined) {
@@ -199,18 +199,18 @@ function sanitizeBeneficiaryData(data: any): any {
     delete sanitized.aid_amount;
   }
   
-  // TC Kimlik No
+  // TC Kimlik No (legacy mapping)
   if (sanitized.identityNumber) {
-    const cleanTc = sanitizeTcNo(sanitized.identityNumber);
+    const cleanTc = sanitizeTcNo(sanitized.identityNumber as string);
     if (!cleanTc) {
       throw new ValidationError('Geçersiz TC Kimlik No');
     }
     sanitized.identityNumber = cleanTc;
   }
   
-  // Phone numbers
+  // Phone numbers (legacy mapping)
   if (sanitized.mobilePhone) {
-    const cleanPhone = sanitizePhone(sanitized.mobilePhone);
+    const cleanPhone = sanitizePhone(sanitized.mobilePhone as string);
     if (!cleanPhone) {
       throw new ValidationError('Geçersiz telefon numarası');
     }
@@ -218,13 +218,13 @@ function sanitizeBeneficiaryData(data: any): any {
   }
   
   if (sanitized.landlinePhone) {
-    const cleanLandline = sanitizePhone(sanitized.landlinePhone);
+    const cleanLandline = sanitizePhone(sanitized.landlinePhone as string);
     sanitized.landlinePhone = cleanLandline || undefined;
   }
   
   // Email
   if (sanitized.email) {
-    const cleanEmail = sanitizeEmail(sanitized.email);
+    const cleanEmail = sanitizeEmail(sanitized.email as string);
     if (sanitized.email && !cleanEmail) {
       throw new ValidationError('Geçersiz email adresi');
     }
@@ -234,8 +234,8 @@ function sanitizeBeneficiaryData(data: any): any {
   // Numbers
   const numberFields = ['monthlyIncome', 'monthlyExpense', 'totalAidAmount', 'familyMemberCount'];
   numberFields.forEach(field => {
-    if (sanitized[field] !== undefined) {
-      const cleanNumber = sanitizeNumber(sanitized[field]);
+    if (sanitized[field] !== undefined && sanitized[field] !== null) {
+      const cleanNumber = sanitizeNumber(sanitized[field] as string | number);
       if (cleanNumber === null && sanitized[field] !== null) {
         throw new ValidationError(`Geçersiz sayı değeri: ${field}`);
       }
@@ -254,10 +254,11 @@ function sanitizeBeneficiaryData(data: any): any {
   
   textFields.forEach(field => {
     if (sanitized[field] && typeof sanitized[field] === 'string') {
-      sanitized[field] = sanitizeObject(
+      const sanitizedObj = sanitizeObject(
         { [field]: sanitized[field] },
         { allowHtml: false }
-      )[field];
+      );
+      sanitized[field] = sanitizedObj[field];
     }
   });
   

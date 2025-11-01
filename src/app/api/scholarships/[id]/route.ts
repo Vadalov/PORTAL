@@ -1,0 +1,215 @@
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  getScholarship,
+  updateScholarship,
+  deleteScholarship
+} from '@/lib/api/mock-api';
+import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import {
+  ScholarshipType
+} from '@/types/scholarship';
+
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+interface ScholarshipData {
+  name?: string;
+  description?: string;
+  type?: ScholarshipType;
+  amount?: number;
+  currency?: string;
+  duration?: number;
+  maxRecipients?: number;
+  requirements?: string[];
+  eligibilityCriteria?: string[];
+  applicationDeadline?: Date;
+  isActive?: boolean;
+}
+
+/**
+ * Validate scholarship data
+ */
+function validateScholarshipData(data: ScholarshipData): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Required fields for updates
+  if (data.name && data.name.trim().length < 3) {
+    errors.push('Burs adı en az 3 karakter olmalıdır');
+  }
+
+  if (data.description && data.description.trim().length < 10) {
+    errors.push('Açıklama en az 10 karakter olmalıdır');
+  }
+
+  if (data.amount !== undefined && data.amount <= 0) {
+    errors.push('Burs tutarı 0\'dan büyük olmalıdır');
+  }
+
+  if (data.duration !== undefined && data.duration <= 0) {
+    errors.push('Süre 0\'dan büyük olmalıdır');
+  }
+
+  if (data.maxRecipients !== undefined && data.maxRecipients <= 0) {
+    errors.push('Maksimum alıcı sayısı 0\'dan büyük olmalıdır');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
+/**
+ * GET /api/scholarships/[id]
+ * Get single scholarship
+ */
+async function getScholarshipHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Burs ID gerekli' },
+        { status: 400 }
+      );
+    }
+
+    const result = await getScholarship(id);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: 'Burs bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: result.data,
+      message: 'Burs başarıyla getirildi'
+    });
+  } catch (error: unknown) {
+    console.error('Get scholarship error:', error);
+
+    return NextResponse.json(
+      { success: false, error: 'Burs getirilemedi' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * PUT /api/scholarships/[id]
+ * Update scholarship
+ */
+async function updateScholarshipHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = (await request.json()) as ScholarshipData;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Burs ID gerekli' },
+        { status: 400 }
+      );
+    }
+
+    if (!body) {
+      return NextResponse.json(
+        { success: false, error: 'Güncellenecek veri bulunamadı' },
+        { status: 400 }
+      );
+    }
+
+    // Validate scholarship data
+    const validation = validateScholarshipData(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Doğrulama hatası', 
+          details: validation.errors 
+        },
+        { status: 400 }
+      );
+    }
+
+    const result = await updateScholarship(id, body);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: 'Burs güncellenemedi' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: result.data,
+      message: 'Burs başarıyla güncellendi'
+    });
+  } catch (error: unknown) {
+    console.error('Update scholarship error:', error);
+
+    return NextResponse.json(
+      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/scholarships/[id]
+ * Delete scholarship
+ */
+async function deleteScholarshipHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Burs ID gerekli' },
+        { status: 400 }
+      );
+    }
+
+    const result = await deleteScholarship(id);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: 'Burs silinemedi' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Burs başarıyla silindi'
+    });
+  } catch (error: unknown) {
+    console.error('Delete scholarship error:', error);
+
+    return NextResponse.json(
+      { success: false, error: 'Silme işlemi başarısız' },
+      { status: 500 }
+    );
+  }
+}
+
+// Export handlers with CSRF protection for mutations
+export const GET = getScholarshipHandler;
+export const PUT = withCsrfProtection(updateScholarshipHandler);
+export const DELETE = withCsrfProtection(deleteScholarshipHandler);

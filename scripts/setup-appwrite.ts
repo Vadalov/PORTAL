@@ -5,8 +5,25 @@
  * Usage: npx tsx scripts/setup-appwrite.ts
  */
 
-import { Client, Databases, Storage, Permission, Role } from 'node-appwrite';
+import { Client, Databases, Storage, Permission, Role, IndexType } from 'node-appwrite';
 import * as dotenv from 'dotenv';
+
+// Type definitions
+interface AttributeDefinition {
+  key: string;
+  type: string;
+  required?: boolean;
+  array?: boolean;
+  default?: any;
+  options?: string[];
+}
+
+interface IndexDefinition {
+  key: string;
+  type: string;
+  attributes: string[];
+  orders?: string[];
+}
 
 // Appwrite SDK type constants
 const AttributeType = {
@@ -19,12 +36,6 @@ const AttributeType = {
   URL: 'url',
   IP: 'ip',
   Enum: 'enum',
-} as const;
-
-const IndexType = {
-  Key: 'key',
-  Unique: 'unique',
-  Fulltext: 'fulltext',
 } as const;
 
 // Load environment variables
@@ -73,29 +84,32 @@ async function setupDatabase() {
     try {
       await databases.get(DATABASE_ID);
       console.log(`✅ Database '${DATABASE_ID}' already exists`);
-    } catch (error: any) {
-      if (error.code === 404) {
+    } catch (error: unknown) {
+      const appwriteError = error as { code?: number; message?: string };
+      if (appwriteError.code === 404) {
         const db = await databases.create(DATABASE_ID, DATABASE_ID);
         console.log(`✅ Database '${DATABASE_ID}' created`);
       } else {
         throw error;
       }
     }
-  } catch (error: any) {
-    console.error('❌ Database setup failed:', error.message);
+  } catch (error: unknown) {
+    const appwriteError = error as { message?: string };
+    console.error('❌ Database setup failed:', appwriteError.message || error);
     throw error;
   }
 }
 
-async function createCollection(collectionId: string, collectionName: string, attributes: any[], indexes: any[] = []) {
+async function createCollection(collectionId: string, collectionName: string, attributes: AttributeDefinition[], indexes: IndexDefinition[] = []) {
   try {
     // Check if collection exists
     try {
       await databases.getCollection(DATABASE_ID, collectionId);
       console.log(`✅ Collection '${collectionId}' already exists`);
       return;
-    } catch (error: any) {
-      if (error.code !== 404) throw error;
+    } catch (error: unknown) {
+      const appwriteError = error as { code?: number };
+      if (appwriteError.code !== 404) throw error;
     }
 
     // Create collection
@@ -116,11 +130,30 @@ async function createCollection(collectionId: string, collectionName: string, at
     // Add attributes
     for (const attr of attributes) {
       try {
-        await databases.createAttribute(DATABASE_ID, collectionId, attr.type, attr.key, attr.required || false, attr.default || undefined, attr.array || false, attr.options || undefined);
+        // Use the low-level client.call to create attributes because the node-appwrite SDK exposes per-type methods
+        const body: any = {
+          type: attr.type,
+          key: attr.key,
+          required: attr.required || false,
+          array: attr.array || false,
+        };
+        if (attr.default !== undefined) body.default = attr.default;
+        if (attr.options !== undefined) body.options = attr.options;
+
+        await client.call(
+          'post',
+          `/databases/${DATABASE_ID}/collections/${collectionId}/attributes` as any,
+          { 'content-type': 'application/json' },
+          body
+        );
+
         console.log(`  ✓ Attribute '${attr.key}' created`);
       } catch (error: any) {
-        if (error.code !== 409) { // 409 = attribute already exists
-          console.warn(`  ⚠ Attribute '${attr.key}': ${error.message}`);
+        // Handle both SDK-style error.code and fetch-style response status
+        const appwriteError = error as { code?: number; response?: { status?: number }; message?: string };
+        const status = appwriteError.code ?? appwriteError.response?.status;
+        if (status !== 409) { // 409 = attribute already exists
+          console.warn(`  ⚠ Attribute '${attr.key}': ${appwriteError.message || error}`);
         }
       }
     }
@@ -128,7 +161,7 @@ async function createCollection(collectionId: string, collectionName: string, at
     // Add indexes
     for (const index of indexes) {
       try {
-        await databases.createIndex(DATABASE_ID, collectionId, index.key, index.type, index.attributes, index.orders || undefined);
+        await databases.createIndex(DATABASE_ID, collectionId, index.key, index.type as any, index.attributes, index.orders || undefined);
         console.log(`  ✓ Index '${index.key}' created`);
       } catch (error: any) {
         if (error.code !== 409) { // 409 = index already exists
