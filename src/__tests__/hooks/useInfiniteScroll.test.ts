@@ -136,7 +136,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: true,
       isFetchingNextPage: true,
       isLoading: true,
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -211,7 +211,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: true,
       error: null,
       refetch: vi.fn(),
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => usePaginatedQuery(
       ['test'],
