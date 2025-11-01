@@ -11,6 +11,7 @@
 **Dernek Yönetim Sistemi**, sivil toplum örgütlerinin (dernekler) tüm operasyonlarını merkezi bir platform üzerinden yönetmelerine olanak sağlayan modern bir web uygulamasıdır.
 
 ### Ana Modüller
+
 - 💝 **Bağış Yönetimi** - Bağış kaydı, bağışçı veri tabanı, makbuzlar, raporlar
 - 👥 **İhtiyaç Sahipleri** - Kayıt, düzenleme, yardım takibi, dosya yönetimi
 - 🎓 **Burs Programları** - Öğrenci kaydı, başvurular, yetim sponsorluğu
@@ -23,6 +24,7 @@
 ## ⚡ Hızlı Başlangıç
 
 ### Gereksinimler
+
 ```bash
 Node.js 18+
 npm 9+
@@ -30,6 +32,7 @@ Git
 ```
 
 ### Kurulum
+
 ```bash
 git clone https://github.com/kafkasder-gi/PORTAL.git
 cd PORTAL
@@ -41,6 +44,7 @@ npm run dev
 **Sonuç:** http://localhost:3000
 
 ### Test Hesabı
+
 ```
 Email:  admin@test.com
 Şifre:  admin123
@@ -48,9 +52,41 @@ Email:  admin@test.com
 
 ---
 
+## 🔧 Appwrite Backend Kurulumu
+
+Bu proje mock backend ile birlikte gelir, ancak gerçek Appwrite backend'i kurmak için:
+
+**📚 Detaylı Kurulum Rehberi**: [APPWRITE_DEPLOYMENT.md](./APPWRITE_DEPLOYMENT.md)
+
+### Hızlı Başlangıç
+
+```bash
+# 1. Environment değişkenlerini ayarla
+cp .env.example .env.local
+# .env.local dosyasını düzenle ve Appwrite bilgilerini gir
+
+# 2. Otomatik kurulum (Önerilen)
+npm run appwrite:setup
+
+# 3. Veya interaktif kurulum
+npm run appwrite:deploy:quick
+```
+
+### Appwrite Komutları
+
+```bash
+npm run appwrite:setup          # Otomatik backend kurulumu
+npm run appwrite:deploy:quick   # İnteraktif deployment
+npm run appwrite:validate       # Yapılandırma kontrolü
+npm run appwrite:deploy         # Appwrite CLI ile deploy
+```
+
+---
+
 ## 📊 Özellikler
 
 ### ✅ Tamamlanmış
+
 - [x] Kullanıcı yönetimi ve kimlik doğrulaması
 - [x] Rol tabanlı erişim kontrolü (6 rol)
 - [x] 7 ana modül
@@ -63,6 +99,7 @@ Email:  admin@test.com
 - [x] Comprehensive dokümantasyon
 
 ### 🔄 Geliştirme Aşamasında
+
 - [ ] Kumbara Takibi (Şubat 2025)
 - [ ] Finans Raporları (Mart 2025)
 - [ ] Mali Dashboard (Nisan 2025)
@@ -105,12 +142,14 @@ src/
 ## 🎨 Modernizasyon (Phase 2)
 
 ### Yeni Bileşenler
+
 1. **PageLayout** - Universal sayfa düzeni
 2. **DataTable** - Yeniden kullanılabilir tablo
 3. **StatCard** - İstatistik kartları
 4. **PlaceholderPage** - Modern placeholder
 
 ### Sonuçlar
+
 - ✅ 14+ sayfa modernized
 - ✅ %100 visual consistency
 - ✅ %30-40 kod azaltma
@@ -121,13 +160,13 @@ src/
 
 ## 📚 Dokümantasyon
 
-| Dosya | Açıklama |
-|-------|----------|
-| [PRD.md](PRD.md) | Ürün belirtimi, özellikler, roadmap |
-| [QUICK_START.md](QUICK_START.md) | Kurulum, test, ortak görevler |
-| [COMPONENT_GUIDE.md](COMPONENT_GUIDE.md) | Bileşen API, örnekler |
-| [MODERNIZATION_SUMMARY.md](MODERNIZATION_SUMMARY.md) | Modernizasyon detayları |
-| [PHASE_2_COMPLETE.md](PHASE_2_COMPLETE.md) | Phase 2 tamamlanmış işler |
+| Dosya                                                | Açıklama                            |
+| ---------------------------------------------------- | ----------------------------------- |
+| [PRD.md](PRD.md)                                     | Ürün belirtimi, özellikler, roadmap |
+| [QUICK_START.md](QUICK_START.md)                     | Kurulum, test, ortak görevler       |
+| [COMPONENT_GUIDE.md](COMPONENT_GUIDE.md)             | Bileşen API, örnekler               |
+| [MODERNIZATION_SUMMARY.md](MODERNIZATION_SUMMARY.md) | Modernizasyon detayları             |
+| [PHASE_2_COMPLETE.md](PHASE_2_COMPLETE.md)           | Phase 2 tamamlanmış işler           |
 
 ---
 
@@ -157,26 +196,26 @@ npm run lint
 
 ## 👥 Roller
 
-| Rol | Tanım | Sayı |
-|-----|-------|------|
-| Super Admin | Sistem yöneticisi | 1 |
-| Admin | Kurum yöneticisi | 2-3 |
-| Manager | Modül sorumlusu | 5-10 |
-| Member | Aktif üye | 20-50 |
-| Volunteer | Gönüllü | 10-30 |
-| Viewer | Görüntüleyici | Unlimited |
+| Rol         | Tanım             | Sayı      |
+| ----------- | ----------------- | --------- |
+| Super Admin | Sistem yöneticisi | 1         |
+| Admin       | Kurum yöneticisi  | 2-3       |
+| Manager     | Modül sorumlusu   | 5-10      |
+| Member      | Aktif üye         | 20-50     |
+| Volunteer   | Gönüllü           | 10-30     |
+| Viewer      | Görüntüleyici     | Unlimited |
 
 ---
 
 ## 📊 Performans
 
-| Metrik | Hedef | Durum |
-|--------|-------|-------|
-| FCP | < 1.5s | ✅ |
-| LCP | < 2.5s | ✅ |
-| CLS | < 0.1 | ✅ |
-| TTI | < 3s | ✅ |
-| Bundle | < 400KB | ✅ |
+| Metrik | Hedef   | Durum |
+| ------ | ------- | ----- |
+| FCP    | < 1.5s  | ✅    |
+| LCP    | < 2.5s  | ✅    |
+| CLS    | < 0.1   | ✅    |
+| TTI    | < 3s    | ✅    |
+| Bundle | < 400KB | ✅    |
 
 ---
 
@@ -222,16 +261,19 @@ Q2 2025:
 ## 💡 Kullanım Örnekleri
 
 ### Yeni Bağış Ekle
+
 ```
 Dashboard → Bağışlar → Yeni Ekle → Form Doldur → Kaydet
 ```
 
 ### İhtiyaç Sahibi Ara
+
 ```
 Dashboard → İhtiyaç Sahipleri → Ara (İsim/TC No) → Sonuç
 ```
 
 ### Rapor Dışa Aktar
+
 ```
 Herhangi Sayfa → Dışa Aktar Buton → CSV İndir
 ```
@@ -345,6 +387,7 @@ Katkılar hoş karşılanır! Lütfen:
 ## 📝 Son Notlar
 
 Bu proje **autonomous operation mode** ile geliştirilmiştir:
+
 - Proactive implementation
 - Smart assumptions
 - Auto-complete workflows

@@ -4,6 +4,29 @@ Bu doküman, PORTAL projesinin Appwrite backend yapılandırmasını ve dağıt�
 
 This document explains the Appwrite backend configuration and deployment for the PORTAL project.
 
+---
+
+## ⚡ Hızlı Başlangıç / Quick Start
+
+```bash
+# 1. Environment değişkenlerini ayarla / Setup environment variables
+cp .env.example .env.local
+# Edit .env.local and add your Appwrite credentials
+
+# 2. Konfigürasyonu doğrula / Validate configuration
+npm run appwrite:validate
+
+# 3. Otomatik kurulum / Automatic setup (Recommended)
+npm run appwrite:setup
+
+# Or interactive deployment
+npm run appwrite:deploy:quick
+```
+
+**📌 Detaylı adımlar için aşağıdaki bölümleri okuyun / Read sections below for detailed steps**
+
+---
+
 ## 📋 İçindekiler / Table of Contents
 
 - [Gereksinimler / Prerequisites](#gereksinimler--prerequisites)
