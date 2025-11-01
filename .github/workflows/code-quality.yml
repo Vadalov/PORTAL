@@ -17,6 +17,8 @@ jobs:
   verify-lockfile:
     name: Verify lockfile sync
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
