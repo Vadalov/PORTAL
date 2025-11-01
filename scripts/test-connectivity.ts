@@ -3,15 +3,15 @@
 /**
  * CLI Connectivity Testing Script
  * Tests Appwrite connectivity with detailed reporting and progress indicators
- * 
+ *
  * Usage: npx tsx scripts/test-connectivity.ts [options]
- * 
+ *
  * Options:
  *   --json                 Output as JSON instead of formatted text
  *   --service <name>       Test specific service only (endpoint, account, database, storage)
  *   --retry <count>        Number of retries (default: 3)
  *   --timeout <ms>         Timeout in milliseconds (default: 5000)
- * 
+ *
  * Examples:
  *   npx tsx scripts/test-connectivity.ts
  *   npx tsx scripts/test-connectivity.ts --service database
@@ -29,7 +29,7 @@ interface TestResult {
   timing: number;
   error?: string;
   retryCount?: number;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 interface ConnectivityReport {
@@ -56,17 +56,19 @@ interface ConnectivityReport {
 function printResult(serviceName: string, result: TestResult): void {
   const status = result.success ? '✅' : '❌';
   const timing = result.timing ? ` (${result.timing}ms)` : '';
-  
-  console.log(`${status} ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)} Service${timing}`);
-  
+
+  console.log(
+    `${status} ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)} Service${timing}`
+  );
+
   if (!result.success && result.error) {
     console.log(`   Error: ${result.error}`);
   }
-  
+
   if (result.details) {
     console.log(`   Details: ${JSON.stringify(result.details)}`);
   }
-  
+
   if (result.retryCount && result.retryCount > 0) {
     console.log(`   Retries: ${result.retryCount}`);
   }
@@ -81,15 +83,15 @@ function printReport(report: ConnectivityReport): void {
   console.log(`Timestamp: ${report.timestamp}`);
   console.log(`Overall Health: ${report.summary.overallHealth}%`);
   console.log(`Tests: ${report.summary.successfulTests}/${report.summary.totalTests} passed\n`);
-  
+
   printResult('endpoint', report.tests.endpoint);
   printResult('account', report.tests.account);
   printResult('database', report.tests.database);
   printResult('storage', report.tests.storage);
-  
+
   if (report.recommendations.length > 0) {
     console.log(`\n💡 Recommendations:`);
-    report.recommendations.forEach(rec => console.log(`   • ${rec}`));
+    report.recommendations.forEach((rec) => console.log(`   • ${rec}`));
   }
 }
 
@@ -172,7 +174,7 @@ async function main(): Promise<void> {
     if (service) {
       // Test specific service
       showProgress(service);
-      
+
       let result: TestResult;
       switch (service) {
         case 'endpoint':
@@ -188,7 +190,9 @@ async function main(): Promise<void> {
           result = await connectivityTester.testStorageService();
           break;
         default:
-          console.error(`❌ Unknown service: ${service}. Valid options: endpoint, account, database, storage`);
+          console.error(
+            `❌ Unknown service: ${service}. Valid options: endpoint, account, database, storage`
+          );
           process.exit(2);
       }
 
@@ -212,7 +216,10 @@ async function main(): Promise<void> {
       process.exit(report.summary.failedTests === 0 ? 0 : 1);
     }
   } catch (error) {
-    console.error('❌ Error running connectivity tests:', error instanceof Error ? error.message : String(error));
+    console.error(
+      '❌ Error running connectivity tests:',
+      error instanceof Error ? error.message : String(error)
+    );
     process.exit(1);
   }
 }

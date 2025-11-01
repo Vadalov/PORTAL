@@ -1,7 +1,7 @@
 /**
  * Create Test Users in Appwrite
  * Creates test accounts for development
- * 
+ *
  * Usage: npx tsx scripts/create-test-users.ts
  */
 
@@ -17,7 +17,6 @@ const serverClient = new Client()
   .setKey(process.env.APPWRITE_API_KEY || '');
 
 const users = new Users(serverClient);
-const account = new Account(serverClient);
 
 interface TestUser {
   email: string;
@@ -72,23 +71,25 @@ async function createTestUsers() {
         await users.updateLabels(user.$id, [testUser.role.toLowerCase()]);
 
         console.log(`✅ Created user: ${testUser.email} (${testUser.role})`);
-      } catch (error: any) {
+      } catch (error) {
         // Check if user already exists
-        if (error.code === 409 || error.message?.includes('already exists')) {
+        const err = error as { code?: number; message?: string };
+        if (err.code === 409 || err.message?.includes('already exists')) {
           console.log(`ℹ️  User ${testUser.email} already exists`);
         } else {
-          console.error(`❌ Failed to create ${testUser.email}:`, error.message);
+          console.error(`❌ Failed to create ${testUser.email}:`, err.message);
         }
       }
     }
 
     console.log('\n✨ Test users setup completed!');
     console.log('\nYou can now login with:');
-    testUsers.forEach(user => {
+    testUsers.forEach((user) => {
       console.log(`  • ${user.email} / ${user.password} (${user.role})`);
     });
-  } catch (error: any) {
-    console.error('❌ Setup failed:', error.message);
+  } catch (error) {
+    const err = error as { message?: string };
+    console.error('❌ Setup failed:', err.message);
     process.exit(1);
   }
 }
