@@ -11,7 +11,7 @@ interface PageLayoutProps {
   children: React.ReactNode;
   title: string;
   description?: string;
-  icon?: LucideIcon;
+  icon?: LucideIcon | string | null;
   badge?: {
     text: string;
     variant?: 'default' | 'secondary' | 'destructive' | 'outline';
@@ -56,7 +56,7 @@ export function PageLayout({
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
-              {Icon && (
+              {Icon && typeof Icon === 'function' && (
                 <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
                   <Icon className="h-6 w-6" />
                 </div>

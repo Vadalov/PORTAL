@@ -35,11 +35,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 Debug mode enabled');
 
-      HydrationLogger.init();
-      StoreDebugger.init(useAuthStore, 'authStore');
-      NetworkMonitor.init();
+      // Temporarily disabled for E2E testing - can be re-enabled later
+      // HydrationLogger.init();
+      // StoreDebugger.init(useAuthStore, 'authStore');
+      // NetworkMonitor.init();
 
-      // Expose to window for manual debugging
+      // Expose to window for manual debugging (safe)
       if (typeof window !== 'undefined') {
         (window as any).__AUTH_STORE__ = useAuthStore;
         (window as any).__QUERY_CLIENT__ = queryClient;

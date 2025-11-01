@@ -19,6 +19,7 @@ import { ParameterSelect } from './ParameterSelect';
 
 // Central validation schema
 import { beneficiarySchema } from '@/lib/validations/beneficiary'
+import { z } from 'zod';
 
 // Sanitization functions
 import {
@@ -38,7 +39,7 @@ const advancedBeneficiarySchema = beneficiarySchema;
 
 // Use central type
 import type { BeneficiaryFormData } from '@/lib/validations/beneficiary';
-type AdvancedBeneficiaryFormData = BeneficiaryFormData;
+type AdvancedBeneficiaryFormData = z.infer<typeof advancedBeneficiarySchema>;
 
 
 interface AdvancedBeneficiaryFormProps {
@@ -62,7 +63,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
     watch,
     formState: { errors },
   } = useForm<AdvancedBeneficiaryFormData>({
-    resolver: zodResolver(advancedBeneficiarySchema),
+    resolver: zodResolver(advancedBeneficiarySchema) as any,
     defaultValues: {
       familyMemberCount: 1,
       children_count: 0,
@@ -186,9 +187,8 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
     dateFields.forEach(field => {
       if (sanitized[field]) {
         const dateValue = sanitized[field];
-        if (dateValue instanceof Date) {
-          sanitized[field] = dateValue.toISOString().split('T')[0]; // YYYY-MM-DD
-        } else if (typeof dateValue === 'string') {
+        if (typeof dateValue === 'string') {
+          // String tarih varsa ISO format'a çevir
           const cleanDate = sanitizeDate(dateValue);
           sanitized[field] = cleanDate ? cleanDate.toISOString().split('T')[0] : undefined;
         }
@@ -197,9 +197,9 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
 
     // Emergency contacts - sanitize phone numbers
     if (sanitized.emergencyContacts && Array.isArray(sanitized.emergencyContacts)) {
-      sanitized.emergencyContacts = sanitized.emergencyContacts.map(contact => ({
+      sanitized.emergencyContacts = sanitized.emergencyContacts.map((contact: any) => ({
         ...contact,
-        phone: sanitizePhone(contact.phone) || contact.phone
+        phone: sanitizePhone(contact.phone || '') || contact.phone || ''
       }));
     }
 
@@ -228,12 +228,12 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
     return sanitized;
   };
 
-  const onSubmit = async (data: AdvancedBeneficiaryFormData) => {
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true);
 
     try {
       // 1. Sanitize form data
-      const sanitizedData = sanitizeFormData(data);
+      const sanitizedData = sanitizeFormData(data as AdvancedBeneficiaryFormData);
 
       // 2. Call mutation directly with sanitized data (no mapping needed since we use camelCase)
       if (isUpdateMode && updateMutation) {
@@ -403,7 +403,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                 <ParameterSelect
                   category="gender"
                   value={watch('gender')}
-                  onChange={(value) => setValue('gender', value)}
+                  onChange={(value) => setValue('gender', value as any)}
                   label="Cinsiyet"
                   error={errors.gender?.message}
                 />
@@ -411,7 +411,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                 <ParameterSelect
                   category="religion"
                   value={watch('religion')}
-                  onChange={(value) => setValue('religion', value)}
+                  onChange={(value) => setValue('religion', value as any)}
                   label="İnanç"
                   error={errors.religion?.message}
                 />
@@ -419,7 +419,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                 <ParameterSelect
                   category="marital_status"
                   value={watch('maritalStatus')}
-                  onChange={(value) => setValue('maritalStatus', value)}
+                  onChange={(value) => setValue('maritalStatus', value as any)}
                   label="Medeni Durum"
                   error={errors.maritalStatus?.message}
                 />
@@ -573,7 +573,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                 <ParameterSelect
                   category="housing_type"
                   value={watch('livingPlace')}
-                  onChange={(value) => setValue('livingPlace', value)}
+                  onChange={(value) => setValue('livingPlace', value as any)}
                   label="Konut Durumu"
                   error={errors.livingPlace?.message}
                 />
@@ -582,8 +582,8 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="has_debt"
-                      checked={watch('has_debt')}
-                      onCheckedChange={(checked) => setValue('has_debt', checked as boolean)}
+                      checked={watch('has_debt') ?? false}
+                      onCheckedChange={(checked) => setValue('has_debt', !!checked)}
                     />
                     <Label htmlFor="has_debt" className="cursor-pointer">Borcu var</Label>
                   </div>
@@ -591,8 +591,8 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="has_vehicle"
-                      checked={watch('has_vehicle')}
-                      onCheckedChange={(checked) => setValue('has_vehicle', checked as boolean)}
+                      checked={watch('has_vehicle') ?? false}
+                      onCheckedChange={(checked) => setValue('has_vehicle', !!checked)}
                     />
                     <Label htmlFor="has_vehicle" className="cursor-pointer">Aracı var</Label>
                   </div>

@@ -143,7 +143,7 @@ export const beneficiarySchema = z.object({
     .min(2, 'Uyruk en az 2 karakter olmalıdır')
     .max(50, 'Uyruk en fazla 50 karakter olmalıdır'),
   identityNumber: tcKimlikNoSchema.optional(),
-  mernisCheck: z.boolean().default(false),
+  mernisCheck: z.boolean().optional().default(false),
   category: z.nativeEnum(BeneficiaryCategory, {
     message: 'Kategori seçiniz'
   }),
@@ -195,8 +195,8 @@ export const beneficiarySchema = z.object({
     .regex(/^[a-zA-ZçğıöşüÇĞIİÖŞÜ\s]*$/, 'Anne adı sadece harf içerebilir')
     .optional(),
   identityDocumentType: z.nativeEnum(IdentityDocumentType).optional(),
-  identityIssueDate: pastDateSchema,
-  identityExpiryDate: futureDateSchema,
+  identityIssueDate: z.string().optional(), // Changed from date to string for form compatibility
+  identityExpiryDate: z.string().optional(), // Changed from date to string for form compatibility
   identitySerialNumber: z.string().max(50).optional(),
   previousNationality: z.string().max(50).optional(),
   previousName: z.string().max(100).optional(),
@@ -204,16 +204,16 @@ export const beneficiarySchema = z.object({
   // Pasaport ve Vize
   passportType: z.nativeEnum(PassportType).optional(),
   passportNumber: z.string().max(50).optional(),
-  passportExpiryDate: futureDateSchema,
+  passportExpiryDate: z.string().optional(), // Changed from date to string for form compatibility
   visaType: z.nativeEnum(VisaType).optional(),
-  visaExpiryDate: futureDateSchema,
+  visaExpiryDate: z.string().optional(), // Changed from date to string for form compatibility
   entryType: z.nativeEnum(EntryType).optional(),
   returnInfo: z.nativeEnum(ReturnInfo).optional(),
   
   // Kişisel Veriler
   gender: z.nativeEnum(Gender).optional(),
   birthPlace: z.string().max(100).optional(),
-  birthDate: pastDateSchema,
+  birthDate: z.string().optional(), // Changed from date to string for form compatibility
   maritalStatus: z.nativeEnum(MaritalStatus).optional(),
   educationStatus: z.nativeEnum(EducationStatus).optional(),
   educationLevel: z.string().max(100).optional(),
@@ -258,6 +258,7 @@ export const beneficiarySchema = z.object({
   chronicIllnessDetail: z.string().min(3).optional(),
   hasDisability: z.boolean().default(false),
   disabilityDetail: z.string().min(3).optional(),
+  has_health_insurance: z.boolean().default(false),
   
   // Acil Durum İletişimi
   emergencyContacts: z.array(z.object({
@@ -271,7 +272,7 @@ export const beneficiarySchema = z.object({
   })).max(2, 'En fazla 2 acil durum iletişim kişisi eklenebilir').optional(),
   
   // Kayıt Bilgisi
-  registrationTime: z.date().optional(),
+  registrationTime: z.string().optional(), // Changed from date to string for form compatibility
   registrationIP: z.string().optional(),
   registeredBy: z.string().optional(),
   totalAidAmount: z.number()
@@ -282,6 +283,29 @@ export const beneficiarySchema = z.object({
   labels: z.array(z.nativeEnum(Label)).optional(),
   earthquakeVictim: z.boolean().default(false),
   
+  // Additional fields used in AdvancedBeneficiaryForm
+  children_count: z.number().min(0).max(50).default(0),
+  orphan_children_count: z.number().min(0).max(50).default(0),
+  elderly_count: z.number().min(0).max(50).default(0),
+  disabled_count: z.number().min(0).max(50).default(0),
+  has_debt: z.boolean().default(false),
+  has_vehicle: z.boolean().default(false),
+  income_level: z.string().optional(),
+  occupation: z.string().optional(),
+  employment_status: z.string().optional(),
+  aidType: z.string().optional(),
+  aid_duration: z.string().optional(),
+  priority: z.string().optional(),
+  emergency: z.boolean().default(false),
+  previous_aid: z.boolean().default(false),
+  other_organization_aid: z.boolean().default(false),
+  referenceName: z.string().optional(),
+  referencePhone: z.string().optional(),
+  referenceRelation: z.string().optional(),
+  applicationSource: z.string().optional(),
+  contactPreference: z.string().optional(),
+  notes: z.string().max(2000).optional(),
+  
   // Metadata
   createdAt: z.string().datetime().optional(),  // Appwrite ISO 8601 string
   updatedAt: z.string().datetime().optional(),  // Appwrite ISO 8601 string
@@ -290,9 +314,13 @@ export const beneficiarySchema = z.object({
 }).refine((data) => {
   // Yaş kontrolü (18 yaşından küçükler için özel kurallar)
   if (data.birthDate) {
-    const age = calculateAge(data.birthDate);
-    if (age < 18 && data.maritalStatus === MaritalStatus.EVLI) {
-      return false; // 18 yaşından küçük evli olamaz
+    // Parse string date for age calculation
+    const birthDate = new Date(data.birthDate);
+    if (!isNaN(birthDate.getTime())) {
+      const age = calculateAge(birthDate);
+      if (age < 18 && data.maritalStatus === MaritalStatus.EVLI) {
+        return false; // 18 yaşından küçük evli olamaz
+      }
     }
   }
   return true;

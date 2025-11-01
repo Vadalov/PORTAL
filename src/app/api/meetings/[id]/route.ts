@@ -23,12 +23,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, error: 'ID parametresi gerekli' }, { status: 400 });
     }
 
-    const response = await api.meetings.getMeeting(id);
-    if (response.error || !response.data) {
+    // Use getMeetings and filter by ID since getMeeting doesn't exist
+    const response = await api.meetings.getMeetings({ limit: 1000 });
+    const meeting = Array.isArray(response.data) ? 
+      (response.data as any[]).find(m => m.$id === id) : null;
+    
+    if (!meeting) {
       return NextResponse.json({ success: false, error: 'Kayıt bulunamadı' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: response.data });
+    return NextResponse.json({ success: true, data: meeting });
   } catch (error: any) {
     console.error('Get meeting error:', error);
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });

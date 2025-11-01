@@ -375,7 +375,7 @@ export interface BeneficiaryQuickAdd {
   nationality: string;
   birthDate?: Date;  // Form input - Date object olarak kalır
   identityNumber?: string;
-  mernisCheck: boolean;
+  mernisCheck?: boolean;
   fundRegion: FundRegion;
   fileConnection: FileConnection;
   fileNumber: string;
@@ -398,7 +398,7 @@ export interface Beneficiary {
   lastName: string;
   nationality: string;
   identityNumber?: string;
-  mernisCheck: boolean;
+  mernisCheck?: boolean;
   category: BeneficiaryCategory;
   fundRegion: FundRegion;
   fileConnection: FileConnection;

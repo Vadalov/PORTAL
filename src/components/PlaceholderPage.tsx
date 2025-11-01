@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Construction, ArrowLeft, Clock, Code, Rocket, LucideIcon } from 'lucide-react';
+import { Construction, ArrowLeft, Clock, Code, Rocket } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 interface PlaceholderPageProps {
   title: string;
   description?: string;
-  icon?: LucideIcon | string;
   estimatedDate?: string;
   features?: string[];
 }
@@ -20,7 +19,6 @@ interface PlaceholderPageProps {
 export function PlaceholderPage({
   title,
   description,
-  icon,
   estimatedDate,
   features = [],
 }: PlaceholderPageProps) {
@@ -30,7 +28,6 @@ export function PlaceholderPage({
     <PageLayout
       title={title}
       description={description || 'Bu sayfa geliştirme aşamasındadır'}
-      icon={icon}
       badge={{ text: 'Geliştiriliyor', variant: 'secondary' }}
       showBackButton={true}
     >

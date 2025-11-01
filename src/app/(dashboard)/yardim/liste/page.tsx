@@ -1,12 +1,10 @@
 import { PlaceholderPage } from '@/components/PlaceholderPage';
-import { ClipboardList } from 'lucide-react';
 
 export default function AidListPage() {
   return (
     <PlaceholderPage
       title="Yardım Listesi"
       description="Yapılan yardımları görüntüleyin ve takip edin"
-      icon={ClipboardList}
       estimatedDate="Şubat 2025"
       features={[
         'Yardım kayıt sistemi',

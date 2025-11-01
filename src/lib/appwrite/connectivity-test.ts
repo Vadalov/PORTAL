@@ -191,14 +191,14 @@ export class ConnectivityTester {
    * Helper method for retry logic with exponential backoff
    */
   private async testWithRetry<T>(operation: () => Promise<T>): Promise<T> {
-    let lastError: Error;
+    let lastError: any;
     
     for (let i = 0; i < this.maxRetries; i++) {
       try {
         return await operation();
       } catch (error: any) {
         lastError = error;
-        lastError.retryCount = i + 1;
+        (lastError as any).retryCount = i + 1;
         
         if (i < this.maxRetries - 1) {
           const delay = this.baseDelay * Math.pow(2, i);

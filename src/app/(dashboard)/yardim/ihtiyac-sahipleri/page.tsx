@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import { DataTable, Column } from '@/components/ui/data-table';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, Download, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { BeneficiaryQuickAddModal } from '@/components/forms/BeneficiaryQuickAddModal';
 import api from '@/lib/api';
 import { exportBeneficiaries } from '@/lib/api/mock-api';
 import type { BeneficiaryDocument } from '@/types/collections';
 import { toast } from 'sonner';
+import { Eye, ArrowUpRight, Download, Plus } from 'lucide-react';
 
 export default function BeneficiariesPage() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function BeneficiariesPage() {
       render: (item) => (
         <Link href={`/yardim/ihtiyac-sahipleri/${item.$id}`}>
           <Button variant="ghost" size="icon-sm" className="h-8 w-8">
-            <Eye className="h-4 w-4" />
+            <ArrowUpRight className="h-4 w-4" />
           </Button>
         </Link>
       ),
@@ -126,7 +126,6 @@ export default function BeneficiariesPage() {
       <PageLayout
         title="İhtiyaç Sahipleri"
         description="Kayıtlı ihtiyaç sahiplerini görüntüleyin ve yönetin"
-        icon={Users}
         actions={
           <>
             <Button variant="outline" onClick={handleExport} className="gap-2">

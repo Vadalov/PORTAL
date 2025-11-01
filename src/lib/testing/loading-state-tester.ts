@@ -5,6 +5,8 @@
  * Provides comprehensive testing for LoadingOverlay component and loading state scenarios
  */
 
+import React, { createElement } from 'react';
+import { createRoot } from 'react-dom/client';
 import { LoadingOverlay } from '@/components/ui/loading-overlay';
 import { useAuthStore } from '@/stores/authStore';
 
@@ -70,7 +72,7 @@ class LoadingStateTester {
       document.body.appendChild(container);
 
       // Render the component
-      const root = ReactDOM.createRoot(container);
+      const root = createRoot(container);
       root.render(
         React.createElement(LoadingOverlay, {
           variant,
@@ -117,7 +119,7 @@ class LoadingStateTester {
       const container = document.createElement('div');
       document.body.appendChild(container);
 
-      const root = ReactDOM.createRoot(container);
+      const root = createRoot(container);
       root.render(
         React.createElement(LoadingOverlay, {
           variant: 'spinner',
@@ -131,12 +133,12 @@ class LoadingStateTester {
       const ariaLive = overlay?.getAttribute('aria-live');
       const screenReaderText = container.querySelector('.sr-only');
 
-      const passed = overlay && ariaLive === 'polite' && screenReaderText?.textContent?.includes('Yükleniyor');
+      const passed = !!(overlay && ariaLive === 'polite' && screenReaderText?.textContent?.includes('Yükleniyor'));
 
       root.unmount();
       document.body.removeChild(container);
 
-      return this.endTest('Accessibility Test', passed, passed ? undefined : 'Missing ARIA attributes or screen reader text');
+      return this.endTest('Accessibility Test', !!passed, passed ? undefined : 'Missing ARIA attributes or screen reader text');
     } catch (error: any) {
       return this.endTest('Accessibility Test', false, error.message);
     }
@@ -169,7 +171,7 @@ class LoadingStateTester {
       const container = document.createElement('div');
       document.body.appendChild(container);
 
-      const root = ReactDOM.createRoot(container);
+      const root = createRoot(container);
       root.render(
         React.createElement(LoadingOverlay, {
           variant: 'spinner',
@@ -205,7 +207,7 @@ class LoadingStateTester {
       const container = document.createElement('div');
       document.body.appendChild(container);
 
-      const root = ReactDOM.createRoot(container);
+      const root = createRoot(container);
       root.render(
         React.createElement(LoadingOverlay, {
           variant: 'spinner',
@@ -293,7 +295,7 @@ class LoadingStateTester {
       document.body.appendChild(container);
 
       const renderStart = performance.now();
-      const root = ReactDOM.createRoot(container);
+      const root = createRoot(container);
       root.render(
         React.createElement(LoadingOverlay, { variant })
       );
@@ -350,7 +352,7 @@ class LoadingStateTester {
       const container = document.createElement('div');
       document.body.appendChild(container);
 
-      const root = ReactDOM.createRoot(container);
+      const root = createRoot(container);
       const startTime = performance.now();
 
       root.render(

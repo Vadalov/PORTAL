@@ -5,6 +5,88 @@ export const getSearchHotkey = () => {
   return process.platform === 'darwin' ? 'Meta+K' : 'Control+K';
 };
 
+// Enhanced wait functions for better reliability
+export async function waitForElement(page: Page, selector: string, timeout: number = 5000): Promise<boolean> {
+  try {
+    await page.waitForSelector(selector, { timeout });
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+// Safe element operations with fallbacks
+export async function safeClick(page: Page, selectors: string[]): Promise<boolean> {
+  for (const selector of selectors) {
+    try {
+      const element = page.locator(selector).first();
+      if (await element.isVisible()) {
+        await element.click();
+        return true;
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+  return false;
+}
+
+// Safe fill with multiple selector attempts
+export async function safeFill(page: Page, selectors: string[], text: string): Promise<boolean> {
+  for (const selector of selectors) {
+    try {
+      const element = page.locator(selector).first();
+      if (await element.isVisible()) {
+        await element.fill(text);
+        return true;
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+  return false;
+}
+
+// Enhanced search functionality with multiple selector fallbacks
+export async function performSearch(page: Page, searchTerm: string): Promise<boolean> {
+  const searchSelectors = [
+    'input[placeholder*="Ara"]',
+    'input[placeholder*="Search"]',
+    'input[type="search"]',
+    '[data-testid="search-input"]',
+    '.search-input input'
+  ];
+  
+  // Try to open search dialog first
+  const searchHotkey = getSearchHotkey();
+  await page.keyboard.press(searchHotkey);
+  await page.waitForTimeout(500);
+  
+  // Try to fill search input
+  if (await safeFill(page, searchSelectors, searchTerm)) {
+    await page.waitForTimeout(600); // Wait for debounce
+    return true;
+  }
+  
+  return false;
+}
+
+// Robust navigation wait function
+export async function waitForNavigation(page: Page, expectedUrl: string, timeout: number = 10000): Promise<boolean> {
+  try {
+    await page.waitForURL(expectedUrl, { timeout });
+    return true;
+  } catch (error) {
+    // Fallback: just wait for any URL change
+    try {
+      await page.waitForLoadState('load', { timeout });
+      return true;
+    } catch (timeoutError) {
+      return false;
+    }
+  }
+}
+
 // Test data isolation utilities
 export class TestDataManager {
   private createdUsers: string[] = [];

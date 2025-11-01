@@ -103,8 +103,9 @@ async function getBeneficiariesHandler(request: NextRequest) {
     }
 
     // Handle different response structures
-    const beneficiaries = Array.isArray(response.data) ? response.data : response.data?.data || [];
-    const total = Array.isArray(response.data) ? response.data.length : response.data?.total || 0;
+    const data = (response as any)?.data;
+    const beneficiaries = Array.isArray(data) ? data : (data as any)?.data || [];
+    const total = Array.isArray(data) ? data.length : (data as any)?.total || 0;
 
     return NextResponse.json({
       success: true,

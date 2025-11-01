@@ -292,7 +292,7 @@ export const messagesApi = {
 export const storageApi = {
   async uploadFile(args: { bucketId: string; file: Blob; permissions?: string[] }): Promise<AppwriteResponse<UploadedFile>> {
     const { bucketId, file, permissions } = args;
-    const uploaded = await storage.createFile(bucketId, ID.unique(), file, permissions);
+    const uploaded = await storage.createFile(bucketId, ID.unique(), file as unknown as File, permissions);
     return { data: uploaded as unknown as UploadedFile, error: null };
   },
 
