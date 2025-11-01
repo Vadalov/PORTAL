@@ -1,4 +1,5 @@
 import { RateLimiter } from './security';
+import logger from '@/lib/logger';
 
 // Rate limit monitoring arayüzü
 export interface RateLimitViolation {
@@ -63,12 +64,15 @@ export class RateLimitMonitor {
     }
 
     // Violation'ları logla
-    console.warn('🚫 Rate Limit Violation:', {
+    logger.warn('Rate limit violation recorded', {
       endpoint: fullViolation.endpoint,
-      ip: fullViolation.ipAddress,
+      ipAddress: fullViolation.ipAddress,
       attempts: fullViolation.attempts,
       maxAllowed: fullViolation.maxAllowed,
-      type: fullViolation.violationType
+      violationType: fullViolation.violationType,
+      identifier: fullViolation.identifier,
+      isAuthenticated: fullViolation.isAuthenticated,
+      userId: fullViolation.userId
     });
 
     // Alert kontrolü
@@ -205,19 +209,30 @@ export class RateLimitMonitor {
     
     // Yüksek violation rate alert
     if (recentStats.violationRate > this.alertThresholds.violationRate) {
-      console.warn('🚨 HIGH RATE LIMIT VIOLATION RATE!', {
-        rate: recentStats.violationRate,
-        threshold: this.alertThresholds.violationRate,
-        violations: recentStats.blockedRequests
-      });
+      if (recentStats.violationRate > 0.2) {
+        logger.error('High rate limit violation rate detected', undefined, {
+          rate: recentStats.violationRate,
+          threshold: this.alertThresholds.violationRate,
+          violations: recentStats.blockedRequests,
+          alertType: 'high_violation_rate'
+        });
+      } else {
+        logger.warn('High rate limit violation rate detected', {
+          rate: recentStats.violationRate,
+          threshold: this.alertThresholds.violationRate,
+          violations: recentStats.blockedRequests,
+          alertType: 'high_violation_rate'
+        });
+      }
     }
 
     // Çok fazla IP'den violation
     const uniqueIPs = new Set(recentStats.topViolators.map(v => v.identifier.split('-')[0]));
     if (uniqueIPs.size > this.alertThresholds.ipsPerHour) {
-      console.warn('🚨 HIGH NUMBER OF VIOLATING IPs!', {
+      logger.warn('High number of violating IPs detected', {
         uniqueIPs: uniqueIPs.size,
-        threshold: this.alertThresholds.ipsPerHour
+        threshold: this.alertThresholds.ipsPerHour,
+        alertType: 'high_ip_count'
       });
     }
 
@@ -226,10 +241,11 @@ export class RateLimitMonitor {
       e => e.endpoint === violation.endpoint
     );
     if (endpointViolation && endpointViolation.violations > this.alertThresholds.endpointThreshold) {
-      console.warn('🚨 HIGH VIOLATIONS ON ENDPOINT!', {
+      logger.warn('High violations on endpoint', {
         endpoint: violation.endpoint,
         violations: endpointViolation.violations,
-        threshold: this.alertThresholds.endpointThreshold
+        threshold: this.alertThresholds.endpointThreshold,
+        alertType: 'endpoint_threshold'
       });
     }
   }
@@ -259,7 +275,9 @@ export class RateLimitMonitor {
   // Monitoring reset
   static reset(): void {
     this.violations = [];
-    console.log('🔄 Rate limit monitoring data reset');
+    logger.info('Rate limit monitoring data reset', {
+      previousViolationCount: this.violations.length
+    });
   }
 
   // Export data

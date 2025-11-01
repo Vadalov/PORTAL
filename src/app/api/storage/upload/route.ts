@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { STORAGE_BUCKETS } from '@/lib/appwrite/config';
+import logger from '@/lib/logger';
 
 /**
  * POST /api/storage/upload
@@ -10,6 +11,9 @@ import { STORAGE_BUCKETS } from '@/lib/appwrite/config';
  * - bucket: optional bucketId (default: receipts)
  */
 async function uploadHandler(request: NextRequest) {
+  let file: File | null = null;
+  let bucketId: string = STORAGE_BUCKETS.REPORTS;
+  
   try {
     const contentType = request.headers.get('content-type') || '';
     if (!contentType.includes('multipart/form-data')) {
@@ -17,8 +21,8 @@ async function uploadHandler(request: NextRequest) {
     }
 
     const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const bucketId = (formData.get('bucket') as string | null) || STORAGE_BUCKETS.REPORTS;
+    file = formData.get('file') as File | null;
+    bucketId = (formData.get('bucket') as string | null) || STORAGE_BUCKETS.REPORTS;
 
     if (!file) {
       return NextResponse.json({ success: false, error: 'Dosya zorunludur' }, { status: 400 });
@@ -31,7 +35,14 @@ async function uploadHandler(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: response.data, message: 'Dosya yüklendi' }, { status: 201 });
   } catch (error: any) {
-    console.error('Upload file error:', error);
+    logger.error('File upload error', error, {
+      endpoint: '/api/storage/upload',
+      method: 'POST',
+      fileName: file?.name,
+      fileSize: file?.size,
+      fileType: file?.type,
+      bucketId
+    });
     return NextResponse.json({ success: false, error: 'Yükleme işlemi başarısız' }, { status: 500 });
   }
 }

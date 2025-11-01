@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import logger from '@/lib/logger';
 
 /**
  * Validate beneficiary data for updates
@@ -72,7 +73,11 @@ async function getBeneficiaryHandler(
       message: 'Kayıt başarıyla getirildi',
     });
   } catch (error: any) {
-    console.error('Get beneficiary error:', error);
+    logger.error('Get beneficiary error', error, {
+      endpoint: '/api/beneficiaries/[id]',
+      method: request.method,
+      beneficiaryId: id
+    });
     
     return NextResponse.json(
       { success: false, error: 'Veri alınamadı' },
@@ -132,7 +137,11 @@ async function updateBeneficiaryHandler(
       message: 'İhtiyaç sahibi başarıyla güncellendi',
     });
   } catch (error: any) {
-    console.error('Update beneficiary error:', error);
+    logger.error('Update beneficiary error', error, {
+      endpoint: '/api/beneficiaries/[id]',
+      method: request.method,
+      beneficiaryId: id
+    });
     
     // Handle duplicate TC number
     if (error.message?.includes('duplicate') || error.message?.includes('unique')) {
@@ -181,7 +190,11 @@ async function deleteBeneficiaryHandler(
       message: 'İhtiyaç sahibi başarıyla silindi',
     });
   } catch (error: any) {
-    console.error('Delete beneficiary error:', error);
+    logger.error('Delete beneficiary error', error, {
+      endpoint: '/api/beneficiaries/[id]',
+      method: request.method,
+      beneficiaryId: id
+    });
     
     return NextResponse.json(
       { success: false, error: 'Silme işlemi başarısız' },

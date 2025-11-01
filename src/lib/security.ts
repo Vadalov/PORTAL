@@ -1,4 +1,5 @@
 import DOMPurify from 'isomorphic-dompurify';
+import logger from '@/lib/logger';
 
 // Input sanitization utilities
 export class InputSanitizer {
@@ -189,10 +190,12 @@ export class RateLimiter {
   private static recordViolation(identifier: string): void {
     const currentViolations = this.violations.get(identifier) || 0;
     this.violations.set(identifier, currentViolations + 1);
-    
-    console.warn(`🚫 Rate limit violation for ${identifier}`, {
+
+    logger.warn('Rate limit violation', {
+      identifier,
       violations: currentViolations + 1,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      type: 'rate_limit_violation'
     });
   }
 
@@ -360,13 +363,23 @@ export class AuditLogger {
       this.logs = this.logs.slice(-this.maxLogs);
     }
 
-    // In production, send to logging service
+    // Determine log level based on severity
+    const level: 'info' | 'warn' | 'error' = logData.status === 'failure'
+      ? 'warn'
+      : logData.action.toLowerCase().includes('violation') || logData.action.toLowerCase().includes('security')
+        ? 'error'
+        : 'info';
+
     if (process.env.NODE_ENV === 'production') {
-      console.log('🔍 AUDIT:', JSON.stringify(auditLog));
-      // TODO: Send to external logging service
-      // auditService.send(auditLog);
+      logger[level]('Audit log', {
+        action: logData.action,
+        resource: logData.resource,
+        userId: logData.userId,
+        status: logData.status,
+        ipAddress: logData.ipAddress
+      });
     } else {
-      console.log('🔍 AUDIT:', auditLog.action, auditLog.resource, auditLog.status);
+      logger.debug('Audit log', { ...auditLog });
     }
   }
 

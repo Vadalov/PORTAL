@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import logger from '@/lib/logger';
 import {
   handleGetById,
   handleUpdate,
@@ -68,7 +69,11 @@ async function sendMessageHandler(request: NextRequest, { params }: { params: Pr
     
     return successResponse(response.data, 'Mesaj gönderildi');
   } catch (error: any) {
-    console.error('Send message error:', error);
+    logger.error('Send message error', error, {
+      endpoint: '/api/messages/[id]',
+      method: 'POST',
+      messageId: id
+    });
     return errorResponse('Gönderim işlemi başarısız', 500);
   }
 }

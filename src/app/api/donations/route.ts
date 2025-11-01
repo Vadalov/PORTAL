@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import logger from '@/lib/logger';
 
 /**
  * Validate donation payload
@@ -49,7 +50,12 @@ export async function GET(request: NextRequest) {
       total: response.total ?? 0,
     });
   } catch (error: any) {
-    console.error('List donations error:', error);
+    logger.error('List donations error', error, {
+      endpoint: '/api/donations',
+      method: 'GET',
+      page,
+      limit
+    });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
 }
@@ -73,7 +79,12 @@ async function createDonationHandler(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: response.data, message: 'Bağış başarıyla oluşturuldu' }, { status: 201 });
   } catch (error: any) {
-    console.error('Create donation error:', error);
+    logger.error('Create donation error', error, {
+      endpoint: '/api/donations',
+      method: 'POST',
+      donorName: body?.donor_name,
+      amount: body?.amount
+    });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }
 }

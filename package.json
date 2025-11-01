@@ -40,11 +40,15 @@
     "appwrite:deploy:quick": "bash scripts/deploy-appwrite.sh",
     "appwrite:init": "appwrite init",
     "appwrite:validate": "node scripts/validate-appwrite-config.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint:fix": "eslint --fix --max-warnings 0 .",
+    "lint:check": "eslint --max-warnings 0 .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
+      "eslint --fix --max-warnings 0",
       "prettier --write"
     ],
     "*.{json,md,yml,yaml}": [

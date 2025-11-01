@@ -4,6 +4,7 @@ import { generateCsrfToken } from '@/lib/csrf';
 import { cookies } from 'next/headers';
 import { UserRole, ROLE_PERMISSIONS } from '@/types/auth';
 import { authRateLimit } from '@/lib/rate-limit';
+import logger from '@/lib/logger';
 
 /**
  * POST /api/auth/login
@@ -90,7 +91,14 @@ export const POST = authRateLimit(async (request: NextRequest) => {
     });
 
   } catch (error: unknown) {
-    console.error('Login error:', error);
+    logger.error('Login error', error, {
+      endpoint: '/api/auth/login',
+      method: 'POST',
+      email: email?.substring(0, 3) + '***', // Mask email for security
+      errorCode: (error as any)?.code,
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+      // Password asla loglanmamalı!
+    });
     
     // Handle specific Appwrite errors
     if (error instanceof Error && 'code' in error && (error as any).code === 401) {

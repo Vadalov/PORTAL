@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { QueryParams, BeneficiaryDocument, CreateDocumentData } from '@/types/collections';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import logger from '@/lib/logger';
 
 // TypeScript interfaces
 interface BeneficiaryFilters {
@@ -142,7 +143,13 @@ async function getBeneficiariesHandler(request: NextRequest) {
       message: `${total} kayıt bulundu`,
     });
   } catch (error: unknown) {
-    console.error('Beneficiaries list error:', error);
+    logger.error('Beneficiaries list error', error, {
+      endpoint: '/api/beneficiaries',
+      method: 'GET',
+      page: params.page,
+      limit: params.limit,
+      filters: params.filters
+    });
 
     return NextResponse.json(
       { success: false, error: 'Listeleme işlemi başarısız' },
@@ -202,7 +209,11 @@ async function createBeneficiaryHandler(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: unknown) {
-    console.error('Beneficiary creation error:', error);
+    logger.error('Beneficiary creation error', error, {
+      endpoint: '/api/beneficiaries',
+      method: 'POST',
+      tcNo: body?.tc_no?.substring(0, 3) + '***' // Mask TC number for privacy
+    });
 
     // Handle duplicate TC number
     const errorMessage = error instanceof Error ? error.message : '';

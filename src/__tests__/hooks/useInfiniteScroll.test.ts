@@ -2,14 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useInfiniteScroll, usePaginatedQuery } from '@/hooks/useInfiniteScroll';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // Mock TanStack Query
 vi.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: vi.fn(),
 }));
 
 import { useInfiniteQuery } from '@tanstack/react-query';
+import type { UseInfiniteQueryResult } from '@tanstack/react-query';
 
 describe('useInfiniteScroll Hook', () => {
   beforeEach(() => {
@@ -25,7 +24,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -48,7 +47,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     renderHook(() => useInfiniteScroll({
       limit: 50,
@@ -77,7 +76,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -97,7 +96,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -117,7 +116,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -137,7 +136,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: true,
       isFetchingNextPage: true,
       isLoading: true,
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -163,7 +162,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const queryFn = vi.fn();
     
@@ -192,7 +191,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => usePaginatedQuery(
       ['test'],
@@ -212,7 +211,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: true,
       error: null,
       refetch: vi.fn(),
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => usePaginatedQuery(
       ['test'],
@@ -229,7 +228,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: false,
       error: new Error('Query failed'),
       refetch: vi.fn(),
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => usePaginatedQuery(
       ['test'],
@@ -248,7 +247,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
-    } as any);
+    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => usePaginatedQuery(
       ['test'],

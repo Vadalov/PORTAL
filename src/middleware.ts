@@ -4,6 +4,7 @@ import { serverAccount } from '@/lib/appwrite/server';
 import { ensureServerInitialized } from '@/lib/appwrite/server';
 import { UserRole, Permission, ROLE_PERMISSIONS } from '@/types/auth';
 import { appwriteConfig } from '@/lib/appwrite/config';
+import logger from '@/lib/logger';
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -101,7 +102,10 @@ function isServerReady(): boolean {
     ensureServerInitialized();
     return true;
   } catch (error) {
-    console.error('Server initialization failed:', error);
+    logger.error('Server initialization failed', error, {
+      context: 'middleware',
+      function: 'isServerReady'
+    });
     return false;
   }
 }
@@ -136,7 +140,10 @@ async function getAppwriteSession(request: NextRequest): Promise<{ userId: strin
     if (sessionData.expire) {
       const expireDate = new Date(sessionData.expire);
       if (expireDate < new Date()) {
-        console.warn('Session expired');
+        logger.warn('Session expired', {
+          context: 'middleware',
+          function: 'getAppwriteSession'
+        });
         return null;
       }
     }
@@ -148,7 +155,11 @@ async function getAppwriteSession(request: NextRequest): Promise<{ userId: strin
       secret: sessionData.secret,
     };
   } catch (error) {
-    console.error('Appwrite session validation error:', error);
+    logger.error('Appwrite session validation error', error, {
+      context: 'middleware',
+      function: 'getAppwriteSession',
+      hasCookie: !!sessionCookie
+    });
     return null;
   }
 }
@@ -182,7 +193,11 @@ async function getUserFromSession(session: { userId: string; $id: string; secret
       permissions: ROLE_PERMISSIONS[role] || [],
     };
   } catch (error) {
-    console.error('User data retrieval error:', error);
+    logger.error('User data retrieval error', error, {
+      context: 'middleware',
+      function: 'getUserFromSession',
+      sessionId: session?.$id
+    });
     return null;
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import logger from '@/lib/logger';
 
 function validateMeeting(data: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -47,7 +48,13 @@ export async function GET(request: NextRequest) {
       total: response.total ?? 0,
     });
   } catch (error: any) {
-    console.error('List meetings error:', error);
+    logger.error('List meetings error', error, {
+      endpoint: '/api/meetings',
+      method: 'GET',
+      page,
+      limit,
+      filters
+    });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
 }
@@ -70,7 +77,12 @@ async function createMeetingHandler(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: response.data, message: 'Toplantı başarıyla oluşturuldu' }, { status: 201 });
   } catch (error: any) {
-    console.error('Create meeting error:', error);
+    logger.error('Create meeting error', error, {
+      endpoint: '/api/meetings',
+      method: 'POST',
+      title: body?.title,
+      meetingDate: body?.meeting_date
+    });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }
 }

@@ -108,7 +108,7 @@ export default function BudgetForm({
     try {
       await onSubmit(formData);
     } catch (error) {
-      console.error('Form submission error:', error);
+      // Error handled by mutation's onError callback
     }
   };
 

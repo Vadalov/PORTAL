@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import logger from '@/lib/logger';
 
 function validateTask(data: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -43,7 +44,13 @@ export async function GET(request: NextRequest) {
       total: response.total ?? 0,
     });
   } catch (error: any) {
-    console.error('List tasks error:', error);
+    logger.error('List tasks error', error, {
+      endpoint: '/api/tasks',
+      method: 'GET',
+      page,
+      limit,
+      filters
+    });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
 }
@@ -66,7 +73,11 @@ async function createTaskHandler(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: response.data, message: 'Görev başarıyla oluşturuldu' }, { status: 201 });
   } catch (error: any) {
-    console.error('Create task error:', error);
+    logger.error('Create task error', error, {
+      endpoint: '/api/tasks',
+      method: 'POST',
+      title: body?.title
+    });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }
 }

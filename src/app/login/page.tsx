@@ -11,8 +11,8 @@ import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@test.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('isahamid@gmail.com');
+  const [password, setPassword] = useState('vadalov95');
   const [mounted, setMounted] = useState(false);
   const { login, isAuthenticated, isLoading, initializeAuth } = useAuthStore();
 
@@ -114,6 +114,7 @@ export default function LoginPage() {
                 Test Hesapları:
               </p>
               <div className="space-y-1 text-xs text-blue-800">
+                <p><strong>Admin (Tüm Yetkiler):</strong> isahamid@gmail.com / vadalov95</p>
                 <p>Admin: admin@test.com / admin123</p>
                 <p>Manager: manager@test.com / manager123</p>
                 <p>Member: member@test.com / member123</p>

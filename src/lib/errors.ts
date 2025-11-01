@@ -3,6 +3,8 @@
  * Standardized error handling with Turkish error messages
  */
 
+import logger from '@/lib/logger';
+
 export class AppError extends Error {
   constructor(
     message: string,
@@ -278,23 +280,13 @@ export function formatErrorMessage(error: any): string {
  * Log error for debugging (in development) and monitoring (in production)
  */
 export function logError(error: any, context?: string): void {
-  if (process.env.NODE_ENV === 'development') {
-    console.group(`❌ Error${context ? ` in ${context}` : ''}`);
-    console.error('Message:', error?.message || error);
-    console.error('Code:', error?.code);
-    console.error('Status:', error?.status || error?.statusCode);
-    console.error('Details:', error?.details);
-    console.error('Stack:', error?.stack);
-    console.groupEnd();
-  } else {
-    // In production, you would send this to a monitoring service like Sentry
-    console.error(`Error${context ? ` in ${context}` : ''}:`, {
-      message: error?.message,
-      code: error?.code,
-      status: error?.status || error?.statusCode,
-      // Don't log stack traces in production to avoid exposing internals
-    });
-  }
+  const message = `Error${context ? ` in ${context}` : ''}`;
+  logger.error(message, error, {
+    code: error?.code,
+    status: error?.status || error?.statusCode,
+    details: error?.details,
+    context,
+  });
 }
 
 /**

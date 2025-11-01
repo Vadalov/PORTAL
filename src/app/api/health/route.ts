@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getValidationReport } from '@/lib/appwrite/validation';
 import { connectivityTester } from '@/lib/appwrite/connectivity-test';
 import { getConfigStatus } from '@/lib/appwrite/config';
+import logger from '@/lib/logger';
 
 // Cache for detailed health checks (30 seconds)
 let healthCache: { data: any; timestamp: number } | null = null;
@@ -60,7 +61,11 @@ export async function GET(request: Request) {
       connectivityReport = await connectivityTester.getConnectivityReport();
     } catch (error: any) {
       connectivityError = error.message;
-      console.error('Connectivity test failed:', error);
+      logger.error('Connectivity test failed', error, {
+        endpoint: '/api/health',
+        provider,
+        detailed: true
+      });
     }
   }
 

@@ -256,6 +256,58 @@ This project implements comprehensive error handling and loading state managemen
 
 ---
 
+## 📋 Logging
+
+Projede merkezi bir logger sistemi kullanılıyor. Tüm log'lar Sentry'ye otomatik gönderiliyor.
+
+### Kullanım
+
+```typescript
+import logger from '@/lib/logger';
+
+// Info log
+logger.info('User action', { userId: '123', action: 'login' });
+
+// Error log
+logger.error('Database error', error, { query: 'SELECT *' });
+
+// Warning log
+logger.warn('Rate limit approaching', { remaining: 5 });
+
+// Debug log (sadece development'ta görünür)
+logger.debug('Debug info', { data });
+```
+
+### Environment Variables
+
+```bash
+# Sentry DSN (production logging için)
+SENTRY_DSN=your-sentry-dsn
+NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
+
+# Log level (optional, default: info)
+LOG_LEVEL=debug # development
+LOG_LEVEL=warn  # production
+```
+
+### Best Practices
+
+1. **Sensitive Data:** Password, token, API key gibi bilgileri asla loglama
+2. **Context:** Her log'a context bilgisi ekle (endpoint, userId, vb.)
+3. **Error Objects:** Error'ları ikinci parametre olarak geç
+4. **Production:** Production'da sadece warn/error/fatal logla
+5. **Development:** Development'ta debug log'ları kullan
+
+### Log Levels
+
+- `debug`: Geliştirme sırasında detaylı bilgi
+- `info`: Normal operasyonlar
+- `warn`: Uyarılar (rate limit, deprecated API vb.)
+- `error`: Hatalar (Sentry'ye gönderilir)
+- `fatal`: Kritik hatalar (Sentry'ye gönderilir)
+
+---
+
 ## 📦 Dependencies & SDK Usage
 
 ### Appwrite SDK Architecture

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
+import logger from '@/lib/logger';
 
 function validateUser(data: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -23,7 +24,13 @@ export async function GET(request: NextRequest) {
     const response = await api.users.getUsers({ page, limit, search, orderBy: '$createdAt' });
     return NextResponse.json({ success: true, data: response.data, total: response.total ?? 0 });
   } catch (error: any) {
-    console.error('List users error:', error);
+    logger.error('List users error', error, {
+      endpoint: '/api/users',
+      method: 'GET',
+      page,
+      limit,
+      search
+    });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
 }
@@ -44,7 +51,11 @@ async function createUserHandler(request: NextRequest) {
     }
     return NextResponse.json({ success: true, data: response.data, message: 'Kullanıcı oluşturuldu' }, { status: 201 });
   } catch (error: any) {
-    console.error('Create user error:', error);
+    logger.error('Create user error', error, {
+      endpoint: '/api/users',
+      method: 'POST',
+      email: body?.email // Safe to log email for debugging
+    });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }
 }

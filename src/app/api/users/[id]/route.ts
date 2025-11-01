@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import logger from '@/lib/logger';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
@@ -22,25 +23,58 @@ function validateUserUpdate(data: any): ValidationResult {
  * GET /api/users/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await extractParams(params);
-  return handleGetById(id, api.users.getUser, 'Kullanıcı');
+  let id: string;
+  try {
+    const { id: extractedId } = await extractParams(params);
+    id = extractedId;
+    return handleGetById(id, api.users.getUser, 'Kullanıcı');
+  } catch (error) {
+    logger.error('Get user error', error, {
+      endpoint: '/api/users/[id]',
+      method: 'GET',
+      userId: id
+    });
+    throw error;
+  }
 }
 
 /**
  * PATCH /api/users/[id]
  */
 async function updateUserHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await extractParams(params);
-  const body = await request.json();
-  return handleUpdate(id, body, validateUserUpdate, api.users.updateUser, 'Kullanıcı');
+  let id: string;
+  try {
+    const { id: extractedId } = await extractParams(params);
+    id = extractedId;
+    const body = await request.json();
+    return handleUpdate(id, body, validateUserUpdate, api.users.updateUser, 'Kullanıcı');
+  } catch (error) {
+    logger.error('Update user error', error, {
+      endpoint: '/api/users/[id]',
+      method: 'PATCH',
+      userId: id
+    });
+    throw error;
+  }
 }
 
 /**
  * DELETE /api/users/[id]
  */
 async function deleteUserHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await extractParams(params);
-  return handleDelete(id, api.users.deleteUser, 'Kullanıcı');
+  let id: string;
+  try {
+    const { id: extractedId } = await extractParams(params);
+    id = extractedId;
+    return handleDelete(id, api.users.deleteUser, 'Kullanıcı');
+  } catch (error) {
+    logger.error('Delete user error', error, {
+      endpoint: '/api/users/[id]',
+      method: 'DELETE',
+      userId: id
+    });
+    throw error;
+  }
 }
 
 export const PATCH = withCsrfProtection(updateUserHandler);

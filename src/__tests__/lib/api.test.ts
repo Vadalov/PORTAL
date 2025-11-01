@@ -8,21 +8,19 @@ import {
   uploadBeneficiaryPhoto,
   checkMernis,
 } from '@/lib/api/mock-api';
-import type { BeneficiaryQuickAdd, BeneficiaryStatus } from '@/types/beneficiary';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { BeneficiaryQuickAdd, BeneficiaryStatus, BeneficiaryCategory, FundRegion, FileConnection } from '@/types/beneficiary';
 
 describe('Mock API', () => {
   describe('createBeneficiary', () => {
     it('should create a new beneficiary', async () => {
       const beneficiaryData: BeneficiaryQuickAdd = {
-        category: 'assistance' as any,
+        category: 'assistance' as BeneficiaryCategory,
         firstName: 'Test',
         lastName: 'User',
         nationality: 'TC',
         mernisCheck: true,
-        fundRegion: 'ankara' as any,
-        fileConnection: 'physical' as any,
+        fundRegion: 'ankara' as FundRegion,
+        fileConnection: 'physical' as FileConnection,
         fileNumber: '123',
         identityNumber: '12345678901',
       };
@@ -39,13 +37,13 @@ describe('Mock API', () => {
 
     it('should handle invalid data', async () => {
       const invalidData: BeneficiaryQuickAdd = {
-        category: 'assistance' as any,
+        category: 'assistance' as BeneficiaryCategory,
         firstName: '',
         lastName: '',
         nationality: 'TC',
         mernisCheck: false,
-        fundRegion: 'ankara' as any,
-        fileConnection: 'physical' as any,
+        fundRegion: 'ankara' as FundRegion,
+        fileConnection: 'physical' as FileConnection,
         fileNumber: '',
       };
 

@@ -9,8 +9,6 @@ import {
   type ValidationResult,
 } from '@/lib/api/route-helpers';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 describe('Route Helpers', () => {
   describe('successResponse', () => {
     it('should create a success response with data', () => {
@@ -111,10 +109,13 @@ describe('Route Helpers', () => {
   });
 
   describe('handleUpdate', () => {
-    const mockValidate = (data: any): ValidationResult => ({
-      isValid: data.name && data.name.length > 0,
-      errors: data.name && data.name.length > 0 ? [] : ['Name is required'],
-    });
+    const mockValidate = (data: unknown): ValidationResult => {
+      const record = data as Record<string, unknown>;
+      return {
+        isValid: typeof record.name === 'string' && record.name.length > 0,
+        errors: typeof record.name === 'string' && record.name.length > 0 ? [] : ['Name is required'],
+      };
+    };
 
     it('should return error if id is undefined', async () => {
       const mockUpdateOperation = vi.fn();

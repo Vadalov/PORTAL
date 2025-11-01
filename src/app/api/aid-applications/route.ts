@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { aidApplicationsApi as api } from '@/lib/api';
+import logger from '@/lib/logger';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 
 function validateApplication(data: any): { isValid: boolean; errors: string[] } {
@@ -30,7 +31,13 @@ export async function GET(request: NextRequest) {
     const response = await api.getAidApplications({ page, limit, search, filters });
     return NextResponse.json({ success: true, data: response.data, total: response.total ?? 0 });
   } catch (error: any) {
-    console.error('List aid applications error:', error);
+    logger.error('List aid applications error', error, {
+      endpoint: '/api/aid-applications',
+      method: 'GET',
+      page,
+      limit,
+      filters
+    });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
 }
@@ -53,7 +60,12 @@ async function createApplicationHandler(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: response.data, message: 'Başvuru oluşturuldu' }, { status: 201 });
   } catch (error: any) {
-    console.error('Create aid application error:', error);
+    logger.error('Create aid application error', error, {
+      endpoint: '/api/aid-applications',
+      method: 'POST',
+      applicantName: body?.applicant_name,
+      stage: body?.stage
+    });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }
 }

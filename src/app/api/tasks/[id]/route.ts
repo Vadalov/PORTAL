@@ -8,6 +8,7 @@ import {
   extractParams,
   type ValidationResult,
 } from '@/lib/api/route-helpers';
+import logger from '@/lib/logger';
 
 function validateTaskUpdate(data: any): ValidationResult {
   const errors: string[] = [];
@@ -28,7 +29,16 @@ function validateTaskUpdate(data: any): ValidationResult {
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
-  return handleGetById(id, api.tasks.getTask, 'Görev');
+  try {
+    return handleGetById(id, api.tasks.getTask, 'Görev');
+  } catch (error) {
+    logger.error('Task operation error', error, {
+      endpoint: '/api/tasks/[id]',
+      method: request.method,
+      taskId: id
+    });
+    throw error;
+  }
 }
 
 /**
@@ -36,8 +46,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  */
 async function updateTaskHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
-  const body = await request.json();
-  return handleUpdate(id, body, validateTaskUpdate, api.tasks.updateTask, 'Görev');
+  try {
+    const body = await request.json();
+    return handleUpdate(id, body, validateTaskUpdate, api.tasks.updateTask, 'Görev');
+  } catch (error) {
+    logger.error('Task operation error', error, {
+      endpoint: '/api/tasks/[id]',
+      method: request.method,
+      taskId: id
+    });
+    throw error;
+  }
 }
 
 /**
@@ -45,7 +64,16 @@ async function updateTaskHandler(request: NextRequest, { params }: { params: Pro
  */
 async function deleteTaskHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
-  return handleDelete(id, api.tasks.deleteTask, 'Görev');
+  try {
+    return handleDelete(id, api.tasks.deleteTask, 'Görev');
+  } catch (error) {
+    logger.error('Task operation error', error, {
+      endpoint: '/api/tasks/[id]',
+      method: request.method,
+      taskId: id
+    });
+    throw error;
+  }
 }
 
 export const PUT = withCsrfProtection(updateTaskHandler);

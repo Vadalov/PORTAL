@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { serverAccount, ensureServerInitialized } from '@/lib/appwrite/server';
 import { cookies } from 'next/headers';
+import logger from '@/lib/logger';
 
 /**
  * POST /api/auth/logout
@@ -22,7 +23,11 @@ export async function POST(request: NextRequest) {
           await serverAccount.deleteSession(sessionData.sessionId);
         }
       } catch (error) {
-        console.error('Error deleting session from Appwrite:', error);
+        logger.error('Error deleting session from Appwrite', error, {
+          endpoint: '/api/auth/logout',
+          method: 'POST',
+          sessionId: sessionData?.sessionId
+        });
         // Continue with cleanup even if Appwrite deletion fails
       }
     }
@@ -62,7 +67,10 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('Logout error:', error);
+    logger.error('Logout error', error, {
+      endpoint: '/api/auth/logout',
+      method: 'POST'
+    });
     
     // Even if there's an error, we should clear the cookies
     try {
@@ -84,7 +92,10 @@ export async function POST(request: NextRequest) {
         path: '/',
       });
     } catch (cleanupError) {
-      console.error('Error during cookie cleanup:', cleanupError);
+      logger.error('Error during cookie cleanup', cleanupError, {
+        endpoint: '/api/auth/logout',
+        method: 'POST'
+      });
     }
 
     // Return success even if cleanup has issues

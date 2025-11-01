@@ -8,6 +8,7 @@ import {
   extractParams,
   type ValidationResult,
 } from '@/lib/api/route-helpers';
+import logger from '@/lib/logger';
 
 function validateDonationUpdate(data: any): ValidationResult {
   const errors: string[] = [];
@@ -33,25 +34,55 @@ function validateDonationUpdate(data: any): ValidationResult {
  * GET /api/donations/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await extractParams(params);
-  return handleGetById(id, api.donations.getDonation, 'Bağış');
+  let id: string;
+  try {
+    id = (await extractParams(params)).id;
+    return handleGetById(id, api.donations.getDonation, 'Bağış');
+  } catch (error) {
+    logger.error('Donation operation error', error, {
+      endpoint: '/api/donations/[id]',
+      method: 'GET',
+      donationId: id || 'unknown'
+    });
+    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+  }
 }
 
 /**
  * PUT /api/donations/[id]
  */
 async function updateDonationHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await extractParams(params);
-  const body = await request.json();
-  return handleUpdate(id, body, validateDonationUpdate, api.donations.updateDonation, 'Bağış');
+  let id: string;
+  try {
+    id = (await extractParams(params)).id;
+    const body = await request.json();
+    return handleUpdate(id, body, validateDonationUpdate, api.donations.updateDonation, 'Bağış');
+  } catch (error) {
+    logger.error('Donation operation error', error, {
+      endpoint: '/api/donations/[id]',
+      method: 'PUT',
+      donationId: id || 'unknown'
+    });
+    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+  }
 }
 
 /**
  * DELETE /api/donations/[id]
  */
 async function deleteDonationHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await extractParams(params);
-  return handleDelete(id, api.donations.deleteDonation, 'Bağış');
+  let id: string;
+  try {
+    id = (await extractParams(params)).id;
+    return handleDelete(id, api.donations.deleteDonation, 'Bağış');
+  } catch (error) {
+    logger.error('Donation operation error', error, {
+      endpoint: '/api/donations/[id]',
+      method: 'DELETE',
+      donationId: id || 'unknown'
+    });
+    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+  }
 }
 
 export const PUT = withCsrfProtection(updateDonationHandler);
