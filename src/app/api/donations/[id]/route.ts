@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import {
@@ -34,7 +34,7 @@ function validateDonationUpdate(data: any): ValidationResult {
  * GET /api/donations/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  let id: string;
+  let id: string | undefined;
   try {
     id = (await extractParams(params)).id;
     return handleGetById(id, api.donations.getDonation, 'Bağış');
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       method: 'GET',
       donationId: id || 'unknown'
     });
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  * PUT /api/donations/[id]
  */
 async function updateDonationHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  let id: string;
+  let id: string | undefined;
   try {
     id = (await extractParams(params)).id;
     const body = await request.json();
@@ -63,7 +63,7 @@ async function updateDonationHandler(request: NextRequest, { params }: { params:
       method: 'PUT',
       donationId: id || 'unknown'
     });
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -71,7 +71,7 @@ async function updateDonationHandler(request: NextRequest, { params }: { params:
  * DELETE /api/donations/[id]
  */
 async function deleteDonationHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  let id: string;
+  let id: string | undefined;
   try {
     id = (await extractParams(params)).id;
     return handleDelete(id, api.donations.deleteDonation, 'Bağış');
@@ -81,7 +81,7 @@ async function deleteDonationHandler(request: NextRequest, { params }: { params:
       method: 'DELETE',
       donationId: id || 'unknown'
     });
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 

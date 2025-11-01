@@ -96,7 +96,7 @@ class LoggerImpl implements Logger {
       level,
       message,
       context: safeContext,
-      ...(safeError && { error: safeError }),
+      ...(safeError ? { error: safeError } : {}),
     };
 
     if (isDevelopment) {
@@ -163,6 +163,6 @@ export function measureTime<T>(fn: () => T, label?: string): T {
   }
 }
 
-export { LogLevel, LogContext };
+export type { LogLevel, LogContext };
 
 export default logger;

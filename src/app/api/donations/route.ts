@@ -36,12 +36,12 @@ function validateDonation(data: any): { isValid: boolean; errors: string[] } {
  * List donations
  */
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const page = Number(searchParams.get('page') || '1');
-    const limit = Number(searchParams.get('limit') || '10');
-    const search = searchParams.get('search') || undefined;
+  const { searchParams } = new URL(request.url);
+  const page = Number(searchParams.get('page') || '1');
+  const limit = Number(searchParams.get('limit') || '10');
+  const search = searchParams.get('search') || undefined;
 
+  try {
     const response = await api.donations.getDonations({ page, limit, search });
 
     return NextResponse.json({
@@ -65,8 +65,9 @@ export async function GET(request: NextRequest) {
  * Create donation
  */
 async function createDonationHandler(request: NextRequest) {
+  let body: any = null;
   try {
-    const body = await request.json();
+    body = await request.json();
     const validation = validateDonation(body);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });

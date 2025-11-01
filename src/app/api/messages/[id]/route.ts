@@ -56,8 +56,9 @@ async function deleteMessageHandler(request: NextRequest, { params }: { params: 
  * Note: Implemented via PUT with status change to keep routes simple
  */
 async function sendMessageHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  let id: string | undefined;
   try {
-    const { id } = await extractParams(params);
+    id = (await extractParams(params)).id;
     if (!id) {
       return errorResponse('ID parametresi gerekli', 400);
     }
@@ -72,7 +73,7 @@ async function sendMessageHandler(request: NextRequest, { params }: { params: Pr
     logger.error('Send message error', error, {
       endpoint: '/api/messages/[id]',
       method: 'POST',
-      messageId: id
+      messageId: id || 'unknown'
     });
     return errorResponse('Gönderim işlemi başarısız', 500);
   }

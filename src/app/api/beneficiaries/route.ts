@@ -106,9 +106,8 @@ function validateBeneficiaryData(data: BeneficiaryData): ValidationResult {
  * List beneficiaries with pagination and filters
  */
 async function getBeneficiariesHandler(request: NextRequest) {
+  const params = parseQueryParams(request);
   try {
-    const params = parseQueryParams(request);
-
     // Build filters for Appwrite query
     const filters: BeneficiaryFilters = {};
     if (params.filters?.status) {
@@ -163,8 +162,9 @@ async function getBeneficiariesHandler(request: NextRequest) {
  * Create new beneficiary
  */
 async function createBeneficiaryHandler(request: NextRequest) {
+  let body: BeneficiaryData | null = null;
   try {
-    const body = (await request.json()) as BeneficiaryData;
+    body = (await request.json()) as BeneficiaryData;
 
     // Validate input
     if (!body) {

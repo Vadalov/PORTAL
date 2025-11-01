@@ -11,11 +11,14 @@ import logger from '@/lib/logger';
  * Handle user login with Appwrite authentication
  */
 export const POST = authRateLimit(async (request: NextRequest) => {
+  let email: string | undefined;
   try {
     // Ensure server is initialized
     ensureServerInitialized();
 
-    const { email, password, rememberMe = false } = await request.json();
+    const body = await request.json();
+    email = body.email;
+    const { password, rememberMe = false } = body;
 
     // Validate input
     if (!email || !password) {
@@ -91,33 +94,54 @@ export const POST = authRateLimit(async (request: NextRequest) => {
     });
 
   } catch (error: unknown) {
+    const appwriteError = error as any;
+    const errorCode = appwriteError?.code || appwriteError?.response?.code || appwriteError?.statusCode;
+    const errorMessage = appwriteError?.message || appwriteError?.response?.message || '';
+    
     logger.error('Login error', error, {
       endpoint: '/api/auth/login',
       method: 'POST',
       email: email?.substring(0, 3) + '***', // Mask email for security
-      errorCode: (error as any)?.code,
+      errorCode,
+      errorMessage: errorMessage?.substring(0, 50), // Limit message length
       ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
       // Password asla loglanmamalı!
     });
     
     // Handle specific Appwrite errors
-    if (error instanceof Error && 'code' in error && (error as any).code === 401) {
+    // Appwrite returns 401 for invalid credentials
+    if (errorCode === 401 || errorCode === '401') {
       return NextResponse.json(
         { success: false, error: 'Geçersiz email veya şifre' },
         { status: 401 }
       );
     }
     
-    if (error instanceof Error && 'code' in error && (error as any).code === 429) {
+    // Rate limiting
+    if (errorCode === 429 || errorCode === '429') {
       return NextResponse.json(
         { success: false, error: 'Çok fazla deneme. Lütfen bekleyin.' },
         { status: 429 }
       );
     }
+    
+    // Check for credential-related error messages
+    const lowerMessage = errorMessage.toLowerCase();
+    if (lowerMessage.includes('invalid') || 
+        lowerMessage.includes('credential') || 
+        lowerMessage.includes('password') ||
+        lowerMessage.includes('email') ||
+        lowerMessage.includes('user_not_found') ||
+        lowerMessage.includes('user_invalid_credentials')) {
+      return NextResponse.json(
+        { success: false, error: 'Geçersiz email veya şifre' },
+        { status: 401 }
+      );
+    }
 
     return NextResponse.json(
-      { success: false, error: 'Giriş yapılırken bir hata oluştu' },
-      { status: 500 }
+      { success: false, error: errorMessage || 'Giriş yapılırken bir hata oluştu' },
+      { status: errorCode && typeof errorCode === 'number' && errorCode >= 400 && errorCode < 500 ? errorCode : 500 }
     );
   }
 });

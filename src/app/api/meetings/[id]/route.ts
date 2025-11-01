@@ -25,14 +25,15 @@ function validateMeetingUpdate(data: any): ValidationResult {
  * GET /api/meetings/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  let id: string | undefined;
   try {
-    const { id } = await extractParams(params);
+    id = (await extractParams(params)).id;
     return handleGetById(id, api.meetings.getMeeting, 'Toplantı');
   } catch (error) {
     logger.error('Meeting operation error', error, {
       endpoint: '/api/meetings/[id]',
       method: 'GET',
-      meetingId: id
+      meetingId: id || 'unknown'
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -42,15 +43,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  * PUT /api/meetings/[id]
  */
 async function updateMeetingHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  let id: string | undefined;
   try {
-    const { id } = await extractParams(params);
+    id = (await extractParams(params)).id;
     const body = await request.json();
     return handleUpdate(id, body, validateMeetingUpdate, api.meetings.updateMeeting, 'Toplantı');
   } catch (error) {
     logger.error('Meeting operation error', error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
-      meetingId: id
+      meetingId: id || 'unknown'
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -60,14 +62,15 @@ async function updateMeetingHandler(request: NextRequest, { params }: { params: 
  * DELETE /api/meetings/[id]
  */
 async function deleteMeetingHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  let id: string | undefined;
   try {
-    const { id } = await extractParams(params);
+    id = (await extractParams(params)).id;
     return handleDelete(id, api.meetings.deleteMeeting, 'Toplantı');
   } catch (error) {
     logger.error('Meeting operation error', error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
-      meetingId: id
+      meetingId: id || 'unknown'
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

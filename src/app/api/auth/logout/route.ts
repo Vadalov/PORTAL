@@ -7,7 +7,7 @@ import logger from '@/lib/logger';
  * POST /api/auth/logout
  * Handle user logout and session cleanup
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // Ensure server is initialized
     ensureServerInitialized();
@@ -16,10 +16,11 @@ export async function POST(request: NextRequest) {
     const sessionCookie = cookieStore.get('appwrite-session');
 
     // If there's an active session, delete it from Appwrite
+    let sessionData: { sessionId?: string } | null = null;
     if (sessionCookie) {
       try {
-        const sessionData = JSON.parse(sessionCookie.value);
-        if (sessionData.sessionId) {
+        sessionData = JSON.parse(sessionCookie.value);
+        if (sessionData?.sessionId) {
           await serverAccount.deleteSession(sessionData.sessionId);
         }
       } catch (error) {

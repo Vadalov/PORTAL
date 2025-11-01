@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { serverAccount } from '@/lib/appwrite/server';
 import { ensureServerInitialized } from '@/lib/appwrite/server';
 import { UserRole, Permission, ROLE_PERMISSIONS } from '@/types/auth';
 import { appwriteConfig } from '@/lib/appwrite/config';
@@ -119,12 +118,12 @@ function isServerReady(): boolean {
  * Get user session from Appwrite
  */
 async function getAppwriteSession(request: NextRequest): Promise<{ userId: string; $id: string; secret: string } | null> {
+  const sessionCookie = request.cookies.get('appwrite-session');
   try {
     if (!isServerReady()) {
       return null;
     }
 
-    const sessionCookie = request.cookies.get('appwrite-session');
     if (!sessionCookie) {
       return null;
     }

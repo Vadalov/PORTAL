@@ -21,25 +21,25 @@ function validateMeeting(data: any): { isValid: boolean; errors: string[] } {
  * GET /api/meetings
  */
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const page = Number(searchParams.get('page') || '1');
+  const limit = Number(searchParams.get('limit') || '20');
+  const search = searchParams.get('search') || undefined;
+
+  const filters: Record<string, any> = {};
+  const status = searchParams.get('status');
+  const meeting_type = searchParams.get('meeting_type');
+  const organizer = searchParams.get('organizer');
+  const date_from = searchParams.get('date_from');
+  const date_to = searchParams.get('date_to');
+
+  if (status) filters.status = status;
+  if (meeting_type) filters.meeting_type = meeting_type;
+  if (organizer) filters.organizer = organizer;
+  if (date_from) filters.date_from = date_from;
+  if (date_to) filters.date_to = date_to;
+
   try {
-    const { searchParams } = new URL(request.url);
-    const page = Number(searchParams.get('page') || '1');
-    const limit = Number(searchParams.get('limit') || '20');
-    const search = searchParams.get('search') || undefined;
-
-    const filters: Record<string, any> = {};
-    const status = searchParams.get('status');
-    const meeting_type = searchParams.get('meeting_type');
-    const organizer = searchParams.get('organizer');
-    const date_from = searchParams.get('date_from');
-    const date_to = searchParams.get('date_to');
-
-    if (status) filters.status = status;
-    if (meeting_type) filters.meeting_type = meeting_type;
-    if (organizer) filters.organizer = organizer;
-    if (date_from) filters.date_from = date_from;
-    if (date_to) filters.date_to = date_to;
-
     const response = await api.meetings.getMeetings({ page, limit, search, filters });
 
     return NextResponse.json({
@@ -63,8 +63,9 @@ export async function GET(request: NextRequest) {
  * POST /api/meetings
  */
 async function createMeetingHandler(request: NextRequest) {
+  let body: any = null;
   try {
-    const body = await request.json();
+    body = await request.json();
     const validation = validateMeeting(body);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });

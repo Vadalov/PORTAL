@@ -16,11 +16,11 @@ function validateUser(data: any): { isValid: boolean; errors: string[] } {
  * GET /api/users
  */
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const page = Number(searchParams.get('page') || '1');
+  const limit = Number(searchParams.get('limit') || '10');
+  const search = searchParams.get('search') || undefined;
   try {
-    const { searchParams } = new URL(request.url);
-    const page = Number(searchParams.get('page') || '1');
-    const limit = Number(searchParams.get('limit') || '10');
-    const search = searchParams.get('search') || undefined;
     const response = await api.users.getUsers({ page, limit, search, orderBy: '$createdAt' });
     return NextResponse.json({ success: true, data: response.data, total: response.total ?? 0 });
   } catch (error: any) {
@@ -39,8 +39,9 @@ export async function GET(request: NextRequest) {
  * POST /api/users
  */
 async function createUserHandler(request: NextRequest) {
+  let body: any = null;
   try {
-    const body = await request.json();
+    body = await request.json();
     const validation = validateUser(body);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });

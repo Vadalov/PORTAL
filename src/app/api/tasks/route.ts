@@ -21,21 +21,21 @@ function validateTask(data: any): { isValid: boolean; errors: string[] } {
  * GET /api/tasks
  */
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const page = Number(searchParams.get('page') || '1');
+  const limit = Number(searchParams.get('limit') || '20');
+  const search = searchParams.get('search') || undefined;
+
+  const filters: Record<string, any> = {};
+  const status = searchParams.get('status');
+  const priority = searchParams.get('priority');
+  const assigned_to = searchParams.get('assigned_to');
+
+  if (status) filters.status = status;
+  if (priority) filters.priority = priority;
+  if (assigned_to) filters.assigned_to = assigned_to;
+
   try {
-    const { searchParams } = new URL(request.url);
-    const page = Number(searchParams.get('page') || '1');
-    const limit = Number(searchParams.get('limit') || '20');
-    const search = searchParams.get('search') || undefined;
-
-    const filters: Record<string, any> = {};
-    const status = searchParams.get('status');
-    const priority = searchParams.get('priority');
-    const assigned_to = searchParams.get('assigned_to');
-
-    if (status) filters.status = status;
-    if (priority) filters.priority = priority;
-    if (assigned_to) filters.assigned_to = assigned_to;
-
     const response = await api.tasks.getTasks({ page, limit, search, filters });
 
     return NextResponse.json({
@@ -59,8 +59,9 @@ export async function GET(request: NextRequest) {
  * POST /api/tasks
  */
 async function createTaskHandler(request: NextRequest) {
+  let body: any = null;
   try {
-    const body = await request.json();
+    body = await request.json();
     const validation = validateTask(body);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });

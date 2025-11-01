@@ -48,9 +48,8 @@ async function getBeneficiaryHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const { id } = await params;
-
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'ID parametresi gerekli' },
@@ -94,9 +93,8 @@ async function updateBeneficiaryHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const { id } = await params;
-
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'ID parametresi gerekli' },
@@ -166,9 +164,8 @@ async function deleteBeneficiaryHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
-    const { id } = await params;
-
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'ID parametresi gerekli' },

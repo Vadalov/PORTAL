@@ -23,7 +23,7 @@ function validateUserUpdate(data: any): ValidationResult {
  * GET /api/users/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  let id: string;
+  let id: string | undefined;
   try {
     const { id: extractedId } = await extractParams(params);
     id = extractedId;
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     logger.error('Get user error', error, {
       endpoint: '/api/users/[id]',
       method: 'GET',
-      userId: id
+      userId: id || 'unknown'
     });
     throw error;
   }
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  * PATCH /api/users/[id]
  */
 async function updateUserHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  let id: string;
+  let id: string | undefined;
   try {
     const { id: extractedId } = await extractParams(params);
     id = extractedId;
@@ -52,7 +52,7 @@ async function updateUserHandler(request: NextRequest, { params }: { params: Pro
     logger.error('Update user error', error, {
       endpoint: '/api/users/[id]',
       method: 'PATCH',
-      userId: id
+      userId: id || 'unknown'
     });
     throw error;
   }
@@ -62,7 +62,7 @@ async function updateUserHandler(request: NextRequest, { params }: { params: Pro
  * DELETE /api/users/[id]
  */
 async function deleteUserHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  let id: string;
+  let id: string | undefined;
   try {
     const { id: extractedId } = await extractParams(params);
     id = extractedId;
@@ -71,7 +71,7 @@ async function deleteUserHandler(request: NextRequest, { params }: { params: Pro
     logger.error('Delete user error', error, {
       endpoint: '/api/users/[id]',
       method: 'DELETE',
-      userId: id
+      userId: id || 'unknown'
     });
     throw error;
   }

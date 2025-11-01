@@ -24,23 +24,23 @@ function validateMessage(data: any): { isValid: boolean; errors: string[] } {
  * GET /api/messages
  */
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const page = Number(searchParams.get('page') || '1');
+  const limit = Number(searchParams.get('limit') || '20');
+  const search = searchParams.get('search') || undefined;
+
+  const filters: Record<string, any> = {};
+  const message_type = searchParams.get('message_type');
+  const status = searchParams.get('status');
+  const sender = searchParams.get('sender');
+  const is_bulk = searchParams.get('is_bulk');
+
+  if (message_type) filters.message_type = message_type;
+  if (status) filters.status = status;
+  if (sender) filters.sender = sender;
+  if (is_bulk !== null) filters.is_bulk = is_bulk === 'true';
+
   try {
-    const { searchParams } = new URL(request.url);
-    const page = Number(searchParams.get('page') || '1');
-    const limit = Number(searchParams.get('limit') || '20');
-    const search = searchParams.get('search') || undefined;
-
-    const filters: Record<string, any> = {};
-    const message_type = searchParams.get('message_type');
-    const status = searchParams.get('status');
-    const sender = searchParams.get('sender');
-    const is_bulk = searchParams.get('is_bulk');
-
-    if (message_type) filters.message_type = message_type;
-    if (status) filters.status = status;
-    if (sender) filters.sender = sender;
-    if (is_bulk !== null) filters.is_bulk = is_bulk === 'true';
-
     const response = await api.messages.getMessages({ page, limit, search, filters });
 
     return NextResponse.json({
@@ -64,8 +64,9 @@ export async function GET(request: NextRequest) {
  * POST /api/messages
  */
 async function createMessageHandler(request: NextRequest) {
+  let body: any = null;
   try {
-    const body = await request.json();
+    body = await request.json();
     const validation = validateMessage(body);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
