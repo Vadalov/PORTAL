@@ -1,36 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { appwriteApi } from '@/lib/api/appwrite-api';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
-  MessageSquare,
   Mail,
   Phone,
-  Users,
   Send,
   ArrowRight,
   ArrowLeft,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Clock,
   Download,
   History,
   Eye,
   EyeOff,
-  Calculator,
   FileText,
 } from 'lucide-react';
 import { MessageForm } from '@/components/forms/MessageForm';
@@ -101,13 +93,13 @@ export default function BulkMessagingPage() {
   // });
 
   const historyResponse = { data: [] };
-  const isLoadingHistory = false;
+  const _isLoadingHistory = false;
 
   const historyMessages = historyResponse?.data || [];
 
   // Mutations
   const createMessageMutation = useMutation({
-    mutationFn: (data: any) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.createMessage(data),
+    mutationFn: (_data: Record<string, unknown>) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.createMessage(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
@@ -115,7 +107,7 @@ export default function BulkMessagingPage() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: (id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.sendMessage(id),
+    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.sendMessage(id),
   });
 
   // Event handlers
@@ -217,8 +209,9 @@ export default function BulkMessagingPage() {
 
         toast.success(`Toplu mesaj gönderildi! ${successCount} başarılı, ${failedCount} başarısız.`);
       }
-    } catch (error: any) {
-      toast.error(`Toplu mesaj gönderilirken hata oluştu: ${  error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen hata';
+      toast.error(`Toplu mesaj gönderilirken hata oluştu: ${errorMessage}`);
     } finally {
       setIsSending(false);
     }

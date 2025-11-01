@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { appwriteApi } from '@/lib/api/appwrite-api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,13 +20,9 @@ import {
   FileText,
   Trash2,
   Reply,
-  Forward,
-  Eye,
-  EyeOff,
   Calendar,
   User,
   Mail,
-  MoreHorizontal,
 } from 'lucide-react';
 import { MessageForm } from '@/components/forms/MessageForm';
 import {
@@ -102,20 +98,20 @@ export default function InternalMessagingPage() {
 
   // Mutations
   const deleteMessageMutation = useMutation({
-    mutationFn: (id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.deleteMessage(id),
+    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.deleteMessage(id),
     onSuccess: () => {
       toast.success('Mesaj silindi.');
       queryClient.invalidateQueries({ queryKey: ['internal-messages'] });
       setSelectedMessage(null);
       setShowMessageDetail(false);
     },
-    onError: (error: any) => {
-      toast.error(`Mesaj silinirken hata oluştu: ${  error.message}`);
+    onError: (error: Error) => {
+      toast.error(`Mesaj silinirken hata oluştu: ${error.message}`);
     },
   });
 
   const markAsReadMutation = useMutation({
-    mutationFn: (id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.markAsRead(id, user?.id || ''),
+    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.markAsRead(id, user?.id || ''),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['internal-messages'] });
     },
@@ -149,7 +145,7 @@ export default function InternalMessagingPage() {
     }
   };
 
-  const handleSelectAll = () => {
+  const _handleSelectAll = () => {
     if (selectedMessages.length === messages.length) {
       setSelectedMessages([]);
     } else {
@@ -170,7 +166,7 @@ export default function InternalMessagingPage() {
     return user?.name || 'Bilinmeyen Kullanıcı';
   };
 
-  const getUserEmail = (userId: string) => {
+  const _getUserEmail = (userId: string) => {
     const user = users.find((u: UserDocument) => u.$id === userId);
     return user?.email || '';
   };
