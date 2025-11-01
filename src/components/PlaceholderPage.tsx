@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Construction, ArrowLeft, Clock, Code, Rocket } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PageLayout } from '@/components/layouts/PageLayout';
-import { cn } from '@/lib/utils';
 
 interface PlaceholderPageProps {
   title: string;

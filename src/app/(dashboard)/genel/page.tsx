@@ -3,7 +3,6 @@
 import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/ui/stat-card';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import {
@@ -16,10 +15,8 @@ import {
   Clock,
   CheckCircle2,
   AlertCircle,
-  Activity,
   Zap,
   Target,
-  Home
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -130,27 +127,6 @@ export default function DashboardPage() {
     },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  } as const;
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-      },
-    },
-  } as const;
-
   return (
     <PageLayout
       title={`Hoş geldiniz, ${user?.name || 'Kullanıcı'}!`}
@@ -201,23 +177,23 @@ export default function DashboardPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className={cn(
-                          "group relative p-5 rounded-xl border-2 transition-all duration-300",
-                          "hover:shadow-lg hover:border-primary/50 cursor-pointer",
-                          "bg-gradient-to-br from-background to-muted/20"
+                          'group relative p-5 rounded-xl border-2 transition-all duration-300',
+                          'hover:shadow-lg hover:border-primary/50 cursor-pointer',
+                          'bg-gradient-to-br from-background to-muted/20'
                         )}
                       >
-                        <div className={cn(
-                          "inline-flex p-3 rounded-xl mb-3 transition-transform duration-300 group-hover:scale-110",
-                          action.iconBg
-                        )}>
-                          <Icon className={cn("h-5 w-5", action.iconColor)} />
+                        <div
+                          className={cn(
+                            'inline-flex p-3 rounded-xl mb-3 transition-transform duration-300 group-hover:scale-110',
+                            action.iconBg
+                          )}
+                        >
+                          <Icon className={cn('h-5 w-5', action.iconColor)} />
                         </div>
                         <h3 className="font-semibold text-base mb-1 group-hover:text-primary transition-colors">
                           {action.title}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {action.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{action.description}</p>
                         <ArrowUpRight className="h-4 w-4 absolute top-4 right-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       </motion.div>
                     </Link>
@@ -239,9 +215,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl font-bold">Son Aktiviteler</CardTitle>
-                  <CardDescription className="mt-1">
-                    Sistemdeki son işlemler
-                  </CardDescription>
+                  <CardDescription className="mt-1">Sistemdeki son işlemler</CardDescription>
                 </div>
                 <Clock className="h-5 w-5 text-muted-foreground" />
               </div>
@@ -258,27 +232,29 @@ export default function DashboardPage() {
                       transition={{ delay: 0.4 + index * 0.1 }}
                       className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                     >
-                      <div className={cn(
-                        "p-2 rounded-lg",
-                        activity.type === 'success' && "bg-green-500/10",
-                        activity.type === 'info' && "bg-blue-500/10",
-                        activity.type === 'warning' && "bg-yellow-500/10"
-                      )}>
-                        <Icon className={cn(
-                          "h-4 w-4",
-                          activity.type === 'success' && "text-green-600 dark:text-green-400",
-                          activity.type === 'info' && "text-blue-600 dark:text-blue-400",
-                          activity.type === 'warning' && "text-yellow-600 dark:text-yellow-400"
-                        )} />
+                      <div
+                        className={cn(
+                          'p-2 rounded-lg',
+                          activity.type === 'success' && 'bg-green-500/10',
+                          activity.type === 'info' && 'bg-blue-500/10',
+                          activity.type === 'warning' && 'bg-yellow-500/10'
+                        )}
+                      >
+                        <Icon
+                          className={cn(
+                            'h-4 w-4',
+                            activity.type === 'success' && 'text-green-600 dark:text-green-400',
+                            activity.type === 'info' && 'text-blue-600 dark:text-blue-400',
+                            activity.type === 'warning' && 'text-yellow-600 dark:text-yellow-400'
+                          )}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">{activity.title}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {activity.description}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {activity.time}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
                       </div>
                     </motion.div>
                   );

@@ -1,43 +1,44 @@
-"use client"
+'use client';
 
-import { use } from "react"
-import { useQuery, useMutation } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import { 
-  ArrowLeft, 
-  Save, 
-  X, 
-  Trash2,
-  User,
-  XCircle
-} from "lucide-react"
+import { use } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { ArrowLeft, Save, X, Trash2, User, XCircle } from 'lucide-react';
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
-import api from "@/lib/api"
-import { checkMernis } from "@/lib/api/mock-api"
-import type { BeneficiaryDocument } from "@/types/collections"
-import { useForm, Controller } from "react-hook-form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import api from '@/lib/api';
+import { checkMernis } from '@/lib/api/mock-api';
+import type { BeneficiaryDocument } from '@/types/collections';
+import { useForm, Controller } from 'react-hook-form';
+import { z } from 'zod';
+
+// Form validation schema
+type DocSchema = z.infer<typeof docSchema>;
 
 const docSchema = z.object({
-  name: z.string().min(2, "İsim zorunludur"),
-  tc_no: z.string().optional().refine(
-    (val) => !val || (/^\d{11}$/.test(val)), 
-    { message: "TC Kimlik No 11 haneli olmalıdır" }
-  ),
+  name: z.string().min(2, 'İsim zorunludur'),
+  tc_no: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^\d{11}$/.test(val), { message: 'TC Kimlik No 11 haneli olmalıdır' }),
   phone: z.string().optional(),
-  email: z.string().email("Geçersiz e-posta").optional().or(z.literal("")),
+  email: z.string().email('Geçersiz e-posta').optional().or(z.literal('')),
   nationality: z.string().optional(),
   religion: z.string().optional(),
   marital_status: z.string().optional(),
@@ -46,89 +47,98 @@ const docSchema = z.object({
   district: z.string().optional(),
   neighborhood: z.string().optional(),
   family_size: z.coerce.number().min(1).max(20).optional(),
-  status: z.enum(["TASLAK", "AKTIF", "PASIF", "SILINDI"]),
-  approval_status: z.enum(["pending", "approved", "rejected"]).optional()
-})
+  status: z.enum(['TASLAK', 'AKTIF', 'PASIF', 'SILINDI']),
+  approval_status: z.enum(['pending', 'approved', 'rejected']).optional(),
+});
 
-type FormValues = z.infer<typeof docSchema>
+type FormValues = z.infer<typeof docSchema>;
 
 export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const router = useRouter()
-  const { id } = use(params)
+  const router = useRouter();
+  const { id } = use(params);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['beneficiary', id],
     queryFn: () => api.beneficiaries.getBeneficiary(id),
-  })
+  });
 
-  const beneficiary = data?.data as BeneficiaryDocument | undefined
+  const beneficiary = data?.data as BeneficiaryDocument | undefined;
 
   const updateMutation = useMutation({
-    mutationFn: (payload: Partial<BeneficiaryDocument>) => api.beneficiaries.updateBeneficiary(id, payload),
+    mutationFn: (payload: Partial<BeneficiaryDocument>) =>
+      api.beneficiaries.updateBeneficiary(id, payload),
     onSuccess: (res) => {
       if (!res.error) {
-        toast.success("Kayıt güncellendi")
-        refetch()
+        toast.success('Kayıt güncellendi');
+        refetch();
       } else {
-        toast.error(res.error || "Güncelleme başarısız")
+        toast.error(res.error || 'Güncelleme başarısız');
       }
     },
-    onError: () => toast.error("Güncelleme sırasında hata oluştu")
-  })
+    onError: () => toast.error('Güncelleme sırasında hata oluştu'),
+  });
 
   const deleteMutation = useMutation({
     mutationFn: () => api.beneficiaries.deleteBeneficiary(id),
     onSuccess: (res) => {
       if (!res.error) {
-        toast.success("Kayıt silindi")
-        router.push("/yardim/ihtiyac-sahipleri")
+        toast.success('Kayıt silindi');
+        router.push('/yardim/ihtiyac-sahipleri');
       } else {
-        toast.error(res.error || "Silme işlemi başarısız")
+        toast.error(res.error || 'Silme işlemi başarısız');
       }
     },
-    onError: () => toast.error("Silme sırasında hata oluştu")
-  })
+    onError: () => toast.error('Silme sırasında hata oluştu'),
+  });
 
   const mernisMutation = useMutation({
     mutationFn: (identity: string) => checkMernis(identity),
     onSuccess: (res) => {
       if (res.success && res.data) {
         if (res.data.isValid) {
-          toast.success(res.data.message || "Mernis geçerli")
+          toast.success(res.data.message || 'Mernis geçerli');
         } else {
-          toast.error(res.data.message || "Mernis geçersiz")
+          toast.error(res.data.message || 'Mernis geçersiz');
         }
       } else {
-        toast.error(res.error || "Mernis kontrolü başarısız")
+        toast.error(res.error || 'Mernis kontrolü başarısız');
       }
     },
-    onError: () => toast.error("Mernis kontrolü sırasında hata oluştu")
-  })
+    onError: () => toast.error('Mernis kontrolü sırasında hata oluştu'),
+  });
 
-  const { register, control, handleSubmit, formState: { isSubmitting, errors }, getValues } = useForm<FormValues>({
-    // Resolver disabled due to TypeScript conflicts - will be fixed later
-    resolver: undefined as any,
-    defaultValues: beneficiary ? {
-      name: beneficiary.name || "",
-      tc_no: beneficiary.tc_no || "",
-      phone: beneficiary.phone || "",
-      email: beneficiary.email || "",
-      nationality: beneficiary.nationality || "",
-      religion: beneficiary.religion || "",
-      marital_status: beneficiary.marital_status || "",
-      address: beneficiary.address || "",
-      city: beneficiary.city || "",
-      district: beneficiary.district || "",
-      neighborhood: beneficiary.neighborhood || "",
-      family_size: beneficiary.family_size ?? 1,
-      status: beneficiary.status,
-      approval_status: beneficiary.approval_status || "pending"
-    } : undefined
-  })
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { isSubmitting, errors },
+    getValues,
+  } = useForm<FormValues>({
+    // Resolver disabled temporarily - needs proper schema integration
+    resolver: undefined,
+    defaultValues: beneficiary
+      ? {
+          name: beneficiary.name || '',
+          tc_no: beneficiary.tc_no || '',
+          phone: beneficiary.phone || '',
+          email: beneficiary.email || '',
+          nationality: beneficiary.nationality || '',
+          religion: beneficiary.religion || '',
+          marital_status: beneficiary.marital_status || '',
+          address: beneficiary.address || '',
+          city: beneficiary.city || '',
+          district: beneficiary.district || '',
+          neighborhood: beneficiary.neighborhood || '',
+          family_size: beneficiary.family_size ?? 1,
+          status: beneficiary.status,
+          approval_status: beneficiary.approval_status || 'pending',
+        }
+      : undefined,
+  });
 
   const onSubmit = (values: FormValues) => {
-    updateMutation.mutate(values)
-  }
+    updateMutation.mutate(values);
+  };
 
   if (isLoading) {
     return (
@@ -138,7 +148,7 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
           <p className="text-muted-foreground">Yükleniyor...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !beneficiary) {
@@ -153,14 +163,16 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <XCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-red-900 mb-2">İhtiyaç Sahibi Bulunamadı</h3>
+                <h3 className="text-lg font-semibold text-red-900 mb-2">
+                  İhtiyaç Sahibi Bulunamadı
+                </h3>
                 <p className="text-red-700">Aradığınız kayıt sistemde mevcut değil.</p>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -170,12 +182,7 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
         <div className="max-w-[1600px] mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => router.back()} 
-                size="sm" 
-                className="gap-2"
-              >
+              <Button variant="ghost" onClick={() => router.back()} size="sm" className="gap-2">
                 <ArrowLeft className="h-4 w-4" />
                 Geri
               </Button>
@@ -186,33 +193,28 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                 </h1>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="gap-2 text-red-600 hover:bg-red-50"
                 onClick={() => deleteMutation.mutate()}
                 disabled={deleteMutation.isPending}
               >
                 <Trash2 className="h-4 w-4" />
-                {deleteMutation.isPending ? "Siliniyor..." : "Kaldır"}
+                {deleteMutation.isPending ? 'Siliniyor...' : 'Kaldır'}
               </Button>
-              <Button 
-                type="submit" 
-                size="sm" 
+              <Button
+                type="submit"
+                size="sm"
                 className="gap-2 bg-green-600 hover:bg-green-700"
                 disabled={isSubmitting || updateMutation.isPending}
               >
                 <Save className="h-4 w-4" />
-                {isSubmitting || updateMutation.isPending ? "Kaydediliyor..." : "Kaydet"}
+                {isSubmitting || updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="gap-2"
-                onClick={() => router.back()}
-              >
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => router.back()}>
                 <X className="h-4 w-4" />
                 Kapat
               </Button>
@@ -224,10 +226,8 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
       {/* Main Content */}
       <div className="max-w-[1600px] mx-auto px-6 py-6">
         <div className="grid grid-cols-12 gap-6">
-          
           {/* Left Column - Main Form */}
           <div className="col-span-9 space-y-6">
-            
             {/* Temel Bilgiler */}
             <Card>
               <CardHeader className="pb-3">
@@ -245,19 +245,13 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                   <div className="col-span-10 grid grid-cols-3 gap-4">
                     <div className="space-y-1.5 col-span-2">
                       <Label className="text-xs">İsim</Label>
-                      <Input 
-                        {...register("name")}
-                        className="h-9"
-                      />
+                      <Input {...register('name')} className="h-9" />
                       {errors.name && <p className="text-xs text-red-600">{errors.name.message}</p>}
                     </div>
 
                     <div className="space-y-1.5">
                       <Label className="text-xs">Uyruk</Label>
-                      <Input 
-                        {...register("nationality")}
-                        className="h-9"
-                      />
+                      <Input {...register('nationality')} className="h-9" />
                     </div>
                   </div>
                 </div>
@@ -274,26 +268,23 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                   <div className="space-y-1.5">
                     <Label className="text-xs">TC Kimlik No</Label>
                     <div className="flex gap-2">
-                      <Input 
-                        {...register("tc_no")}
-                        className="h-9"
-                      />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
+                      <Input {...register('tc_no')} className="h-9" />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         className="gap-1"
                         onClick={() => {
-                          const tc = getValues("tc_no") || ""
+                          const tc = getValues('tc_no') || '';
                           if (!tc) {
-                            toast.error("TC Kimlik No giriniz")
-                            return
+                            toast.error('TC Kimlik No giriniz');
+                            return;
                           }
-                          mernisMutation.mutate(tc)
+                          mernisMutation.mutate(tc);
                         }}
                         disabled={mernisMutation.isPending}
                       >
-                        {mernisMutation.isPending ? "Kontrol..." : "Mernis"}
+                        {mernisMutation.isPending ? 'Kontrol...' : 'Mernis'}
                       </Button>
                     </div>
                     {errors.tc_no && <p className="text-xs text-red-600">{errors.tc_no.message}</p>}
@@ -301,28 +292,18 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
 
                   <div className="space-y-1.5">
                     <Label className="text-xs">Telefon</Label>
-                    <Input 
-                      {...register("phone")}
-                      className="h-9"
-                    />
+                    <Input {...register('phone')} className="h-9" />
                   </div>
 
                   <div className="space-y-1.5">
                     <Label className="text-xs">E-posta</Label>
-                    <Input 
-                      type="email"
-                      {...register("email")}
-                      className="h-9"
-                    />
+                    <Input type="email" {...register('email')} className="h-9" />
                     {errors.email && <p className="text-xs text-red-600">{errors.email.message}</p>}
                   </div>
 
                   <div className="space-y-1.5">
                     <Label className="text-xs">Medeni Durum</Label>
-                    <Input 
-                      {...register("marital_status")}
-                      className="h-9"
-                    />
+                    <Input {...register('marital_status')} className="h-9" />
                   </div>
                 </div>
               </CardContent>
@@ -337,24 +318,15 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                 <div className="grid grid-cols-4 gap-4">
                   <div className="space-y-1.5">
                     <Label className="text-xs">Şehir/Bölge</Label>
-                    <Input 
-                      {...register("city")}
-                      className="h-9"
-                    />
+                    <Input {...register('city')} className="h-9" />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Yerleşim</Label>
-                    <Input 
-                      {...register("district")}
-                      className="h-9"
-                    />
+                    <Input {...register('district')} className="h-9" />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Mahalle/Köy</Label>
-                    <Input 
-                      {...register("neighborhood")}
-                      className="h-9"
-                    />
+                    <Input {...register('neighborhood')} className="h-9" />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Ailedeki Kişi Sayısı</Label>
@@ -362,7 +334,10 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                       control={control}
                       name="family_size"
                       render={({ field }) => (
-                        <Select value={(field.value ?? 1).toString()} onValueChange={(v) => field.onChange(Number(v))}>
+                        <Select
+                          value={(field.value ?? 1).toString()}
+                          onValueChange={(v) => field.onChange(Number(v))}
+                        >
                           <SelectTrigger className="h-9">
                             <SelectValue />
                           </SelectTrigger>
@@ -380,11 +355,7 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Adres</Label>
-                  <Textarea 
-                    {...register("address")}
-                    rows={3}
-                    className="resize-none text-sm"
-                  />
+                  <Textarea {...register('address')} rows={3} className="resize-none text-sm" />
                 </div>
               </CardContent>
             </Card>
@@ -402,22 +373,34 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                       control={control}
                       name="status"
                       render={({ field }) => (
-                        <RadioGroup value={field.value} onValueChange={field.onChange} className="flex gap-4">
+                        <RadioGroup
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="flex gap-4"
+                        >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="TASLAK" id="taslak" />
-                            <Label htmlFor="taslak" className="text-sm font-normal">Taslak</Label>
+                            <Label htmlFor="taslak" className="text-sm font-normal">
+                              Taslak
+                            </Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="AKTIF" id="aktif" />
-                            <Label htmlFor="aktif" className="text-sm font-normal">Aktif</Label>
+                            <Label htmlFor="aktif" className="text-sm font-normal">
+                              Aktif
+                            </Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="PASIF" id="pasif" />
-                            <Label htmlFor="pasif" className="text-sm font-normal">Pasif</Label>
+                            <Label htmlFor="pasif" className="text-sm font-normal">
+                              Pasif
+                            </Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="SILINDI" id="silindi" />
-                            <Label htmlFor="silindi" className="text-sm font-normal">Silindi</Label>
+                            <Label htmlFor="silindi" className="text-sm font-normal">
+                              Silindi
+                            </Label>
                           </div>
                         </RadioGroup>
                       )}
@@ -430,7 +413,7 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                       control={control}
                       name="approval_status"
                       render={({ field }) => (
-                        <Select value={field.value || "pending"} onValueChange={field.onChange}>
+                        <Select value={field.value || 'pending'} onValueChange={field.onChange}>
                           <SelectTrigger className="h-9 w-40">
                             <SelectValue />
                           </SelectTrigger>
@@ -469,7 +452,6 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                 </div>
               </CardContent>
             </Card>
-
           </div>
 
           {/* Right Column - Bağlantılı Kayıtlar */}
@@ -495,15 +477,16 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                     className="w-full justify-between h-9 px-3 hover:bg-gray-100"
                   >
                     <span className="text-sm">{item.label}</span>
-                    <Badge variant="secondary" className="text-xs">{item.count}</Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {item.count}
+                    </Badge>
                   </Button>
                 ))}
               </CardContent>
             </Card>
           </div>
-
         </div>
       </div>
     </form>
-  )
+  );
 }

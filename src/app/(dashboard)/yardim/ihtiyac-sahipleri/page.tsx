@@ -13,7 +13,7 @@ import api from '@/lib/api';
 import { exportBeneficiaries } from '@/lib/api/mock-api';
 import type { BeneficiaryDocument } from '@/types/collections';
 import { toast } from 'sonner';
-import { Eye, ArrowUpRight, Download, Plus } from 'lucide-react';
+import { ArrowUpRight, Download, Plus } from 'lucide-react';
 
 export default function BeneficiariesPage() {
   const router = useRouter();
@@ -77,9 +77,7 @@ export default function BeneficiariesPage() {
     {
       key: 'name',
       label: 'İsim',
-      render: (item) => (
-        <span className="font-medium text-foreground">{item.name || '-'}</span>
-      ),
+      render: (item) => <span className="font-medium text-foreground">{item.name || '-'}</span>,
     },
     {
       key: 'nationality',
@@ -113,9 +111,7 @@ export default function BeneficiariesPage() {
     {
       key: 'family_size',
       label: 'Aile Büyüklüğü',
-      render: (item) => (
-        <Badge variant="outline">{item.family_size ?? '-'}</Badge>
-      ),
+      render: (item) => <Badge variant="outline">{item.family_size ?? '-'}</Badge>,
     },
   ];
 
