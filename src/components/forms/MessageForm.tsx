@@ -99,7 +99,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('Mesaj oluşturulurken hata oluştu: ' + error.message);
+      toast.error(`Mesaj oluşturulurken hata oluştu: ${  error.message}`);
     },
   });
 
@@ -113,7 +113,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('Mesaj güncellenirken hata oluştu: ' + error.message);
+      toast.error(`Mesaj güncellenirken hata oluştu: ${  error.message}`);
     },
   });
 
@@ -126,7 +126,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('Mesaj gönderilirken hata oluştu: ' + error.message);
+      toast.error(`Mesaj gönderilirken hata oluştu: ${  error.message}`);
     },
   });
 

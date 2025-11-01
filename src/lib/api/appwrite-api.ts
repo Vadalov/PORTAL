@@ -667,7 +667,7 @@ async getMetrics(): Promise<AppwriteResponse<any>> {
       const metrics = {
         totalBeneficiaries: beneficiariesResponse.total,
         totalDonations: donationsResponse.total,
-        totalDonationAmount: totalDonationAmount,
+        totalDonationAmount,
         activeUsers: usersResponse.total
       };
 

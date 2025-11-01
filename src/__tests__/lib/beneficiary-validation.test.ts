@@ -146,7 +146,7 @@ describe('Beneficiary Validation Schema', () => {
         firstName: 'Ahmet',
         lastName: 'Yılmaz',
         nationality: 'Türkiye',
-        birthDate: birthDate,
+        birthDate,
         maritalStatus: MaritalStatus.EVLI, // Under 18 cannot be married
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
         fundRegion: FundRegion.SERBEST,

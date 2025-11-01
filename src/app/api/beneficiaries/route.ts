@@ -138,7 +138,7 @@ async function getBeneficiariesHandler(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: beneficiaries,
-      total: total,
+      total,
       message: `${total} kayıt bulundu`,
     });
   } catch (error: unknown) {
@@ -212,7 +212,7 @@ async function createBeneficiaryHandler(request: NextRequest) {
     logger.error('Beneficiary creation error', error, {
       endpoint: '/api/beneficiaries',
       method: 'POST',
-      tcNo: body?.tc_no?.substring(0, 3) + '***' // Mask TC number for privacy
+      tcNo: `${body?.tc_no?.substring(0, 3)  }***` // Mask TC number for privacy
     });
 
     // Handle duplicate TC number

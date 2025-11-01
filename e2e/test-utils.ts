@@ -1,5 +1,4 @@
 import { Page } from '@playwright/test';
-import { chromium, Browser, BrowserContext } from '@playwright/test';
 
 // Enhanced configuration for test stability
 export const TEST_CONFIG = {
@@ -40,7 +39,7 @@ export async function waitForElement(
     try {
       await page.waitForSelector(selector, { timeout: timeout / attempt });
       return true;
-    } catch (error) {
+    } catch (_error) {
       if (attempt === TEST_CONFIG.RETRY_ATTEMPTS) {
         console.warn(`Element ${selector} not found after ${TEST_CONFIG.RETRY_ATTEMPTS} attempts`);
         return false;
@@ -60,7 +59,7 @@ export async function waitForNetworkIdle(
     try {
       await page.waitForLoadState('networkidle', { timeout });
       return;
-    } catch (error) {
+    } catch (_error) {
       if (attempt === 2) {
         console.warn('Network idle timeout, proceeding anyway');
         return;
@@ -75,21 +74,24 @@ export async function safeClick(page: Page, selectors: string[]): Promise<boolea
   for (const selector of selectors) {
     try {
       const element = page.locator(selector).first();
-      
+
       // Wait for element to be visible and stable
       await element.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
-      
+
       // Check if element is actually visible and enabled
-      if (await element.isVisible() && !await element.isDisabled()) {
+      if ((await element.isVisible()) && !(await element.isDisabled())) {
         // Scroll into view to ensure it's clickable
         await element.scrollIntoViewIfNeeded();
         await page.waitForTimeout(100);
-        
+
         await element.click();
         return true;
       }
     } catch (error) {
-      console.warn(`Failed to click ${selector}:`, error instanceof Error ? error.message : String(error));
+      console.warn(
+        `Failed to click ${selector}:`,
+        error instanceof Error ? error.message : String(error)
+      );
       continue;
     }
   }
@@ -101,18 +103,18 @@ export async function safeFill(page: Page, selectors: string[], text: string): P
   for (const selector of selectors) {
     try {
       const element = page.locator(selector).first();
-      
+
       // Wait for element to be visible
       await element.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
-      
-      if (await element.isVisible() && !await element.isDisabled()) {
+
+      if ((await element.isVisible()) && !(await element.isDisabled())) {
         // Clear existing content first
         await element.clear();
         await page.waitForTimeout(200);
-        
+
         // Fill with text
         await element.fill(text);
-        
+
         // Verify the value was set
         const actualValue = await element.inputValue();
         if (actualValue === text || actualValue.includes(text)) {
@@ -120,7 +122,10 @@ export async function safeFill(page: Page, selectors: string[], text: string): P
         }
       }
     } catch (error) {
-      console.warn(`Failed to fill ${selector}:`, error instanceof Error ? error.message : String(error));
+      console.warn(
+        `Failed to fill ${selector}:`,
+        error instanceof Error ? error.message : String(error)
+      );
       continue;
     }
   }
@@ -136,18 +141,18 @@ export async function safeSelect(
   for (const selector of selectors) {
     try {
       const element = page.locator(selector).first();
-      
+
       await element.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
-      
-      if (await element.isVisible() && !await element.isDisabled()) {
+
+      if ((await element.isVisible()) && !(await element.isDisabled())) {
         // Click to open dropdown
         await element.click();
         await page.waitForTimeout(500);
-        
+
         // Find and click option
         const option = page.locator(`text=/${optionText}/i`).first();
         await option.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
-        
+
         if (await option.isVisible()) {
           await option.click();
           await page.waitForTimeout(300);
@@ -155,7 +160,10 @@ export async function safeSelect(
         }
       }
     } catch (error) {
-      console.warn(`Failed to select ${optionText} from ${selector}:`, error instanceof Error ? error.message : String(error));
+      console.warn(
+        `Failed to select ${optionText} from ${selector}:`,
+        error instanceof Error ? error.message : String(error)
+      );
       continue;
     }
   }
@@ -251,7 +259,7 @@ export class TestDataManager {
 
       await nameField.clear();
       await nameField.fill(userData.name);
-      
+
       await emailField.clear();
       await emailField.fill(userData.email);
 
@@ -273,32 +281,40 @@ export class TestDataManager {
       }
 
       // Enhanced submit
-      const submitButton = page.locator('button[type="submit"], button:has-text(/Kaydet|Save/i)').first();
+      const submitButton = page
+        .locator('button[type="submit"], button:has-text(/Kaydet|Save/i)')
+        .first();
       await submitButton.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
       await submitButton.click();
 
       // Wait for success feedback
       await page.waitForTimeout(2000);
-      
+
       // Check for success toast or confirmation
       const successIndicators = [
         'text=/başarıyla|success|created/i',
         '[role="alert"]:has-text(/başarı/i)',
         '.toast-success',
       ];
-      
+
       for (const indicator of successIndicators) {
-        if (await page.locator(indicator).isVisible({ timeout: 1000 }).catch(() => false)) {
+        if (
+          await page
+            .locator(indicator)
+            .isVisible({ timeout: 1000 })
+            .catch(() => false)
+        ) {
           break;
         }
       }
 
       this.createdUsers.push(userData.email);
       return userData.email;
-
     } catch (error) {
       console.error('Failed to create test user:', error);
-      throw new Error(`User creation failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `User creation failed: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 
@@ -327,7 +343,7 @@ export class TestDataManager {
       ];
 
       const userRow = page.locator(userRowSelectors.join(', ')).first();
-      
+
       if (await userRow.isVisible({ timeout: TEST_CONFIG.SHORT_TIMEOUT })) {
         // Enhanced delete button detection
         const deleteButtonSelectors = [
@@ -376,7 +392,7 @@ export class TestDataManager {
   getUniqueTestData() {
     const timestamp = Date.now();
     const shortTimestamp = timestamp.toString().slice(-6);
-    
+
     return {
       user: {
         name: `Test User ${shortTimestamp}`,
@@ -405,29 +421,29 @@ export class TestDataManager {
 export async function getCSRFToken(page: Page): Promise<string> {
   try {
     const response = await page.request.get('/api/csrf');
-    
+
     // Check if response is OK
     if (!response.ok()) {
       // If CSRF endpoint doesn't exist, generate a mock token for testing
       console.warn(`CSRF endpoint returned ${response.status()}, generating mock token`);
       return generateMockCSRFToken();
     }
-    
+
     // Try to parse JSON response
     let data;
     try {
       data = await response.json();
-    } catch (jsonError) {
+    } catch (_jsonError) {
       // Response is not JSON, might be HTML error page
       console.warn('CSRF response is not JSON, generating mock token');
       return generateMockCSRFToken();
     }
-    
+
     if (!data.token) {
       console.warn('CSRF token not found in response, generating mock token');
       return generateMockCSRFToken();
     }
-    
+
     return data.token;
   } catch (error) {
     console.warn('Failed to get CSRF token, generating mock token:', error);
@@ -444,86 +460,86 @@ function generateMockCSRFToken(): string {
 export async function loginAsAdmin(page: Page): Promise<void> {
   await page.goto('/login');
   await waitForNetworkIdle(page);
-  
+
   const csrfToken = await getCSRFToken(page);
-  
+
   // Fill form fields
   const emailField = page.locator('input[type="email"], input[name="email"]').first();
   const passwordField = page.locator('input[type="password"], input[name="password"]').first();
-  
+
   await emailField.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
   await passwordField.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
-  
+
   await emailField.fill('admin@test.com');
   await passwordField.fill('admin123');
-  
+
   // Submit with enhanced error handling
   try {
     const response = await page.request.post('/api/auth/login', {
       data: {
         email: 'admin@test.com',
         password: 'admin123',
-        rememberMe: false
+        rememberMe: false,
       },
       headers: {
         'x-csrf-token': csrfToken,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     if (!response.ok()) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(`Login failed: ${response.status()} - ${errorData.error || 'Unknown error'}`);
     }
-    
+
     // Wait for redirect with timeout
     await page.waitForURL('/genel', { timeout: TEST_CONFIG.LONG_TIMEOUT });
-    
+
     // Verify successful login
     await waitForElement(page, 'text=/Hoş geldiniz|Dashboard|Genel/i', TEST_CONFIG.SHORT_TIMEOUT);
-    
   } catch (error) {
     console.error('Login attempt failed:', error);
-    throw new Error(`Admin login failed: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Admin login failed: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 
 export async function loginAsUser(page: Page, email: string, password: string): Promise<void> {
   await page.goto('/login');
   await waitForNetworkIdle(page);
-  
+
   const csrfToken = await getCSRFToken(page);
-  
+
   const emailField = page.locator('input[type="email"], input[name="email"]').first();
   const passwordField = page.locator('input[type="password"], input[name="password"]').first();
-  
+
   await emailField.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
   await passwordField.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
-  
+
   await emailField.fill(email);
   await passwordField.fill(password);
-  
+
   try {
     const response = await page.request.post('/api/auth/login', {
       data: {
         email,
         password,
-        rememberMe: false
+        rememberMe: false,
       },
       headers: {
         'x-csrf-token': csrfToken,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     if (!response.ok()) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(`Login failed: ${response.status()} - ${errorData.error || 'Unknown error'}`);
     }
-    
+
     await page.waitForURL('/genel', { timeout: TEST_CONFIG.LONG_TIMEOUT });
     await waitForElement(page, 'text=/Hoş geldiniz|Dashboard|Genel/i', TEST_CONFIG.SHORT_TIMEOUT);
-    
   } catch (error) {
     console.error('User login failed:', error);
     throw new Error(`User login failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -534,25 +550,24 @@ export async function loginAsUser(page: Page, email: string, password: string): 
 export async function logout(page: Page): Promise<void> {
   try {
     const csrfToken = await getCSRFToken(page);
-    
+
     const response = await page.request.post('/api/auth/logout', {
       headers: {
         'x-csrf-token': csrfToken,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     if (!response.ok()) {
       console.warn('Logout request failed, proceeding with navigation');
     }
-    
+
     // Clear any stored session data
     await page.context().clearCookies();
-    
+
     // Navigate to login
     await page.goto('/login');
     await waitForElement(page, 'input[type="email"]', TEST_CONFIG.SHORT_TIMEOUT);
-    
   } catch (error) {
     console.error('Logout failed:', error);
     // Force navigation to login even if logout fails
@@ -576,25 +591,25 @@ export async function authenticatedRequest(
   page: Page,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   url: string,
-  data?: any,
+  data?: Record<string, unknown>,
   retries: number = 2
-): Promise<any> {
+): Promise<unknown> {
   for (let attempt = 1; attempt <= retries + 1; attempt++) {
     try {
       // Get CSRF token
       const csrfToken = await getCSRFToken(page);
-      
-      const requestOptions: any = {
+
+      const requestOptions: Record<string, unknown> = {
         headers: {
           'x-csrf-token': csrfToken,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       };
-      
+
       if (data && ['POST', 'PUT', 'DELETE'].includes(method)) {
         requestOptions.data = data;
       }
-      
+
       let response;
       switch (method) {
         case 'GET':
@@ -612,24 +627,25 @@ export async function authenticatedRequest(
         default:
           throw new Error(`Unsupported HTTP method: ${method}`);
       }
-      
+
       // Check if response is successful
       if (response.ok()) {
         return response;
       }
-      
+
       // If it's a server error and we have retries left, wait and retry
       if (response.status() >= 500 && attempt <= retries) {
         await page.waitForTimeout(1000 * attempt);
         continue;
       }
-      
+
       // Return failed response for handling by caller
       return response;
-      
     } catch (error) {
       if (attempt === retries + 1) {
-        throw new Error(`Request failed after ${retries + 1} attempts: ${error instanceof Error ? error.message : String(error)}`);
+        throw new Error(
+          `Request failed after ${retries + 1} attempts: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
       await page.waitForTimeout(1000 * attempt);
     }
@@ -637,7 +653,11 @@ export async function authenticatedRequest(
 }
 
 // Enhanced wait helpers with better error handling
-export async function waitForToast(page: Page, message?: string, timeout: number = 5000): Promise<void> {
+export async function waitForToast(
+  page: Page,
+  message?: string,
+  timeout: number = 5000
+): Promise<void> {
   if (message) {
     const toastSelector = `text=/${message}/i`;
     await page.waitForSelector(toastSelector, { timeout });
@@ -649,7 +669,7 @@ export async function waitForToast(page: Page, message?: string, timeout: number
       '.alert',
       'text=/başarı|success|error|hata/i',
     ];
-    
+
     for (const selector of toastSelectors) {
       try {
         await page.waitForSelector(selector, { timeout: 1000 });
@@ -658,7 +678,7 @@ export async function waitForToast(page: Page, message?: string, timeout: number
         continue;
       }
     }
-    
+
     // Fallback generic wait
     await page.waitForTimeout(2000);
   }
@@ -673,15 +693,15 @@ export async function fillFormField(page: Page, fieldName: string, value: string
     `[data-testid="${fieldName}"]`,
     `#${fieldName}`,
   ];
-  
+
   const field = page.locator(fieldSelectors.join(', ')).first();
   await field.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
-  
+
   // Clear and fill
   await field.clear();
   await page.waitForTimeout(200);
   await field.fill(value);
-  
+
   // Verify the value was set
   const actualValue = await field.inputValue();
   if (actualValue !== value) {
@@ -704,31 +724,50 @@ export async function selectDropdownOption(
 }
 
 // Enhanced assertion helpers
-export async function expectElementToBeVisible(page: Page, selector: string, timeout: number = TEST_CONFIG.DEFAULT_TIMEOUT): Promise<void> {
+export async function expectElementToBeVisible(
+  page: Page,
+  selector: string,
+  timeout: number = TEST_CONFIG.DEFAULT_TIMEOUT
+): Promise<void> {
   const element = page.locator(selector).first();
   await element.waitFor({ state: 'visible', timeout });
 }
 
-export async function expectElementToNotBeVisible(page: Page, selector: string, timeout: number = TEST_CONFIG.DEFAULT_TIMEOUT): Promise<void> {
+export async function expectElementToNotBeVisible(
+  page: Page,
+  selector: string,
+  timeout: number = TEST_CONFIG.DEFAULT_TIMEOUT
+): Promise<void> {
   const element = page.locator(selector).first();
   await element.waitFor({ state: 'hidden', timeout });
 }
 
 // Enhanced URL validation
-export async function expectURLToMatch(page: Page, pattern: string | RegExp, timeout: number = TEST_CONFIG.DEFAULT_TIMEOUT): Promise<void> {
+export async function expectURLToMatch(
+  page: Page,
+  pattern: string | RegExp,
+  timeout: number = TEST_CONFIG.DEFAULT_TIMEOUT
+): Promise<void> {
   await page.waitForURL(pattern, { timeout });
 }
 
 // Enhanced text content validation
-export async function expectTextToBeVisible(page: Page, text: string, timeout: number = TEST_CONFIG.SHORT_TIMEOUT): Promise<void> {
+export async function expectTextToBeVisible(
+  page: Page,
+  text: string,
+  timeout: number = TEST_CONFIG.SHORT_TIMEOUT
+): Promise<void> {
   await page.waitForSelector(`text=/${text}/i`, { timeout });
 }
 
 // Enhanced loading state detection
-export async function waitForLoadingToComplete(page: Page, timeout: number = TEST_CONFIG.LONG_TIMEOUT): Promise<void> {
+export async function waitForLoadingToComplete(
+  page: Page,
+  timeout: number = TEST_CONFIG.LONG_TIMEOUT
+): Promise<void> {
   // Wait for network to be idle
   await waitForNetworkIdle(page, timeout);
-  
+
   // Wait for any loading spinners to disappear
   const loadingSelectors = [
     '[data-testid="loading"]',
@@ -736,10 +775,13 @@ export async function waitForLoadingToComplete(page: Page, timeout: number = TES
     '.spinner',
     '[aria-busy="true"]',
   ];
-  
+
   for (const selector of loadingSelectors) {
     try {
-      await page.waitForSelector(`${selector}[style*="display: none"], ${selector}:not([aria-busy="true"])`, { timeout: 2000 });
+      await page.waitForSelector(
+        `${selector}[style*="display: none"], ${selector}:not([aria-busy="true"])`,
+        { timeout: 2000 }
+      );
     } catch {
       // Continue if this loading indicator doesn't exist
       continue;

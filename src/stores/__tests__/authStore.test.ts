@@ -168,7 +168,7 @@ describe('AuthStore', () => {
           await act(async () => {
             await result.current.login('wrong@email.com', 'wrongpass')
           })
-        } catch (error) {
+        } catch (_error) {
           // Expected error
         }
       }

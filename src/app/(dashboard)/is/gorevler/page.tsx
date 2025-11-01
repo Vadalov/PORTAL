@@ -21,7 +21,6 @@ import {
   Edit,
   Trash2,
   CheckSquare,
-  Square,
   Play,
   CheckCircle,
   XCircle
@@ -103,7 +102,7 @@ export default function TasksPage() {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
     },
     onError: (error: any) => {
-      toast.error('Görev durumu güncellenirken hata oluştu: ' + error.message);
+      toast.error(`Görev durumu güncellenirken hata oluştu: ${  error.message}`);
     },
   });
 
@@ -116,7 +115,7 @@ export default function TasksPage() {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
     },
     onError: (error: any) => {
-      toast.error('Görev silinirken hata oluştu: ' + error.message);
+      toast.error(`Görev silinirken hata oluştu: ${  error.message}`);
     },
   });
 

@@ -191,7 +191,7 @@ describe('Sanitization Library', () => {
     });
 
     it('should limit length to 255 characters', () => {
-      const input = 'a'.repeat(300) + '.txt';
+      const input = `${'a'.repeat(300)  }.txt`;
       const output = sanitizeFilename(input);
       expect(output.length).toBeLessThanOrEqual(255);
     });

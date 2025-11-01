@@ -47,6 +47,19 @@ const eslintConfig = defineConfig([
     },
   },
   
+  // Scripts and tools için özel kurallar
+  {
+    files: ['scripts/**/*.ts', 'scripts/**/*.js', 'scripts/**/*.mts', 'src/scripts/**/*.ts', 'src/scripts/**/*.js'],
+    rules: {
+      // Scripts'te console kullanımına izin ver (debugging/diagnostic scripts)
+      'no-console': 'off',
+      // Scripts'te any kullanımına daha toleranslı ol
+      '@typescript-eslint/no-explicit-any': 'warn',
+      // Unused vars için daha toleranslı ol
+      '@typescript-eslint/no-unused-vars': 'warn',
+    },
+  },
+  
   // Override default ignores
   globalIgnores([
     '.next/**',

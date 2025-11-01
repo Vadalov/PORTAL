@@ -76,7 +76,7 @@ async function runTests() {
   }
 
   // Sonuçları yazdır
-  console.log('\n' + '='.repeat(60));
+  console.log(`\n${  '='.repeat(60)}`);
   console.log('\n📊 TEST SONUÇLARI\n');
 
   const passed = results.filter(r => r.status === 'PASS').length;
@@ -91,7 +91,7 @@ async function runTests() {
     }
   });
 
-  console.log('\n' + '='.repeat(60));
+  console.log(`\n${  '='.repeat(60)}`);
   console.log(`\n📈 Özet:`);
   console.log(`   ✅ Başarılı: ${passed}`);
   console.log(`   ⚠️  Uyarı: ${warnings}`);

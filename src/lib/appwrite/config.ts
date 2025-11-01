@@ -228,7 +228,7 @@ export function getConfigStatus() {
   
   return {
     isValid: report.summary.errors === 0,
-    warnings: warnings,
+    warnings,
     errors: report.results.filter(r => r.severity === ValidationSeverity.ERROR).map(r => r.message),
     suggestions: report.results.filter(r => r.suggestion).map(r => ({ variable: r.variable, suggestion: r.suggestion })),
     timestamp: report.timestamp,

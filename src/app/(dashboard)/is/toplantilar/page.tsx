@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Calendar as CalendarIcon, List, Search, Filter, X, Edit, Trash2, Users, MapPin } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, List, Filter, X, Edit, Trash2, Users, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -40,7 +40,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { DatePicker } from '@/components/ui/date-picker';
 
 import { appwriteApi } from '@/lib/api/appwrite-api';
 import { useAuthStore } from '@/stores/authStore';
@@ -58,7 +57,7 @@ export default function MeetingsPage() {
 
   // Search and filter state
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const [_page, _setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('all');
   const [meetingTypeFilter, setMeetingTypeFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
@@ -74,11 +73,11 @@ export default function MeetingsPage() {
   const limit = 20;
 
   // Fetch meetings for list view
-  const { data: meetingsResponse, isLoading: isLoadingMeetings } = useQuery({
-    queryKey: ['meetings', page, search, statusFilter, meetingTypeFilter, dateFrom, dateTo],
+  const { data: _meetingsResponse, isLoading: _isLoadingMeetings } = useQuery({
+    queryKey: ['meetings', _page, search, statusFilter, meetingTypeFilter, dateFrom, dateTo],
     queryFn: () =>
       appwriteApi.meetings.getMeetings({
-        page,
+        page: _page,
         limit,
         search,
         filters: {
@@ -138,11 +137,11 @@ export default function MeetingsPage() {
     },
   });
 
-  const meetings = meetingsResponse?.data || [];
+  const _meetings = _meetingsResponse?.data || [];
   const calendarMeetings = calendarMeetingsResponse?.data || [];
   const tabMeetings = tabMeetingsResponse?.data || [];
-  const total = meetingsResponse?.total || 0;
-  const totalPages = Math.ceil(total / limit);
+  const total = _meetingsResponse?.total || 0;
+  const _totalPages = Math.ceil(total / limit);
 
   // Delete mutation
   const deleteMutation = useMutation({

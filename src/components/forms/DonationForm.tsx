@@ -69,7 +69,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('Bağış kaydedilirken hata oluştu: ' + error.message);
+      toast.error(`Bağış kaydedilirken hata oluştu: ${  error.message}`);
     },
   });
 

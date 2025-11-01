@@ -79,7 +79,7 @@ export function BeneficiaryForm({ onSuccess, onCancel }: BeneficiaryFormProps) {
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('İhtiyaç sahibi eklenirken hata oluştu: ' + error.message);
+      toast.error(`İhtiyaç sahibi eklenirken hata oluştu: ${  error.message}`);
     },
   });
 

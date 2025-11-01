@@ -107,7 +107,7 @@ export default function YetimPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [selectedOrphan, setSelectedOrphan] = useState<OrphanAssistance | null>(null);
+  const [selectedOrphan, _setSelectedOrphan] = useState<OrphanAssistance | null>(null);
   const [newOrphan, setNewOrphan] = useState({
     studentName: '',
     orphanType: 'FULL_ORPHAN',
@@ -122,11 +122,7 @@ export default function YetimPage() {
     notes: ''
   });
 
-  useEffect(() => {
-    filterData();
-  }, [searchTerm, statusFilter, typeFilter, orphanData]);
-
-  const filterData = () => {
+  const filterData = React.useCallback(() => {
     let filtered = [...orphanData];
 
     if (searchTerm) {
@@ -146,7 +142,11 @@ export default function YetimPage() {
     }
 
     setFilteredData(filtered);
-  };
+  }, [searchTerm, statusFilter, typeFilter, orphanData]);
+
+  useEffect(() => {
+    filterData();
+  }, [filterData]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
@@ -200,7 +200,7 @@ export default function YetimPage() {
   const formatCurrency = (amount: number, currency: string = 'TRY') => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
-      currency: currency,
+      currency,
       minimumFractionDigits: 0
     }).format(amount);
   };
@@ -213,9 +213,10 @@ export default function YetimPage() {
       }
 
       // Mock create - in real implementation, this would call an API
+      const now = Date.now();
       const mockOrphan: OrphanAssistance = {
-        id: `orphan-${Date.now()}`,
-        studentId: `student-${Date.now()}`,
+        id: `orphan-${now}`,
+        studentId: `student-${now}`,
         orphanType: newOrphan.orphanType,
         guardianName: newOrphan.guardianName,
         guardianPhone: newOrphan.guardianPhone,
@@ -227,7 +228,7 @@ export default function YetimPage() {
         endDate: newOrphan.endDate || undefined,
         status: 'ACTIVE',
         caseManager: newOrphan.caseManager || 'current-user',
-        nextCheckupDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        nextCheckupDate: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         notes: newOrphan.notes,
         studentName: newOrphan.studentName
       };

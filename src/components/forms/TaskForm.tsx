@@ -79,7 +79,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('Görev oluşturulurken hata oluştu: ' + error.message);
+      toast.error(`Görev oluşturulurken hata oluştu: ${  error.message}`);
     },
   });
 
@@ -93,7 +93,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('Görev güncellenirken hata oluştu: ' + error.message);
+      toast.error(`Görev güncellenirken hata oluştu: ${  error.message}`);
     },
   });
 

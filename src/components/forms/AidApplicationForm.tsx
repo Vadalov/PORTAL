@@ -86,7 +86,7 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('Başvuru oluşturulurken hata oluştu: ' + error.message);
+      toast.error(`Başvuru oluşturulurken hata oluştu: ${  error.message}`);
     },
   });
 
