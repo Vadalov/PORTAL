@@ -103,6 +103,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Verify package-lock.json is in sync
+        run: |
+          echo "::notice::Verifying package.json and package-lock.json are in sync..."
+          if ! npm ci --dry-run > /dev/null 2>&1; then
+            echo "::error::package.json and package-lock.json are out of sync!"
+            echo "::error::Please run 'npm install' locally and commit the updated package-lock.json"
+            exit 1
+          fi
+          echo "::notice::✅ package.json and package-lock.json are in sync"
+
       - name: Check package.json changes
         id: package-check
         run: |
