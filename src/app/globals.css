@@ -126,51 +126,73 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.5rem;
 
-  /* Base Colors */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: var(--brand-primary);
+  /* ========================================
+     PREMIUM CORPORATE COLOR PALETTE
+     Modern, professional gray-based design
+     ======================================== */
+
+  /* Base Colors - Premium Slate Palette */
+  --background: #f8fafc; /* slate-50 - soft, professional background */
+  --foreground: #0f172a; /* slate-900 - deep readable text */
+
+  /* Cards - Clean white with subtle elevation */
+  --card: #ffffff; /* Pure white - premium feel */
+  --card-foreground: #0f172a; /* slate-900 */
+
+  /* Popover/Dropdown */
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  /* Primary - Professional Slate */
+  --primary: #475569; /* slate-600 - sophisticated, not too bold */
   --primary-foreground: #ffffff;
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
 
-  /* Chart Colors */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  /* Secondary - Lighter slate for backgrounds */
+  --secondary: #f1f5f9; /* slate-100 */
+  --secondary-foreground: #334155; /* slate-700 */
 
-  /* Sidebar Colors */
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: var(--brand-primary);
+  /* Muted - Subtle backgrounds */
+  --muted: #f1f5f9; /* slate-100 */
+  --muted-foreground: #64748b; /* slate-500 */
+
+  /* Accent - Highlight color */
+  --accent: #e2e8f0; /* slate-200 */
+  --accent-foreground: #1e293b; /* slate-800 */
+
+  /* Destructive - Professional red */
+  --destructive: #dc2626; /* red-600 */
+  --destructive-foreground: #ffffff;
+
+  /* Borders - Subtle but visible */
+  --border: #e2e8f0; /* slate-200 */
+  --input: #cbd5e1; /* slate-300 */
+  --ring: #94a3b8; /* slate-400 */
+
+  /* Chart Colors - Professional palette */
+  --chart-1: #3b82f6; /* blue-500 */
+  --chart-2: #10b981; /* emerald-500 */
+  --chart-3: #f59e0b; /* amber-500 */
+  --chart-4: #8b5cf6; /* violet-500 */
+  --chart-5: #ec4899; /* pink-500 */
+
+  /* Sidebar Colors - Premium Dark Sidebar */
+  --sidebar: #1e293b; /* slate-800 - professional dark sidebar */
+  --sidebar-foreground: #f1f5f9; /* slate-100 - light text */
+  --sidebar-primary: #3b82f6; /* blue-500 - accent color */
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: #334155; /* slate-700 - hover state */
+  --sidebar-accent-foreground: #f8fafc; /* slate-50 */
+  --sidebar-border: #334155; /* slate-700 - subtle borders */
+  --sidebar-ring: #475569; /* slate-600 */
 
-  /* Brand Colors - Kurumsal Mavi #1358B8 */
-  --brand-primary: #1358B8;  /* Kurumsal Mavi */
-  --brand-primary-light: #4A8FFF;  /* Açık Mavi */
-  --brand-primary-dark: #0B3D7D;  /* Koyu Mavi */
-  --brand-secondary: #10B981;  /* Yeşil */
-  --brand-accent: #F59E0B;  /* Turuncu */
+  /* Brand Colors - Premium Corporate Blue */
+  --brand-primary: #3b82f6;  /* blue-500 - Modern, professional */
+  --brand-primary-light: #60a5fa;  /* blue-400 */
+  --brand-primary-dark: #2563eb;  /* blue-600 */
+  --brand-secondary: #10b981;  /* emerald-500 - Success green */
+  --brand-accent: #f59e0b;  /* amber-500 - Attention orange */
 
   /* Semantic Colors - Success */
   --success: oklch(0.60 0.17 145);
@@ -198,49 +220,70 @@
 }
 
 .dark {
+  /* ========================================
+     DARK MODE - PREMIUM CORPORATE
+     ======================================== */
+
   /* Base Colors */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: var(--brand-primary);
-  --primary-foreground: #0b1f33;
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --background: #0f172a; /* slate-900 - deep professional dark */
+  --foreground: #f1f5f9; /* slate-100 - soft white text */
 
-  /* Chart Colors */
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  /* Cards - Slightly lighter than background */
+  --card: #1e293b; /* slate-800 */
+  --card-foreground: #f1f5f9; /* slate-100 */
 
-  /* Sidebar Colors */
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: var(--brand-primary);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Popover/Dropdown */
+  --popover: #1e293b; /* slate-800 */
+  --popover-foreground: #f1f5f9; /* slate-100 */
+
+  /* Primary - Brighter in dark mode */
+  --primary: #60a5fa; /* blue-400 - more vibrant */
+  --primary-foreground: #0f172a; /* slate-900 */
+
+  /* Secondary */
+  --secondary: #334155; /* slate-700 */
+  --secondary-foreground: #f1f5f9; /* slate-100 */
+
+  /* Muted */
+  --muted: #334155; /* slate-700 */
+  --muted-foreground: #94a3b8; /* slate-400 */
+
+  /* Accent */
+  --accent: #334155; /* slate-700 */
+  --accent-foreground: #f1f5f9; /* slate-100 */
+
+  /* Destructive */
+  --destructive: #ef4444; /* red-500 - brighter in dark */
+  --destructive-foreground: #ffffff;
+
+  /* Borders */
+  --border: #334155; /* slate-700 - subtle but visible */
+  --input: #475569; /* slate-600 */
+  --ring: #64748b; /* slate-500 */
+
+  /* Chart Colors - Vibrant for dark mode */
+  --chart-1: #60a5fa; /* blue-400 */
+  --chart-2: #34d399; /* emerald-400 */
+  --chart-3: #fbbf24; /* amber-400 */
+  --chart-4: #a78bfa; /* violet-400 */
+  --chart-5: #f472b6; /* pink-400 */
+
+  /* Sidebar Colors - Even darker */
+  --sidebar: #0f172a; /* slate-900 - deepest dark */
+  --sidebar-foreground: #cbd5e1; /* slate-300 */
+  --sidebar-primary: #60a5fa; /* blue-400 */
+  --sidebar-primary-foreground: #0f172a; /* slate-900 */
+  --sidebar-accent: #1e293b; /* slate-800 - hover */
+  --sidebar-accent-foreground: #f1f5f9; /* slate-100 */
+  --sidebar-border: #334155; /* slate-700 */
+  --sidebar-ring: #475569; /* slate-600 */
 
   /* Brand Colors - Dark Mode Adjustments */
-  --brand-primary: #1A6DD0;  /* Biraz açık mavi (dark mode için) */
-  --brand-primary-light: #7CB3FF;  /* Daha açık */
-  --brand-primary-dark: #0F4A9A;  /* Koyu */
-  --brand-secondary: #34D399;  /* Yeşil (açık) */
-  --brand-accent: #FBBF24;  /* Turuncu (açık) */
+  --brand-primary: #60a5fa;  /* blue-400 - brighter */
+  --brand-primary-light: #93c5fd;  /* blue-300 */
+  --brand-primary-dark: #3b82f6;  /* blue-500 */
+  --brand-secondary: #34d399;  /* emerald-400 */
+  --brand-accent: #fbbf24;  /* amber-400 */
 
   /* Semantic Colors - Success - Dark Mode */
   --success: oklch(0.50 0.19 145);
@@ -547,6 +590,23 @@
 
   .shadow-glow-success {
     box-shadow: var(--shadow-glow-success);
+  }
+
+  /* Enhanced Card Shadows - Premium Style */
+  .shadow-card {
+    box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.04), 0 1px 2px -1px rgb(15 23 42 / 0.04);
+  }
+
+  .shadow-card-hover {
+    box-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.08);
+    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .shadow-card-premium {
+    box-shadow:
+      0 0 0 1px rgb(226 232 240 / 0.8),
+      0 2px 4px -2px rgb(15 23 42 / 0.06),
+      0 4px 8px -2px rgb(15 23 42 / 0.04);
   }
 
   /* Animation Utilities */

@@ -152,8 +152,17 @@ export function BeneficiaryQuickAddModal({
     onOpenChange(false)
   }
 
+  const handleOpenChange = (open: boolean) => {
+    // Only close if form is not submitting and no validation errors
+    if (!open && !isLoading && !form.formState.isSubmitting) {
+      handleClose()
+    } else if (open) {
+      onOpenChange(true)
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">

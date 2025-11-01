@@ -20,7 +20,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
     switch (variant) {
       case 'dots':
         return (
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <pattern
                 id={uniqueId}
@@ -45,7 +45,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
 
       case 'grid':
         return (
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <pattern
                 id={uniqueId}
@@ -70,7 +70,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
 
       case 'waves':
         return (
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <pattern
                 id={uniqueId}
@@ -102,7 +102,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
 
       case 'circuit':
         return (
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <pattern
                 id={uniqueId}
@@ -216,7 +216,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
 
       case 'topography':
         return (
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <pattern
                 id={uniqueId}
@@ -272,6 +272,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
         'absolute inset-0 pointer-events-none overflow-hidden z-0',
         className
       )}
+      aria-hidden="true"
     >
       {renderPattern()}
     </div>

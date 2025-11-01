@@ -1,146 +1,114 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { InputSanitizer, AuditLogger, PasswordSecurity } from '@/lib/security';
-import { authRateLimit } from '@/lib/rate-limit';
+import { serverAccount, ensureServerInitialized } from '@/lib/appwrite/server';
+import { generateCsrfToken } from '@/lib/csrf';
+import { cookies } from 'next/headers';
+import { UserRole, ROLE_PERMISSIONS } from '@/types/auth';
 
-async function loginHandler(req: NextRequest): Promise<NextResponse> {
+/**
+ * POST /api/auth/login
+ * Handle user login with Appwrite authentication
+ */
+export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    // Ensure server is initialized
+    ensureServerInitialized();
 
-    // Sanitize inputs
-    const sanitizedEmail = InputSanitizer.sanitizeText(email);
-    const sanitizedPassword = InputSanitizer.sanitizeText(password);
+    const { email, password, rememberMe = false } = await request.json();
 
-    // Validate email format
-    if (!InputSanitizer.validateEmail(sanitizedEmail)) {
-      AuditLogger.log({
-        userId: 'unknown',
-        action: 'LOGIN_ATTEMPT',
-        resource: 'auth',
-        resourceId: sanitizedEmail,
-        ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: req.headers.get('user-agent') || 'unknown',
-        status: 'failure',
-        error: 'Invalid email format',
-      });
-
+    // Validate input
+    if (!email || !password) {
       return NextResponse.json(
-        { error: 'Geçersiz email formatı' },
+        { success: false, error: 'Email ve şifre gereklidir' },
         { status: 400 }
       );
     }
 
-    // Basic password presence check (do not enforce strength on login)
-    if (!sanitizedPassword) {
-      AuditLogger.log({
-        userId: 'unknown',
-        action: 'LOGIN_ATTEMPT',
-        resource: 'auth',
-        resourceId: sanitizedEmail,
-        ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: req.headers.get('user-agent') || 'unknown',
-        status: 'failure',
-        error: 'Empty password',
-      });
-
+    // Authenticate with Appwrite
+    const session = await serverAccount.createEmailPasswordSession(email, password);
+    
+    if (!session) {
       return NextResponse.json(
-        { error: 'Geçersiz şifre' },
-        { status: 400 }
-      );
-    }
-
-    // Mock authentication (replace with real Appwrite auth)
-    let user = null;
-    let sessionData = null;
-
-    if (sanitizedEmail === 'admin@test.com' && sanitizedPassword === 'admin123') {
-      user = {
-        $id: 'user-123',
-        name: 'Test Admin',
-        email: sanitizedEmail,
-        role: 'ADMIN',
-      };
-
-      sessionData = {
-        userId: user.$id,
-        accessToken: 'mock-access-token-' + Date.now(),
-        expire: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      };
-    }
-
-    if (!user || !sessionData) {
-      AuditLogger.log({
-        userId: 'unknown',
-        action: 'LOGIN_ATTEMPT',
-        resource: 'auth',
-        resourceId: sanitizedEmail,
-        ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: req.headers.get('user-agent') || 'unknown',
-        status: 'failure',
-        error: 'Invalid credentials',
-      });
-
-      return NextResponse.json(
-        { error: 'Geçersiz kullanıcı bilgileri' },
+        { success: false, error: 'Geçersiz email veya şifre' },
         { status: 401 }
       );
     }
 
-    // Create response with secure HTTP-only cookie
-    const response = NextResponse.json({
-      success: true,
-      data: {
-        user: {
-          id: user.$id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
-      },
-    });
+    // Get user data
+    const user = await serverAccount.get();
 
-    // Set secure HTTP-only cookie
-    response.cookies.set('auth-session', JSON.stringify(sessionData), {
+    // Map Appwrite user to our user format
+    const role = (user.labels?.[0]?.toUpperCase() || 'MEMBER') as UserRole;
+    const userData = {
+      id: user.$id,
+      email: user.email,
+      name: user.name,
+      role,
+      permissions: ROLE_PERMISSIONS[role] || [],
+      isActive: true,
+      createdAt: user.$createdAt,
+      updatedAt: user.$updatedAt,
+    };
+
+    // Generate CSRF token
+    const csrfToken = generateCsrfToken();
+
+    // Set session cookies
+    const cookieStore = await cookies();
+    
+    // Appwrite session cookie (HttpOnly)
+    cookieStore.set('appwrite-session', JSON.stringify({
+      sessionId: session.$id,
+      userId: user.$id,
+      expire: session.expire,
+    }), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days or 1 day
+      path: '/',
+    });
+
+    // CSRF token cookie (not HttpOnly)
+    cookieStore.set('csrf-token', csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 24 * 60 * 60, // 24 hours
       path: '/',
     });
 
-    // Log successful login
-    AuditLogger.log({
-      userId: user.$id,
-      action: 'LOGIN_SUCCESS',
-      resource: 'auth',
-      resourceId: user.$id,
-      ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: req.headers.get('user-agent') || 'unknown',
-      status: 'success',
+    return NextResponse.json({
+      success: true,
+      data: {
+        user: userData,
+        session: {
+          sessionId: session.$id,
+          expire: session.expire,
+        },
+      },
     });
 
-    return response;
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-
-    // Log error
-    AuditLogger.log({
-      userId: 'unknown',
-      action: 'LOGIN_ERROR',
-      resource: 'auth',
-      resourceId: 'unknown',
-      ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
-      userAgent: req.headers.get('user-agent') || 'unknown',
-      status: 'failure',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    
+    // Handle specific Appwrite errors
+    if (error.code === 401) {
+      return NextResponse.json(
+        { success: false, error: 'Geçersiz email veya şifre' },
+        { status: 401 }
+      );
+    }
+    
+    if (error.code === 429) {
+      return NextResponse.json(
+        { success: false, error: 'Çok fazla deneme. Lütfen bekleyin.' },
+        { status: 429 }
+      );
+    }
 
     return NextResponse.json(
-      { error: 'Giriş yapılırken bir hata oluştu' },
+      { success: false, error: 'Giriş yapılırken bir hata oluştu' },
       { status: 500 }
     );
   }
 }
-
-// Apply rate limiting
-export const POST = authRateLimit(loginHandler);

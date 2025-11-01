@@ -1,24 +1,29 @@
 // KafkasDer İhtiyaç Sahipleri Mock API
 // Mock backend servisi - gerçek API entegrasyonu için değiştirilecek
 
-// Legacy mock types (used by some pages)
-import { 
-  Beneficiary, 
-  BeneficiaryQuickAdd, 
-  BeneficiaryListResponse, 
+import {
+  Beneficiary,
+  BeneficiaryQuickAdd,
+  BeneficiaryListResponse,
   BeneficiaryResponse,
   BeneficiarySearchParams,
   PhotoUploadResponse,
-  MernisCheckResponse
+  MernisCheckResponse,
+  BeneficiaryCategory,
+  FundRegion,
+  FileConnection,
+  Country,
+  City,
+  BeneficiaryStatus,
+  SponsorType
 } from '@/types/beneficiary';
 
-// Appwrite-aligned types
-import type { 
-  BeneficiaryDocument, 
-  AppwriteResponse, 
-  QueryParams, 
-  CreateDocumentData, 
-  UpdateDocumentData 
+import type {
+  BeneficiaryDocument,
+  AppwriteResponse,
+  QueryParams,
+  CreateDocumentData,
+  UpdateDocumentData
 } from '@/types/collections';
 
 // Define ApiResponse type locally (legacy)
@@ -33,19 +38,19 @@ interface ApiResponse<T> {
 const delay = (ms: number = 300) => new Promise(resolve => setTimeout(resolve, ms));
 
 // === LEGACY MOCK STORAGE (kept for backward compatibility) ===
-let mockBeneficiaries: Beneficiary[] = [
+const mockBeneficiaries: Beneficiary[] = [
   {
     id: "beneficiary-001",
     photo: "https://via.placeholder.com/300x400/cccccc/666666?text=Ahmet+Yılmaz",
-    sponsorType: "BIREYSEL" as any,
+    sponsorType: SponsorType.BIREYSEL,
     firstName: "Ahmet",
     lastName: "Yılmaz",
     nationality: "Türkiye",
     identityNumber: "12345678901",
     mernisCheck: true,
-    category: "YETIM_AILESI" as any,
-    fundRegion: "AVRUPA" as any,
-    fileConnection: "PARTNER_KURUM" as any,
+    category: BeneficiaryCategory.YETIM_AILESI,
+    fundRegion: FundRegion.AVRUPA,
+    fileConnection: FileConnection.PARTNER_KURUM,
     fileNumber: "AVYET001234",
     mobilePhone: "5551234567",
     mobilePhoneCode: "555",
@@ -55,14 +60,14 @@ let mockBeneficiaries: Beneficiary[] = [
     linkedOrphan: "ORP-001",
     linkedCard: "CARD-001",
     familyMemberCount: 4,
-    country: "TURKIYE" as any,
-    city: "ISTANBUL" as any,
+    country: Country.TURKIYE,
+    city: City.ISTANBUL,
     district: "Kadıköy",
     neighborhood: "Moda",
     address: "Moda Mahallesi, Kadıköy/İstanbul",
     consentStatement: "Kişisel verilerimin işlenmesine rıza gösteriyorum.",
     deleteRecord: false,
-    status: "AKTIF" as any,
+    status: BeneficiaryStatus.AKTIF,
     createdAt: "2024-01-15T10:30:00.000Z",
     updatedAt: "2024-01-15T10:30:00.000Z",
     createdBy: "admin@test.com",
@@ -71,15 +76,15 @@ let mockBeneficiaries: Beneficiary[] = [
   {
     id: "beneficiary-002",
     photo: "https://via.placeholder.com/300x400/cccccc/666666?text=Fatma+Demir",
-    sponsorType: "KURUMSAL" as any,
+    sponsorType: SponsorType.KURUMSAL,
     firstName: "Fatma",
     lastName: "Demir",
     nationality: "Suriye",
     identityNumber: undefined,
     mernisCheck: false,
-    category: "MULTECI_AILE" as any,
-    fundRegion: "SERBEST" as any,
-    fileConnection: "CALISMA_SAHASI" as any,
+    category: BeneficiaryCategory.MULTECI_AILE,
+    fundRegion: FundRegion.SERBEST,
+    fileConnection: FileConnection.CALISMA_SAHASI,
     fileNumber: "SRMUL002345",
     mobilePhone: "5552345678",
     mobilePhoneCode: "555",
@@ -89,14 +94,14 @@ let mockBeneficiaries: Beneficiary[] = [
     linkedOrphan: undefined,
     linkedCard: "CARD-002",
     familyMemberCount: 3,
-    country: "TURKIYE" as any,
-    city: "GAZIANTEP" as any,
+    country: Country.TURKIYE,
+    city: City.GAZIANTEP,
     district: "Şahinbey",
     neighborhood: "Şehitkamil",
     address: "Şehitkamil Mahallesi, Şahinbey/Gaziantep",
     consentStatement: "Kişisel verilerimin işlenmesine rıza gösteriyorum.",
     deleteRecord: false,
-    status: "AKTIF" as any,
+    status: BeneficiaryStatus.AKTIF,
     createdAt: "2024-02-10T14:20:00.000Z",
     updatedAt: "2024-02-10T14:20:00.000Z",
     createdBy: "manager@test.com",
@@ -105,15 +110,15 @@ let mockBeneficiaries: Beneficiary[] = [
   {
     id: "beneficiary-003",
     photo: "https://via.placeholder.com/300x400/cccccc/666666?text=Mehmet+Kaya",
-    sponsorType: "BIREYSEL" as any,
+    sponsorType: SponsorType.BIREYSEL,
     firstName: "Mehmet",
     lastName: "Kaya",
     nationality: "Türkiye",
     identityNumber: "98765432109",
     mernisCheck: true,
-    category: "IHTIYAC_SAHIBI_COCUK" as any,
-    fundRegion: "AVRUPA" as any,
-    fileConnection: "PARTNER_KURUM" as any,
+    category: BeneficiaryCategory.IHTIYAC_SAHIBI_COCUK,
+    fundRegion: FundRegion.AVRUPA,
+    fileConnection: FileConnection.PARTNER_KURUM,
     fileNumber: "AVIHT003456",
     mobilePhone: "5553456789",
     mobilePhoneCode: "555",
@@ -123,14 +128,14 @@ let mockBeneficiaries: Beneficiary[] = [
     linkedOrphan: "ORP-003",
     linkedCard: undefined,
     familyMemberCount: 2,
-    country: "TURKIYE" as any,
-    city: "ANKARA" as any,
+    country: Country.TURKIYE,
+    city: City.ANKARA,
     district: "Çankaya",
     neighborhood: "Kızılay",
     address: "Kızılay Mahallesi, Çankaya/Ankara",
     consentStatement: "Kişisel verilerimin işlenmesine rıza gösteriyorum.",
     deleteRecord: false,
-    status: "TASLAK" as any,
+    status: BeneficiaryStatus.TASLAK,
     createdAt: "2024-03-05T09:15:00.000Z",
     updatedAt: "2024-03-05T09:15:00.000Z",
     createdBy: "member@test.com",
@@ -215,7 +220,7 @@ export const createBeneficiary = async (data: BeneficiaryQuickAdd): Promise<ApiR
     const newBeneficiary: Beneficiary = {
       id: generateId(),
       ...data,
-      status: 'TASLAK' as any,
+      status: BeneficiaryStatus.TASLAK,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       createdBy: 'current-user',
@@ -306,7 +311,7 @@ export const updateBeneficiary = async (id: string, data: Partial<Beneficiary>):
         district: legacy.district || mockAppwriteBeneficiaries[idx2].district,
         neighborhood: legacy.neighborhood || mockAppwriteBeneficiaries[idx2].neighborhood,
         family_size: legacy.familyMemberCount || mockAppwriteBeneficiaries[idx2].family_size,
-        status: (legacy.status as any) || mockAppwriteBeneficiaries[idx2].status
+        status: (legacy.status as BeneficiaryStatus) || mockAppwriteBeneficiaries[idx2].status
       };
     }
     
@@ -688,56 +693,56 @@ export async function appwriteCreateBeneficiary(data: CreateDocumentData<Benefic
     $collectionId: "beneficiaries",
     $databaseId: "mock-db",
     // Map required core fields with safe fallbacks
-    name: data.name || `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim() || 'Ad Soyad',
-    tc_no: data.tc_no || '',
-    phone: data.phone || '',
-    email: data.email,
-    birth_date: data.birth_date,
-    gender: data.gender,
-    nationality: data.nationality,
-    religion: data.religion,
-    marital_status: data.marital_status,
-    address: data.address || '',
-    city: data.city || '',
-    district: data.district || '',
-    neighborhood: data.neighborhood || '',
-    family_size: data.family_size ?? 1,
-    children_count: data.children_count,
-    orphan_children_count: data.orphan_children_count,
-    elderly_count: data.elderly_count,
-    disabled_count: data.disabled_count,
-    income_level: data.income_level,
-    income_source: data.income_source,
-    has_debt: !!data.has_debt,
-    housing_type: data.housing_type,
-    has_vehicle: !!data.has_vehicle,
-    health_status: data.health_status,
-    has_chronic_illness: data.has_chronic_illness,
-    chronic_illness_detail: data.chronic_illness_detail,
-    has_disability: data.has_disability,
-    disability_detail: data.disability_detail,
-    has_health_insurance: data.has_health_insurance,
-    regular_medication: data.regular_medication,
-    education_level: data.education_level,
-    occupation: data.occupation,
-    employment_status: data.employment_status,
-    aid_type: data.aid_type,
-    totalAidAmount: data.totalAidAmount,
-    aid_duration: data.aid_duration,
-    priority: data.priority,
-    reference_name: data.reference_name,
-    reference_phone: data.reference_phone,
-    reference_relation: data.reference_relation,
-    application_source: data.application_source,
-    notes: data.notes,
-    previous_aid: !!data.previous_aid,
-    other_organization_aid: !!data.other_organization_aid,
-    emergency: !!data.emergency,
-    contact_preference: data.contact_preference,
-    status: data.status || 'TASLAK',
-    approval_status: data.approval_status || 'pending',
-    approved_by: data.approved_by,
-    approved_at: data.approved_at
+    name: (data as any).name || (data as any).firstName || (data as any).lastName || 'Ad Soyad',
+    tc_no: (data as any).tc_no || '',
+    phone: (data as any).phone || '',
+    email: (data as any).email,
+    birth_date: (data as any).birth_date,
+    gender: (data as any).gender,
+    nationality: (data as any).nationality,
+    religion: (data as any).religion,
+    marital_status: (data as any).marital_status,
+    address: (data as any).address || '',
+    city: (data as any).city || '',
+    district: (data as any).district || '',
+    neighborhood: (data as any).neighborhood || '',
+    family_size: (data as any).family_size ?? 1,
+    children_count: (data as any).children_count,
+    orphan_children_count: (data as any).orphan_children_count,
+    elderly_count: (data as any).elderly_count,
+    disabled_count: (data as any).disabled_count,
+    income_level: (data as any).income_level,
+    income_source: (data as any).income_source,
+    has_debt: !!(data as any).has_debt,
+    housing_type: (data as any).housing_type,
+    has_vehicle: !!(data as any).has_vehicle,
+    health_status: (data as any).health_status,
+    has_chronic_illness: (data as any).has_chronic_illness,
+    chronic_illness_detail: (data as any).chronic_illness_detail,
+    has_disability: (data as any).has_disability,
+    disability_detail: (data as any).disability_detail,
+    has_health_insurance: (data as any).has_health_insurance,
+    regular_medication: (data as any).regular_medication,
+    education_level: (data as any).education_level,
+    occupation: (data as any).occupation,
+    employment_status: (data as any).employment_status,
+    aid_type: (data as any).aid_type,
+    totalAidAmount: (data as any).totalAidAmount,
+    aid_duration: (data as any).aid_duration,
+    priority: (data as any).priority,
+    reference_name: (data as any).reference_name,
+    reference_phone: (data as any).reference_phone,
+    reference_relation: (data as any).reference_relation,
+    application_source: (data as any).application_source,
+    notes: (data as any).notes,
+    previous_aid: !!(data as any).previous_aid,
+    other_organization_aid: !!(data as any).other_organization_aid,
+    emergency: !!(data as any).emergency,
+    contact_preference: (data as any).contact_preference,
+    status: (data as any).status || BeneficiaryStatus.TASLAK,
+    approval_status: (data as any).approval_status || 'pending',
+    approved_by: (data as any).approved_by,
+    approved_at: (data as any).approved_at
   };
 
   mockAppwriteBeneficiaries.push(doc);
@@ -838,3 +843,744 @@ export async function appwriteDeleteBeneficiary(id: string): Promise<AppwriteRes
     error: before === after ? 'İhtiyaç sahibi bulunamadı' : null
   };
 }
+
+// === SCHOLARSHIP MANAGEMENT MOCK DATA ===
+
+import {
+  Scholarship,
+  Student,
+  ScholarshipApplication,
+  Payment,
+  OrphanAssistance,
+  ScholarshipType,
+  ApplicationStatus,
+  StudentStatus,
+  PaymentStatus,
+  EducationLevel,
+  OrphanStatus,
+  ScholarshipListResponse,
+  StudentListResponse,
+  ApplicationListResponse,
+  ScholarshipResponse,
+  StudentResponse,
+  ApplicationResponse,
+  ScholarshipSearchParams,
+  StudentSearchParams,
+  ApplicationSearchParams,
+  ScholarshipStats,
+  StudentStats,
+  PaymentStats,
+  OrphanStats
+} from '@/types/scholarship';
+
+// Mock storage for scholarships
+const mockScholarships: Scholarship[] = [
+  {
+    id: "scholarship-001",
+    name: "Akademik Başarı Bursu",
+    description: "Yüksek akademik başarı gösteren öğrenciler için burs",
+    type: ScholarshipType.ACADEMIC,
+    amount: 5000,
+    currency: "TRY",
+    duration: 12,
+    maxRecipients: 50,
+    requirements: ["GPA > 3.5", "Üniversite öğrencisi"],
+    eligibilityCriteria: ["Türk vatandaşı olmak", "Üniversite öğrencisi olmak"],
+    applicationDeadline: new Date("2024-12-31"),
+    disbursementDate: new Date("2025-01-15"),
+    isActive: true,
+    createdAt: "2024-01-15T10:30:00.000Z",
+    updatedAt: "2024-01-15T10:30:00.000Z",
+    createdBy: "admin@test.com",
+    updatedBy: "admin@test.com"
+  },
+  {
+    id: "scholarship-002",
+    name: "İhtiyaç Sahibi Öğrenci Bursu",
+    description: "Mali durumu zayıf olan öğrenciler için burs",
+    type: ScholarshipType.NEED_BASED,
+    amount: 3000,
+    currency: "TRY",
+    duration: 9,
+    maxRecipients: 100,
+    requirements: ["Aylık gelir < 5000 TL", "Başarılı öğrenci"],
+    eligibilityCriteria: ["Türk vatandaşı olmak", "Öğrenci olmak"],
+    applicationDeadline: new Date("2024-11-30"),
+    isActive: true,
+    createdAt: "2024-02-10T14:20:00.000Z",
+    updatedAt: "2024-02-10T14:20:00.000Z",
+    createdBy: "manager@test.com",
+    updatedBy: "manager@test.com"
+  }
+];
+
+// Mock storage for students
+const mockStudents: Student[] = [
+  {
+    id: "student-001",
+    beneficiaryId: "beneficiary-001",
+    firstName: "Ahmet",
+    lastName: "Yılmaz",
+    nationalId: "12345678901",
+    birthDate: new Date("1998-05-15"),
+    gender: "MALE",
+    email: "ahmet.yilmaz@university.edu.tr",
+    phone: "5551234567",
+    address: "Üniversite kampüsü yurt",
+    city: "İstanbul",
+    country: "Türkiye",
+    educationLevel: EducationLevel.BACHELOR,
+    institution: "İstanbul Üniversitesi",
+    department: "Bilgisayar Mühendisliği",
+    grade: "3. sınıf",
+    gpa: 3.7,
+    academicYear: "2024-2025",
+    status: StudentStatus.ACTIVE,
+    familyIncome: 4000,
+    familySize: 4,
+    isOrphan: false,
+    documents: [],
+    notes: "Başarılı öğrenci",
+    createdAt: "2024-01-15T10:30:00.000Z",
+    updatedAt: "2024-01-15T10:30:00.000Z",
+    createdBy: "admin@test.com",
+    updatedBy: "admin@test.com"
+  }
+];
+
+// Mock storage for applications
+const mockApplications: ScholarshipApplication[] = [
+  {
+    id: "application-001",
+    scholarshipId: "scholarship-001",
+    studentId: "student-001",
+    applicationDate: new Date("2024-03-01"),
+    status: ApplicationStatus.APPROVED,
+    personalStatement: "Akademik başarılarımı paylaşmak istiyorum",
+    documents: [],
+    familySituation: "Orta gelirli aile",
+    financialNeed: "Orta seviyede",
+    academicAchievements: "3.7 GPA",
+    priority: 1,
+    assignedReviewer: "admin@test.com",
+    reviewNotes: "Başarılı başvuru",
+    reviewDate: new Date("2024-03-15"),
+    decisionDate: new Date("2024-03-20"),
+    createdAt: "2024-03-01T10:30:00.000Z",
+    updatedAt: "2024-03-20T10:30:00.000Z",
+    createdBy: "student-001",
+    updatedBy: "admin@test.com"
+  }
+];
+
+// Mock storage for payments
+const mockPayments: Payment[] = [
+  {
+    id: "payment-001",
+    applicationId: "application-001",
+    amount: 5000,
+    currency: "TRY",
+    paymentDate: new Date("2024-04-01"),
+    status: PaymentStatus.PAID,
+    transactionId: "TXN-001",
+    bankAccount: "****1234",
+    description: "Akademik Başarı Bursu - Nisan 2024",
+    processedBy: "admin@test.com",
+    processedAt: new Date("2024-04-01T10:00:00.000Z"),
+    installments: 12,
+    currentInstallment: 1,
+    createdAt: "2024-03-20T10:30:00.000Z",
+    updatedAt: "2024-04-01T10:00:00.000Z"
+  }
+];
+
+// Mock storage for orphan assistance
+const mockOrphanAssistance: OrphanAssistance[] = [
+  {
+    id: "orphan-001",
+    studentId: "student-001",
+    orphanType: OrphanStatus.FULL_ORPHAN,
+    guardianInfo: {
+      name: "Fatma Yılmaz",
+      relationship: "Teyze",
+      age: 45,
+      occupation: "Ev hanımı",
+      income: 2000,
+      contactInfo: {
+        phone: "5552345678"
+      }
+    },
+    assistanceType: "SCHOLARSHIP",
+    amount: 3000,
+    currency: "TRY",
+    startDate: new Date("2024-01-01"),
+    status: "ACTIVE",
+    caseManager: "admin@test.com",
+    regularCheckups: true,
+    nextCheckupDate: new Date("2024-12-01"),
+    createdAt: "2024-01-01T10:30:00.000Z",
+    updatedAt: "2024-01-01T10:30:00.000Z",
+    createdBy: "admin@test.com",
+    updatedBy: "admin@test.com"
+  }
+];
+
+// === SCHOLARSHIP API FUNCTIONS ===
+
+/**
+ * Get all scholarships
+ */
+export const getScholarships = async (params: ScholarshipSearchParams = {}): Promise<ApiResponse<ScholarshipListResponse>> => {
+  await delay();
+  
+  try {
+    const {
+      search = '',
+      type,
+      isActive,
+      page = 1,
+      limit = 20
+    } = params;
+    
+    let filteredScholarships = [...mockScholarships];
+    
+    // Search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredScholarships = filteredScholarships.filter(s =>
+        s.name.toLowerCase().includes(searchLower) ||
+        s.description.toLowerCase().includes(searchLower) ||
+        s.id.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Type filter
+    if (type) {
+      filteredScholarships = filteredScholarships.filter(s => s.type === type);
+    }
+    
+    // Active filter
+    if (isActive !== undefined) {
+      filteredScholarships = filteredScholarships.filter(s => s.isActive === isActive);
+    }
+    
+    // Pagination
+    const total = filteredScholarships.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedScholarships = filteredScholarships.slice(startIndex, endIndex);
+    
+    return {
+      success: true,
+      data: {
+        data: paginatedScholarships,
+        total,
+        page,
+        limit
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Burs listesi getirilirken hata oluştu'
+    };
+  }
+};
+
+/**
+ * Get single scholarship
+ */
+export const getScholarship = async (id: string): Promise<ApiResponse<Scholarship>> => {
+  await delay();
+  
+  try {
+    const scholarship = mockScholarships.find(s => s.id === id);
+    
+    if (!scholarship) {
+      return {
+        success: false,
+        error: 'Burs bulunamadı'
+      };
+    }
+    
+    return {
+      success: true,
+      data: scholarship
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Burs getirilirken hata oluştu'
+    };
+  }
+};
+
+/**
+ * Create new scholarship
+ */
+export const createScholarship = async (data: Partial<Scholarship>): Promise<ApiResponse<Scholarship>> => {
+  await delay();
+  
+  try {
+    const newScholarship: Scholarship = {
+      id: generateId(),
+      name: data.name || '',
+      description: data.description || '',
+      type: data.type || ScholarshipType.NEED_BASED,
+      amount: data.amount || 0,
+      currency: data.currency || 'TRY',
+      duration: data.duration || 12,
+      maxRecipients: data.maxRecipients || 1,
+      requirements: data.requirements || [],
+      eligibilityCriteria: data.eligibilityCriteria || [],
+      applicationDeadline: data.applicationDeadline || new Date(),
+      isActive: data.isActive ?? true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'current-user',
+      updatedBy: 'current-user'
+    };
+    
+    mockScholarships.push(newScholarship);
+    
+    return {
+      success: true,
+      data: newScholarship,
+      message: 'Burs başarıyla oluşturuldu'
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Burs oluşturulurken hata oluştu'
+    };
+  }
+};
+
+/**
+ * Update scholarship
+ */
+export const updateScholarship = async (id: string, data: Partial<Scholarship>): Promise<ApiResponse<Scholarship>> => {
+  await delay();
+  
+  try {
+    const index = mockScholarships.findIndex(s => s.id === id);
+    
+    if (index === -1) {
+      return {
+        success: false,
+        error: 'Burs bulunamadı'
+      };
+    }
+    
+    const updatedScholarship: Scholarship = {
+      ...mockScholarships[index],
+      ...data,
+      updatedAt: new Date().toISOString(),
+      updatedBy: 'current-user'
+    };
+    
+    mockScholarships[index] = updatedScholarship;
+    
+    return {
+      success: true,
+      data: updatedScholarship,
+      message: 'Burs başarıyla güncellendi'
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Burs güncellenirken hata oluştu'
+    };
+  }
+};
+
+/**
+ * Delete scholarship
+ */
+export const deleteScholarship = async (id: string): Promise<ApiResponse<void>> => {
+  await delay();
+  
+  try {
+    const index = mockScholarships.findIndex(s => s.id === id);
+    
+    if (index === -1) {
+      return {
+        success: false,
+        error: 'Burs bulunamadı'
+      };
+    }
+    
+    mockScholarships.splice(index, 1);
+    
+    return {
+      success: true,
+      message: 'Burs başarıyla silindi'
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Burs silinirken hata oluştu'
+    };
+  }
+};
+
+// === STUDENT API FUNCTIONS ===
+
+/**
+ * Get all students
+ */
+export const getStudents = async (params: StudentSearchParams = {}): Promise<ApiResponse<StudentListResponse>> => {
+  await delay();
+  
+  try {
+    const {
+      search = '',
+      status,
+      educationLevel,
+      isOrphan,
+      city,
+      page = 1,
+      limit = 20
+    } = params;
+    
+    let filteredStudents = [...mockStudents];
+    
+    // Search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredStudents = filteredStudents.filter(s =>
+        s.firstName.toLowerCase().includes(searchLower) ||
+        s.lastName.toLowerCase().includes(searchLower) ||
+        s.nationalId?.includes(search) ||
+        s.institution.toLowerCase().includes(searchLower) ||
+        s.id.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Status filter
+    if (status) {
+      filteredStudents = filteredStudents.filter(s => s.status === status);
+    }
+    
+    // Education level filter
+    if (educationLevel) {
+      filteredStudents = filteredStudents.filter(s => s.educationLevel === educationLevel);
+    }
+    
+    // Orphan filter
+    if (isOrphan !== undefined) {
+      filteredStudents = filteredStudents.filter(s => s.isOrphan === isOrphan);
+    }
+    
+    // City filter
+    if (city) {
+      filteredStudents = filteredStudents.filter(s => s.city === city);
+    }
+    
+    // Pagination
+    const total = filteredStudents.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedStudents = filteredStudents.slice(startIndex, endIndex);
+    
+    return {
+      success: true,
+      data: {
+        data: paginatedStudents,
+        total,
+        page,
+        limit
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Öğrenci listesi getirilirken hata oluştu'
+    };
+  }
+};
+
+/**
+ * Get single student
+ */
+export const getStudent = async (id: string): Promise<ApiResponse<Student>> => {
+  await delay();
+  
+  try {
+    const student = mockStudents.find(s => s.id === id);
+    
+    if (!student) {
+      return {
+        success: false,
+        error: 'Öğrenci bulunamadı'
+      };
+    }
+    
+    return {
+      success: true,
+      data: student
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Öğrenci getirilirken hata oluştu'
+    };
+  }
+};
+
+/**
+ * Create new student
+ */
+export const createStudent = async (data: Partial<Student>): Promise<ApiResponse<Student>> => {
+  await delay();
+  
+  try {
+    const newStudent: Student = {
+      id: generateId(),
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      nationalId: data.nationalId,
+      birthDate: data.birthDate || new Date(),
+      gender: data.gender || 'MALE',
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      city: data.city,
+      country: data.country || 'Türkiye',
+      educationLevel: data.educationLevel || EducationLevel.BACHELOR,
+      institution: data.institution || '',
+      department: data.department,
+      grade: data.grade,
+      gpa: data.gpa,
+      academicYear: data.academicYear || '2024-2025',
+      status: data.status || StudentStatus.ACTIVE,
+      familyIncome: data.familyIncome,
+      familySize: data.familySize,
+      isOrphan: data.isOrphan || false,
+      orphanStatus: data.orphanStatus,
+      guardianName: data.guardianName,
+      guardianPhone: data.guardianPhone,
+      guardianRelation: data.guardianRelation,
+      documents: [],
+      notes: data.notes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'current-user',
+      updatedBy: 'current-user'
+    };
+    
+    mockStudents.push(newStudent);
+    
+    return {
+      success: true,
+      data: newStudent,
+      message: 'Öğrenci başarıyla oluşturuldu'
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Öğrenci oluşturulurken hata oluştu'
+    };
+  }
+};
+
+// === APPLICATION API FUNCTIONS ===
+
+/**
+ * Get all applications
+ */
+export const getApplications = async (params: ApplicationSearchParams = {}): Promise<ApiResponse<ApplicationListResponse>> => {
+  await delay();
+  
+  try {
+    const {
+      search = '',
+      scholarshipId,
+      studentId,
+      status,
+      assignedReviewer,
+      page = 1,
+      limit = 20
+    } = params;
+    
+    let filteredApplications = [...mockApplications];
+    
+    // Search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredApplications = filteredApplications.filter(a =>
+        a.id.toLowerCase().includes(searchLower) ||
+        a.scholarshipId.toLowerCase().includes(searchLower) ||
+        a.studentId.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Scholarship filter
+    if (scholarshipId) {
+      filteredApplications = filteredApplications.filter(a => a.scholarshipId === scholarshipId);
+    }
+    
+    // Student filter
+    if (studentId) {
+      filteredApplications = filteredApplications.filter(a => a.studentId === studentId);
+    }
+    
+    // Status filter
+    if (status) {
+      filteredApplications = filteredApplications.filter(a => a.status === status);
+    }
+    
+    // Reviewer filter
+    if (assignedReviewer) {
+      filteredApplications = filteredApplications.filter(a => a.assignedReviewer === assignedReviewer);
+    }
+    
+    // Pagination
+    const total = filteredApplications.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedApplications = filteredApplications.slice(startIndex, endIndex);
+    
+    return {
+      success: true,
+      data: {
+        data: paginatedApplications,
+        total,
+        page,
+        limit
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Başvuru listesi getirilirken hata oluştu'
+    };
+  }
+};
+
+/**
+ * Create new application
+ */
+export const createApplication = async (data: Partial<ScholarshipApplication>): Promise<ApiResponse<ScholarshipApplication>> => {
+  await delay();
+  
+  try {
+    const newApplication: ScholarshipApplication = {
+      id: generateId(),
+      scholarshipId: data.scholarshipId || '',
+      studentId: data.studentId || '',
+      applicationDate: data.applicationDate || new Date(),
+      status: data.status || ApplicationStatus.DRAFT,
+      personalStatement: data.personalStatement,
+      motivationLetter: data.motivationLetter,
+      documents: [],
+      familySituation: data.familySituation,
+      financialNeed: data.financialNeed,
+      academicAchievements: data.academicAchievements,
+      extracurricularActivities: data.extracurricularActivities,
+      references: data.references || [],
+      priority: data.priority || 0,
+      assignedReviewer: data.assignedReviewer,
+      reviewNotes: data.reviewNotes,
+      reviewDate: data.reviewDate,
+      decisionDate: data.decisionDate,
+      decisionNotes: data.decisionNotes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'current-user',
+      updatedBy: 'current-user'
+    };
+    
+    mockApplications.push(newApplication);
+    
+    return {
+      success: true,
+      data: newApplication,
+      message: 'Başvuru başarıyla oluşturuldu'
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Başvuru oluşturulurken hata oluştu'
+    };
+  }
+};
+
+// === STATISTICS FUNCTIONS ===
+
+/**
+ * Get scholarship statistics
+ */
+export const getScholarshipStats = async (): Promise<ApiResponse<ScholarshipStats>> => {
+  await delay();
+  
+  try {
+    const total = mockScholarships.length;
+    const active = mockScholarships.filter(s => s.isActive).length;
+    const byType = mockScholarships.reduce((acc, s) => {
+      acc[s.type] = (acc[s.type] || 0) + 1;
+      return acc;
+    }, {} as Record<ScholarshipType, number>);
+    
+    const totalBudget = mockScholarships.reduce((sum, s) => sum + (s.amount * s.maxRecipients), 0);
+    const approvedApplications = mockApplications.filter(a => a.status === ApplicationStatus.APPROVED).length;
+    const totalApplications = mockApplications.length;
+    const approvalRate = totalApplications > 0 ? (approvedApplications / totalApplications) * 100 : 0;
+    
+    return {
+      success: true,
+      data: {
+        total,
+        active,
+        byType,
+        totalBudget,
+        totalRecipients: approvedApplications,
+        applicationsReceived: totalApplications,
+        applicationsApproved: approvedApplications,
+        approvalRate
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'İstatistikler getirilirken hata oluştu'
+    };
+  }
+};
+
+/**
+ * Get student statistics
+ */
+export const getStudentStats = async (): Promise<ApiResponse<StudentStats>> => {
+  await delay();
+  
+  try {
+    const total = mockStudents.length;
+    const active = mockStudents.filter(s => s.status === StudentStatus.ACTIVE).length;
+    const byEducationLevel = mockStudents.reduce((acc, s) => {
+      acc[s.educationLevel] = (acc[s.educationLevel] || 0) + 1;
+      return acc;
+    }, {} as Record<EducationLevel, number>);
+    const orphans = mockStudents.filter(s => s.isOrphan).length;
+    const byStatus = mockStudents.reduce((acc, s) => {
+      acc[s.status] = (acc[s.status] || 0) + 1;
+      return acc;
+    }, {} as Record<StudentStatus, number>);
+    
+    return {
+      success: true,
+      data: {
+        total,
+        active,
+        byEducationLevel,
+        orphans,
+        byStatus
+      }
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Öğrenci istatistikleri getirilirken hata oluştu'
+    };
+  }
+};

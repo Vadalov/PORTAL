@@ -1,266 +1,173 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Search, Plus, Download } from 'lucide-react';
+import { DataTable, Column } from '@/components/ui/data-table';
+import { PageLayout } from '@/components/layouts/PageLayout';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { BeneficiaryQuickAddModal } from '@/components/forms/BeneficiaryQuickAddModal';
 import api from '@/lib/api';
 import { exportBeneficiaries } from '@/lib/api/mock-api';
 import type { BeneficiaryDocument } from '@/types/collections';
+import { toast } from 'sonner';
+import { ArrowUpRight, Download, Plus } from 'lucide-react';
+
+// Lazy load heavy modal component
+const BeneficiaryQuickAddModal = lazy(() =>
+  import('@/components/forms/BeneficiaryQuickAddModal').then((mod) => ({
+    default: mod.BeneficiaryQuickAddModal,
+  }))
+);
 
 export default function BeneficiariesPage() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
-  const [idSearch, setIdSearch] = useState('');
-  const [tcSearch, setTcSearch] = useState('');
-  const [fileSearch, setFileSearch] = useState('');
   const [page, setPage] = useState(1);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const limit = 20;
 
-  const effectiveSearch = idSearch || tcSearch || fileSearch || search;
-
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['beneficiaries', page, effectiveSearch],
-    queryFn: () => api.beneficiaries.getBeneficiaries({ page, limit, search: effectiveSearch }),
+    queryKey: ['beneficiaries', page, search],
+    queryFn: () => api.beneficiaries.getBeneficiaries({ page, limit, search }),
   });
 
   const beneficiaries = data?.data || [];
   const total = data?.total || 0;
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  // Modal kapandığında listeyi yenile
   const handleModalClose = () => {
     setShowQuickAddModal(false);
     refetch();
   };
 
-  const handleSearch = () => {
-    // Sayfayı başa al ve refetch tetikle
-    setPage(1);
-    refetch();
-  };
-
   const handleExport = async () => {
-    const result = await exportBeneficiaries({ search: effectiveSearch });
+    const result = await exportBeneficiaries({ search });
     if (result.success && result.data) {
       const blob = new Blob([result.data], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'ihtiyac_sahipleri.csv';
+      a.download = `ihtiyac_sahipleri_${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
       URL.revokeObjectURL(url);
+      toast.success('Veri başarıyla dışa aktarıldı');
+    } else {
+      toast.error('Dışa aktarma sırasında hata oluştu');
     }
   };
 
+  const columns: Column<BeneficiaryDocument>[] = [
+    {
+      key: 'actions',
+      label: '',
+      render: (item) => (
+        <Link href={`/yardim/ihtiyac-sahipleri/${item.$id}`}>
+          <Button variant="ghost" size="icon-sm" className="h-8 w-8">
+            <ArrowUpRight className="h-4 w-4" />
+          </Button>
+        </Link>
+      ),
+      className: 'w-12',
+    },
+    {
+      key: 'type',
+      label: 'Tür',
+      render: () => (
+        <Badge variant="secondary" className="font-medium">
+          İhtiyaç Sahibi
+        </Badge>
+      ),
+    },
+    {
+      key: 'name',
+      label: 'İsim',
+      render: (item) => <span className="font-medium text-foreground">{item.name || '-'}</span>,
+    },
+    {
+      key: 'nationality',
+      label: 'Uyruk',
+    },
+    {
+      key: 'tc_no',
+      label: 'Kimlik No',
+    },
+    {
+      key: 'phone',
+      label: 'Telefon',
+    },
+    {
+      key: 'city',
+      label: 'Şehir',
+    },
+    {
+      key: 'district',
+      label: 'İlçe',
+    },
+    {
+      key: 'address',
+      label: 'Adres',
+      render: (item) => (
+        <span className="max-w-xs truncate block" title={item.address || '-'}>
+          {item.address || '-'}
+        </span>
+      ),
+    },
+    {
+      key: 'family_size',
+      label: 'Aile Büyüklüğü',
+      render: (item) => <Badge variant="outline">{item.family_size ?? '-'}</Badge>,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">İhtiyaç Sahipleri</h1>
-          <p className="text-gray-600 mt-2">
-            Kayıtlı ihtiyaç sahiplerini görüntüleyin ve yönetin
-          </p>
-        </div>
-      </div>
+    <>
+      {showQuickAddModal && (
+        <Suspense fallback={<div>Yükleniyor...</div>}>
+          <BeneficiaryQuickAddModal open={showQuickAddModal} onOpenChange={handleModalClose} />
+        </Suspense>
+      )}
 
-      {/* Hızlı Ekleme Modal */}
-      <BeneficiaryQuickAddModal
-        open={showQuickAddModal}
-        onOpenChange={handleModalClose}
-      />
-
-      {/* Portal Plus Style Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-wrap gap-2 items-end">
-            <div className="flex-1 min-w-[120px]">
-              <Input
-                placeholder="ID ↵"
-                className="h-9"
-                value={idSearch}
-                onChange={(e) => {
-                  setIdSearch(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <div className="flex-1 min-w-[150px]">
-              <Input
-                placeholder="Kişi / Kurum Ünvanı"
-                className="h-9"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <div className="flex-1 min-w-[120px]">
-              <Input
-                placeholder="Kimlik No"
-                className="h-9"
-                value={tcSearch}
-                onChange={(e) => {
-                  setTcSearch(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <div className="flex-1 min-w-[120px]">
-              <Input
-                placeholder="Dosya No"
-                className="h-9"
-                value={fileSearch}
-                onChange={(e) => {
-                  setFileSearch(e.target.value);
-                  setPage(1);
-                }}
-              />
-            </div>
-            <select className="h-9 px-3 border rounded-md text-sm">
-              <option>=</option>
-              <option>{'>'}</option>
-              <option>{'<'}</option>
-              <option>~</option>
-            </select>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="h-9 gap-1 bg-green-600 hover:bg-green-700"
-              onClick={handleSearch}
-            >
-              <Search className="h-4 w-4" />
-              Ara
-            </Button>
-            <Button variant="default" size="sm" className="h-9 gap-1 bg-gray-600 hover:bg-gray-700">
-              Filtre
-            </Button>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="h-9 gap-1 bg-blue-600 hover:bg-blue-700"
-              onClick={() => setShowQuickAddModal(true)}
-            >
-              <Plus className="h-4 w-4" />
-              Ekle
-            </Button>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="h-9 gap-1 bg-cyan-600 hover:bg-cyan-700"
-              onClick={handleExport}
-            >
+      <PageLayout
+        title="İhtiyaç Sahipleri"
+        description="Kayıtlı ihtiyaç sahiplerini görüntüleyin ve yönetin"
+        actions={
+          <>
+            <Button variant="outline" onClick={handleExport} className="gap-2">
               <Download className="h-4 w-4" />
-              İndir
+              Dışa Aktar
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* List - Portal Plus Style */}
-      <Card>
-        <CardContent className="pt-4">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium">{total} Kayıt</span>
-            <div className="flex items-center gap-2 text-sm">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="h-7 px-2"
-              >
-                ←
-              </Button>
-              <Input 
-                type="number" 
-                value={page} 
-                onChange={(e) => {
-                  const next = Number(e.target.value);
-                  setPage(Number.isNaN(next) ? 1 : Math.min(Math.max(1, next), totalPages));
-                }}
-                className="h-7 w-12 text-center p-0"
-              />
-              <span>/ {totalPages}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="h-7 px-2"
-              >
-                →
-              </Button>
-            </div>
-          </div>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-            </div>
-          ) : error ? (
-            <div className="text-center text-red-600 py-8">
-              Veriler yüklenirken hata oluştu
-            </div>
-          ) : beneficiaries.length === 0 ? (
-            <div className="text-center text-gray-500 py-12">
-              <p className="text-lg font-medium">Kayıt bulunamadı</p>
-              <p className="text-sm mt-2">
-                {effectiveSearch ? 'Arama kriterlerinize uygun kayıt yok' : 'Henüz kayıt eklenmemiş'}
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 border-b">
-                    <th className="p-3 text-left text-sm font-medium text-gray-700 w-8"></th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">Tür</th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">İsim</th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">Uyruk</th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">Kimlik No</th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">Cep Telefonu</th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">Şehir</th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">Yerleşim</th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">Adres</th>
-                    <th className="p-3 text-left text-sm font-medium text-gray-700">Kişi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {beneficiaries.map((beneficiary: BeneficiaryDocument, index: number) => (
-                    <tr 
-                      key={beneficiary.$id}
-                      className={`border-b hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                    >
-                      <td className="p-3">
-                        <Link href={`/yardim/ihtiyac-sahipleri/${beneficiary.$id}`}>
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <Search className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                      </td>
-                      <td className="p-3 text-sm">İhtiyaç Sahibi Kişi</td>
-                      <td className="p-3 text-sm font-medium">{beneficiary.name || '-'}</td>
-                      <td className="p-3 text-sm">{beneficiary.nationality || '-'}</td>
-                      <td className="p-3 text-sm">{beneficiary.tc_no || '-'}</td>
-                      <td className="p-3 text-sm">{beneficiary.phone || '-'}</td>
-                      <td className="p-3 text-sm">{beneficiary.city || '-'}</td>
-                      <td className="p-3 text-sm">{beneficiary.district || '-'}</td>
-                      <td className="p-3 text-sm max-w-xs truncate">{beneficiary.address || '-'}</td>
-                      <td className="p-3 text-sm">{beneficiary.family_size ?? '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            <Button onClick={() => setShowQuickAddModal(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Yeni Ekle
+            </Button>
+          </>
+        }
+      >
+        <DataTable
+          data={beneficiaries}
+          columns={columns}
+          isLoading={isLoading}
+          error={error as Error}
+          emptyMessage="İhtiyaç sahibi bulunamadı"
+          emptyDescription="Henüz kayıt eklenmemiş"
+          searchable={true}
+          searchValue={search}
+          onSearchChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          searchPlaceholder="İsim, TC No veya telefon ile ara..."
+          pagination={{
+            page,
+            totalPages,
+            total,
+            onPageChange: setPage,
+          }}
+          onRowClick={(item) => router.push(`/yardim/ihtiyac-sahipleri/${item.$id}`)}
+        />
+      </PageLayout>
+    </>
   );
 }

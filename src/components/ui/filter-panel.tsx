@@ -122,7 +122,7 @@ export function FilterPanel({
                   <select
                     value={filters[field.key] || ''}
                     onChange={(e) => handleFilterChange(field.key, e.target.value)}
-                    className="w-full h-8 px-2 border rounded-md text-sm bg-white"
+                    className="w-full h-8 px-2 border border-border rounded-md text-sm bg-background"
                   >
                     <option value="">Tümü</option>
                     {field.options?.map((option) => (

@@ -69,7 +69,7 @@ function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
 
   return (
     <Card
-      className={`cursor-move transition-all duration-200 hover:shadow-md hover:bg-gray-50 ${
+      className={`cursor-move transition-all duration-200 hover:shadow-md hover:bg-muted/30 ${
         isDragging ? 'opacity-50 scale-95' : ''
       }`}
       draggable
@@ -85,7 +85,7 @@ function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
 
         {/* Description */}
         {task.description && (
-          <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
             {task.description}
           </p>
         )}
@@ -93,8 +93,8 @@ function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
         {/* Assigned User */}
         {task.assigned_to && (
           <div className="flex items-center gap-1 mb-2">
-            <User className="h-3 w-3 text-gray-500" />
-            <span className="text-xs text-gray-600">
+            <User className="h-3 w-3 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">
               {task.assigned_to} {/* In real app, this would be user name */}
             </span>
           </div>
@@ -110,16 +110,16 @@ function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
         {/* Due Date */}
         {task.due_date && (
           <div className="flex items-center gap-1 mb-2">
-            <Calendar className="h-3 w-3 text-gray-500" />
+            <Calendar className="h-3 w-3 text-muted-foreground" />
             <span className={`text-xs ${
-              isOverdue ? 'text-red-600 font-medium' : 
-              isDueSoon ? 'text-orange-600 font-medium' : 
-              'text-gray-600'
+              isOverdue ? 'text-destructive font-medium' : 
+              isDueSoon ? 'text-warning font-medium' : 
+              'text-muted-foreground'
             }`}>
               {new Date(task.due_date).toLocaleDateString('tr-TR')}
             </span>
-            {isOverdue && <AlertCircle className="h-3 w-3 text-red-500" />}
-            {isDueSoon && !isOverdue && <Clock className="h-3 w-3 text-orange-500" />}
+            {isOverdue && <AlertCircle className="h-3 w-3 text-destructive" />}
+            {isDueSoon && !isOverdue && <Clock className="h-3 w-3 text-warning" />}
           </div>
         )}
 

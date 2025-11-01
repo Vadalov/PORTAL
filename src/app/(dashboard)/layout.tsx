@@ -5,14 +5,19 @@ import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
 import { Sidebar } from '@/components/layouts/Sidebar';
-import { Button } from '@/components/ui/button';
-import { LogOut, Menu, User } from 'lucide-react';
+import { LogOut, Menu, ChevronDown, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { BackgroundPattern } from '@/components/ui/background-pattern';
 import { AnimatedGradient } from '@/components/ui/animated-gradient';
 import { LoadingOverlay } from '@/components/ui/loading-overlay';
 import { SuspenseBoundary } from '@/components/ui/suspense-boundary';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { UserRole } from '@/types/auth';
+import Link from 'next/link';
 
 export default function DashboardLayout({
   children,
@@ -32,6 +37,36 @@ export default function DashboardLayout({
     return stored === 'true';
   });
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+
+  // Helper function to get initials from name
+  const getInitials = (name: string): string => {
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  // Helper function to get role badge variant
+  const getRoleBadgeVariant = (
+    role: UserRole
+  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    switch (role) {
+      case UserRole.SUPER_ADMIN:
+      case UserRole.ADMIN:
+        return 'destructive';
+      case UserRole.MANAGER:
+        return 'default';
+      case UserRole.MEMBER:
+      case UserRole.VOLUNTEER:
+        return 'secondary';
+      case UserRole.VIEWER:
+        return 'outline';
+      default:
+        return 'default';
+    }
+  };
 
   // Initialize auth on mount
   useEffect(() => {
@@ -112,26 +147,23 @@ export default function DashboardLayout({
       {/* Background Layers */}
       <BackgroundPattern
         variant="dots"
-        opacity={0.3}
+        opacity={0.08}
         className="text-muted-foreground"
       />
       <AnimatedGradient
         variant="subtle"
         speed="slow"
-        className="opacity-30 dark:opacity-20"
+        className="opacity-25 dark:opacity-20"
       />
 
-      {/* Header */}
+      {/* Header - Premium Top Bar */}
       <header
         className={cn(
           'sticky top-0 z-50 relative',
-          'border-b border-white/10 dark:border-white/5',
-          'bg-background/80 backdrop-blur-xl backdrop-saturate-150',
-          'shadow-glass transition-shadow duration-300',
-          'before:absolute before:inset-0',
-          'before:bg-gradient-to-r before:from-[oklch(from_var(--brand-primary)_l_c_h_/_5%)] before:to-transparent',
-          'before:pointer-events-none',
-          isScrolled && 'shadow-lg'
+          'border-b border-border/50',
+          'bg-card/80 backdrop-blur-xl backdrop-saturate-150',
+          'transition-all duration-300',
+          isScrolled ? 'shadow-card-hover border-border' : 'shadow-sm'
         )}
       >
         <motion.div
@@ -153,22 +185,73 @@ export default function DashboardLayout({
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-sm font-body">
-              <User className="h-4 w-4" />
-              <span className="font-medium">{user?.name}</span>
-              <span className="text-muted-foreground">({user?.role})</span>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="gap-2 hover:bg-destructive/10 hover:text-destructive transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline font-body">Çıkış</span>
-            </Button>
+          <div className="flex items-center gap-3">
+            <Popover open={isUserMenuOpen} onOpenChange={setIsUserMenuOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  className="flex items-center gap-2 rounded-full p-1.5 hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  aria-label="Kullanıcı menüsü"
+                >
+                  <Avatar size="sm">
+                    <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'User'} />
+                    <AvatarFallback className="text-xs font-semibold">
+                      {user?.name ? getInitials(user.name) : 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <ChevronDown className={cn(
+                    "h-4 w-4 text-muted-foreground hidden sm:block transition-transform duration-200",
+                    isUserMenuOpen && "rotate-180"
+                  )} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0" align="end" sideOffset={8}>
+                <div className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar size="md">
+                      <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'User'} />
+                      <AvatarFallback className="font-semibold">
+                        {user?.name ? getInitials(user.name) : 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm text-foreground truncate">
+                        {user?.name || 'Kullanıcı'}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user?.email || ''}
+                      </p>
+                      <Badge
+                        variant={getRoleBadgeVariant(user?.role || UserRole.VIEWER)}
+                        className="text-xs mt-1"
+                      >
+                        {user?.role || 'Viewer'}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+                <div className="p-2">
+                  <Link
+                    href="/settings"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Ayarlar</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors text-left"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Çıkış Yap</span>
+                  </button>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </motion.div>
       </header>

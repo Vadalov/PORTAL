@@ -131,7 +131,7 @@ export default function TestErrorBoundaryPage() {
               <Checkbox
                 id="includeStack"
                 checked={includeStack}
-                onCheckedChange={setIncludeStack}
+                onCheckedChange={(checked) => setIncludeStack(checked === true)}
               />
               <label htmlFor="includeStack" className="text-sm">Include stack trace</label>
             </div>
@@ -139,7 +139,7 @@ export default function TestErrorBoundaryPage() {
               <Checkbox
                 id="simulateHydration"
                 checked={simulateHydration}
-                onCheckedChange={setSimulateHydration}
+                onCheckedChange={(checked) => setSimulateHydration(checked === true)}
               />
               <label htmlFor="simulateHydration" className="text-sm">Simulate hydration error</label>
             </div>

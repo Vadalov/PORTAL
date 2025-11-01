@@ -14,28 +14,40 @@ const config = {
   endpoint: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || '',
   projectId: process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || '',
   apiKey: process.env.APPWRITE_API_KEY || '',
-  databaseId: process.env.NEXT_PUBLIC_DATABASE_ID || 'dernek_db'
+  databaseId: process.env.NEXT_PUBLIC_DATABASE_ID || 'dernek_db',
 };
 
 // Logger utility
 class SeederLogger {
-  private static log(prefix: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') {
+  private static log(
+    prefix: string,
+    message: string,
+    type: 'info' | 'success' | 'warning' | 'error' = 'info'
+  ) {
     const timestamp = new Date().toISOString();
     const color = {
       info: '\x1b[36m',
       success: '\x1b[32m',
       warning: '\x1b[33m',
-      error: '\x1b[31m'
+      error: '\x1b[31m',
     }[type];
-    
+
     const reset = '\x1b[0m';
     console.log(`${color}[${timestamp}] ${prefix}: ${message}${reset}`);
   }
 
-  static info(message: string) { this.log('INFO', message, 'info'); }
-  static success(message: string) { this.log('SUCCESS', message, 'success'); }
-  static warning(message: string) { this.log('WARNING', message, 'warning'); }
-  static error(message: string) { this.log('ERROR', message, 'error'); }
+  static info(message: string) {
+    this.log('INFO', message, 'info');
+  }
+  static success(message: string) {
+    this.log('SUCCESS', message, 'success');
+  }
+  static warning(message: string) {
+    this.log('WARNING', message, 'warning');
+  }
+  static error(message: string) {
+    this.log('ERROR', message, 'error');
+  }
 }
 
 // Sample data generators
@@ -50,7 +62,7 @@ const generateSampleData = {
       eMail: 'admin@dernek.com',
       avatarUrl: null,
       disabled: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     },
     {
       userID: 'user-001',
@@ -60,7 +72,7 @@ const generateSampleData = {
       eMail: 'yardim@dernek.com',
       avatarUrl: null,
       disabled: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     },
     {
       userID: 'viewer-001',
@@ -70,8 +82,8 @@ const generateSampleData = {
       eMail: 'gozlemci@dernek.com',
       avatarUrl: null,
       disabled: false,
-      createdAt: new Date().toISOString()
-    }
+      createdAt: new Date().toISOString(),
+    },
   ],
 
   // Beneficiaries sample data
@@ -86,7 +98,7 @@ const generateSampleData = {
       need: 'Gıda Yardımı',
       status: 'completed',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     },
     {
       userID: 'beneficiary-002',
@@ -98,8 +110,8 @@ const generateSampleData = {
       need: 'Eğitim Yardımı',
       status: 'pending',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+      updatedAt: new Date().toISOString(),
+    },
   ],
 
   // Donations sample data
@@ -107,19 +119,19 @@ const generateSampleData = {
     {
       donationID: 'donation-001',
       userID: 'donor-001',
-      amount: 500.00,
+      amount: 500.0,
       campaign: 'Ramazan Yardım Kampanyası',
       status: 'completed',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     },
     {
       donationID: 'donation-002',
       userID: 'donor-002',
-      amount: 1000.00,
+      amount: 1000.0,
       campaign: 'Yetim Destek Kampanyası',
       status: 'completed',
-      createdAt: new Date().toISOString()
-    }
+      createdAt: new Date().toISOString(),
+    },
   ],
 
   // Tasks sample data
@@ -131,7 +143,7 @@ const generateSampleData = {
       status: 'pending',
       priority: 'medium',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     },
     {
       taskID: 'task-002',
@@ -140,8 +152,8 @@ const generateSampleData = {
       status: 'completed',
       priority: 'high',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+      updatedAt: new Date().toISOString(),
+    },
   ],
 
   // Meetings sample data
@@ -154,7 +166,7 @@ const generateSampleData = {
       location: 'Dernek Merkezi',
       mode: 'in-person',
       status: 'scheduled',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     },
     {
       meetingID: 'meeting-002',
@@ -164,9 +176,9 @@ const generateSampleData = {
       location: 'Online (Zoom)',
       mode: 'online',
       status: 'scheduled',
-      createdAt: new Date().toISOString()
-    }
-  ]
+      createdAt: new Date().toISOString(),
+    },
+  ],
 };
 
 // Database seeding class
@@ -190,28 +202,34 @@ class DatabaseSeeder {
   }
 
   // Check if data already exists
-  private async dataExists(collectionId: string, searchField: string, searchValue: string): Promise<boolean> {
+  private async dataExists(
+    collectionId: string,
+    searchField: string,
+    searchValue: string
+  ): Promise<boolean> {
     try {
-      const result = await this.databases.listDocuments(
-        this.databaseId,
-        collectionId,
-        [Query.equal(searchField, searchValue)]
-      );
+      const result = await this.databases.listDocuments(this.databaseId, collectionId, [
+        Query.equal(searchField, searchValue),
+      ]);
       return result.total > 0;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
 
   // Seed a single collection
-  private async seedCollection(collectionId: string, data: any[], searchField: string = 'userID'): Promise<void> {
+  private async seedCollection(
+    collectionId: string,
+    data: Record<string, unknown>[],
+    searchField: string = 'userID'
+  ): Promise<void> {
     try {
       let seededCount = 0;
       let skippedCount = 0;
 
       for (const item of data) {
         // Check if data already exists
-        if (await this.dataExists(collectionId, searchField, item[searchField])) {
+        if (await this.dataExists(collectionId, searchField, item[searchField] as string)) {
           SeederLogger.warning(`Skipping existing ${collectionId}: ${item[searchField]}`);
           skippedCount++;
           continue;
@@ -221,7 +239,7 @@ class DatabaseSeeder {
         await this.databases.createDocument(
           this.databaseId,
           collectionId,
-          item[searchField],
+          item[searchField] as string,
           item
         );
 
@@ -229,8 +247,9 @@ class DatabaseSeeder {
       }
 
       SeederLogger.success(`✅ ${collectionId}: ${seededCount} seeded, ${skippedCount} skipped`);
-    } catch (error: any) {
-      SeederLogger.error(`❌ Failed to seed ${collectionId}: ${error.message}`);
+    } catch (error) {
+      const err = error as { message?: string };
+      SeederLogger.error(`❌ Failed to seed ${collectionId}: ${err.message}`);
       throw error;
     }
   }
@@ -243,7 +262,7 @@ class DatabaseSeeder {
     try {
       // Seed users first (dependency for other collections)
       await this.seedCollection('users', generateSampleData.users(), 'userID');
-      
+
       // Seed other collections
       await this.seedCollection('beneficiaries', generateSampleData.beneficiaries(), 'userID');
       await this.seedCollection('donations', generateSampleData.donations(), 'donationID');
@@ -255,9 +274,9 @@ class DatabaseSeeder {
 
       SeederLogger.success(`🎉 Seeding completed successfully in ${duration.toFixed(2)}s`);
       SeederLogger.info('Sample data has been added to all collections');
-
-    } catch (error: any) {
-      SeederLogger.error(`💥 Seeding failed: ${error.message}`);
+    } catch (error) {
+      const err = error as { message?: string };
+      SeederLogger.error(`💥 Seeding failed: ${err.message}`);
       throw error;
     }
   }
@@ -268,8 +287,9 @@ async function main() {
   try {
     const seeder = new DatabaseSeeder();
     await seeder.seed();
-  } catch (error: any) {
-    SeederLogger.error(`💥 Fatal error: ${error.message}`);
+  } catch (error) {
+    const err = error as { message?: string };
+    SeederLogger.error(`💥 Fatal error: ${err.message}`);
     process.exit(1);
   }
 }

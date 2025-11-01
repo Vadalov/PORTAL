@@ -120,11 +120,11 @@ export function FileUpload({
 
   const getFileIcon = (file: File) => {
     if (file.type.startsWith('image/')) {
-      return <Image className="h-8 w-8 text-blue-500" />;
+      return <Image className="h-8 w-8 text-primary" />;
     } else if (file.type === 'application/pdf') {
-      return <FileText className="h-8 w-8 text-red-500" />;
+      return <FileText className="h-8 w-8 text-destructive" />;
     } else {
-      return <File className="h-8 w-8 text-gray-500" />;
+      return <File className="h-8 w-8 text-muted-foreground" />;
     }
   };
 
@@ -155,10 +155,10 @@ export function FileUpload({
         className={cn(
           "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
           dragActive
-            ? "border-blue-500 bg-blue-50"
-            : "border-gray-300 hover:border-gray-400",
+            ? "border-primary bg-primary/10"
+            : "border-border hover:border-primary/50",
           disabled && "opacity-50 cursor-not-allowed",
-          error && "border-red-300 bg-red-50"
+          error && "border-destructive bg-destructive/10"
         )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -170,8 +170,8 @@ export function FileUpload({
           <div className="flex items-center justify-center space-x-4">
             {getFileIcon(selectedFile)}
             <div className="text-left">
-              <p className="font-medium text-gray-900">{selectedFile.name}</p>
-              <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)}</p>
+              <p className="font-medium text-foreground">{selectedFile.name}</p>
+              <p className="text-sm text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
             </div>
             {!disabled && (
               <Button
@@ -182,7 +182,7 @@ export function FileUpload({
                   e.stopPropagation();
                   clearFile();
                 }}
-                className="text-red-500 hover:text-red-700"
+                className="text-destructive hover:text-destructive/80"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -190,10 +190,10 @@ export function FileUpload({
           </div>
         ) : (
           <div className="space-y-2">
-            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+            <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
             <div>
-              <p className="text-sm font-medium text-gray-900">{placeholder}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-sm font-medium text-foreground">{placeholder}</p>
+              <p className="text-xs text-muted-foreground">
                 Maksimum {maxSize}MB • Desteklenen formatlar: {accept}
               </p>
             </div>
@@ -203,7 +203,7 @@ export function FileUpload({
 
       {/* Error Message */}
       {error && (
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm text-destructive">{error}</p>
       )}
     </div>
   );

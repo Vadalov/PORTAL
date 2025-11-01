@@ -49,13 +49,13 @@ export function ExportButtons({
         </Button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-1 w-40 bg-white border rounded-lg shadow-lg z-10">
+          <div className="absolute right-0 mt-1 w-40 bg-popover border border-border rounded-lg shadow-lg z-10">
             <button
               onClick={() => {
                 exportCSV(data, filename, columns);
                 setIsOpen(false);
               }}
-              className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm flex items-center gap-2"
+              className="w-full text-left px-4 py-2 hover:bg-accent text-sm flex items-center gap-2"
             >
               <FileSpreadsheet className="h-4 w-4" />
               CSV
@@ -65,7 +65,7 @@ export function ExportButtons({
                 exportJSON(data, filename);
                 setIsOpen(false);
               }}
-              className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm flex items-center gap-2"
+              className="w-full text-left px-4 py-2 hover:bg-accent text-sm flex items-center gap-2"
             >
               <FileJson className="h-4 w-4" />
               JSON
@@ -75,7 +75,7 @@ export function ExportButtons({
                 exportHTML(data, filename, title, columns);
                 setIsOpen(false);
               }}
-              className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm flex items-center gap-2"
+              className="w-full text-left px-4 py-2 hover:bg-accent text-sm flex items-center gap-2"
             >
               <FileText className="h-4 w-4" />
               HTML
@@ -85,7 +85,7 @@ export function ExportButtons({
                 printTable(data, title, columns);
                 setIsOpen(false);
               }}
-              className="w-full text-left px-4 py-2 hover:bg-gray-50 text-sm flex items-center gap-2 border-t"
+              className="w-full text-left px-4 py-2 hover:bg-accent text-sm flex items-center gap-2 border-t"
             >
               <Download className="h-4 w-4" />
               Yazdır

@@ -1,7 +1,18 @@
 {
-  "status": "init",
-  "scope": "codebase",
+  "status": "commited",
   "type": "frontend",
-  "localEndpoint": "http://localhost:3000/",
-  "serverPort": 34049
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "loginUser": "admin@test.com",
+  "loginPassword": "admin123",
+  "executionArgs": {
+    "projectName": "PORTAL",
+    "projectPath": "/home/pc/Resimler/PORTAL",
+    "testIds": [],
+    "additionalInstruction": "",
+    "envs": {
+      "API_KEY": "sk-user-5YbD2vHQp2McKv3zkjNSkHORnCrlWfLRX_tXe-9TXsQBKcfwqKI5MUKCqEJHHRp-U-JUSUHCHOFxnX6eQ-EgE0bKgx9NDBhe3eG0Iq1mGrbGDPCRG9nFbdVs2KoePtmb-rs"
+    }
+  },
+  "proxy": "http://e12be88f-0294-49e7-92db-2718c5fa503f:TQmenNVhAC3e9f5oVse7NaXnxF3Xxgup@tun.testsprite.com:8080"
 }

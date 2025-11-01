@@ -22,8 +22,8 @@ export function Pagination({
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
-      <p className="text-sm text-gray-600">
-        Toplam <span className="font-semibold">{total}</span> kayıt
+      <p className="text-sm text-muted-foreground">
+        Toplam <span className="font-semibold text-foreground">{total}</span> kayıt
         {total > 0 && ` (${startItem}-${endItem} görüntüleniyor)`}
       </p>
 
@@ -40,7 +40,7 @@ export function Pagination({
         </Button>
 
         <div className="flex items-center gap-1 px-2">
-          <span className="text-sm text-gray-600">Sayfa</span>
+          <span className="text-sm text-muted-foreground">Sayfa</span>
           <Input
             type="number"
             value={currentPage}
@@ -54,7 +54,7 @@ export function Pagination({
             min="1"
             max={totalPages}
           />
-          <span className="text-sm text-gray-600">/ {totalPages}</span>
+          <span className="text-sm text-muted-foreground">/ {totalPages}</span>
         </div>
 
         <Button
@@ -100,7 +100,7 @@ export function SimplePagination({
         ← Önceki
       </Button>
 
-      <span className="text-sm text-gray-600 px-2 min-w-[80px] text-center">
+      <span className="text-sm text-muted-foreground px-2 min-w-[80px] text-center">
         {currentPage} / {totalPages}
       </span>
 

@@ -431,7 +431,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
                     <div className="text-sm text-gray-600">
                       <strong>İçerik:</strong>
                     </div>
-                    <div className="bg-white p-3 rounded border text-sm">
+                    <div className="bg-card p-3 rounded border border-border text-sm">
                       {content || 'İçerik yok'}
                     </div>
                   </div>

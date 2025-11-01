@@ -61,13 +61,13 @@ export function CalendarView({ meetings, onMeetingClick, onDateClick }: Calendar
   const getMeetingTypeColor = (type: string) => {
     switch (type) {
       case 'general':
-        return 'bg-blue-500';
+        return 'bg-primary';
       case 'committee':
-        return 'bg-purple-500';
+        return 'bg-secondary';
       case 'board':
-        return 'bg-red-500';
+        return 'bg-destructive';
       default:
-        return 'bg-gray-500';
+        return 'bg-muted';
     }
   };
 

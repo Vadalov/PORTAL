@@ -28,8 +28,8 @@ export function PageLoader({ variant = 'overlay', text = 'Yükleniyor...', class
     return (
       <div className={cn('flex items-center justify-center min-h-[400px]', className)}>
         <div className="text-center space-y-3">
-          <div className="w-16 h-16 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
-          <p className="text-gray-600">{text}</p>
+          <div className="w-16 h-16 border-4 border-muted border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-muted-foreground">{text}</p>
         </div>
       </div>
     );
@@ -55,15 +55,15 @@ export function PageLoader({ variant = 'overlay', text = 'Yükleniyor...', class
       </div>
 
       {/* Table skeleton */}
-      <div className="border rounded-lg overflow-hidden">
-        <div className="bg-gray-50 border-b p-4 flex gap-4">
+      <div className="border border-border rounded-lg overflow-hidden">
+        <div className="bg-muted/30 border-b border-border p-4 flex gap-4">
           <Skeleton className="h-4 w-24" />
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-4 w-40" />
           <Skeleton className="h-4 w-20" />
         </div>
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="border-b p-4 flex gap-4">
+          <div key={i} className="border-b border-border p-4 flex gap-4">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-4 w-40" />

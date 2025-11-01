@@ -30,7 +30,8 @@ export default function TestAppwritePage() {
       // Test 2: Test beneficiaries API
       try {
         const beneficiaries = await api.beneficiaries.getBeneficiaries({ page: 1, limit: 5 });
-        const total = Array.isArray(beneficiaries.data) ? beneficiaries.data.length : beneficiaries.data?.total || 0;
+        const data = (beneficiaries as any).data;
+        const total = Array.isArray(data) ? data.length : data?.total || 0;
         addResult(`✅ Beneficiaries API working: ${total} total records`);
       } catch (error: any) {
         addResult(`❌ Beneficiaries API error: ${error.message}`);
@@ -39,7 +40,7 @@ export default function TestAppwritePage() {
       // Test 3: Test donations API
       try {
         const donations = await api.donations.getDonations({ page: 1, limit: 5 });
-        addResult(`✅ Donations API working: ${donations.total} total records`);
+        addResult(`✅ Donations API working: ${(donations as any).total} total records`);
       } catch (error: any) {
         addResult(`❌ Donations API error: ${error.message}`);
       }
@@ -47,7 +48,7 @@ export default function TestAppwritePage() {
       // Test 4: Test tasks API
       try {
         const tasks = await api.tasks.getTasks({ page: 1, limit: 5 });
-        addResult(`✅ Tasks API working: ${tasks.total} total records`);
+        addResult(`✅ Tasks API working: ${(tasks as any).total} total records`);
       } catch (error: any) {
         addResult(`❌ Tasks API error: ${error.message}`);
       }

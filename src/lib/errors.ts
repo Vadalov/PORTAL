@@ -8,7 +8,7 @@ export class AppError extends Error {
     message: string,
     public code: string,
     public statusCode: number = 500,
-    public details?: any
+    public details?: unknown
   ) {
     super(message);
     this.name = 'AppError';
@@ -18,28 +18,28 @@ export class AppError extends Error {
 
 // Authentication Errors
 export class AuthenticationError extends AppError {
-  constructor(message: string = 'Kimlik doğrulama hatası', details?: any) {
+  constructor(message: string = 'Kimlik doğrulama hatası', details?: unknown) {
     super(message, 'AUTH_ERROR', 401, details);
     this.name = 'AuthenticationError';
   }
 }
 
 export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Bu işlem için yetkiniz yok', details?: any) {
+  constructor(message: string = 'Bu işlem için yetkiniz yok', details?: unknown) {
     super(message, 'UNAUTHORIZED', 403, details);
     this.name = 'UnauthorizedError';
   }
 }
 
 export class InvalidCredentialsError extends AppError {
-  constructor(message: string = 'Email veya şifre hatalı', details?: any) {
+  constructor(message: string = 'Email veya şifre hatalı', details?: unknown) {
     super(message, 'INVALID_CREDENTIALS', 401, details);
     this.name = 'InvalidCredentialsError';
   }
 }
 
 export class SessionExpiredError extends AppError {
-  constructor(message: string = 'Oturumunuz sona erdi. Lütfen tekrar giriş yapın', details?: any) {
+  constructor(message: string = 'Oturumunuz sona erdi. Lütfen tekrar giriş yapın', details?: unknown) {
     super(message, 'SESSION_EXPIRED', 401, details);
     this.name = 'SessionExpiredError';
   }
@@ -47,14 +47,14 @@ export class SessionExpiredError extends AppError {
 
 // Validation Errors
 export class ValidationError extends AppError {
-  constructor(message: string = 'Girilen bilgiler geçersiz', details?: any) {
+  constructor(message: string = 'Girilen bilgiler geçersiz', details?: unknown) {
     super(message, 'VALIDATION_ERROR', 400, details);
     this.name = 'ValidationError';
   }
 }
 
 export class InvalidInputError extends AppError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: unknown) {
     super(message, 'INVALID_INPUT', 400, details);
     this.name = 'InvalidInputError';
   }
@@ -62,21 +62,21 @@ export class InvalidInputError extends AppError {
 
 // Resource Errors
 export class NotFoundError extends AppError {
-  constructor(resource: string = 'Kayıt', details?: any) {
+  constructor(resource: string = 'Kayıt', details?: unknown) {
     super(`${resource} bulunamadı`, 'NOT_FOUND', 404, details);
     this.name = 'NotFoundError';
   }
 }
 
 export class DuplicateError extends AppError {
-  constructor(message: string = 'Bu kayıt zaten mevcut', details?: any) {
+  constructor(message: string = 'Bu kayıt zaten mevcut', details?: unknown) {
     super(message, 'DUPLICATE', 409, details);
     this.name = 'DuplicateError';
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string = 'İşlem çakışması oluştu', details?: any) {
+  constructor(message: string = 'İşlem çakışması oluştu', details?: unknown) {
     super(message, 'CONFLICT', 409, details);
     this.name = 'ConflictError';
   }
@@ -92,21 +92,21 @@ export class RateLimitError extends AppError {
 
 // File Upload Errors
 export class FileUploadError extends AppError {
-  constructor(message: string = 'Dosya yükleme hatası', details?: any) {
+  constructor(message: string = 'Dosya yükleme hatası', details?: unknown) {
     super(message, 'FILE_UPLOAD_ERROR', 400, details);
     this.name = 'FileUploadError';
   }
 }
 
 export class FileSizeError extends AppError {
-  constructor(maxSize: number, details?: any) {
+  constructor(maxSize: number, details?: unknown) {
     super(`Dosya boyutu ${maxSize}MB'dan büyük olamaz`, 'FILE_SIZE_ERROR', 400, details);
     this.name = 'FileSizeError';
   }
 }
 
 export class FileTypeError extends AppError {
-  constructor(message: string = 'Desteklenmeyen dosya türü', details?: any) {
+  constructor(message: string = 'Desteklenmeyen dosya türü', details?: unknown) {
     super(message, 'FILE_TYPE_ERROR', 400, details);
     this.name = 'FileTypeError';
   }
@@ -114,7 +114,7 @@ export class FileTypeError extends AppError {
 
 // Database Errors
 export class DatabaseError extends AppError {
-  constructor(message: string = 'Veritabanı hatası oluştu', details?: any) {
+  constructor(message: string = 'Veritabanı hatası oluştu', details?: unknown) {
     super(message, 'DATABASE_ERROR', 500, details);
     this.name = 'DatabaseError';
   }
@@ -122,21 +122,21 @@ export class DatabaseError extends AppError {
 
 // External Service Errors
 export class ExternalServiceError extends AppError {
-  constructor(service: string, message: string = 'Harici servis hatası', details?: any) {
+  constructor(service: string, message: string = 'Harici servis hatası', details?: unknown) {
     super(`${service}: ${message}`, 'EXTERNAL_SERVICE_ERROR', 502, details);
     this.name = 'ExternalServiceError';
   }
 }
 
 export class EmailServiceError extends AppError {
-  constructor(message: string = 'Email gönderimi başarısız', details?: any) {
+  constructor(message: string = 'Email gönderimi başarısız', details?: unknown) {
     super(message, 'EMAIL_ERROR', 500, details);
     this.name = 'EmailServiceError';
   }
 }
 
 export class SmsServiceError extends AppError {
-  constructor(message: string = 'SMS gönderimi başarısız', details?: any) {
+  constructor(message: string = 'SMS gönderimi başarısız', details?: unknown) {
     super(message, 'SMS_ERROR', 500, details);
     this.name = 'SmsServiceError';
   }
@@ -144,14 +144,14 @@ export class SmsServiceError extends AppError {
 
 // Business Logic Errors
 export class InsufficientBalanceError extends AppError {
-  constructor(message: string = 'Yetersiz bakiye', details?: any) {
+  constructor(message: string = 'Yetersiz bakiye', details?: unknown) {
     super(message, 'INSUFFICIENT_BALANCE', 400, details);
     this.name = 'InsufficientBalanceError';
   }
 }
 
 export class InvalidStatusError extends AppError {
-  constructor(message: string = 'Geçersiz durum', details?: any) {
+  constructor(message: string = 'Geçersiz durum', details?: unknown) {
     super(message, 'INVALID_STATUS', 400, details);
     this.name = 'InvalidStatusError';
   }
@@ -159,14 +159,14 @@ export class InvalidStatusError extends AppError {
 
 // Generic Errors
 export class BadRequestError extends AppError {
-  constructor(message: string = 'Geçersiz istek', details?: any) {
+  constructor(message: string = 'Geçersiz istek', details?: unknown) {
     super(message, 'BAD_REQUEST', 400, details);
     this.name = 'BadRequestError';
   }
 }
 
 export class InternalServerError extends AppError {
-  constructor(message: string = 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin', details?: any) {
+  constructor(message: string = 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin', details?: unknown) {
     super(message, 'INTERNAL_SERVER_ERROR', 500, details);
     this.name = 'InternalServerError';
   }
@@ -304,7 +304,7 @@ export interface ErrorResponse {
   success: false;
   error: string;
   code?: string;
-  details?: any;
+  details?: unknown;
 }
 
 export function createErrorResponse(error: any): ErrorResponse {

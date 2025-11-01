@@ -152,8 +152,8 @@ describe('AuthStore', () => {
         await result.current.login('admin@test.com', 'admin123')
       })
 
-      expect(result.current.hasPermission('beneficiaries.read')).toBe(true)
-      expect(result.current.hasRole('ADMIN')).toBe(true)
+      expect(result.current.hasPermission('beneficiaries:read' as any)).toBe(true)
+      expect(result.current.hasRole('ADMIN' as any)).toBe(true)
     })
   })
 

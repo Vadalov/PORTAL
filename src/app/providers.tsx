@@ -7,11 +7,13 @@ import { Toaster } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import { useState } from 'react';
 
-// Debug utilities (development only)
-import { HydrationLogger } from '@/lib/debug/hydration-logger';
-import { StoreDebugger } from '@/lib/debug/store-debugger';
-import { NetworkMonitor } from '@/lib/debug/network-monitor';
 import { SuspenseBoundary } from '@/components/ui/suspense-boundary';
+
+// TypeScript interfaces for window objects
+interface WindowWithDebug extends Window {
+  __AUTH_STORE__?: typeof useAuthStore;
+  __QUERY_CLIENT__?: QueryClient;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -26,7 +28,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
-  const [mounted, setMounted] = useState(false);
+  const [mounted] = useState(true);
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const initializeAuth = useAuthStore((state) => state?.initializeAuth);
 
@@ -35,14 +37,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔍 Debug mode enabled');
 
-      HydrationLogger.init();
-      StoreDebugger.init(useAuthStore, 'authStore');
-      NetworkMonitor.init();
-
-      // Expose to window for manual debugging
+      // Expose to window for manual debugging (safe)
       if (typeof window !== 'undefined') {
-        (window as any).__AUTH_STORE__ = useAuthStore;
-        (window as any).__QUERY_CLIENT__ = queryClient;
+        const windowWithDebug = window as WindowWithDebug;
+        windowWithDebug.__AUTH_STORE__ = useAuthStore;
+        windowWithDebug.__QUERY_CLIENT__ = queryClient;
       }
     }
   }, [queryClient]);
@@ -50,10 +49,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Manual rehydration for skipHydration: true
   useEffect(() => {
     useAuthStore.persist.rehydrate();
-  }, []);
-
-  useEffect(() => {
-    setMounted(true);
   }, []);
 
   // Wait for both mounted and hydration complete before initializing auth

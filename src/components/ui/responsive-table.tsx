@@ -78,8 +78,8 @@ export function ResponsiveTable({
             {data.map((row, index) => (
               <tr
                 key={String(row[rowKey])}
-                className={`border-b hover:bg-blue-50 transition-colors cursor-pointer ${
-                  index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                className={`border-b hover:bg-primary/5 transition-colors cursor-pointer ${
+                  index % 2 === 0 ? 'bg-card' : 'bg-muted/30'
                 }`}
                 onClick={() => onRowClick?.(row)}
               >
