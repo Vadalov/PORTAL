@@ -24,7 +24,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -47,7 +47,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     renderHook(() => useInfiniteScroll({
       limit: 50,
@@ -76,7 +76,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -96,7 +96,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -116,7 +116,7 @@ describe('useInfiniteScroll Hook', () => {
       isFetching: false,
       isFetchingNextPage: false,
       isLoading: false,
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
@@ -162,7 +162,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const queryFn = vi.fn();
     
@@ -191,7 +191,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => usePaginatedQuery(
       ['test'],
@@ -228,7 +228,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: false,
       error: new Error('Query failed'),
       refetch: vi.fn(),
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => usePaginatedQuery(
       ['test'],
@@ -247,7 +247,7 @@ describe('usePaginatedQuery Hook', () => {
       isLoading: false,
       error: null,
       refetch: mockRefetch,
-    } as Partial<UseInfiniteQueryResult> as UseInfiniteQueryResult);
+    } as unknown as UseInfiniteQueryResult);
 
     const { result } = renderHook(() => usePaginatedQuery(
       ['test'],
