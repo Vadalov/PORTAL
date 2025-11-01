@@ -3,10 +3,9 @@ import {
   safeFill,
   loginAsAdmin,
   waitForNetworkIdle,
-  waitForElement,
   expectTextToBeVisible,
   expectURLToMatch,
-  TEST_CONFIG
+  TEST_CONFIG,
 } from './test-utils';
 import { setupMockAPI } from './mock-api';
 
@@ -14,7 +13,7 @@ test.describe('Beneficiaries Module', () => {
   test.beforeEach(async ({ page }) => {
     // Setup mock API for stable tests
     setupMockAPI(page);
-    
+
     // Login using enhanced helper
     await loginAsAdmin(page);
   });
@@ -30,9 +29,14 @@ test.describe('Beneficiaries Module', () => {
       '[data-testid="page-title"]:has-text(/İhtiyaç Sahipleri/)',
       '.page-header h1:has-text(/İhtiyaç Sahipleri/)',
     ];
-    
+
     for (const selector of titleSelectors) {
-      if (await page.locator(selector).isVisible().catch(() => false)) {
+      if (
+        await page
+          .locator(selector)
+          .isVisible()
+          .catch(() => false)
+      ) {
         await expect(page.locator(selector)).toBeVisible();
         break;
       }
@@ -46,16 +50,21 @@ test.describe('Beneficiaries Module', () => {
       '[data-testid="search-input"]',
       '.search-box input',
     ];
-    
+
     let searchFound = false;
     for (const selector of searchSelectors) {
-      if (await page.locator(selector).isVisible().catch(() => false)) {
+      if (
+        await page
+          .locator(selector)
+          .isVisible()
+          .catch(() => false)
+      ) {
         await expect(page.locator(selector)).toBeVisible();
         searchFound = true;
         break;
       }
     }
-    
+
     // If no search box found, test still passes (feature might not be implemented)
     expect(searchFound || true).toBeTruthy();
 
@@ -66,16 +75,21 @@ test.describe('Beneficiaries Module', () => {
       '[data-testid="filter-button"]',
       '.filter-toggle',
     ];
-    
+
     let filterFound = false;
     for (const selector of filterSelectors) {
-      if (await page.locator(selector).isVisible().catch(() => false)) {
+      if (
+        await page
+          .locator(selector)
+          .isVisible()
+          .catch(() => false)
+      ) {
         await expect(page.locator(selector)).toBeVisible();
         filterFound = true;
         break;
       }
     }
-    
+
     // If no filter found, test still passes
     expect(filterFound || true).toBeTruthy();
   });
@@ -106,11 +120,17 @@ test.describe('Beneficiaries Module', () => {
       try {
         const url = page.url();
         const hasQueryParam = url.includes('search') || url.includes('q') || url.includes('?');
-        
+
         // Also check for search results or loading states
-        const hasResults = await page.locator('tbody tr, [data-row], .beneficiary-item').isVisible().catch(() => false);
-        const hasLoading = await page.locator('.loading, .spinner, [aria-busy="true"]').isVisible().catch(() => false);
-        
+        const hasResults = await page
+          .locator('tbody tr, [data-row], .beneficiary-item')
+          .isVisible()
+          .catch(() => false);
+        const hasLoading = await page
+          .locator('.loading, .spinner, [aria-busy="true"]')
+          .isVisible()
+          .catch(() => false);
+
         expect(hasQueryParam || hasResults || hasLoading).toBeTruthy();
       } catch {
         // If URL check fails, just verify that search interaction worked
@@ -202,8 +222,12 @@ test.describe('Beneficiaries Module', () => {
     if (beneficiaryFound) {
       // Wait for navigation with enhanced URL validation
       try {
-        await expectURLToMatch(page, /\/yardim\/ihtiyac-sahipleri\/[^/]+/, TEST_CONFIG.LONG_TIMEOUT);
-        
+        await expectURLToMatch(
+          page,
+          /\/yardim\/ihtiyac-sahipleri\/[^/]+/,
+          TEST_CONFIG.LONG_TIMEOUT
+        );
+
         // Enhanced detail page validation
         const detailInfoSelectors = [
           'text=/Ad|Soyad/',
@@ -211,17 +235,22 @@ test.describe('Beneficiaries Module', () => {
           '[data-testid="beneficiary-details"]',
           '.beneficiary-info',
         ];
-        
+
         let detailFound = false;
         for (const selector of detailInfoSelectors) {
-          if (await page.locator(selector).isVisible({ timeout: TEST_CONFIG.SHORT_TIMEOUT }).catch(() => false)) {
+          if (
+            await page
+              .locator(selector)
+              .isVisible({ timeout: TEST_CONFIG.SHORT_TIMEOUT })
+              .catch(() => false)
+          ) {
             detailFound = true;
             break;
           }
         }
-        
+
         expect(detailFound).toBeTruthy();
-      } catch (error) {
+      } catch (_error) {
         // If navigation fails, check if we're still on list page (acceptable)
         await expectTextToBeVisible(page, 'İhtiyaç Sahipleri', TEST_CONFIG.SHORT_TIMEOUT);
       }
@@ -277,7 +306,12 @@ test.describe('Beneficiaries Module', () => {
       // Check for modal
       let modalFound = false;
       for (const selector of modalSelectors) {
-        if (await page.locator(selector).isVisible({ timeout: 2000 }).catch(() => false)) {
+        if (
+          await page
+            .locator(selector)
+            .isVisible({ timeout: 2000 })
+            .catch(() => false)
+        ) {
           modalFound = true;
           break;
         }
@@ -286,7 +320,12 @@ test.describe('Beneficiaries Module', () => {
       // Check for form page
       let formFound = false;
       for (const selector of formPageSelectors) {
-        if (await page.locator(selector).isVisible({ timeout: 2000 }).catch(() => false)) {
+        if (
+          await page
+            .locator(selector)
+            .isVisible({ timeout: 2000 })
+            .catch(() => false)
+        ) {
           formFound = true;
           break;
         }
@@ -421,7 +460,9 @@ test.describe('Beneficiary Form Validation', () => {
 
       for (const selector of submitButtonSelectors) {
         const submitButton = page.locator(selector).first();
-        if (await submitButton.isVisible({ timeout: TEST_CONFIG.SHORT_TIMEOUT }).catch(() => false)) {
+        if (
+          await submitButton.isVisible({ timeout: TEST_CONFIG.SHORT_TIMEOUT }).catch(() => false)
+        ) {
           await submitButton.click();
           await page.waitForTimeout(500);
 

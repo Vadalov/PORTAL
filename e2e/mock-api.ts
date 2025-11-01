@@ -1,6 +1,5 @@
 // Mock API for E2E tests - Provides deterministic test data and network error simulation
 import { Page, Route } from '@playwright/test';
-import { TEST_CONFIG } from './test-utils';
 
 // Mock data constants for deterministic tests
 export const MOCK_DATA = {
@@ -22,7 +21,7 @@ export const MOCK_DATA = {
       updatedAt: '2024-01-01T00:00:00Z',
     },
   ],
-  
+
   beneficiaries: [
     {
       id: 'beneficiary_001',
@@ -51,7 +50,7 @@ export const MOCK_DATA = {
       updatedAt: '2024-01-01T00:00:00Z',
     },
   ],
-  
+
   donations: [
     {
       id: 'donation_001',
@@ -63,7 +62,7 @@ export const MOCK_DATA = {
       updatedAt: '2024-01-01T00:00:00Z',
     },
   ],
-  
+
   tasks: [
     {
       id: 'task_001',
@@ -122,52 +121,52 @@ export class MockAPIHandler {
   // Setup mock routes for the page
   setupMockRoutes(): void {
     // Mock authentication routes
-    this.page.route('/api/csrf', async route => {
+    this.page.route('/api/csrf', async (route) => {
       await this.handleCSRF(route);
     });
 
-    this.page.route('/api/auth/login', async route => {
+    this.page.route('/api/auth/login', async (route) => {
       await this.handleLogin(route);
     });
 
-    this.page.route('/api/auth/logout', async route => {
+    this.page.route('/api/auth/logout', async (route) => {
       await this.handleLogout(route);
     });
 
-    this.page.route('/api/auth/me', async route => {
+    this.page.route('/api/auth/me', async (route) => {
       await this.handleMe(route);
     });
 
     // Mock user management routes
-    this.page.route('/api/users', async route => {
+    this.page.route('/api/users', async (route) => {
       await this.handleUsers(route);
     });
 
-    this.page.route('/api/users/*', async route => {
+    this.page.route('/api/users/*', async (route) => {
       await this.handleUserById(route);
     });
 
     // Mock beneficiary routes
-    this.page.route('/api/beneficiaries', async route => {
+    this.page.route('/api/beneficiaries', async (route) => {
       await this.handleBeneficiaries(route);
     });
 
-    this.page.route('/api/beneficiaries/*', async route => {
+    this.page.route('/api/beneficiaries/*', async (route) => {
       await this.handleBeneficiaryById(route);
     });
 
     // Mock donation routes
-    this.page.route('/api/donations', async route => {
+    this.page.route('/api/donations', async (route) => {
       await this.handleDonations(route);
     });
 
     // Mock task routes
-    this.page.route('/api/tasks', async route => {
+    this.page.route('/api/tasks', async (route) => {
       await this.handleTasks(route);
     });
 
     // Mock health check
-    this.page.route('/api/health/appwrite', async route => {
+    this.page.route('/api/health/appwrite', async (route) => {
       await this.handleAppwriteHealth(route);
     });
   }
@@ -175,7 +174,7 @@ export class MockAPIHandler {
   // Individual route handlers
   private async handleCSRF(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -194,10 +193,10 @@ export class MockAPIHandler {
 
   private async handleLogin(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     const request = route.request();
     const postData = request.postDataJSON();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -225,7 +224,7 @@ export class MockAPIHandler {
 
   private async handleLogout(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -244,7 +243,7 @@ export class MockAPIHandler {
 
   private async handleMe(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -263,7 +262,7 @@ export class MockAPIHandler {
 
   private async handleUsers(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -274,7 +273,7 @@ export class MockAPIHandler {
     }
 
     const method = route.request().method();
-    
+
     if (method === 'GET') {
       await route.fulfill({
         status: 200,
@@ -289,7 +288,7 @@ export class MockAPIHandler {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
+
       await route.fulfill({
         status: 201,
         contentType: 'application/json',
@@ -300,7 +299,7 @@ export class MockAPIHandler {
 
   private async handleUserById(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -312,8 +311,8 @@ export class MockAPIHandler {
 
     const url = route.request().url();
     const userId = url.split('/').pop();
-    const user = MOCK_DATA.users.find(u => u.id === userId);
-    
+    const user = MOCK_DATA.users.find((u) => u.id === userId);
+
     if (user) {
       await route.fulfill({
         status: 200,
@@ -331,7 +330,7 @@ export class MockAPIHandler {
 
   private async handleBeneficiaries(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -342,12 +341,15 @@ export class MockAPIHandler {
     }
 
     const method = route.request().method();
-    
+
     if (method === 'GET') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ data: MOCK_DATA.beneficiaries, total: MOCK_DATA.beneficiaries.length }),
+        body: JSON.stringify({
+          data: MOCK_DATA.beneficiaries,
+          total: MOCK_DATA.beneficiaries.length,
+        }),
       });
     } else if (method === 'POST') {
       // Mock beneficiary creation
@@ -357,7 +359,7 @@ export class MockAPIHandler {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
+
       await route.fulfill({
         status: 201,
         contentType: 'application/json',
@@ -368,7 +370,7 @@ export class MockAPIHandler {
 
   private async handleBeneficiaryById(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -380,11 +382,11 @@ export class MockAPIHandler {
 
     const url = route.request().url();
     const beneficiaryId = url.split('/').pop();
-    const beneficiary = MOCK_DATA.beneficiaries.find(b => b.id === beneficiaryId);
-    
+    const beneficiary = MOCK_DATA.beneficiaries.find((b) => b.id === beneficiaryId);
+
     if (beneficiary) {
       const method = route.request().method();
-      
+
       if (method === 'GET') {
         await route.fulfill({
           status: 200,
@@ -398,7 +400,7 @@ export class MockAPIHandler {
           ...route.request().postDataJSON(),
           updatedAt: new Date().toISOString(),
         };
-        
+
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -422,7 +424,7 @@ export class MockAPIHandler {
 
   private async handleDonations(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -433,7 +435,7 @@ export class MockAPIHandler {
     }
 
     const method = route.request().method();
-    
+
     if (method === 'GET') {
       await route.fulfill({
         status: 200,
@@ -445,7 +447,7 @@ export class MockAPIHandler {
 
   private async handleTasks(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     if (this.networkErrors) {
       await route.fulfill({
         status: 500,
@@ -456,7 +458,7 @@ export class MockAPIHandler {
     }
 
     const method = route.request().method();
-    
+
     if (method === 'GET') {
       await route.fulfill({
         status: 200,
@@ -468,14 +470,14 @@ export class MockAPIHandler {
 
   private async handleAppwriteHealth(route: Route): Promise<void> {
     await this.simulateDelay();
-    
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ 
-        status: 'connected', 
+      body: JSON.stringify({
+        status: 'connected',
         success: true,
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString(),
       }),
     });
   }
@@ -491,20 +493,23 @@ export class MockAPIHandler {
 }
 
 // Helper function to setup mock API for a test
-export function setupMockAPI(page: Page, options: {
-  enableNetworkErrors?: boolean;
-  enableSlowNetwork?: boolean;
-} = {}): MockAPIHandler {
+export function setupMockAPI(
+  page: Page,
+  options: {
+    enableNetworkErrors?: boolean;
+    enableSlowNetwork?: boolean;
+  } = {}
+): MockAPIHandler {
   const handler = new MockAPIHandler(page);
-  
+
   if (options.enableNetworkErrors) {
     handler.enableNetworkErrors();
   }
-  
+
   if (options.enableSlowNetwork) {
     handler.enableSlowNetwork();
   }
-  
+
   handler.setupMockRoutes();
   return handler;
 }

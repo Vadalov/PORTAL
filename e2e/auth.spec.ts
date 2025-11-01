@@ -3,10 +3,9 @@ import {
   loginAsAdmin,
   logout,
   waitForNetworkIdle,
-  waitForElement,
   getCSRFToken,
   safeClick,
-  TEST_CONFIG
+  TEST_CONFIG,
 } from './test-utils';
 import { setupMockAPI } from './mock-api';
 
@@ -22,8 +21,10 @@ test.describe('Authentication Flow', () => {
 
     // Enhanced form field detection
     const emailField = page.locator('input[type="email"], input[name="email"], #email').first();
-    const passwordField = page.locator('input[type="password"], input[name="password"], #password').first();
-    
+    const passwordField = page
+      .locator('input[type="password"], input[name="password"], #password')
+      .first();
+
     await emailField.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
     await passwordField.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
 
@@ -40,12 +41,12 @@ test.describe('Authentication Flow', () => {
         data: {
           email: 'admin@test.com',
           password: 'admin123',
-          rememberMe: false
+          rememberMe: false,
         },
         headers: {
           'x-csrf-token': csrfToken,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+        },
       });
 
       expect(response.ok()).toBeTruthy();
@@ -60,17 +61,22 @@ test.describe('Authentication Flow', () => {
         '[data-testid="dashboard-title"]',
         '.dashboard-header h1',
       ];
-      
+
       let welcomeFound = false;
       for (const selector of welcomeSelectors) {
-        if (await page.locator(selector).isVisible({ timeout: TEST_CONFIG.SHORT_TIMEOUT }).catch(() => false)) {
+        if (
+          await page
+            .locator(selector)
+            .isVisible({ timeout: TEST_CONFIG.SHORT_TIMEOUT })
+            .catch(() => false)
+        ) {
           welcomeFound = true;
           break;
         }
       }
-      
+
       expect(welcomeFound).toBeTruthy();
-    } catch (error) {
+    } catch (_error) {
       // If API call fails, verify UI feedback
       const errorMessage = page.locator('.error-message, text=/hata|error/i').first();
       await expect(errorMessage).toBeVisible({ timeout: TEST_CONFIG.SHORT_TIMEOUT });
@@ -83,8 +89,10 @@ test.describe('Authentication Flow', () => {
 
     // Enhanced form field detection
     const emailField = page.locator('input[type="email"], input[name="email"], #email').first();
-    const passwordField = page.locator('input[type="password"], input[name="password"], #password').first();
-    
+    const passwordField = page
+      .locator('input[type="password"], input[name="password"], #password')
+      .first();
+
     await emailField.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
     await passwordField.waitFor({ state: 'visible', timeout: TEST_CONFIG.SHORT_TIMEOUT });
 
@@ -98,12 +106,12 @@ test.describe('Authentication Flow', () => {
       data: {
         email: 'invalid@test.com',
         password: 'wrongpassword',
-        rememberMe: false
+        rememberMe: false,
       },
       headers: {
         'x-csrf-token': csrfToken,
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
 
     // Enhanced error validation
@@ -118,15 +126,20 @@ test.describe('Authentication Flow', () => {
       'text=/hata|error/i',
       '[role="alert"]',
     ];
-    
+
     let uiErrorFound = false;
     for (const selector of errorSelectors) {
-      if (await page.locator(selector).isVisible({ timeout: 1000 }).catch(() => false)) {
+      if (
+        await page
+          .locator(selector)
+          .isVisible({ timeout: 1000 })
+          .catch(() => false)
+      ) {
         uiErrorFound = true;
         break;
       }
     }
-    
+
     expect(uiErrorFound || responseData.success === false).toBeTruthy();
   });
 
@@ -175,10 +188,10 @@ test.describe('Protected Routes', () => {
   test('should deny access to protected API without authentication', async ({ page }) => {
     // Try to access protected API without authentication
     const response = await page.request.get('/api/users');
-    
+
     // Should return 401 Unauthorized
     expect(response.status()).toBe(401);
-    
+
     const responseData = await response.json();
     expect(responseData.error).toBe('Unauthorized');
   });
@@ -186,10 +199,10 @@ test.describe('Protected Routes', () => {
   test('should allow access to protected API with authentication', async ({ page }) => {
     // Login first
     await loginAsAdmin(page);
-    
+
     // Access protected API with authentication
     const response = await page.request.get('/api/users');
-    
+
     // Should return 200 OK
     expect(response.status()).toBe(200);
   });
@@ -197,18 +210,18 @@ test.describe('Protected Routes', () => {
   test('should enforce CSRF protection on API requests', async ({ page }) => {
     // Login first
     await loginAsAdmin(page);
-    
+
     // Try to make POST request without CSRF token
     const response = await page.request.post('/api/users', {
       data: { name: 'Test User' },
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     // Should return 403 Forbidden
     expect(response.status()).toBe(403);
-    
+
     const responseData = await response.json();
     expect(responseData.error).toContain('CSRF');
   });
