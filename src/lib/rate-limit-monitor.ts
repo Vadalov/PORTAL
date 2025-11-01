@@ -1,5 +1,4 @@
 import { RateLimiter } from './security';
-import { NextRequest, NextResponse } from 'next/server';
 
 // Rate limit monitoring arayüzü
 export interface RateLimitViolation {

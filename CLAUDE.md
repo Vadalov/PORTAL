@@ -81,6 +81,35 @@ npm run e2e:ui       # Run E2E tests with UI
 npx playwright test e2e/beneficiaries.spec.ts
 npx playwright test --headed  # Run with visible browser
 npx playwright test --debug   # Run in debug mode
+
+# Boundary tests
+npm run test:error-boundaries    # Test error boundary behavior
+npm run test:loading-states      # Test loading state rendering
+npm run test:suspense            # Test suspense boundaries
+npm run test:all-boundaries      # Run all boundary tests
+```
+
+### Diagnostic & System Testing
+
+```bash
+# Configuration & connectivity
+npm run validate:config       # Validate environment variables
+npm run test:connectivity     # Test Appwrite connectivity
+npm run diagnose              # Comprehensive diagnostics
+npm run health:check          # Check API health endpoint
+
+# System testing
+npm run test:full-system      # Complete system validation
+npm run test:browsers         # Browser compatibility tests
+npm run test:prod             # Test production build
+npm run test:prod-enhanced    # Enhanced production testing
+npm run test:integration      # Full integration test suite
+npm run test:all              # All tests (unit + E2E + boundaries + integration)
+
+# Debugging
+npm run debug:hydration       # Debug hydration issues
+npm run clean                 # Clean .next cache
+npm run clean:all             # Clean everything and reinstall
 ```
 
 ### Code Quality Checks
@@ -443,14 +472,14 @@ Configured in `tsconfig.json`:
 **Setup Scripts:**
 
 ```bash
-# Test Appwrite connection
-npx tsx src/scripts/test-appwrite-connection.ts
+# Automated setup
+npm run appwrite:setup          # Interactive setup wizard
+npm run appwrite:deploy:quick   # Quick deployment script
 
-# Create test users
-npx tsx src/scripts/create-test-users.ts
-
-# Migrate data (if needed)
-npx tsx src/scripts/migrate-to-appwrite.ts
+# Manual operations
+npx tsx src/scripts/test-appwrite-connection.ts  # Test connection
+npx tsx src/scripts/create-test-users.ts         # Create test users
+npx tsx src/scripts/migrate-to-appwrite.ts       # Migrate data
 ```
 
 ## Module Organization
@@ -478,10 +507,12 @@ The application is organized into modules, each with subpages:
 5. **Appwrite SDK Selection:** Always use correct SDK (client.ts vs server.ts) - see Appwrite Backend Integration section
 6. **Environment Variables:** Never commit `.env.local` - keep API keys secure
 7. **CSRF Protection:** All mutations require CSRF tokens from `/api/csrf`
-8. **File Uploads:** Use Appwrite Storage buckets with proper permissions
-9. **Input Sanitization:** All user inputs must be sanitized using functions from `src/lib/sanitization.ts`
-10. **Validation:** Use Zod schemas from `src/lib/validations/` for all form validations
-11. **Error Monitoring:** Sentry is configured for both client and server - errors are automatically tracked
+8. **Rate Limiting:** API routes have rate limiting configured (see `src/lib/rate-limit.ts` and `src/lib/rate-limit-config.ts`)
+9. **File Uploads:** Use Appwrite Storage buckets with proper permissions (see `src/lib/appwrite/storage.ts`)
+10. **Input Sanitization:** All user inputs must be sanitized using functions from `src/lib/sanitization.ts`
+11. **Validation:** Use Zod schemas from `src/lib/validations/` for all form validations
+12. **Error Monitoring:** Sentry is configured for both client and server - errors are automatically tracked
+13. **SDK Guard:** Use `src/lib/appwrite/sdk-guard.ts` for runtime checks to prevent SDK misuse
 
 ## Security & Validation
 

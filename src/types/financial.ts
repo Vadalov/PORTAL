@@ -234,8 +234,8 @@ export interface TransactionQuery {
   maxAmount?: number;
   status?: string;
   search?: string;
-  page?: number;
-  limit?: number;
+  page: number;
+  limit: number;
   sortBy?: 'date' | 'amount' | 'category';
   sortOrder?: 'asc' | 'desc';
 }

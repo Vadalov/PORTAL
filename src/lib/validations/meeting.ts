@@ -8,7 +8,7 @@ import { z } from 'zod';
 /**
  * Helper: Validate future date (meetings can't be scheduled in the past)
  */
-const futureDateSchema = z.string().refine(
+export const futureDateSchema = z.string().refine(
   (dateStr) => {
     const meetingDate = new Date(dateStr);
     const now = new Date();

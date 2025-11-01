@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { 
   FinancialReport, 
   ReportType,
@@ -20,9 +20,7 @@ import {
   BarChart3,
   PieChart,
   TrendingUp,
-  Download,
   Eye,
-  Calendar,
   Filter,
   Plus,
   Loader2,
@@ -226,7 +224,7 @@ export default function RaporlarPage() {
   };
 
   // Mock chart component (replace with actual chart library)
-  const SimpleChart = ({ data, type }: { data: any[], type: 'line' | 'pie' | 'bar' }) => {
+  const SimpleChart = ({ data, type }: { data: unknown[], type: 'line' | 'pie' | 'bar' }) => {
     return (
       <div className="w-full h-64 bg-muted/30 rounded-lg flex items-center justify-center">
         <div className="text-center">

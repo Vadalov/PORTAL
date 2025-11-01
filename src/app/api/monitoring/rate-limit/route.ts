@@ -108,13 +108,14 @@ export async function GET(request: NextRequest) {
           timestamp: new Date().toISOString()
         });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Rate limit monitoring API error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       { 
         success: false, 
         error: 'Failed to process monitoring request',
-        details: error.message 
+        details: errorMessage 
       },
       { status: 500 }
     );
@@ -161,13 +162,14 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Rate limit monitoring POST error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
       { 
         success: false, 
         error: 'Failed to process POST request',
-        details: error.message 
+        details: errorMessage 
       },
       { status: 500 }
     );

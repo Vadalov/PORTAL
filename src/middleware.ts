@@ -131,7 +131,7 @@ function validateCSRFToken(request: NextRequest): boolean {
 /**
  * Get user session from Appwrite
  */
-async function getAppwriteSession(request: NextRequest): Promise<any> {
+async function getAppwriteSession(request: NextRequest): Promise<{ userId: string; $id: string } | null> {
   try {
     if (!isServerReady()) {
       return null;
@@ -144,14 +144,14 @@ async function getAppwriteSession(request: NextRequest): Promise<any> {
 
     // Use the session cookie to get session info
     const sessionData = JSON.parse(sessionCookie.value);
-    
+
     if (!sessionData.sessionId) {
       return null;
     }
 
     // Get session from Appwrite using session ID
     const session = await serverAccount.getSession(sessionData.sessionId);
-    return session;
+    return session as { userId: string; $id: string };
   } catch (error) {
     console.error('Appwrite session validation error:', error);
     return null;
@@ -161,7 +161,7 @@ async function getAppwriteSession(request: NextRequest): Promise<any> {
 /**
  * Get user data from Appwrite session
  */
-async function getUserFromSession(session: any): Promise<any> {
+async function getUserFromSession(session: { userId: string; $id: string } | null): Promise<{ id: string; email: string; name: string; role: string; permissions: string[] } | null> {
   try {
     if (!session || !session.userId) {
       return null;
@@ -177,9 +177,6 @@ async function getUserFromSession(session: any): Promise<any> {
       name: user.name,
       role,
       permissions: ROLE_PERMISSIONS[role] || [],
-      isActive: true,
-      createdAt: user.$createdAt,
-      updatedAt: user.$updatedAt,
     };
   } catch (error) {
     console.error('User data retrieval error:', error);
@@ -190,7 +187,7 @@ async function getUserFromSession(session: any): Promise<any> {
 /**
  * Check if user has required permission
  */
-function hasRequiredPermission(user: any, route: RouteRule): boolean {
+function hasRequiredPermission(user: { id: string; email: string; name: string; role: string; permissions: string[] } | null, route: RouteRule): boolean {
   if (!user) return false;
 
   // Check role requirement first

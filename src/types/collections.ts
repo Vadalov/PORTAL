@@ -389,7 +389,7 @@ export interface QueryParams {
   search?: string;
   orderBy?: string;
   orderType?: 'asc' | 'desc';
-  filters?: Record<string, any>;
+  filters?: Record<string, string | number | boolean | undefined> | undefined;
 }
 
 // File Upload Types

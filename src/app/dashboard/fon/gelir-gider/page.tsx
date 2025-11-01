@@ -12,8 +12,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { 
   Transaction, 
-  TransactionType, 
-  TransactionCategory,
   CreateTransactionInput,
   TransactionQuery,
   ApiResponse
@@ -107,7 +105,7 @@ export default function GelirGiderPage() {
     amount: 0,
     currency: 'TRY',
     description: '',
-    date: new Date().toISOString(),
+    date: new Date(),
     status: 'pending',
     tags: []
   });
@@ -214,18 +212,18 @@ export default function GelirGiderPage() {
       amount: 0,
       currency: 'TRY',
       description: '',
-      date: new Date().toISOString(),
+      date: new Date(),
       status: 'pending',
       tags: []
     });
   };
 
   // Handle filter changes
-  const handleFilterChange = (key: keyof TransactionQuery, value: any) => {
+  const handleFilterChange = (key: keyof TransactionQuery, value: TransactionQuery[keyof TransactionQuery]) => {
     setFilters(prev => ({
       ...prev,
       [key]: value,
-      page: key !== 'page' ? 1 : value // Reset to first page when filters change
+      page: key !== 'page' ? 1 : (value as number) // Reset to first page when filters change
     }));
   };
 
@@ -407,7 +405,7 @@ export default function GelirGiderPage() {
                       id="date"
                       type="date"
                       value={formData.date ? new Date(formData.date).toISOString().split('T')[0] : ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, date: new Date(e.target.value).toISOString() }))}
+                      onChange={(e) => setFormData(prev => ({ ...prev, date: new Date(e.target.value) }))}
                       required
                     />
                   </div>

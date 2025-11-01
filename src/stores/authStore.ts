@@ -57,11 +57,8 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
-// Configuration: Set to true to use mock authentication temporarily
-const USE_MOCK_AUTH = false;
-
 // Convert Appwrite user to Store user
-const appwriteUserToStoreUser = (appwriteUser: any): User => {
+export const appwriteUserToStoreUser = (appwriteUser: { $id: string; email: string; name: string; labels?: string[]; avatar?: string; $createdAt?: string; $updatedAt?: string }): User => {
   const role = (appwriteUser.labels?.[0]?.toUpperCase() || 'MEMBER') as UserRole;
   return {
     id: appwriteUser.$id,
@@ -71,8 +68,8 @@ const appwriteUserToStoreUser = (appwriteUser: any): User => {
     avatar: appwriteUser.avatar,
     permissions: ROLE_PERMISSIONS[role] || [],
     isActive: true,
-    createdAt: appwriteUser.$createdAt,
-    updatedAt: appwriteUser.$updatedAt,
+    createdAt: appwriteUser.$createdAt || new Date().toISOString(),
+    updatedAt: appwriteUser.$updatedAt || new Date().toISOString(),
   };
 };
 
@@ -118,7 +115,7 @@ export const useAuthStore = create<AuthStore>()(
                   });
                   return;
                 }
-              } catch (error) {
+              } catch {
                 localStorage.removeItem('auth-session');
               }
             }
@@ -187,9 +184,9 @@ export const useAuthStore = create<AuthStore>()(
                 state.error = null;
               });
 
-            } catch (error: any) {
+            } catch (error: unknown) {
 
-              const errorMessage = error.message || 'Giriş yapılamadı';
+              const errorMessage = (error as Error).message || 'Giriş yapılamadı';
 
               set((state) => {
                 state.isLoading = false;

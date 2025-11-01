@@ -9,10 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { 
   Budget, 
   BudgetPeriod,
-  CreateBudgetInput,
-  TransactionCategory
+  CreateBudgetInput
 } from '@/types/financial';
-import { Loader2, CheckCircle, Target, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
+import { Loader2, CheckCircle, Target } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
   // Income Categories
@@ -114,7 +113,7 @@ export default function BudgetForm({
   };
 
   // Handle field changes
-  const handleFieldChange = (field: keyof CreateBudgetInput, value: any) => {
+  const handleFieldChange = (field: keyof CreateBudgetInput, value: CreateBudgetInput[keyof CreateBudgetInput]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

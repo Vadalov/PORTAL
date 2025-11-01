@@ -221,7 +221,7 @@ async function getEligibleStudentsHandler(request: NextRequest) {
       );
     }
 
-    let students = result.data?.data || [];
+    const students = result.data?.data || [];
 
     // Filter by scholarship eligibility if scholarshipId provided
     if (scholarshipId) {

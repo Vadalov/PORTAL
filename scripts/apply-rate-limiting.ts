@@ -23,26 +23,6 @@ const RATE_LIMIT_IMPORTS = `import {
   dashboardRateLimit
 } from '@/lib/rate-limit';`;
 
-const RATE_LIMIT_MAPPING = {
-  // Authentication endpoints
-  'auth': 'authRateLimit',
-  
-  // Upload endpoints
-  'storage': 'uploadRateLimit',
-  
-  // Dashboard endpoints
-  'dashboard': 'dashboardRateLimit',
-  
-  // Search endpoints
-  'search': 'searchRateLimit',
-  
-  // Data modification (POST, PUT, DELETE)
-  'modify': 'dataModificationRateLimit',
-  
-  // Default read-only
-  'read': 'readOnlyRateLimit'
-};
-
 function classifyEndpoint(pathname: string, method: string): { type: string; rateLimitFunction: string } {
   const pathSegments = pathname.toLowerCase().split('/');
   

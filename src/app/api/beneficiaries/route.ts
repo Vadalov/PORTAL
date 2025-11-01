@@ -11,7 +11,7 @@ interface BeneficiaryFilters {
   city?: string;
 }
 
-interface ParsedQueryParams extends QueryParams {
+interface ParsedQueryParams extends Omit<QueryParams, 'filters'> {
   filters?: BeneficiaryFilters;
 }
 
@@ -117,12 +117,12 @@ async function getBeneficiariesHandler(request: NextRequest) {
       filters.city = params.filters.city;
     }
 
-    const queryParams = {
+    const queryParams: ParsedQueryParams = {
       ...params,
       filters: Object.keys(filters).length > 0 ? filters : undefined,
     };
 
-    const response = (await api.beneficiaries.getBeneficiaries(queryParams)) as ApiResponse;
+    const response = (await api.beneficiaries.getBeneficiaries(queryParams as QueryParams)) as ApiResponse;
 
     if (response.error) {
       return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });

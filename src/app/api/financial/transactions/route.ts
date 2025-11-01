@@ -92,12 +92,14 @@ function filterTransactions(transactions: Transaction[], query: TransactionQuery
   }
 
   // Amount range filter
-  if (query.minAmount !== undefined) {
-    filtered = filtered.filter((tx) => tx.amount >= query.minAmount!);
+  const minAmount = query.minAmount;
+  if (minAmount !== undefined) {
+    filtered = filtered.filter((tx) => tx.amount >= minAmount);
   }
 
-  if (query.maxAmount !== undefined) {
-    filtered = filtered.filter((tx) => tx.amount <= query.maxAmount!);
+  const maxAmount = query.maxAmount;
+  if (maxAmount !== undefined) {
+    filtered = filtered.filter((tx) => tx.amount <= maxAmount);
   }
 
   // Status filter

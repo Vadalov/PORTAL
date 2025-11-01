@@ -11,7 +11,7 @@ import {
 // Endpoint-specific rate limiting konfigürasyonları
 export interface EndpointConfig {
   pattern: RegExp;
-  rateLimitFunction: (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) => any;
+  rateLimitFunction: (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) => (req: NextRequest) => Promise<NextResponse>;
   description: string;
 }
 
@@ -93,7 +93,9 @@ export const RATE_LIMIT_CONFIGS: EndpointConfig[] = [
   // Health check - Her zaman açık
   {
     pattern: /^\/api\/health/,
-    rateLimitFunction: (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) => handler, // No rate limiting
+    rateLimitFunction: (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) => async (req: NextRequest) => {
+      return await Promise.resolve(handler(req));
+    }, // No rate limiting
     description: 'Health check endpoints - No rate limiting'
   }
 ];

@@ -7,7 +7,7 @@ import { dashboardRateLimit } from '@/lib/rate-limit';
  * Get dashboard metrics and KPIs
  */
 async function getDashboardHandler(request: NextRequest) {
-  // eslint-disable-line @typescript-eslint/no-unused-vars
+   
   try {
     // Mock data - in real app, these would come from actual calculations
     const currentMonthData = {

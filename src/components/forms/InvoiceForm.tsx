@@ -141,8 +141,10 @@ export default function InvoiceForm({
     }
 
     // Update form data with items
-    const updatedFormData = {
+    const updatedFormData: CreateInvoiceInput = {
       ...formData,
+      issueDate: new Date(formData.issueDate),
+      dueDate: new Date(formData.dueDate),
       items: items.map(item => ({
         description: item.description,
         quantity: item.quantity,
@@ -152,6 +154,20 @@ export default function InvoiceForm({
     };
 
     try {
+      await onSubmit(updatedFormData);
+    } catch (error) {
+      console.error('Form submission error:', error);
+    }
+  };
+
+  // Handle field changes
+  const handleFieldChange = (field: keyof CreateInvoiceInput, value: CreateInvoiceInput[keyof CreateInvoiceInput]) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    if (errors[field]) {
       setErrors(prev => ({
         ...prev,
         [field]: ''
@@ -359,8 +375,8 @@ export default function InvoiceForm({
               <Input
                 id="dueDate"
                 type="date"
-                value={formData.dueDate ? formData.dueDate.split('T')[0] : ''}
-                onChange={(e) => handleFieldChange('dueDate', new Date(e.target.value).toISOString())}
+                value={formData.dueDate || ''}
+                onChange={(e) => handleFieldChange('dueDate', e.target.value)}
               />
               {errors.dueDate && (
                 <p className="text-sm text-red-500 mt-1">{errors.dueDate}</p>

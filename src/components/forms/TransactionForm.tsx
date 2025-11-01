@@ -12,7 +12,7 @@ import {
   TransactionType, 
   CreateTransactionInput
 } from '@/types/financial';
-import { Loader2, CheckCircle, DollarSign, Calendar, Tag } from 'lucide-react';
+import { Loader2, CheckCircle, DollarSign, Tag } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
   // Income Categories
@@ -313,7 +313,6 @@ export default function TransactionForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="date">
-                <Calendar className="w-4 h-4 inline mr-1" />
                 Tarih
               </Label>
               <Input
@@ -348,7 +347,6 @@ export default function TransactionForm({
           {/* Tags */}
           <div>
             <Label htmlFor="tags">
-              <Tag className="w-4 h-4 inline mr-1" />
               Etiketler
             </Label>
             <div className="space-y-3">

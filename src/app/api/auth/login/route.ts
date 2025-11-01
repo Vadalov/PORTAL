@@ -89,18 +89,18 @@ export const POST = authRateLimit(async (request: NextRequest) => {
       },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Login error:', error);
     
     // Handle specific Appwrite errors
-    if (error.code === 401) {
+    if (error instanceof Error && 'code' in error && (error as any).code === 401) {
       return NextResponse.json(
         { success: false, error: 'Geçersiz email veya şifre' },
         { status: 401 }
       );
     }
     
-    if (error.code === 429) {
+    if (error instanceof Error && 'code' in error && (error as any).code === 429) {
       return NextResponse.json(
         { success: false, error: 'Çok fazla deneme. Lütfen bekleyin.' },
         { status: 429 }
