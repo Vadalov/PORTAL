@@ -14,7 +14,7 @@ const publicRoutes = [
   '/favicon.ico',
   '/api/csrf', // CSRF token endpoint is public
   '/api/auth/login', // Login endpoint is public (but requires CSRF token)
-  '/api/auth/logout' // Logout endpoint is public
+  '/api/auth/logout', // Logout endpoint is public
 ];
 
 // Auth routes that should redirect to dashboard if already authenticated
@@ -45,48 +45,48 @@ const protectedRoutes: RouteRule[] = [
   // Dashboard routes
   { path: '/genel', requiredPermission: Permission.DASHBOARD_READ },
   { path: '/financial-dashboard', requiredPermission: Permission.FINANCIAL_READ },
-  
+
   // User management
   { path: '/kullanici', requiredPermission: Permission.USERS_READ },
-  
+
   // Beneficiaries
   { path: '/yardim', requiredPermission: Permission.BENEFICIARIES_READ },
   { path: '/yardim/basvurular', requiredPermission: Permission.AID_REQUESTS_READ },
   { path: '/yardim/liste', requiredPermission: Permission.BENEFICIARIES_READ },
   { path: '/yardim/nakdi-vezne', requiredPermission: Permission.BENEFICIARIES_CREATE },
   { path: '/yardim/ihtiyac-sahipleri', requiredPermission: Permission.BENEFICIARIES_READ },
-  
+
   // Donations
   { path: '/bagis', requiredPermission: Permission.DONATIONS_READ },
   { path: '/bagis/liste', requiredPermission: Permission.DONATIONS_READ },
   { path: '/bagis/kumbara', requiredPermission: Permission.DONATIONS_CREATE },
   { path: '/bagis/raporlar', requiredPermission: Permission.REPORTS_READ },
-  
+
   // Scholarships
   { path: '/burs', requiredPermission: Permission.SCHOLARSHIPS_READ },
   { path: '/burs/basvurular', requiredPermission: Permission.SCHOLARSHIPS_READ },
   { path: '/burs/ogrenciler', requiredPermission: Permission.SCHOLARSHIPS_READ },
   { path: '/burs/yetim', requiredPermission: Permission.SCHOLARSHIPS_READ },
-  
+
   // Tasks & Meetings
   { path: '/is', requiredPermission: Permission.DASHBOARD_READ },
   { path: '/is/gorevler', requiredPermission: Permission.DASHBOARD_READ },
   { path: '/is/toplantilar', requiredPermission: Permission.DASHBOARD_READ },
-  
+
   // Messaging
   { path: '/mesaj', requiredPermission: Permission.MESSAGING_READ },
   { path: '/mesaj/kurum-ici', requiredPermission: Permission.MESSAGING_READ },
   { path: '/mesaj/toplu', requiredPermission: Permission.MESSAGING_BULK },
-  
+
   // Partners
   { path: '/partner', requiredPermission: Permission.PARTNERS_READ },
   { path: '/partner/liste', requiredPermission: Permission.PARTNERS_READ },
-  
+
   // Financial
   { path: '/fon', requiredPermission: Permission.FINANCIAL_READ },
   { path: '/fon/gelir-gider', requiredPermission: Permission.FINANCIAL_READ },
   { path: '/fon/raporlar', requiredPermission: Permission.REPORTS_READ },
-  
+
   // Settings (require admin role)
   { path: '/settings', requiredRole: UserRole.ADMIN },
   { path: '/ayarlar', requiredRole: UserRole.ADMIN },
@@ -103,7 +103,7 @@ function isServerReady(): boolean {
   } catch (error) {
     logger.error('Server initialization failed', error, {
       context: 'middleware',
-      function: 'isServerReady'
+      function: 'isServerReady',
     });
     return false;
   }
@@ -117,7 +117,9 @@ function isServerReady(): boolean {
 /**
  * Get user session from Appwrite
  */
-async function getAppwriteSession(request: NextRequest): Promise<{ userId: string; $id: string; secret: string } | null> {
+async function getAppwriteSession(
+  request: NextRequest
+): Promise<{ userId: string; $id: string; secret: string } | null> {
   const sessionCookie = request.cookies.get('appwrite-session');
   try {
     if (!isServerReady()) {
@@ -141,7 +143,7 @@ async function getAppwriteSession(request: NextRequest): Promise<{ userId: strin
       if (expireDate < new Date()) {
         logger.warn('Session expired', {
           context: 'middleware',
-          function: 'getAppwriteSession'
+          function: 'getAppwriteSession',
         });
         return null;
       }
@@ -157,7 +159,7 @@ async function getAppwriteSession(request: NextRequest): Promise<{ userId: strin
     logger.error('Appwrite session validation error', error, {
       context: 'middleware',
       function: 'getAppwriteSession',
-      hasCookie: !!sessionCookie
+      hasCookie: !!sessionCookie,
     });
     return null;
   }
@@ -166,7 +168,15 @@ async function getAppwriteSession(request: NextRequest): Promise<{ userId: strin
 /**
  * Get user data from Appwrite session
  */
-async function getUserFromSession(session: { userId: string; $id: string; secret: string } | null): Promise<{ id: string; email: string; name: string; role: string; permissions: string[] } | null> {
+async function getUserFromSession(
+  session: { userId: string; $id: string; secret: string } | null
+): Promise<{
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  permissions: string[];
+} | null> {
   try {
     if (!session || !session.userId || !session.secret) {
       return null;
@@ -183,7 +193,28 @@ async function getUserFromSession(session: { userId: string; $id: string; secret
     const user = await sessionAccount.get();
 
     // Map Appwrite user to our user format
-    const role = (user.labels?.[0]?.toUpperCase() || 'MEMBER') as UserRole;
+    // Determine role from labels (priority: superadmin > admin > manager > member > viewer)
+    let role: UserRole = UserRole.MEMBER;
+    if (user.labels && user.labels.length > 0) {
+      const labels = user.labels.map((l) => l.toLowerCase());
+      if (labels.includes('superadmin')) {
+        role = UserRole.SUPER_ADMIN;
+      } else if (labels.includes('admin')) {
+        role = UserRole.ADMIN;
+      } else if (labels.includes('manager')) {
+        role = UserRole.MANAGER;
+      } else if (labels.includes('member')) {
+        role = UserRole.MEMBER;
+      } else if (labels.includes('viewer')) {
+        role = UserRole.VIEWER;
+      } else if (labels.includes('volunteer')) {
+        role = UserRole.VOLUNTEER;
+      } else {
+        // Default to MEMBER if label doesn't match
+        role = UserRole.MEMBER;
+      }
+    }
+
     return {
       id: user.$id,
       email: user.email,
@@ -195,7 +226,7 @@ async function getUserFromSession(session: { userId: string; $id: string; secret
     logger.error('User data retrieval error', error, {
       context: 'middleware',
       function: 'getUserFromSession',
-      sessionId: session?.$id
+      sessionId: session?.$id,
     });
     return null;
   }
@@ -204,7 +235,10 @@ async function getUserFromSession(session: { userId: string; $id: string; secret
 /**
  * Check if user has required permission
  */
-function hasRequiredPermission(user: { id: string; email: string; name: string; role: string; permissions: string[] } | null, route: RouteRule): boolean {
+function hasRequiredPermission(
+  user: { id: string; email: string; name: string; role: string; permissions: string[] } | null,
+  route: RouteRule
+): boolean {
   if (!user) return false;
 
   // Check role requirement first
@@ -219,7 +253,7 @@ function hasRequiredPermission(user: { id: string; email: string; name: string; 
 
   // Check if user has any of the required permissions
   if (route.requiredAnyPermission) {
-    const hasAnyPermission = route.requiredAnyPermission.some(permission =>
+    const hasAnyPermission = route.requiredAnyPermission.some((permission) =>
       user.permissions.includes(permission)
     );
     if (!hasAnyPermission) {
@@ -234,14 +268,14 @@ function hasRequiredPermission(user: { id: string; email: string; name: string; 
  * Check if route requires authentication
  */
 function isProtectedRoute(pathname: string): RouteRule | null {
-  return protectedRoutes.find(route => pathname.startsWith(route.path)) || null;
+  return protectedRoutes.find((route) => pathname.startsWith(route.path)) || null;
 }
 
 /**
  * Check if API route requires authentication
  */
 function isProtectedApiRoute(pathname: string): boolean {
-  return protectedApiRoutes.some(route => pathname.startsWith(route));
+  return protectedApiRoutes.some((route) => pathname.startsWith(route));
 }
 
 /**
@@ -253,9 +287,10 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  
+
   // CSP header for additional security
-  response.headers.set('Content-Security-Policy',
+  response.headers.set(
+    'Content-Security-Policy',
     "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.appwrite.io wss://*.appwrite.io;"
   );
 
@@ -267,15 +302,15 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
  */
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Add security headers to all responses
   const response = addSecurityHeaders(NextResponse.next());
 
   // Allow public routes first (before CSRF check)
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
+  if (publicRoutes.some((route) => pathname.startsWith(route))) {
     // If authenticated and trying to access auth pages, redirect to dashboard
     const sessionCookie = request.cookies.get('appwrite-session');
-    if (sessionCookie && authRoutes.some(route => pathname.startsWith(route))) {
+    if (sessionCookie && authRoutes.some((route) => pathname.startsWith(route))) {
       return NextResponse.redirect(new URL('/genel', request.url));
     }
     return response;
@@ -291,7 +326,11 @@ export default async function middleware(request: NextRequest) {
   // API route protection
   if (pathname.startsWith('/api/')) {
     // Skip auth check for public API routes
-    if (pathname === '/api/csrf' || pathname === '/api/auth/login' || pathname === '/api/auth/logout') {
+    if (
+      pathname === '/api/csrf' ||
+      pathname === '/api/auth/login' ||
+      pathname === '/api/auth/logout'
+    ) {
       return response;
     }
 
@@ -302,7 +341,7 @@ export default async function middleware(request: NextRequest) {
           JSON.stringify({ error: 'Unauthorized', code: 'AUTHENTICATION_REQUIRED' }),
           {
             status: 401,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
           }
         );
       }
@@ -326,11 +365,11 @@ export default async function middleware(request: NextRequest) {
         JSON.stringify({
           error: 'Forbidden',
           message: 'Bu sayfaya erişim yetkiniz bulunmamaktadır.',
-          code: 'INSUFFICIENT_PERMISSIONS'
+          code: 'INSUFFICIENT_PERMISSIONS',
         }),
         {
           status: 403,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }

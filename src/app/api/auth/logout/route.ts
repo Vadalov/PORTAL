@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { serverAccount, ensureServerInitialized } from '@/lib/appwrite/server';
+import { ensureServerInitialized } from '@/lib/appwrite/server';
+import { appwriteConfig } from '@/lib/appwrite/config';
 import { cookies } from 'next/headers';
 import logger from '@/lib/logger';
+import { Client, Account } from 'node-appwrite';
 
 /**
  * POST /api/auth/logout
@@ -16,18 +18,25 @@ export async function POST(_request: NextRequest) {
     const sessionCookie = cookieStore.get('appwrite-session');
 
     // If there's an active session, delete it from Appwrite
-    let sessionData: { sessionId?: string } | null = null;
+    let sessionData: { sessionId?: string; secret?: string } | null = null;
     if (sessionCookie) {
       try {
         sessionData = JSON.parse(sessionCookie.value);
-        if (sessionData?.sessionId) {
-          await serverAccount.deleteSession(sessionData.sessionId);
+        // To delete a session, we need to use the session itself (not admin account)
+        if (sessionData?.sessionId && sessionData?.secret) {
+          const sessionClient = new Client()
+            .setEndpoint(appwriteConfig.endpoint)
+            .setProject(appwriteConfig.projectId)
+            .setSession(sessionData.secret);
+
+          const sessionAccount = new Account(sessionClient);
+          await sessionAccount.deleteSession(sessionData.sessionId);
         }
       } catch (error) {
         logger.error('Error deleting session from Appwrite', error, {
           endpoint: '/api/auth/logout',
           method: 'POST',
-          sessionId: sessionData?.sessionId
+          sessionId: sessionData?.sessionId,
         });
         // Continue with cleanup even if Appwrite deletion fails
       }
@@ -66,17 +75,16 @@ export async function POST(_request: NextRequest) {
       success: true,
       message: 'Başarıyla çıkış yapıldı',
     });
-
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Logout error', error, {
       endpoint: '/api/auth/logout',
-      method: 'POST'
+      method: 'POST',
     });
-    
+
     // Even if there's an error, we should clear the cookies
     try {
       const cookieStore = await cookies();
-      
+
       cookieStore.set('appwrite-session', '', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -95,7 +103,7 @@ export async function POST(_request: NextRequest) {
     } catch (cleanupError) {
       logger.error('Error during cookie cleanup', cleanupError, {
         endpoint: '/api/auth/logout',
-        method: 'POST'
+        method: 'POST',
       });
     }
 

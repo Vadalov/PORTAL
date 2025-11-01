@@ -2,7 +2,7 @@
 
 /**
  * Authentication Store (Zustand)
- * Mock implementation using localStorage
+ * Real Appwrite authentication using server-side API routes
  */
 
 import { create } from 'zustand';
@@ -58,7 +58,15 @@ interface AuthActions {
 type AuthStore = AuthState & AuthActions;
 
 // Convert Appwrite user to Store user
-export const appwriteUserToStoreUser = (appwriteUser: { $id: string; email: string; name: string; labels?: string[]; avatar?: string; $createdAt?: string; $updatedAt?: string }): User => {
+export const appwriteUserToStoreUser = (appwriteUser: {
+  $id: string;
+  email: string;
+  name: string;
+  labels?: string[];
+  avatar?: string;
+  $createdAt?: string;
+  $updatedAt?: string;
+}): User => {
   const role = (appwriteUser.labels?.[0]?.toUpperCase() || 'MEMBER') as UserRole;
   return {
     id: appwriteUser.$id,
@@ -165,7 +173,9 @@ export const useAuthStore = create<AuthStore>()(
                 if (response.status === 401) {
                   throw new Error('E-posta veya şifre hatalı. Lütfen kontrol edin.');
                 } else if (response.status === 429) {
-                  throw new Error('Çok fazla deneme yapıldı. Lütfen 15 dakika sonra tekrar deneyin.');
+                  throw new Error(
+                    'Çok fazla deneme yapıldı. Lütfen 15 dakika sonra tekrar deneyin.'
+                  );
                 } else if (response.status === 400) {
                   throw new Error('E-posta ve şifre alanları zorunludur.');
                 } else {
@@ -183,12 +193,15 @@ export const useAuthStore = create<AuthStore>()(
               };
 
               // Save session info to localStorage (for persistence)
-              localStorage.setItem('auth-session', JSON.stringify({
-                userId: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role
-              }));
+              localStorage.setItem(
+                'auth-session',
+                JSON.stringify({
+                  userId: user.id,
+                  email: user.email,
+                  name: user.name,
+                  role: user.role,
+                })
+              );
 
               set((state) => {
                 state.user = user;
@@ -197,7 +210,6 @@ export const useAuthStore = create<AuthStore>()(
                 state.isLoading = false;
                 state.error = null;
               });
-
             } catch (error: unknown) {
               let errorMessage = 'Giriş yapılamadı. Lütfen tekrar deneyin.';
 
@@ -208,7 +220,10 @@ export const useAuthStore = create<AuthStore>()(
               }
 
               // Network error handling
-              if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+              if (
+                errorMessage.includes('Failed to fetch') ||
+                errorMessage.includes('NetworkError')
+              ) {
                 errorMessage = 'İnternet bağlantınızı kontrol edin.';
               }
 
@@ -318,7 +333,6 @@ export const useAuthStore = create<AuthStore>()(
               state.error = error;
             });
           },
-
         })),
         {
           name: 'auth-store',
