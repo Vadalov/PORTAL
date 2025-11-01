@@ -39,6 +39,7 @@
     "appwrite:deploy": "appwrite deploy",
     "appwrite:deploy:quick": "bash scripts/deploy-appwrite.sh",
     "appwrite:init": "appwrite init",
+    "appwrite:validate": "node scripts/validate-appwrite-config.js",
     "prepare": "husky"
   },
   "lint-staged": {
