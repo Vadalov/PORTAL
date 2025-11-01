@@ -14,8 +14,12 @@ export async function testAppwriteConnection() {
     try {
       await appwriteApi.auth.getCurrentUser();
       console.log('✅ Authentication working');
-    } catch (error: any) {
-      console.log('ℹ️ Authentication expected to fail without session:', error.message);
+    } catch (error: unknown) {
+      const appwriteError = error as { message?: string };
+      console.log(
+        'ℹ️ Authentication expected to fail without session:',
+        appwriteError.message || error
+      );
     }
 
     // Test dashboard metrics
@@ -34,9 +38,9 @@ export async function testAppwriteConnection() {
     console.log(`✅ Donations API working: ${donations.total} total records`);
 
     console.log('🎉 All Appwrite connections working!');
-
-  } catch (error: any) {
-    console.error('❌ Appwrite connection failed:', error.message);
+  } catch (error: unknown) {
+    const appwriteError = error as { message?: string };
+    console.error('❌ Appwrite connection failed:', appwriteError.message || error);
     throw error;
   }
 }
