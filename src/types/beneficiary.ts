@@ -12,17 +12,17 @@ export enum BeneficiaryCategory {
   IHTIYAC_SAHIBI_COCUK = 'IHTIYAC_SAHIBI_COCUK',
   YETIM_GENCLIK = 'YETIM_GENCLIK',
   MULTECI_GENCLIK = 'MULTECI_GENCLIK',
-  IHTIYAC_SAHIBI_GENCLIK = 'IHTIYAC_SAHIBI_GENCLIK'
+  IHTIYAC_SAHIBI_GENCLIK = 'IHTIYAC_SAHIBI_GENCLIK',
 }
 
 export enum FundRegion {
   AVRUPA = 'AVRUPA',
-  SERBEST = 'SERBEST'
+  SERBEST = 'SERBEST',
 }
 
 export enum FileConnection {
   PARTNER_KURUM = 'PARTNER_KURUM',
-  CALISMA_SAHASI = 'CALISMA_SAHASI'
+  CALISMA_SAHASI = 'CALISMA_SAHASI',
 }
 
 export enum IdentityDocumentType {
@@ -30,26 +30,26 @@ export enum IdentityDocumentType {
   TC_KIMLIK_BELGESI = 'TC_KIMLIK_BELGESI',
   PASAPORT = 'PASAPORT',
   SURUCU_BELGESI = 'SURUCU_BELGESI',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 export enum PassportType {
   DIPLOMATIK = 'DIPLOMATIK',
   GECICI = 'GECICI',
   UMUMI = 'UMUMI',
-  HIZMET = 'HIZMET'
+  HIZMET = 'HIZMET',
 }
 
 export enum Gender {
   ERKEK = 'ERKEK',
-  KADIN = 'KADIN'
+  KADIN = 'KADIN',
 }
 
 export enum MaritalStatus {
   BEKAR = 'BEKAR',
   EVLI = 'EVLI',
   BOŞANMIŞ = 'BOŞANMIŞ',
-  DUL = 'DUL'
+  DUL = 'DUL',
 }
 
 export enum EducationStatus {
@@ -60,7 +60,7 @@ export enum EducationStatus {
   LISE = 'LISE',
   UNIVERSITE = 'UNIVERSITE',
   YUKSEK_LISANS = 'YUKSEK_LISANS',
-  DOKTORA = 'DOKTORA'
+  DOKTORA = 'DOKTORA',
 }
 
 export enum Religion {
@@ -70,7 +70,7 @@ export enum Religion {
   BUDIST = 'BUDIST',
   HINDU = 'HINDU',
   ATEIST = 'ATEIST',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 export enum BloodType {
@@ -81,30 +81,30 @@ export enum BloodType {
   AB_POZITIF = 'AB_POZITIF',
   AB_NEGATIF = 'AB_NEGATIF',
   O_POZITIF = 'O_POZITIF',
-  O_NEGATIF = 'O_NEGATIF'
+  O_NEGATIF = 'O_NEGATIF',
 }
 
 export enum SmokingStatus {
   ICER = 'ICER',
   ICMEZ = 'ICMEZ',
-  BIRAKTI = 'BIRAKTI'
+  BIRAKTI = 'BIRAKTI',
 }
 
 export enum DisabilityStatus {
   YOK = 'YOK',
-  VAR = 'VAR'
+  VAR = 'VAR',
 }
 
 export enum SocialSecurityStatus {
   VAR = 'VAR',
-  YOK = 'YOK'
+  YOK = 'YOK',
 }
 
 export enum WorkStatus {
   CALISMIYOR = 'CALISMIYOR',
   CALISIYOR = 'CALISIYOR',
   EMEKLI = 'EMEKLI',
-  OGRENCI = 'OGRENCI'
+  OGRENCI = 'OGRENCI',
 }
 
 export enum LivingPlace {
@@ -112,7 +112,7 @@ export enum LivingPlace {
   KIRALIK = 'KIRALIK',
   YURT = 'YURT',
   BARINMA_MERKEZI = 'BARINMA_MERKEZI',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 export enum IncomeSource {
@@ -120,7 +120,7 @@ export enum IncomeSource {
   SOSYAL_YARDIM = 'SOSYAL_YARDIM',
   AILE_DESTEGI = 'AILE_DESTEGI',
   BURS = 'BURS',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 export enum Sector {
@@ -131,7 +131,7 @@ export enum Sector {
   EGITIM = 'EGITIM',
   SAGLIK = 'SAGLIK',
   DEVLET = 'DEVLET',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 export enum JobGroup {
@@ -141,7 +141,7 @@ export enum JobGroup {
   ESNAF = 'ESNAF',
   CALISAN = 'CALISAN',
   SERBEST_MESLEK = 'SERBEST_MESLEK',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 export enum VisaType {
@@ -150,32 +150,32 @@ export enum VisaType {
   EGITIM = 'EGITIM',
   AILE_BIRLESIMI = 'AILE_BIRLESIMI',
   INSANI = 'INSANI',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 export enum EntryType {
   HAVAYOLU = 'HAVAYOLU',
   KARAYOLU = 'KARAYOLU',
   DENIZYOLU = 'DENIZYOLU',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 export enum ReturnInfo {
   DONECEK = 'DONECEK',
   DONMEYECEK = 'DONMEYECEK',
-  BELIRSIZ = 'BELIRSIZ'
+  BELIRSIZ = 'BELIRSIZ',
 }
 
 export enum BeneficiaryStatus {
   TASLAK = 'TASLAK',
   AKTIF = 'AKTIF',
   PASIF = 'PASIF',
-  SILINDI = 'SILINDI'
+  SILINDI = 'SILINDI',
 }
 
 export enum SponsorType {
   BIREYSEL = 'BIREYSEL',
-  KURUMSAL = 'KURUMSAL'
+  KURUMSAL = 'KURUMSAL',
 }
 
 // === COUNTRIES ===
@@ -234,7 +234,7 @@ export enum Country {
   UKRAYNA = 'UKRAYNA',
   YEMEN = 'YEMEN',
   YUNANISTAN = 'YUNANISTAN',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 // === TURKISH CITIES ===
@@ -319,7 +319,7 @@ export enum City {
   VAN = 'VAN',
   YALOVA = 'YALOVA',
   YOZGAT = 'YOZGAT',
-  ZONGULDAK = 'ZONGULDAK'
+  ZONGULDAK = 'ZONGULDAK',
 }
 
 // === DISEASES ===
@@ -354,7 +354,7 @@ export enum Disease {
   TUBERKUOZ = 'TUBERKUOZ',
   UREME_SISTEMI = 'UREME_SISTEMI',
   YUKSEK_TANSION = 'YUKSEK_TANSION',
-  DIGER = 'DIGER'
+  DIGER = 'DIGER',
 }
 
 // === LABELS ===
@@ -362,7 +362,7 @@ export enum Label {
   DEPREMZEDE = 'DEPREMZEDE',
   SURIYE_MULTECISI = 'SURIYE_MULTECISI',
   AFGAN_MULTECISI = 'AFGAN_MULTECISI',
-  DIGER_MULTECI = 'DIGER_MULTECI'
+  DIGER_MULTECI = 'DIGER_MULTECI',
 }
 
 // === INTERFACES ===
@@ -373,7 +373,7 @@ export interface BeneficiaryQuickAdd {
   firstName: string;
   lastName: string;
   nationality: string;
-  birthDate?: Date;  // Form input - Date object olarak kalır
+  birthDate?: Date; // Form input - Date object olarak kalır
   identityNumber?: string;
   mernisCheck?: boolean;
   fundRegion: FundRegion;
@@ -403,31 +403,31 @@ export interface Beneficiary {
   fundRegion: FundRegion;
   fileConnection: FileConnection;
   fileNumber: string;
-  
+
   // İletişim Bilgileri
   mobilePhone?: string;
   mobilePhoneCode?: string;
   landlinePhone?: string;
   internationalPhone?: string;
   email?: string;
-  
+
   // Bağlantılar
   linkedOrphan?: string;
   linkedCard?: string;
   familyMemberCount?: number;
-  
+
   // Adres Bilgileri
   country?: Country;
   city?: City;
   district?: string;
   neighborhood?: string;
   address?: string;
-  
+
   // Durum ve Rıza
   consentStatement?: string;
   deleteRecord?: boolean;
   status: BeneficiaryStatus;
-  
+
   // === KİMLİK BİLGİLERİ ===
   fatherName?: string;
   motherName?: string;
@@ -437,7 +437,7 @@ export interface Beneficiary {
   identitySerialNumber?: string;
   previousNationality?: string;
   previousName?: string;
-  
+
   // Pasaport ve Vize
   passportType?: PassportType;
   passportNumber?: string;
@@ -446,7 +446,7 @@ export interface Beneficiary {
   visaExpiryDate?: Date;
   entryType?: EntryType;
   returnInfo?: ReturnInfo;
-  
+
   // === KİŞİSEL VERİLER ===
   gender?: Gender;
   birthPlace?: string;
@@ -456,7 +456,7 @@ export interface Beneficiary {
   educationLevel?: string;
   religion?: Religion;
   criminalRecord?: boolean;
-  
+
   // İş ve Gelir Durumu
   livingPlace?: LivingPlace;
   incomeSources?: IncomeSource[];
@@ -467,12 +467,12 @@ export interface Beneficiary {
   sector?: Sector;
   jobGroup?: JobGroup;
   jobDescription?: string;
-  
+
   // İlave Açıklamalar
   additionalNotesTurkish?: string;
   additionalNotesEnglish?: string;
   additionalNotesArabic?: string;
-  
+
   // === SAĞLIK DURUMU ===
   bloodType?: BloodType;
   smokingStatus?: SmokingStatus;
@@ -483,30 +483,30 @@ export interface Beneficiary {
   surgeries?: string;
   healthNotes?: string;
   diseases?: Disease[];
-  
+
   // Acil Durum İletişimi
   emergencyContacts?: EmergencyContact[];
-  
+
   // Kayıt Bilgisi
   registrationTime?: Date;
   registrationIP?: string;
   registeredBy?: string;
   totalAidAmount?: number;
-  
+
   // Etiketler ve Özel Durumlar
   labels?: Label[];
   earthquakeVictim?: boolean;
-  
+
   // === METADATA ===
   // Appwrite returns timestamps as ISO 8601 strings
-  createdAt: string;  // ISO 8601 format (Appwrite)
-  updatedAt: string;  // ISO 8601 format (Appwrite)
+  createdAt: string; // ISO 8601 format (Appwrite)
+  updatedAt: string; // ISO 8601 format (Appwrite)
   createdBy: string;
   updatedBy: string;
 }
 
 // Form state için yardımcı tipler
-export interface BeneficiaryFormData extends Partial<Beneficiary> {}
+export type BeneficiaryFormData = Partial<Beneficiary>;
 
 export interface BeneficiaryFormErrors {
   [key: string]: string | undefined;
@@ -552,7 +552,7 @@ export interface MernisCheckResponse {
   data?: {
     firstName: string;
     lastName: string;
-    birthDate: Date;  // Mernis API response
+    birthDate: Date; // Mernis API response
     nationality: string;
   };
 }

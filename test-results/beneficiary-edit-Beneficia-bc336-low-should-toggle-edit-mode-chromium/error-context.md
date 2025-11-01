@@ -1,0 +1,120 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+    - generic [ref=e6] [cursor=pointer]:
+        - button "Open Next.js Dev Tools" [ref=e7]:
+            - img [ref=e8]
+        - generic [ref=e11]:
+            - button "Open issues overlay" [ref=e12]:
+                - generic [ref=e13]:
+                    - generic [ref=e14]: '0'
+                    - generic [ref=e15]: '1'
+                - generic [ref=e16]: Issue
+            - button "Collapse issues badge" [ref=e17]:
+                - img [ref=e18]
+    - alert [ref=e20]
+    - generic [ref=e21]:
+        - generic:
+            - img
+        - banner [ref=e22]:
+            - generic [ref=e23]:
+                - heading "Dernek Yönetim Sistemi" [level=1] [ref=e25]
+                - button "Kullanıcı menüsü" [ref=e27]:
+                    - generic [ref=e29]: TA
+                    - img [ref=e30]
+        - generic [ref=e32]:
+            - complementary "Sidebar" [ref=e33]:
+                - generic "Quick actions" [ref=e34]:
+                    - generic [ref=e35]:
+                        - button "Ara" [ref=e36]:
+                            - img
+                            - text: Ara
+                        - button "Bildirimler (3)" [ref=e37]:
+                            - img
+                            - generic [ref=e38]: '3'
+                - navigation [ref=e39]:
+                    - generic [ref=e40]:
+                        - button "Ana Sayfa" [ref=e41]:
+                            - generic [ref=e42]:
+                                - img [ref=e43]
+                                - generic [ref=e46]: Ana Sayfa
+                            - img [ref=e49]
+                        - link "Dashboard" [ref=e52] [cursor=pointer]:
+                            - /url: /genel
+                    - button "Bağışlar" [ref=e54]:
+                        - generic [ref=e55]:
+                            - img [ref=e56]
+                            - generic [ref=e58]: Bağışlar
+                        - img [ref=e61]
+                    - button "Yardım" [ref=e64]:
+                        - generic [ref=e65]:
+                            - img [ref=e66]
+                            - generic [ref=e70]: Yardım
+                        - img [ref=e73]
+                    - button "Burs" [ref=e76]:
+                        - generic [ref=e77]:
+                            - img [ref=e78]
+                            - generic [ref=e81]: Burs
+                        - img [ref=e84]
+                    - button "Finans" [ref=e87]:
+                        - generic [ref=e88]:
+                            - img [ref=e89]
+                            - generic [ref=e92]: Finans
+                        - img [ref=e95]
+                    - button "Mesajlar" [ref=e98]:
+                        - generic [ref=e99]:
+                            - img [ref=e100]
+                            - generic [ref=e102]: Mesajlar
+                        - img [ref=e105]
+                    - button "İş Yönetimi" [ref=e108]:
+                        - generic [ref=e109]:
+                            - img [ref=e110]
+                            - generic [ref=e112]: İş Yönetimi
+                        - img [ref=e115]
+                    - button "Ortaklar" [ref=e118]:
+                        - generic [ref=e119]:
+                            - img [ref=e120]
+                            - generic [ref=e124]: Ortaklar
+                        - img [ref=e127]
+                    - button "Kullanıcılar" [ref=e130]:
+                        - generic [ref=e131]:
+                            - img [ref=e132]
+                            - generic [ref=e137]: Kullanıcılar
+                        - img [ref=e140]
+                - generic [ref=e142]:
+                    - button "Toggle sidebar" [ref=e144]:
+                        - img
+                        - text: Daralt
+                    - link "Ayarlar" [ref=e146] [cursor=pointer]:
+                        - /url: /settings
+                        - img [ref=e147]
+                        - generic [ref=e150]: Ayarlar
+            - main [ref=e152]:
+                - generic [ref=e154]:
+                    - generic [ref=e155]:
+                        - generic [ref=e157]:
+                            - heading "İhtiyaç Sahipleri" [level=1] [ref=e159]
+                            - paragraph [ref=e160]: Kayıtlı ihtiyaç sahiplerini görüntüleyin ve yönetin
+                        - generic [ref=e161]:
+                            - button "Dışa Aktar" [ref=e162]:
+                                - img
+                                - text: Dışa Aktar
+                            - button "Yeni Ekle" [ref=e163]:
+                                - img
+                                - text: Yeni Ekle
+                    - generic [ref=e165]:
+                        - generic [ref=e166]:
+                            - generic [ref=e167]:
+                                - img [ref=e168]
+                                - textbox "İsim, TC No veya telefon ile ara..." [ref=e171]
+                            - generic [ref=e172]: 0 Kayıt
+                        - generic [ref=e175]:
+                            - img [ref=e176]
+                            - paragraph [ref=e178]: Veriler yükleniyor...
+    - region "Notifications alt+T"
+    - generic [ref=e179]:
+        - img [ref=e181]
+        - button "Open Tanstack query devtools" [ref=e229] [cursor=pointer]:
+            - img [ref=e230]
+```

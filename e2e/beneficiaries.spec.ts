@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { safeFill, waitForElement } from './test-utils';
+import { safeFill } from './test-utils';
 
 test.describe('Beneficiaries Module', () => {
   test.beforeEach(async ({ page }) => {
@@ -21,7 +21,9 @@ test.describe('Beneficiaries Module', () => {
     await expect(page.locator('input[type="search"], input[placeholder*="Ara"]')).toBeVisible();
 
     // Check filter buttons
-    await expect(page.locator('button:has-text("Filtrele"), button:has-text("Filter")')).toBeVisible();
+    await expect(
+      page.locator('button:has-text("Filtrele"), button:has-text("Filter")')
+    ).toBeVisible();
   });
 
   test('should search beneficiaries', async ({ page }) => {
@@ -36,7 +38,7 @@ test.describe('Beneficiaries Module', () => {
       'input[placeholder*="Ara"]',
       'input[placeholder*="Search"]',
       'input[name*="search"]',
-      '[data-testid="search-input"]'
+      '[data-testid="search-input"]',
     ];
 
     const searchSuccessful = await safeFill(page, searchSelectors, 'test');
@@ -60,7 +62,10 @@ test.describe('Beneficiaries Module', () => {
     await page.goto('/yardim/ihtiyac-sahipleri');
 
     // Look for filter/status buttons
-    const filterButton = page.locator('button').filter({ hasText: /Durum|Status|Aktif|Active/i }).first();
+    const filterButton = page
+      .locator('button')
+      .filter({ hasText: /Durum|Status|Aktif|Active/i })
+      .first();
 
     if (await filterButton.isVisible()) {
       await filterButton.click();
@@ -84,7 +89,9 @@ test.describe('Beneficiaries Module', () => {
     await page.waitForTimeout(1000);
 
     // Click on first beneficiary if exists
-    const firstBeneficiary = page.locator('tr[data-href], a[href*="/yardim/ihtiyac-sahipleri/"]').first();
+    const firstBeneficiary = page
+      .locator('tr[data-href], a[href*="/yardim/ihtiyac-sahipleri/"]')
+      .first();
 
     if (await firstBeneficiary.isVisible()) {
       await firstBeneficiary.click();
@@ -101,7 +108,10 @@ test.describe('Beneficiaries Module', () => {
     await page.goto('/yardim/ihtiyac-sahipleri');
 
     // Look for add button
-    const addButton = page.locator('button').filter({ hasText: /Ekle|Yeni|Add/i }).first();
+    const addButton = page
+      .locator('button')
+      .filter({ hasText: /Ekle|Yeni|Add/i })
+      .first();
 
     if (await addButton.isVisible()) {
       await addButton.click();
@@ -121,7 +131,10 @@ test.describe('Beneficiaries Module', () => {
     await page.goto('/yardim/ihtiyac-sahipleri');
 
     // Look for export button
-    const exportButton = page.locator('button').filter({ hasText: /Dışa Aktar|Export|Excel|PDF/i }).first();
+    const exportButton = page
+      .locator('button')
+      .filter({ hasText: /Dışa Aktar|Export|Excel|PDF/i })
+      .first();
 
     if (await exportButton.isVisible()) {
       // Setup download listener
@@ -151,7 +164,9 @@ test.describe('Beneficiaries Module', () => {
     await page.waitForTimeout(1000);
 
     // Look for pagination controls
-    const nextButton = page.locator('button[aria-label*="next"], button:has-text("Sonraki"), button:has-text("Next")').first();
+    const nextButton = page
+      .locator('button[aria-label*="next"], button:has-text("Sonraki"), button:has-text("Next")')
+      .first();
 
     if (await nextButton.isVisible()) {
       // Check if next button is enabled
@@ -175,10 +190,12 @@ test.describe('Beneficiaries Module', () => {
     await page.waitForTimeout(1000);
 
     // Should show empty state or "no results" message
-    const emptyMessage = page.locator('text=/Kayıt bulunamadı|Sonuç bulunamadı|No results|No beneficiaries/i').first();
+    const emptyMessage = page
+      .locator('text=/Kayıt bulunamadı|Sonuç bulunamadı|No results|No beneficiaries/i')
+      .first();
 
     // Empty state should be visible if no results
-    const hasResults = await page.locator('tbody tr, [data-row]').count() > 0;
+    const hasResults = (await page.locator('tbody tr, [data-row]').count()) > 0;
     const hasEmptyState = await emptyMessage.isVisible();
 
     // Either has results or shows empty state
@@ -200,14 +217,19 @@ test.describe('Beneficiary Form Validation', () => {
     await page.goto('/yardim/ihtiyac-sahipleri');
 
     // Open add form
-    const addButton = page.locator('button').filter({ hasText: /Ekle|Yeni|Add/i }).first();
+    const addButton = page
+      .locator('button')
+      .filter({ hasText: /Ekle|Yeni|Add/i })
+      .first();
 
     if (await addButton.isVisible()) {
       await addButton.click();
       await page.waitForTimeout(500);
 
       // Try to submit empty form
-      const submitButton = page.locator('button[type="submit"], button:has-text("Kaydet"), button:has-text("Save")').first();
+      const submitButton = page
+        .locator('button[type="submit"], button:has-text("Kaydet"), button:has-text("Save")')
+        .first();
 
       if (await submitButton.isVisible()) {
         await submitButton.click();
@@ -215,7 +237,7 @@ test.describe('Beneficiary Form Validation', () => {
         // Should show validation errors
         await page.waitForTimeout(500);
         const errorMessages = page.locator('text=/gerekli|required|zorunlu/i');
-        const hasErrors = await errorMessages.count() > 0;
+        const hasErrors = (await errorMessages.count()) > 0;
 
         expect(hasErrors).toBeTruthy();
       }
