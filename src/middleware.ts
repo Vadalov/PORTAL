@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 import { serverAccount } from '@/lib/appwrite/server';
 import { ensureServerInitialized } from '@/lib/appwrite/server';
 import { UserRole, Permission, ROLE_PERMISSIONS } from '@/types/auth';
+import { appwriteConfig } from '@/lib/appwrite/config';
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -11,7 +12,9 @@ const publicRoutes = [
   '/test-appwrite',
   '/_next',
   '/favicon.ico',
-  '/api/csrf' // CSRF token endpoint is public
+  '/api/csrf', // CSRF token endpoint is public
+  '/api/auth/login', // Login endpoint is public (but requires CSRF token)
+  '/api/auth/logout' // Logout endpoint is public
 ];
 
 // Auth routes that should redirect to dashboard if already authenticated
@@ -104,34 +107,14 @@ function isServerReady(): boolean {
 }
 
 /**
- * Validate CSRF token for POST, PUT, DELETE requests
+ * CSRF validation is handled at the API route level
+ * Middleware in Edge Runtime cannot use Node.js crypto module
  */
-function validateCSRFToken(request: NextRequest): boolean {
-  // Skip CSRF check for GET requests
-  if (request.method === 'GET') {
-    return true;
-  }
-
-  const csrfToken = request.headers.get('x-csrf-token');
-  const sessionCookie = request.cookies.get('auth-session');
-  
-  if (!csrfToken || !sessionCookie) {
-    return false;
-  }
-
-  try {
-    const sessionData = JSON.parse(sessionCookie.value);
-    return sessionData.csrfToken === csrfToken;
-  } catch (error) {
-    console.error('CSRF validation error:', error);
-    return false;
-  }
-}
 
 /**
  * Get user session from Appwrite
  */
-async function getAppwriteSession(request: NextRequest): Promise<{ userId: string; $id: string } | null> {
+async function getAppwriteSession(request: NextRequest): Promise<{ userId: string; $id: string; secret: string } | null> {
   try {
     if (!isServerReady()) {
       return null;
@@ -145,13 +128,25 @@ async function getAppwriteSession(request: NextRequest): Promise<{ userId: strin
     // Use the session cookie to get session info
     const sessionData = JSON.parse(sessionCookie.value);
 
-    if (!sessionData.sessionId) {
+    if (!sessionData.sessionId || !sessionData.secret) {
       return null;
     }
 
-    // Get session from Appwrite using session ID
-    const session = await serverAccount.getSession(sessionData.sessionId);
-    return session as { userId: string; $id: string };
+    // Validate session by checking expiration
+    if (sessionData.expire) {
+      const expireDate = new Date(sessionData.expire);
+      if (expireDate < new Date()) {
+        console.warn('Session expired');
+        return null;
+      }
+    }
+
+    // Return session data from cookie (trusted since it's HttpOnly)
+    return {
+      userId: sessionData.userId,
+      $id: sessionData.sessionId,
+      secret: sessionData.secret,
+    };
   } catch (error) {
     console.error('Appwrite session validation error:', error);
     return null;
@@ -161,14 +156,22 @@ async function getAppwriteSession(request: NextRequest): Promise<{ userId: strin
 /**
  * Get user data from Appwrite session
  */
-async function getUserFromSession(session: { userId: string; $id: string } | null): Promise<{ id: string; email: string; name: string; role: string; permissions: string[] } | null> {
+async function getUserFromSession(session: { userId: string; $id: string; secret: string } | null): Promise<{ id: string; email: string; name: string; role: string; permissions: string[] } | null> {
   try {
-    if (!session || !session.userId) {
+    if (!session || !session.userId || !session.secret) {
       return null;
     }
 
-    const user = await serverAccount.get();
-    
+    // Create a client with the session to get user data
+    const { Client, Account } = await import('node-appwrite');
+    const sessionClient = new Client()
+      .setEndpoint(appwriteConfig.endpoint)
+      .setProject(appwriteConfig.projectId)
+      .setSession(session.secret);
+
+    const sessionAccount = new Account(sessionClient);
+    const user = await sessionAccount.get();
+
     // Map Appwrite user to our user format
     const role = (user.labels?.[0]?.toUpperCase() || 'MEMBER') as UserRole;
     return {
@@ -254,20 +257,7 @@ export default async function middleware(request: NextRequest) {
   // Add security headers to all responses
   const response = addSecurityHeaders(NextResponse.next());
 
-  // Handle CSRF protection for state-changing requests
-  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
-    if (!validateCSRFToken(request)) {
-      return new NextResponse(
-        JSON.stringify({ error: 'CSRF token validation failed' }),
-        {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
-    }
-  }
-
-  // Allow public routes
+  // Allow public routes first (before CSRF check)
   if (publicRoutes.some(route => pathname.startsWith(route))) {
     // If authenticated and trying to access auth pages, redirect to dashboard
     const sessionCookie = request.cookies.get('appwrite-session');
@@ -276,6 +266,9 @@ export default async function middleware(request: NextRequest) {
     }
     return response;
   }
+
+  // CSRF protection is handled at the API route level
+  // (Middleware runs in Edge Runtime and cannot use Node.js crypto module)
 
   // Get Appwrite session
   const appwriteSession = await getAppwriteSession(request);

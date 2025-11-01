@@ -137,10 +137,15 @@ export const useAuthStore = create<AuthStore>()(
             try {
               // Get CSRF token first
               const csrfResponse = await fetch('/api/csrf');
+
+              if (!csrfResponse.ok) {
+                throw new Error('Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin.');
+              }
+
               const csrfData = await csrfResponse.json();
 
               if (!csrfData.success) {
-                throw new Error('CSRF token alınamadı');
+                throw new Error('Güvenlik doğrulaması başarısız. Lütfen sayfayı yenileyin.');
               }
 
               // Call server-side login API (sets HttpOnly cookie)
@@ -156,7 +161,16 @@ export const useAuthStore = create<AuthStore>()(
               const result = await response.json();
 
               if (!result.success) {
-                throw new Error(result.error || 'Giriş yapılamadı');
+                // Handle specific error cases
+                if (response.status === 401) {
+                  throw new Error('E-posta veya şifre hatalı. Lütfen kontrol edin.');
+                } else if (response.status === 429) {
+                  throw new Error('Çok fazla deneme yapıldı. Lütfen 15 dakika sonra tekrar deneyin.');
+                } else if (response.status === 400) {
+                  throw new Error('E-posta ve şifre alanları zorunludur.');
+                } else {
+                  throw new Error(result.error || 'Giriş yapılamadı. Lütfen tekrar deneyin.');
+                }
               }
 
               const user = result.data.user;
@@ -165,11 +179,11 @@ export const useAuthStore = create<AuthStore>()(
               const sessionObj: Session = {
                 userId: user.id,
                 accessToken: 'stored-in-httponly-cookie', // Not stored client-side
-                expire: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                expire: result.data.session.expire,
               };
 
               // Save session info to localStorage (for persistence)
-              localStorage.setItem('auth-session', JSON.stringify({ 
+              localStorage.setItem('auth-session', JSON.stringify({
                 userId: user.id,
                 email: user.email,
                 name: user.name,
@@ -185,8 +199,18 @@ export const useAuthStore = create<AuthStore>()(
               });
 
             } catch (error: unknown) {
+              let errorMessage = 'Giriş yapılamadı. Lütfen tekrar deneyin.';
 
-              const errorMessage = (error as Error).message || 'Giriş yapılamadı';
+              if (error instanceof Error) {
+                errorMessage = error.message;
+              } else if (typeof error === 'string') {
+                errorMessage = error;
+              }
+
+              // Network error handling
+              if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+                errorMessage = 'İnternet bağlantınızı kontrol edin.';
+              }
 
               set((state) => {
                 state.isLoading = false;
@@ -299,7 +323,6 @@ export const useAuthStore = create<AuthStore>()(
         {
           name: 'auth-store',
           storage: createJSONStorage(() => localStorage),
-          skipHydration: true,
           partialize: (state) => ({
             user: state.user,
             session: state.session,

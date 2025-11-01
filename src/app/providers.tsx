@@ -46,11 +46,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }
   }, [queryClient]);
 
-  // Manual rehydration for skipHydration: true
-  useEffect(() => {
-    useAuthStore.persist.rehydrate();
-  }, []);
-
   // Wait for both mounted and hydration complete before initializing auth
   useEffect(() => {
     if (mounted && hasHydrated && initializeAuth) {
@@ -65,9 +60,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }
   }, [mounted, hasHydrated, initializeAuth]);
 
-  // Show nothing until hydration complete (prevents hydration mismatch)
+  // Show loading spinner until hydration complete (prevents hydration mismatch)
   if (!hasHydrated) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
+          <p className="text-sm text-gray-600">Uygulama yükleniyor...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
