@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,18 @@ import { DataTable, Column } from '@/components/ui/data-table';
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { BeneficiaryQuickAddModal } from '@/components/forms/BeneficiaryQuickAddModal';
 import api from '@/lib/api';
 import { exportBeneficiaries } from '@/lib/api/mock-api';
 import type { BeneficiaryDocument } from '@/types/collections';
 import { toast } from 'sonner';
 import { ArrowUpRight, Download, Plus } from 'lucide-react';
+
+// Lazy load heavy modal component
+const BeneficiaryQuickAddModal = lazy(() =>
+  import('@/components/forms/BeneficiaryQuickAddModal').then((mod) => ({
+    default: mod.BeneficiaryQuickAddModal,
+  }))
+);
 
 export default function BeneficiariesPage() {
   const router = useRouter();
@@ -117,7 +123,11 @@ export default function BeneficiariesPage() {
 
   return (
     <>
-      <BeneficiaryQuickAddModal open={showQuickAddModal} onOpenChange={handleModalClose} />
+      {showQuickAddModal && (
+        <Suspense fallback={<div>Yükleniyor...</div>}>
+          <BeneficiaryQuickAddModal open={showQuickAddModal} onOpenChange={handleModalClose} />
+        </Suspense>
+      )}
 
       <PageLayout
         title="İhtiyaç Sahipleri"
