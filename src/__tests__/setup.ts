@@ -23,8 +23,8 @@ global.ResizeObserver = class ResizeObserver {
 }
 
 // Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+;(global as any).IntersectionObserver = class IntersectionObserver {
+  observe(_element: Element): void {}
+  unobserve(_element: Element): void {}
+  disconnect(): void {}
 }
