@@ -120,7 +120,7 @@ const Dashboard = () => {
         <div className="flex gap-2">
           {[...new Array(4)].map((i, idx) => (
             <div
-              key={"first-array-demo-1" + idx}
+              key={`first-array-demo-1${  idx}`}
               className="h-20 w-full animate-pulse rounded-lg bg-muted dark:bg-neutral-800"
             ></div>
           ))}
@@ -128,7 +128,7 @@ const Dashboard = () => {
         <div className="flex flex-1 gap-2">
           {[...new Array(2)].map((i, idx) => (
             <div
-              key={"second-array-demo-1" + idx}
+              key={`second-array-demo-1${  idx}`}
               className="h-full w-full animate-pulse rounded-lg bg-muted dark:bg-neutral-800"
             ></div>
           ))}

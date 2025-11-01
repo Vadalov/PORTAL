@@ -111,7 +111,7 @@ if (config.projectId === '') {
 }
 
 // Summary
-console.log('\n' + '='.repeat(50));
+console.log(`\n${  '='.repeat(50)}`);
 if (hasErrors) {
   console.error('❌ Validation failed! Please fix the errors above.');
   process.exit(1);

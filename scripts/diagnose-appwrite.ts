@@ -108,7 +108,7 @@ async function main() {
       }
     } catch (error: any) {
       overallScore -= 30;
-      issues.push('Connectivity test failed: ' + error.message);
+      issues.push(`Connectivity test failed: ${  error.message}`);
     }
   }
 
@@ -181,7 +181,7 @@ async function main() {
       }
     } catch (error: any) {
       overallScore -= 40;
-      issues.push('Health check error: ' + error.message);
+      issues.push(`Health check error: ${  error.message}`);
     }
   }
 

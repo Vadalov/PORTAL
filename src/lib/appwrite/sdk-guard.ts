@@ -53,7 +53,7 @@ class SDKGuard {
       };
       this.violations.push(violation);
 
-      console.warn('⚠️ ' + message);
+      console.warn(`⚠️ ${  message}`);
 
       if (strictMode) {
         throw new Error(message);
@@ -84,7 +84,7 @@ class SDKGuard {
       };
       this.violations.push(violation);
 
-      console.warn('⚠️ ' + message);
+      console.warn(`⚠️ ${  message}`);
 
       if (strictMode) {
         throw new Error(message);
@@ -114,7 +114,7 @@ class SDKGuard {
         timestamp: new Date()
       };
       this.violations.push(violation);
-      console.warn('⚠️ ' + message);
+      console.warn(`⚠️ ${  message}`);
     } else if (sdkType === 'server' && isBrowser) {
       const message = `Server SDK imported in browser${importPath ? ` from ${importPath}` : ''}. Use client SDK instead.`;
       const violation: SDKViolation = {
@@ -124,7 +124,7 @@ class SDKGuard {
         timestamp: new Date()
       };
       this.violations.push(violation);
-      console.warn('⚠️ ' + message);
+      console.warn(`⚠️ ${  message}`);
     }
   }
 

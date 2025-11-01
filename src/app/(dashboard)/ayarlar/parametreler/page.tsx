@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Search, Edit, Trash2, Check, X } from 'lucide-react';
-import type { ParameterCategory, ParameterDocument } from '@/types/collections';
+import { Plus, Search, Trash2, Check, X } from 'lucide-react';
+import type { ParameterCategory } from '@/types/collections';
 
 const CATEGORY_LABELS: Record<ParameterCategory, string> = {
   gender: 'Cinsiyet',
@@ -73,7 +73,7 @@ export default function ParametersPage() {
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
     },
     onError: (error: any) => {
-      toast.error('Güncelleme hatası: ' + error.message);
+      toast.error(`Güncelleme hatası: ${  error.message}`);
     },
   });
 
@@ -84,7 +84,7 @@ export default function ParametersPage() {
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
     },
     onError: (error: any) => {
-      toast.error('Silme hatası: ' + error.message);
+      toast.error(`Silme hatası: ${  error.message}`);
     },
   });
 
@@ -264,7 +264,7 @@ function ParameterForm({ onSuccess }: { onSuccess?: () => void }) {
       onSuccess?.();
     },
     onError: (error: any) => {
-      toast.error('Hata: ' + error.message);
+      toast.error(`Hata: ${  error.message}`);
     },
   });
 

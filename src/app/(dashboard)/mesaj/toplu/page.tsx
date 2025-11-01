@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { appwriteApi } from '@/lib/api/appwrite-api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -218,7 +218,7 @@ export default function BulkMessagingPage() {
         toast.success(`Toplu mesaj gönderildi! ${successCount} başarılı, ${failedCount} başarısız.`);
       }
     } catch (error: any) {
-      toast.error('Toplu mesaj gönderilirken hata oluştu: ' + error.message);
+      toast.error(`Toplu mesaj gönderilirken hata oluştu: ${  error.message}`);
     } finally {
       setIsSending(false);
     }

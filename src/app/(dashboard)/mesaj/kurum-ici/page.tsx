@@ -45,7 +45,7 @@ export default function InternalMessagingPage() {
   // State management
   const [activeTab, setActiveTab] = useState<ActiveTab>('inbox');
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const [_page, _setPage] = useState(1);
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<MessageDocument | null>(null);
   const [showComposeModal, setShowComposeModal] = useState(false);
@@ -54,7 +54,7 @@ export default function InternalMessagingPage() {
   const limit = 20;
 
   // Data fetching based on active tab
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['internal-messages', activeTab, page, search, user?.id],
     queryFn: async () => {
       if (!user?.id) return { data: [], total: 0 };
@@ -110,7 +110,7 @@ export default function InternalMessagingPage() {
       setShowMessageDetail(false);
     },
     onError: (error: any) => {
-      toast.error('Mesaj silinirken hata oluştu: ' + error.message);
+      toast.error(`Mesaj silinirken hata oluştu: ${  error.message}`);
     },
   });
 

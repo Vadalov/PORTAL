@@ -97,7 +97,7 @@ async function testLogin() {
       console.log('⚠️  Session endpoint yanıt vermedi');
     }
 
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log('🎉 Tüm testler başarılı!');
     console.log('\n💡 Frontend\'de login yapmak için:');
     console.log(`   1. ${BASE_URL}/login adresine gidin`);

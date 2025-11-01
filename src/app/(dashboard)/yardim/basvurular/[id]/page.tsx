@@ -41,7 +41,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
       queryClient.invalidateQueries({ queryKey: ['aid-applications'] });
     },
     onError: (error: any) => {
-      toast.error('Hata: ' + error.message);
+      toast.error(`Hata: ${  error.message}`);
     },
   });
 

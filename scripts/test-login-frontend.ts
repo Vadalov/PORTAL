@@ -87,7 +87,7 @@ async function testFrontendLogin() {
       console.log('✅ Dashboard sayfasına yönlendirme başarılı');
     }
 
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${  '='.repeat(60)}`);
     console.log('🎉 Frontend login testi başarılı!');
     console.log('\n💡 Browser açık kalacak, manuel kontrol edebilirsiniz.');
     console.log('   Kapatmak için 10 saniye bekleyin...');

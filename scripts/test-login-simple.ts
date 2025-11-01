@@ -19,7 +19,7 @@ async function testLogin() {
     console.log('1. CSRF Token alınıyor...');
     const csrfRes = await fetch(`${BASE_URL}/api/csrf`);
     const csrfData = await csrfRes.json();
-    console.log('✅ CSRF Token:', csrfData.token?.substring(0, 20) + '...');
+    console.log('✅ CSRF Token:', `${csrfData.token?.substring(0, 20)  }...`);
     
     // Login yap
     console.log('\n2. Login yapılıyor...');

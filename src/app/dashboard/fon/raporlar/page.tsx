@@ -21,7 +21,6 @@ import {
   PieChart,
   TrendingUp,
   Eye,
-  Filter,
   Plus,
   Loader2,
   AlertCircle,
@@ -213,7 +212,7 @@ export default function RaporlarPage() {
   const formatCurrency = (amount: number, currency: string = 'TRY') => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
-      currency: currency
+      currency
     }).format(amount);
   };
 

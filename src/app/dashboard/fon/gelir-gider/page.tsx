@@ -20,7 +20,6 @@ import {
   Plus,
   Search,
   Filter,
-  Download,
   Trash2,
   Edit,
   Calendar,
@@ -98,7 +97,7 @@ export default function GelirGiderPage() {
   
   // Transaction form
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [_editingTransaction, _setEditingTransaction] = useState<Transaction | null>(null);
   const [formData, setFormData] = useState<CreateTransactionInput>({
     type: 'income',
     category: 'donation',
@@ -236,7 +235,7 @@ export default function GelirGiderPage() {
   const formatCurrency = (amount: number, currency: string = 'TRY') => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
-      currency: currency
+      currency
     }).format(amount);
   };
 

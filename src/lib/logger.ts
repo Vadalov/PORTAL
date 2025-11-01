@@ -59,7 +59,7 @@ function maskSensitive(obj: any): any {
 function shortenStackTrace(error: Error): Error {
   if (isProduction && error.stack) {
     const lines = error.stack.split('\n');
-    error.stack = lines.slice(0, 5).join('\n') + '\n... (truncated)';
+    error.stack = `${lines.slice(0, 5).join('\n')  }\n... (truncated)`;
   }
   return error;
 }
