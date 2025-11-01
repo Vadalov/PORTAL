@@ -83,6 +83,56 @@ npm run appwrite:deploy         # Appwrite CLI ile deploy
 
 ---
 
+## 🤖 GitHub MCP Server Entegrasyonu
+
+PORTAL projesi, Claude Desktop ile GitHub'a doğrudan erişim için GitHub MCP (Model Context Protocol) Server'ı destekler.
+
+**📚 Detaylı Kurulum Rehberi**: [docs/GITHUB_MCP_SETUP.md](./docs/GITHUB_MCP_SETUP.md)
+
+### Hızlı Kurulum
+
+```bash
+# 1. GitHub Personal Access Token oluştur
+# https://github.com/settings/tokens/new
+# Gerekli yetkiler: repo, workflow, read:org, read:user, user:email
+
+# 2. Token'ı ortam değişkeni olarak ayarla
+export GITHUB_TOKEN='your_github_token_here'
+
+# 3. Otomatik kurulum scriptini çalıştır
+./setup-mcp-github.sh
+
+# 4. Test et
+./test-mcp-github.sh
+
+# 5. Claude Desktop'ı yeniden başlat
+```
+
+### Ne Yapabilirsiniz?
+
+GitHub MCP server ile Claude Desktop üzerinden:
+
+- ✅ Repository yönetimi (dosya okuma/yazma, branch oluşturma)
+- ✅ Issue yönetimi (oluşturma, güncelleme, arama)
+- ✅ Pull Request işlemleri (oluşturma, review, merge)
+- ✅ Kod arama (tüm repository'lerde arama)
+- ✅ Commit geçmişi (listeleme, inceleme)
+- ✅ GitHub Actions (workflow tetikleme)
+
+### Kullanım Örnekleri
+
+Claude Desktop'ta şu komutları kullanabilirsiniz:
+
+```
+"Vadalov/PORTAL repository'sindeki açık issue'ları listele"
+"PORTAL projesinde yeni bir feature branch oluştur"
+"Son 10 commit'i göster"
+"package.json dosyasını getir"
+"Yeni bir pull request oluştur"
+```
+
+---
+
 ## 📊 Özellikler
 
 ### ✅ Tamamlanmış
@@ -167,6 +217,7 @@ src/
 | [COMPONENT_GUIDE.md](COMPONENT_GUIDE.md)             | Bileşen API, örnekler               |
 | [MODERNIZATION_SUMMARY.md](MODERNIZATION_SUMMARY.md) | Modernizasyon detayları             |
 | [PHASE_2_COMPLETE.md](PHASE_2_COMPLETE.md)           | Phase 2 tamamlanmış işler           |
+| [docs/GITHUB_MCP_SETUP.md](docs/GITHUB_MCP_SETUP.md) | GitHub MCP Server kurulumu          |
 
 ---
 
@@ -397,7 +448,7 @@ Tüm bileşenler **production ready** ve **type-safe**'dir.
 
 ---
 
-**Son Güncelleme:** 29 Ekim 2024
+**Son Güncelleme:** 1 Kasım 2025
 **Sürüm:** 1.0.0
 **Durum:** ✅ Production Ready
 
