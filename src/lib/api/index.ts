@@ -72,6 +72,7 @@ const mockApi = {
 
   meetings: {
     getMeetings: async (_params?: QueryParams): Promise<AppwriteResponse<MeetingDocument[]>> => ({ data: [], error: null, total: 0 }),
+    getMeeting: async (_id: string): Promise<AppwriteResponse<MeetingDocument>> => ({ data: null, error: 'Not implemented in mock' }),
     createMeeting: async (_data: CreateDocumentData<MeetingDocument>): Promise<AppwriteResponse<MeetingDocument>> => ({ data: null, error: 'Not implemented in mock' }),
     updateMeeting: async (_id: string, _data: UpdateDocumentData<MeetingDocument>): Promise<AppwriteResponse<MeetingDocument>> => ({ data: null, error: 'Not implemented in mock' }),
     updateMeetingStatus: async (_id: string, _status: string): Promise<AppwriteResponse<MeetingDocument>> => ({ data: null, error: 'Not implemented in mock' }),

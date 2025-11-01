@@ -1,0 +1,3421 @@
+{
+  "statistics": {
+    "detectionDate": "2025-10-29T12:23:30.724Z",
+    "formats": {
+      "typescript": {
+        "sources": {
+          "src/app/api/users/[id]/route.ts": {
+            "lines": 76,
+            "tokens": 1086,
+            "sources": 1,
+            "clones": 11,
+            "duplicatedLines": 65,
+            "duplicatedTokens": 1127,
+            "percentage": 85.53,
+            "percentageTokens": 103.78,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/tasks/[id]/route.ts": {
+            "lines": 83,
+            "tokens": 1105,
+            "sources": 1,
+            "clones": 9,
+            "duplicatedLines": 89,
+            "duplicatedTokens": 1089,
+            "percentage": 107.23,
+            "percentageTokens": 98.55,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/storage/upload/route.ts": {
+            "lines": 38,
+            "tokens": 474,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/messages/[id]/route.ts": {
+            "lines": 102,
+            "tokens": 1355,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 19,
+            "duplicatedTokens": 325,
+            "percentage": 18.63,
+            "percentageTokens": 23.99,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/meetings/[id]/route.ts": {
+            "lines": 80,
+            "tokens": 1059,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 29,
+            "duplicatedTokens": 402,
+            "percentage": 36.25,
+            "percentageTokens": 37.96,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/donations/[id]/route.ts": {
+            "lines": 89,
+            "tokens": 1170,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 28,
+            "duplicatedTokens": 432,
+            "percentage": 31.46,
+            "percentageTokens": 36.92,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/beneficiaries/[id]/route.ts": {
+            "lines": 195,
+            "tokens": 1530,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 53,
+            "duplicatedTokens": 475,
+            "percentage": 27.18,
+            "percentageTokens": 31.05,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/auth/session/route.ts": {
+            "lines": 50,
+            "tokens": 368,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/auth/logout/route.ts": {
+            "lines": 35,
+            "tokens": 222,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/auth/login/route.ts": {
+            "lines": 145,
+            "tokens": 1172,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 36,
+            "duplicatedTokens": 344,
+            "percentage": 24.83,
+            "percentageTokens": 29.35,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/aid-applications/[id]/route.ts": {
+            "lines": 74,
+            "tokens": 1047,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 17,
+            "duplicatedTokens": 319,
+            "percentage": 22.97,
+            "percentageTokens": 30.47,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/users/route.ts": {
+            "lines": 51,
+            "tokens": 796,
+            "sources": 1,
+            "clones": 5,
+            "duplicatedLines": 36,
+            "duplicatedTokens": 609,
+            "percentage": 70.59,
+            "percentageTokens": 76.51,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/test-sentry/route.ts": {
+            "lines": 42,
+            "tokens": 344,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 105,
+            "percentage": 33.33,
+            "percentageTokens": 30.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/tasks/route.ts": {
+            "lines": 73,
+            "tokens": 917,
+            "sources": 1,
+            "clones": 7,
+            "duplicatedLines": 50,
+            "duplicatedTokens": 680,
+            "percentage": 68.49,
+            "percentageTokens": 74.15,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/sentry-example-api/route.ts": {
+            "lines": 41,
+            "tokens": 333,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 14,
+            "duplicatedTokens": 105,
+            "percentage": 34.15,
+            "percentageTokens": 31.53,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/messages/route.ts": {
+            "lines": 78,
+            "tokens": 985,
+            "sources": 1,
+            "clones": 3,
+            "duplicatedLines": 21,
+            "duplicatedTokens": 304,
+            "percentage": 26.92,
+            "percentageTokens": 30.86,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/meetings/route.ts": {
+            "lines": 77,
+            "tokens": 957,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 32,
+            "duplicatedTokens": 396,
+            "percentage": 41.56,
+            "percentageTokens": 41.38,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/health/route.ts": {
+            "lines": 101,
+            "tokens": 892,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/donations/route.ts": {
+            "lines": 80,
+            "tokens": 889,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 16,
+            "duplicatedTokens": 224,
+            "percentage": 20,
+            "percentageTokens": 25.2,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/csrf/route.ts": {
+            "lines": 41,
+            "tokens": 301,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/beneficiaries/route.ts": {
+            "lines": 189,
+            "tokens": 1613,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 11,
+            "duplicatedTokens": 103,
+            "percentage": 5.82,
+            "percentageTokens": 6.39,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/app/api/aid-applications/route.ts": {
+            "lines": 60,
+            "tokens": 882,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 12,
+            "duplicatedTokens": 221,
+            "percentage": 20,
+            "percentageTokens": 25.06,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/stores/__tests__/authStore.test.ts": {
+            "lines": 186,
+            "tokens": 1626,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/validations/task.ts": {
+            "lines": 202,
+            "tokens": 1807,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/validations/message.ts": {
+            "lines": 245,
+            "tokens": 2260,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/validations/meeting.ts": {
+            "lines": 193,
+            "tokens": 1259,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 76,
+            "duplicatedTokens": 498,
+            "percentage": 39.38,
+            "percentageTokens": 39.56,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/validations/beneficiary.ts": {
+            "lines": 432,
+            "tokens": 3929,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 44,
+            "duplicatedTokens": 414,
+            "percentage": 10.19,
+            "percentageTokens": 10.54,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/testing/mock-schema-validator.ts": {
+            "lines": 328,
+            "tokens": 2311,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/testing/mock-api-tester.ts": {
+            "lines": 343,
+            "tokens": 3883,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/testing/loading-state-tester.ts": {
+            "lines": 555,
+            "tokens": 4782,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 11,
+            "duplicatedTokens": 90,
+            "percentage": 1.98,
+            "percentageTokens": 1.88,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/testing/error-simulator.ts": {
+            "lines": 254,
+            "tokens": 2042,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/middleware/csrf-middleware.ts": {
+            "lines": 49,
+            "tokens": 360,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/export/index.ts": {
+            "lines": 312,
+            "tokens": 1965,
+            "sources": 1,
+            "clones": 8,
+            "duplicatedLines": 88,
+            "duplicatedTokens": 698,
+            "percentage": 28.21,
+            "percentageTokens": 35.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/debug/store-debugger.ts": {
+            "lines": 373,
+            "tokens": 2635,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/debug/network-monitor.ts": {
+            "lines": 406,
+            "tokens": 3226,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/debug/hydration-logger.ts": {
+            "lines": 267,
+            "tokens": 1856,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/validation.ts": {
+            "lines": 341,
+            "tokens": 2550,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/test-connection.ts": {
+            "lines": 71,
+            "tokens": 517,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/storage.ts": {
+            "lines": 228,
+            "tokens": 1554,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/setup-database.ts": {
+            "lines": 198,
+            "tokens": 2143,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 20,
+            "duplicatedTokens": 164,
+            "percentage": 10.1,
+            "percentageTokens": 7.65,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/server.ts": {
+            "lines": 133,
+            "tokens": 710,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 121,
+            "percentage": 11.28,
+            "percentageTokens": 17.04,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/sdk-guard.ts": {
+            "lines": 169,
+            "tokens": 1195,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 44,
+            "duplicatedTokens": 268,
+            "percentage": 26.04,
+            "percentageTokens": 22.43,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/permissions.ts": {
+            "lines": 217,
+            "tokens": 1571,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 18,
+            "duplicatedTokens": 152,
+            "percentage": 8.29,
+            "percentageTokens": 9.68,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/connectivity-test.ts": {
+            "lines": 276,
+            "tokens": 1992,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/config.ts": {
+            "lines": 235,
+            "tokens": 1573,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/appwrite/client.ts": {
+            "lines": 204,
+            "tokens": 908,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 121,
+            "percentage": 7.35,
+            "percentageTokens": 13.33,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/api/mock-auth-api.ts": {
+            "lines": 289,
+            "tokens": 2207,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/api/mock-api.ts": {
+            "lines": 839,
+            "tokens": 6657,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/api/index.ts": {
+            "lines": 136,
+            "tokens": 2341,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/api/appwrite-server-api.ts": {
+            "lines": 359,
+            "tokens": 4709,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/mocks/server.ts": {
+            "lines": 4,
+            "tokens": 39,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/mocks/handlers.ts": {
+            "lines": 76,
+            "tokens": 587,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/lib/utils.test.ts": {
+            "lines": 45,
+            "tokens": 481,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/lib/sanitization.test.ts": {
+            "lines": 319,
+            "tokens": 3032,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/lib/errors.test.ts": {
+            "lines": 175,
+            "tokens": 1775,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/lib/env-validation.test.ts": {
+            "lines": 108,
+            "tokens": 1070,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/lib/beneficiary-validation.test.ts": {
+            "lines": 387,
+            "tokens": 3092,
+            "sources": 1,
+            "clones": 16,
+            "duplicatedLines": 190,
+            "duplicatedTokens": 1388,
+            "percentage": 49.1,
+            "percentageTokens": 44.89,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/lib/api.test.ts": {
+            "lines": 170,
+            "tokens": 1523,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 12,
+            "duplicatedTokens": 132,
+            "percentage": 7.06,
+            "percentageTokens": 8.67,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/integration/beneficiary-sanitization.test.ts": {
+            "lines": 331,
+            "tokens": 2687,
+            "sources": 1,
+            "clones": 8,
+            "duplicatedLines": 96,
+            "duplicatedTokens": 740,
+            "percentage": 29,
+            "percentageTokens": 27.54,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/hooks/useInfiniteScroll.test.ts": {
+            "lines": 258,
+            "tokens": 2361,
+            "sources": 1,
+            "clones": 8,
+            "duplicatedLines": 108,
+            "duplicatedTokens": 934,
+            "percentage": 41.86,
+            "percentageTokens": 39.56,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/types/collections.ts": {
+            "lines": 454,
+            "tokens": 3188,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/types/beneficiary.ts": {
+            "lines": 557,
+            "tokens": 3681,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/types/auth.ts": {
+            "lines": 254,
+            "tokens": 1552,
+            "sources": 1,
+            "clones": 2,
+            "duplicatedLines": 58,
+            "duplicatedTokens": 346,
+            "percentage": 22.83,
+            "percentageTokens": 22.29,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/types/appwrite.ts": {
+            "lines": 146,
+            "tokens": 867,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/stores/authStore.ts": {
+            "lines": 336,
+            "tokens": 2841,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/scripts/test-appwrite-connection.ts": {
+            "lines": 46,
+            "tokens": 356,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/scripts/migrate-to-appwrite.ts": {
+            "lines": 135,
+            "tokens": 797,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 27,
+            "duplicatedTokens": 151,
+            "percentage": 20,
+            "percentageTokens": 18.95,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/scripts/migrate-donations-collection.ts": {
+            "lines": 43,
+            "tokens": 272,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/scripts/create-test-users.ts": {
+            "lines": 78,
+            "tokens": 525,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 27,
+            "duplicatedTokens": 151,
+            "percentage": 34.62,
+            "percentageTokens": 28.76,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/utils.ts": {
+            "lines": 5,
+            "tokens": 58,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/security.ts": {
+            "lines": 271,
+            "tokens": 2332,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/sanitization.ts": {
+            "lines": 365,
+            "tokens": 2798,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/rate-limit.ts": {
+            "lines": 92,
+            "tokens": 877,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/performance.ts": {
+            "lines": 115,
+            "tokens": 959,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/errors.ts": {
+            "lines": 341,
+            "tokens": 2660,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/env-validation.ts": {
+            "lines": 198,
+            "tokens": 1759,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 34,
+            "duplicatedTokens": 414,
+            "percentage": 17.17,
+            "percentageTokens": 23.54,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/lib/csrf.ts": {
+            "lines": 91,
+            "tokens": 577,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/hooks/useInfiniteScroll.ts": {
+            "lines": 128,
+            "tokens": 980,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/config/design-tokens.ts": {
+            "lines": 388,
+            "tokens": 2293,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/__tests__/setup.ts": {
+            "lines": 29,
+            "tokens": 216,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 11,
+            "duplicatedTokens": 90,
+            "percentage": 37.93,
+            "percentageTokens": 41.67,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "src/middleware.ts": {
+            "lines": 80,
+            "tokens": 546,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          }
+        },
+        "total": {
+          "lines": 15665,
+          "tokens": 130846,
+          "sources": 81,
+          "clones": 67,
+          "duplicatedLines": 718,
+          "duplicatedTokens": 7066,
+          "percentage": 4.58,
+          "percentageTokens": 5.4,
+          "newDuplicatedLines": 0,
+          "newClones": 0
+        }
+      }
+    },
+    "total": {
+      "lines": 15665,
+      "tokens": 130846,
+      "sources": 81,
+      "clones": 67,
+      "duplicatedLines": 718,
+      "duplicatedTokens": 7066,
+      "percentage": 4.58,
+      "percentageTokens": 5.4,
+      "newDuplicatedLines": 0,
+      "newClones": 0
+    }
+  },
+  "duplicates": [
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "(id);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: 'Kayıt bulunamadı' }, { status: 404 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data });\n  } catch (error: any) {\n    console.error('Get task error:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 29,
+        "end": 36,
+        "startLoc": {
+          "line": 29,
+          "column": 8,
+          "position": 369
+        },
+        "endLoc": {
+          "line": 36,
+          "column": 18,
+          "position": 475
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 8,
+          "position": 350
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 18,
+          "position": 456
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "(id, body);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Güncelleme başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Görev başarıyla güncellendi'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 54,
+        "end": 59,
+        "startLoc": {
+          "line": 54,
+          "column": 11,
+          "position": 688
+        },
+        "endLoc": {
+          "line": 59,
+          "column": 30,
+          "position": 784
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 47,
+        "end": 52,
+        "startLoc": {
+          "line": 47,
+          "column": 11,
+          "position": 669
+        },
+        "endLoc": {
+          "line": 52,
+          "column": 24,
+          "position": 765
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {\n  try {\n    const { id } = await params;\n    if (!id) {\n      return NextResponse.json({ success: false, error: 'ID parametresi gerekli' }, { status: 400 });\n    }\n\n    const response = await api.messages",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/messages/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 1,
+          "position": 237
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 9,
+          "position": 360
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 1,
+          "position": 243
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 6,
+          "position": 366
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "(id);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: 'Kayıt bulunamadı' }, { status: 404 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data });\n  } catch (error: any) {\n    console.error('Get message error:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/messages/[id]/route.ts",
+        "start": 29,
+        "end": 36,
+        "startLoc": {
+          "line": 29,
+          "column": 11,
+          "position": 363
+        },
+        "endLoc": {
+          "line": 36,
+          "column": 21,
+          "position": 469
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 8,
+          "position": 350
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 18,
+          "position": 456
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "(id, body);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Güncelleme başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Mesaj başarıyla güncellendi'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/messages/[id]/route.ts",
+        "start": 54,
+        "end": 59,
+        "startLoc": {
+          "line": 54,
+          "column": 14,
+          "position": 682
+        },
+        "endLoc": {
+          "line": 59,
+          "column": 30,
+          "position": 778
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 47,
+        "end": 52,
+        "startLoc": {
+          "line": 47,
+          "column": 11,
+          "position": 669
+        },
+        "endLoc": {
+          "line": 52,
+          "column": 24,
+          "position": 765
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {\n  try {\n    const { id } = await params;\n    if (!id) {\n      return NextResponse.json({ success: false, error: 'ID parametresi gerekli' }, { status: 400 });\n    }\n\n    const response = await api.meetings",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/meetings/[id]/route.ts",
+        "start": 19,
+        "end": 26,
+        "startLoc": {
+          "line": 19,
+          "column": 1,
+          "position": 197
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 9,
+          "position": 320
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 1,
+          "position": 243
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 6,
+          "position": 366
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "(id);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: 'Kayıt bulunamadı' }, { status: 404 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data });\n  } catch (error: any) {\n    console.error('Get meeting error:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/meetings/[id]/route.ts",
+        "start": 26,
+        "end": 33,
+        "startLoc": {
+          "line": 26,
+          "column": 11,
+          "position": 323
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 21,
+          "position": 429
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 8,
+          "position": 350
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 18,
+          "position": 456
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "(id, body);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Güncelleme başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Toplantı başarıyla güncellendi'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/meetings/[id]/route.ts",
+        "start": 51,
+        "end": 56,
+        "startLoc": {
+          "line": 51,
+          "column": 14,
+          "position": 642
+        },
+        "endLoc": {
+          "line": 56,
+          "column": 33,
+          "position": 738
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 47,
+        "end": 52,
+        "startLoc": {
+          "line": 47,
+          "column": 11,
+          "position": 669
+        },
+        "endLoc": {
+          "line": 52,
+          "column": 24,
+          "position": 765
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {\n  try {\n    const { id } = await params;\n    if (!id) {\n      return NextResponse.json({ success: false, error: 'ID parametresi gerekli' }, { status: 400 });\n    }\n\n    const response = await api.donations",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/donations/[id]/route.ts",
+        "start": 28,
+        "end": 35,
+        "startLoc": {
+          "line": 28,
+          "column": 1,
+          "position": 308
+        },
+        "endLoc": {
+          "line": 35,
+          "column": 10,
+          "position": 431
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 1,
+          "position": 243
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 6,
+          "position": 366
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "(id);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: 'Kayıt bulunamadı' }, { status: 404 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data });\n  } catch (error: any) {\n    console.error('Get donation error:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/donations/[id]/route.ts",
+        "start": 35,
+        "end": 42,
+        "startLoc": {
+          "line": 35,
+          "column": 12,
+          "position": 434
+        },
+        "endLoc": {
+          "line": 42,
+          "column": 22,
+          "position": 540
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 8,
+          "position": 350
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 18,
+          "position": 456
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "(id, body);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Güncelleme başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Bağış başarıyla güncellendi'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/donations/[id]/route.ts",
+        "start": 60,
+        "end": 65,
+        "startLoc": {
+          "line": 60,
+          "column": 15,
+          "position": 753
+        },
+        "endLoc": {
+          "line": 65,
+          "column": 30,
+          "position": 849
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 47,
+        "end": 52,
+        "startLoc": {
+          "line": 47,
+          "column": 11,
+          "position": 669
+        },
+        "endLoc": {
+          "line": 52,
+          "column": 24,
+          "position": 765
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "(\n  request: NextRequest,\n  { params }: { params: Promise<{ id: string }> }\n) {\n  try {\n    const { id } = await params;\n\n    if (!id) {\n      return NextResponse.json(\n        { success: false, error: 'ID parametresi gerekli' },\n        { status: 400 }\n      );\n    }\n\n    const response = await api.beneficiaries",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/beneficiaries/[id]/route.ts",
+        "start": 46,
+        "end": 60,
+        "startLoc": {
+          "line": 46,
+          "column": 22,
+          "position": 361
+        },
+        "endLoc": {
+          "line": 60,
+          "column": 14,
+          "position": 487
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 4,
+          "position": 250
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 6,
+          "position": 366
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "(\n  request: NextRequest,\n  { params }: { params: Promise<{ id: string }> }\n) {\n  try {\n    const { id } = await params;\n\n    if (!id) {\n      return NextResponse.json(\n        { success: false, error: 'ID parametresi gerekli' },\n        { status: 400 }\n      );\n    }\n\n    const body",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/beneficiaries/[id]/route.ts",
+        "start": 88,
+        "end": 102,
+        "startLoc": {
+          "line": 88,
+          "column": 25,
+          "position": 667
+        },
+        "endLoc": {
+          "line": 102,
+          "column": 5,
+          "position": 785
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 4,
+          "position": 250
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 9,
+          "position": 358
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "(\n  request: NextRequest,\n  { params }: { params: Promise<{ id: string }> }\n) {\n  try {\n    const { id } = await params;\n\n    if (!id) {\n      return NextResponse.json(\n        { success: false, error: 'ID parametresi gerekli' },\n        { status: 400 }\n      );\n    }\n\n    const response = await api.beneficiaries.deleteBeneficiary",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/beneficiaries/[id]/route.ts",
+        "start": 156,
+        "end": 170,
+        "startLoc": {
+          "line": 156,
+          "column": 25,
+          "position": 1201
+        },
+        "endLoc": {
+          "line": 170,
+          "column": 18,
+          "position": 1329
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 22,
+        "end": 60,
+        "startLoc": {
+          "line": 22,
+          "column": 4,
+          "position": 250
+        },
+        "endLoc": {
+          "line": 60,
+          "column": 15,
+          "position": 489
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ") {\n      AuditLogger.log({\n        userId: 'unknown',\n        action: 'LOGIN_ATTEMPT',\n        resource: 'auth',\n        resourceId: sanitizedEmail,\n        ipAddress: req.headers.get('x-forwarded-for') || 'unknown',\n        userAgent: req.headers.get('user-agent') || 'unknown',\n        status: 'failure',\n        error: 'Empty password'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/auth/login/route.ts",
+        "start": 33,
+        "end": 42,
+        "startLoc": {
+          "line": 33,
+          "column": 18,
+          "position": 287
+        },
+        "endLoc": {
+          "line": 42,
+          "column": 17,
+          "position": 373
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/auth/login/route.ts",
+        "start": 14,
+        "end": 23,
+        "startLoc": {
+          "line": 14,
+          "column": 2,
+          "position": 146
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 23,
+          "position": 232
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ") {\n      AuditLogger.log({\n        userId: 'unknown',\n        action: 'LOGIN_ATTEMPT',\n        resource: 'auth',\n        resourceId: sanitizedEmail,\n        ipAddress: req.headers.get('x-forwarded-for') || 'unknown',\n        userAgent: req.headers.get('user-agent') || 'unknown',\n        status: 'failure',\n        error: 'Invalid credentials'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/auth/login/route.ts",
+        "start": 70,
+        "end": 79,
+        "startLoc": {
+          "line": 70,
+          "column": 12,
+          "position": 590
+        },
+        "endLoc": {
+          "line": 79,
+          "column": 22,
+          "position": 676
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/auth/login/route.ts",
+        "start": 14,
+        "end": 23,
+        "startLoc": {
+          "line": 14,
+          "column": 2,
+          "position": 146
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 23,
+          "position": 232
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {\n  try {\n    const { id } = await params;\n    if (!id) return NextResponse.json({ success: false, error: 'ID parametresi gerekli' }, { status: 400 });\n\n    const response = await api.getAidApplication",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/aid-applications/[id]/route.ts",
+        "start": 15,
+        "end": 20,
+        "startLoc": {
+          "line": 15,
+          "column": 1,
+          "position": 197
+        },
+        "endLoc": {
+          "line": 20,
+          "column": 18,
+          "position": 314
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 17,
+        "end": 22,
+        "startLoc": {
+          "line": 17,
+          "column": 1,
+          "position": 230
+        },
+        "endLoc": {
+          "line": 22,
+          "column": 6,
+          "position": 347
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "(id);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: 'Kayıt bulunamadı' }, { status: 404 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data });\n  } catch (error: any) {\n    console.error('Get aid application error:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/aid-applications/[id]/route.ts",
+        "start": 20,
+        "end": 27,
+        "startLoc": {
+          "line": 20,
+          "column": 18,
+          "position": 315
+        },
+        "endLoc": {
+          "line": 27,
+          "column": 29,
+          "position": 421
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 22,
+        "end": 29,
+        "startLoc": {
+          "line": 22,
+          "column": 8,
+          "position": 350
+        },
+        "endLoc": {
+          "line": 29,
+          "column": 18,
+          "position": 456
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "(id, body);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Güncelleme başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Başvuru güncellendi'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/aid-applications/[id]/route.ts",
+        "start": 45,
+        "end": 50,
+        "startLoc": {
+          "line": 45,
+          "column": 21,
+          "position": 632
+        },
+        "endLoc": {
+          "line": 50,
+          "column": 22,
+          "position": 728
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/[id]/route.ts",
+        "start": 47,
+        "end": 52,
+        "startLoc": {
+          "line": 47,
+          "column": 11,
+          "position": 669
+        },
+        "endLoc": {
+          "line": 52,
+          "column": 24,
+          "position": 765
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "data.title.trim().length < 3) {\n    errors.push('Görev başlığı en az 3 karakter olmalıdır');\n  }\n  if (data.priority && !['low', 'normal', 'high', 'urgent'].includes(data.priority)) {\n    errors.push('Geçersiz öncelik değeri');\n  }\n  if (data.status && !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status)) {\n    errors.push('Geçersiz durum');\n  }\n  return { isValid: errors.length === 0, errors };\n}\n\n/**\n * GET /api/tasks\n */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/tasks/route.ts",
+        "start": 7,
+        "end": 21,
+        "startLoc": {
+          "line": 7,
+          "column": 2,
+          "position": 96
+        },
+        "endLoc": {
+          "line": 21,
+          "column": 4,
+          "position": 242
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/[id]/route.ts",
+        "start": 7,
+        "end": 21,
+        "startLoc": {
+          "line": 7,
+          "column": 2,
+          "position": 95
+        },
+        "endLoc": {
+          "line": 21,
+          "column": 4,
+          "position": 241
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": ");\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Görev başarıyla oluşturuldu'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/tasks/route.ts",
+        "start": 62,
+        "end": 67,
+        "startLoc": {
+          "line": 62,
+          "column": 5,
+          "position": 732
+        },
+        "endLoc": {
+          "line": 67,
+          "column": 30,
+          "position": 823
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/route.ts",
+        "start": 41,
+        "end": 45,
+        "startLoc": {
+          "line": 41,
+          "column": 2,
+          "position": 612
+        },
+        "endLoc": {
+          "line": 45,
+          "column": 24,
+          "position": 702
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": ", error);\n    return NextResponse.json(\n      { error: 'Internal server error' },\n      { status: 500 }\n    );\n  }\n}\n\nexport async function POST(request: NextRequest) {\n  try {\n    const body = await request.json();\n    \n    // Simulate processing that might fail\n    if (body.triggerError) {\n      throw new Error('Test error from Sentry example API'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/sentry-example-api/route.ts",
+        "start": 13,
+        "end": 27,
+        "startLoc": {
+          "line": 13,
+          "column": 31,
+          "position": 117
+        },
+        "endLoc": {
+          "line": 27,
+          "column": 37,
+          "position": 222
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/test-sentry/route.ts",
+        "start": 14,
+        "end": 28,
+        "startLoc": {
+          "line": 14,
+          "column": 28,
+          "position": 128
+        },
+        "endLoc": {
+          "line": 28,
+          "column": 34,
+          "position": 233
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": "export async function GET(request: NextRequest) {\n  try {\n    const { searchParams } = new URL(request.url);\n    const page = Number(searchParams.get('page') || '1');\n    const limit = Number(searchParams.get('limit') || '20');\n    const search = searchParams.get('search') || undefined;\n\n    const filters: Record<string, any> = {};\n    const message_type",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/messages/route.ts",
+        "start": 25,
+        "end": 33,
+        "startLoc": {
+          "line": 25,
+          "column": 1,
+          "position": 273
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 13,
+          "position": 402
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/route.ts",
+        "start": 17,
+        "end": 30,
+        "startLoc": {
+          "line": 17,
+          "column": 1,
+          "position": 233
+        },
+        "endLoc": {
+          "line": 30,
+          "column": 7,
+          "position": 373
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": "({ page, limit, search, filters });\n\n    return NextResponse.json({\n      success: true,\n      data: response.data,\n      total: response.total ?? 0,\n    });\n  } catch (error: any) {\n    console.error('List messages error:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/messages/route.ts",
+        "start": 43,
+        "end": 51,
+        "startLoc": {
+          "line": 43,
+          "column": 12,
+          "position": 547
+        },
+        "endLoc": {
+          "line": 51,
+          "column": 23,
+          "position": 629
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/route.ts",
+        "start": 38,
+        "end": 46,
+        "startLoc": {
+          "line": 38,
+          "column": 9,
+          "position": 479
+        },
+        "endLoc": {
+          "line": 46,
+          "column": 20,
+          "position": 561
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "(body);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Mesaj taslağı oluşturuldu'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/messages/route.ts",
+        "start": 67,
+        "end": 72,
+        "startLoc": {
+          "line": 67,
+          "column": 14,
+          "position": 798
+        },
+        "endLoc": {
+          "line": 72,
+          "column": 28,
+          "position": 891
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/route.ts",
+        "start": 62,
+        "end": 45,
+        "startLoc": {
+          "line": 62,
+          "column": 11,
+          "position": 730
+        },
+        "endLoc": {
+          "line": 45,
+          "column": 24,
+          "position": 702
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ");\n  }\n  if (data.status && !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status)) {\n    errors.push('Geçersiz durum');\n  }\n  return { isValid: errors.length === 0, errors };\n}\n\n/**\n * GET /api/meetings\n */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/meetings/route.ts",
+        "start": 11,
+        "end": 21,
+        "startLoc": {
+          "line": 11,
+          "column": 29,
+          "position": 143
+        },
+        "endLoc": {
+          "line": 21,
+          "column": 4,
+          "position": 220
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/meetings/[id]/route.ts",
+        "start": 8,
+        "end": 18,
+        "startLoc": {
+          "line": 8,
+          "column": 46,
+          "position": 118
+        },
+        "endLoc": {
+          "line": 18,
+          "column": 4,
+          "position": 195
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": "export async function GET(request: NextRequest) {\n  try {\n    const { searchParams } = new URL(request.url);\n    const page = Number(searchParams.get('page') || '1');\n    const limit = Number(searchParams.get('limit') || '20');\n    const search = searchParams.get('search') || undefined;\n\n    const filters: Record<string, any> = {};\n    const status = searchParams.get('status');\n    const meeting_type",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/meetings/route.ts",
+        "start": 22,
+        "end": 31,
+        "startLoc": {
+          "line": 22,
+          "column": 1,
+          "position": 222
+        },
+        "endLoc": {
+          "line": 31,
+          "column": 13,
+          "position": 366
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/route.ts",
+        "start": 17,
+        "end": 31,
+        "startLoc": {
+          "line": 17,
+          "column": 1,
+          "position": 233
+        },
+        "endLoc": {
+          "line": 31,
+          "column": 9,
+          "position": 388
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 9,
+      "fragment": "({ page, limit, search, filters });\n\n    return NextResponse.json({\n      success: true,\n      data: response.data,\n      total: response.total ?? 0,\n    });\n  } catch (error: any) {\n    console.error('List meetings error:'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/meetings/route.ts",
+        "start": 42,
+        "end": 50,
+        "startLoc": {
+          "line": 42,
+          "column": 12,
+          "position": 519
+        },
+        "endLoc": {
+          "line": 50,
+          "column": 23,
+          "position": 601
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/route.ts",
+        "start": 38,
+        "end": 46,
+        "startLoc": {
+          "line": 38,
+          "column": 9,
+          "position": 479
+        },
+        "endLoc": {
+          "line": 46,
+          "column": 20,
+          "position": 561
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "(body);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Toplantı başarıyla oluşturuldu'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/meetings/route.ts",
+        "start": 66,
+        "end": 71,
+        "startLoc": {
+          "line": 66,
+          "column": 14,
+          "position": 770
+        },
+        "endLoc": {
+          "line": 71,
+          "column": 33,
+          "position": 863
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/route.ts",
+        "start": 62,
+        "end": 45,
+        "startLoc": {
+          "line": 62,
+          "column": 11,
+          "position": 730
+        },
+        "endLoc": {
+          "line": 45,
+          "column": 24,
+          "position": 702
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": "!['TRY', 'USD', 'EUR'].includes(data.currency)) {\n    errors.push('Geçersiz para birimi');\n  }\n  if (data.donor_email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(data.donor_email)) {\n    errors.push('Geçersiz e-posta');\n  }\n  if (data.donor_phone && !/^[0-9\\s\\-\\+\\(\\)]{10,15}$/.test(data.donor_phone)) {\n    errors.push('Geçersiz telefon numarası');\n  }\n  if (!",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/donations/route.ts",
+        "start": 17,
+        "end": 26,
+        "startLoc": {
+          "line": 17,
+          "column": 2,
+          "position": 189
+        },
+        "endLoc": {
+          "line": 26,
+          "column": 2,
+          "position": 296
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/donations/[id]/route.ts",
+        "start": 10,
+        "end": 19,
+        "startLoc": {
+          "line": 10,
+          "column": 2,
+          "position": 135
+        },
+        "endLoc": {
+          "line": 19,
+          "column": 5,
+          "position": 242
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "export async function GET(request: NextRequest) {\n  try {\n    const { searchParams } = new URL(request.url);\n    const page = Number(searchParams.get('page') || '1');\n    const limit = Number(searchParams.get('limit') || '10');\n    const search = searchParams.get('search') || undefined;\n\n    const response = await api.donations",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/donations/route.ts",
+        "start": 37,
+        "end": 44,
+        "startLoc": {
+          "line": 37,
+          "column": 1,
+          "position": 345
+        },
+        "endLoc": {
+          "line": 44,
+          "column": 10,
+          "position": 462
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/route.ts",
+        "start": 17,
+        "end": 23,
+        "startLoc": {
+          "line": 17,
+          "column": 1,
+          "position": 233
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 6,
+          "position": 349
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ", error);\n    \n    // Handle duplicate TC number\n    if (error.message?.includes('duplicate') || error.message?.includes('unique')) {\n      return NextResponse.json(\n        { success: false, error: 'Bu TC Kimlik No zaten kayıtlı' },\n        { status: 409 }\n      );\n    }\n\n    return NextResponse.json(\n      { success: false, error: 'Oluşturma işlemi başarısız'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/beneficiaries/route.ts",
+        "start": 171,
+        "end": 182,
+        "startLoc": {
+          "line": 171,
+          "column": 30,
+          "position": 1460
+        },
+        "endLoc": {
+          "line": 182,
+          "column": 29,
+          "position": 1563
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/beneficiaries/[id]/route.ts",
+        "start": 135,
+        "end": 146,
+        "startLoc": {
+          "line": 135,
+          "column": 28,
+          "position": 1066
+        },
+        "endLoc": {
+          "line": 146,
+          "column": 30,
+          "position": 1169
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": "export async function GET(request: NextRequest) {\n  try {\n    const { searchParams } = new URL(request.url);\n    const page = Number(searchParams.get('page') || '1');\n    const limit = Number(searchParams.get('limit') || '20');\n    const search = searchParams.get('search') || undefined;\n    const filters: Record<string, any> = {};\n    const stage",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/aid-applications/route.ts",
+        "start": 17,
+        "end": 24,
+        "startLoc": {
+          "line": 17,
+          "column": 1,
+          "position": 251
+        },
+        "endLoc": {
+          "line": 24,
+          "column": 6,
+          "position": 379
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/users/route.ts",
+        "start": 17,
+        "end": 30,
+        "startLoc": {
+          "line": 17,
+          "column": 1,
+          "position": 233
+        },
+        "endLoc": {
+          "line": 30,
+          "column": 7,
+          "position": 373
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": "(body);\n    if (response.error || !response.data) {\n      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });\n    }\n\n    return NextResponse.json({ success: true, data: response.data, message: 'Başvuru oluşturuldu'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/app/api/aid-applications/route.ts",
+        "start": 49,
+        "end": 54,
+        "startLoc": {
+          "line": 49,
+          "column": 21,
+          "position": 695
+        },
+        "endLoc": {
+          "line": 54,
+          "column": 22,
+          "position": 788
+        }
+      },
+      "secondFile": {
+        "name": "src/app/api/tasks/route.ts",
+        "start": 62,
+        "end": 45,
+        "startLoc": {
+          "line": 62,
+          "column": 11,
+          "position": 730
+        },
+        "endLoc": {
+          "line": 45,
+          "column": 24,
+          "position": 702
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 39,
+      "fragment": "location: z\n      .string()\n      .max(200, 'Konum en fazla 200 karakter olabilir')\n      .optional(),\n\n    organizer: z.string().min(1, 'Düzenleyen gereklidir'),\n\n    participants: participantsSchema,\n\n    status: z.enum(['scheduled', 'ongoing', 'completed', 'cancelled']).default('scheduled'),\n\n    meeting_type: z.enum(['general', 'committee', 'board', 'other'], {\n      message: 'Toplantı türü seçilmelidir',\n    }),\n\n    agenda: z\n      .string()\n      .max(2000, 'Gündem en fazla 2000 karakter olabilir')\n      .optional(),\n\n    notes: z\n      .string()\n      .max(2000, 'Notlar en fazla 2000 karakter olabilir')\n      .optional(),\n  })\n  .refine(\n    (data) => {\n      // Participants must include organizer\n      return data.participants.includes(data.organizer);\n    },\n    {\n      message: 'Düzenleyen katılımcılar arasında olmalıdır',\n      path: ['participants'],\n    }\n  );\n\n/**\n * Type exports\n */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/validations/meeting.ts",
+        "start": 125,
+        "end": 163,
+        "startLoc": {
+          "line": 125,
+          "column": 5,
+          "position": 778
+        },
+        "endLoc": {
+          "line": 163,
+          "column": 4,
+          "position": 1027
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/validations/meeting.ts",
+        "start": 72,
+        "end": 110,
+        "startLoc": {
+          "line": 72,
+          "column": 5,
+          "position": 432
+        },
+        "endLoc": {
+          "line": 110,
+          "column": 4,
+          "position": 681
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": "),\n  firstName: z.string()\n    .min(2, 'Ad en az 2 karakter olmalıdır')\n    .max(50, 'Ad en fazla 50 karakter olmalıdır')\n    .regex(/^[a-zA-ZçğıöşüÇĞIİÖŞÜ\\s]+$/, 'Ad sadece harf içerebilir'),\n  lastName: z.string()\n    .min(2, 'Soyad en az 2 karakter olmalıdır')\n    .max(50, 'Soyad en fazla 50 karakter olmalıdır')\n    .regex(/^[a-zA-ZçğıöşüÇĞIİÖŞÜ\\s]+$/, 'Soyad sadece harf içerebilir'),\n  nationality: z.string()\n    .min(2, 'Uyruk en az 2 karakter olmalıdır')\n    .max(50, 'Uyruk en fazla 50 karakter olmalıdır'),\n  identityNumber",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/validations/beneficiary.ts",
+        "start": 133,
+        "end": 145,
+        "startLoc": {
+          "line": 133,
+          "column": 2,
+          "position": 1087
+        },
+        "endLoc": {
+          "line": 145,
+          "column": 15,
+          "position": 1204
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/validations/beneficiary.ts",
+        "start": 101,
+        "end": 113,
+        "startLoc": {
+          "line": 101,
+          "column": 2,
+          "position": 792
+        },
+        "endLoc": {
+          "line": 113,
+          "column": 10,
+          "position": 897
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "),\n  fundRegion: z.nativeEnum(FundRegion, {\n    message: 'Fon bölgesi seçiniz'\n  }),\n  fileConnection: z.nativeEnum(FileConnection, {\n    message: 'Dosya bağlantısı seçiniz'\n  }),\n  fileNumber: z.string()\n    .min(1, 'Dosya numarası zorunludur')\n    .max(20, 'Dosya numarası en fazla 20 karakter olmalıdır')\n    .regex(/^[A-Z0-9]+$/, 'Dosya numarası sadece büyük harf ve rakam içerebilir'),",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/validations/beneficiary.ts",
+        "start": 149,
+        "end": 159,
+        "startLoc": {
+          "line": 149,
+          "column": 2,
+          "position": 1251
+        },
+        "endLoc": {
+          "line": 159,
+          "column": 2,
+          "position": 1341
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/validations/beneficiary.ts",
+        "start": 115,
+        "end": 126,
+        "startLoc": {
+          "line": 115,
+          "column": 6,
+          "position": 929
+        },
+        "endLoc": {
+          "line": 126,
+          "column": 2,
+          "position": 1020
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "(\n  data: Record<string, unknown>[],\n  filename: string = 'export',\n  columns?: Record<string, string>\n): void {\n  if (!data || data.length === 0) {\n    alert('Verilecek veri yok');\n    return;\n  }\n\n  const",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/export/index.ts",
+        "start": 74,
+        "end": 84,
+        "startLoc": {
+          "line": 74,
+          "column": 10,
+          "position": 510
+        },
+        "endLoc": {
+          "line": 84,
+          "column": 6,
+          "position": 594
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/export/index.ts",
+        "start": 12,
+        "end": 22,
+        "startLoc": {
+          "line": 12,
+          "column": 10,
+          "position": 10
+        },
+        "endLoc": {
+          "line": 22,
+          "column": 33,
+          "position": 94
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ",\n  columns?: Record<string, string>\n): void {\n  if (!data || data.length === 0) {\n    alert('Verilecek veri yok');\n    return;\n  }\n\n  const headers = columns ? Object.values(columns) : Object.keys(data[0]);\n  const keys = columns ? Object.keys(columns) : Object.keys(data[0]);\n\n  const htmlContent",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/export/index.ts",
+        "start": 106,
+        "end": 117,
+        "startLoc": {
+          "line": 106,
+          "column": 9,
+          "position": 812
+        },
+        "endLoc": {
+          "line": 117,
+          "column": 12,
+          "position": 935
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/export/index.ts",
+        "start": 76,
+        "end": 87,
+        "startLoc": {
+          "line": 76,
+          "column": 9,
+          "position": 536
+        },
+        "endLoc": {
+          "line": 87,
+          "column": 11,
+          "position": 659
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 8,
+      "fragment": ");\n    return;\n  }\n\n  const headers = columns ? Object.values(columns) : Object.keys(data[0]);\n  const keys = columns ? Object.keys(columns) : Object.keys(data[0]);\n\n  const printWindow",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/export/index.ts",
+        "start": 222,
+        "end": 229,
+        "startLoc": {
+          "line": 222,
+          "column": 24,
+          "position": 1501
+        },
+        "endLoc": {
+          "line": 229,
+          "column": 12,
+          "position": 1578
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/export/index.ts",
+        "start": 80,
+        "end": 87,
+        "startLoc": {
+          "line": 80,
+          "column": 21,
+          "position": 582
+        },
+        "endLoc": {
+          "line": 87,
+          "column": 11,
+          "position": 659
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": "<th>${escapeHtml(h)}</th>`).join('')}\n      </tr>\n    </thead>\n    <tbody>\n      ${data\n        .map(\n          (row) =>\n            `<tr>${keys.map((key) => `<td>${escapeHtml(String(row[key] ?? ''))}</td>`).join('')}</tr>`\n        )\n        .join('')}\n    </tbody>\n  </table>\n</body>\n</html>\n  `;\n\n  printWindow",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/export/index.ts",
+        "start": 255,
+        "end": 271,
+        "startLoc": {
+          "line": 255,
+          "column": 31,
+          "position": 1637
+        },
+        "endLoc": {
+          "line": 271,
+          "column": 12,
+          "position": 1702
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/export/index.ts",
+        "start": 139,
+        "end": 155,
+        "startLoc": {
+          "line": 139,
+          "column": 31,
+          "position": 961
+        },
+        "endLoc": {
+          "line": 155,
+          "column": 6,
+          "position": 1026
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": ",\n          [\n            Permission.read(Role.any()),\n            Permission.create(Role.team('members')),\n            Permission.update(Role.team('members')),\n            Permission.delete(Role.team('admins'))\n          ]\n        );\n\n        // Add attributes\n        await serverDatabases.createStringAttribute(DATABASE_ID, COLLECTIONS.DONATIONS",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/appwrite/setup-database.ts",
+        "start": 122,
+        "end": 132,
+        "startLoc": {
+          "line": 122,
+          "column": 11,
+          "position": 1236
+        },
+        "endLoc": {
+          "line": 132,
+          "column": 10,
+          "position": 1318
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/appwrite/setup-database.ts",
+        "start": 78,
+        "end": 88,
+        "startLoc": {
+          "line": 78,
+          "column": 20,
+          "position": 681
+        },
+        "endLoc": {
+          "line": 88,
+          "column": 14,
+          "position": 763
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 23,
+      "fragment": ",\n        message,\n        timestamp: new Date()\n      };\n      this.violations.push(violation);\n\n      console.warn('⚠️ ' + message);\n\n      if (strictMode) {\n        throw new Error(message);\n      }\n\n      return { isValid: false, errors: [message], warnings: [] };\n    }\n\n    return { isValid: true, errors: [], warnings: [] };\n  }\n\n  /**\n   * Warn if wrong SDK type is detected for current environment\n   * @param sdkType - The SDK type being used\n   * @param importPath - Optional import path for better error messages\n   */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/appwrite/sdk-guard.ts",
+        "start": 81,
+        "end": 103,
+        "startLoc": {
+          "line": 81,
+          "column": 9,
+          "position": 510
+        },
+        "endLoc": {
+          "line": 103,
+          "column": 6,
+          "position": 644
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/appwrite/sdk-guard.ts",
+        "start": 50,
+        "end": 72,
+        "startLoc": {
+          "line": 50,
+          "column": 9,
+          "position": 262
+        },
+        "endLoc": {
+          "line": 72,
+          "column": 6,
+          "position": 396
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 10,
+      "fragment": ":\n      if (role === UserRole.VIEWER) {\n        return [Permission.read(Role.any())];\n      }\n      return [\n        Permission.read(Role.any()),\n        Permission.create(Role.team('members'))\n      ];\n\n    case 'reports'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/appwrite/permissions.ts",
+        "start": 110,
+        "end": 119,
+        "startLoc": {
+          "line": 110,
+          "column": 11,
+          "position": 794
+        },
+        "endLoc": {
+          "line": 119,
+          "column": 10,
+          "position": 870
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/appwrite/permissions.ts",
+        "start": 101,
+        "end": 110,
+        "startLoc": {
+          "line": 101,
+          "column": 9,
+          "position": 717
+        },
+        "endLoc": {
+          "line": 110,
+          "column": 11,
+          "position": 793
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 16,
+      "fragment": ");\n    } else if (error.code === 404) {\n      throw new Error('Kayıt bulunamadı.');\n    } else if (error.code === 429) {\n      throw new Error('Çok fazla istek. Lütfen bekleyin.');\n    } else if (error.code >= 500) {\n      throw new Error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');\n    }\n    \n    throw new Error(error.message || 'Beklenmeyen bir hata oluştu.');\n  }\n}\n\n/**\n * Retry logic for failed requests\n */",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/appwrite/client.ts",
+        "start": 164,
+        "end": 179,
+        "startLoc": {
+          "line": 164,
+          "column": 46,
+          "position": 544
+        },
+        "endLoc": {
+          "line": 179,
+          "column": 4,
+          "position": 665
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/appwrite/server.ts",
+        "start": 79,
+        "end": 95,
+        "startLoc": {
+          "line": 79,
+          "column": 31,
+          "position": 352
+        },
+        "endLoc": {
+          "line": 95,
+          "column": 4,
+          "position": 473
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": ",\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(validData);\n      expect(result.success).toBe(true);\n    });\n    \n    it('should reject invalid email'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 172,
+        "end": 184,
+        "startLoc": {
+          "line": 172,
+          "column": 20,
+          "position": 1398
+        },
+        "endLoc": {
+          "line": 184,
+          "column": 30,
+          "position": 1485
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 91,
+        "end": 103,
+        "startLoc": {
+          "line": 91,
+          "column": 10,
+          "position": 696
+        },
+        "endLoc": {
+          "line": 103,
+          "column": 40,
+          "position": 783
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ",\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(validData);\n      expect(result.success).toBe(true);\n    });\n  }",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 206,
+        "end": 217,
+        "startLoc": {
+          "line": 206,
+          "column": 3,
+          "position": 1662
+        },
+        "endLoc": {
+          "line": 217,
+          "column": 2,
+          "position": 1745
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 91,
+        "end": 103,
+        "startLoc": {
+          "line": 91,
+          "column": 10,
+          "position": 696
+        },
+        "endLoc": {
+          "line": 103,
+          "column": 3,
+          "position": 781
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": ",\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(validData);\n      expect(result.success).toBe(true);\n    });\n    \n    it('should reject negative income'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 226,
+        "end": 238,
+        "startLoc": {
+          "line": 226,
+          "column": 5,
+          "position": 1819
+        },
+        "endLoc": {
+          "line": 238,
+          "column": 32,
+          "position": 1906
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 91,
+        "end": 103,
+        "startLoc": {
+          "line": 91,
+          "column": 10,
+          "position": 696
+        },
+        "endLoc": {
+          "line": 103,
+          "column": 40,
+          "position": 783
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": ",\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(invalidData);\n      expect(result.success).toBe(false);\n    });\n    \n    it('should reject excessive income'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 243,
+        "end": 255,
+        "startLoc": {
+          "line": 243,
+          "column": 5,
+          "position": 1952
+        },
+        "endLoc": {
+          "line": 255,
+          "column": 33,
+          "position": 2039
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 189,
+        "end": 201,
+        "startLoc": {
+          "line": 189,
+          "column": 16,
+          "position": 1530
+        },
+        "endLoc": {
+          "line": 201,
+          "column": 48,
+          "position": 1617
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 11,
+      "fragment": "category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(invalidData);\n      expect(result.success).toBe(false);\n    });\n  }",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 261,
+        "end": 271,
+        "startLoc": {
+          "line": 261,
+          "column": 9,
+          "position": 2089
+        },
+        "endLoc": {
+          "line": 271,
+          "column": 2,
+          "position": 2169
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 190,
+        "end": 201,
+        "startLoc": {
+          "line": 190,
+          "column": 9,
+          "position": 1533
+        },
+        "endLoc": {
+          "line": 201,
+          "column": 3,
+          "position": 1615
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": ",\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(validData);\n      expect(result.success).toBe(true);\n    });\n    \n    it('should reject more than 2 emergency contacts'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 285,
+        "end": 297,
+        "startLoc": {
+          "line": 285,
+          "column": 2,
+          "position": 2265
+        },
+        "endLoc": {
+          "line": 297,
+          "column": 47,
+          "position": 2352
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 91,
+        "end": 103,
+        "startLoc": {
+          "line": 91,
+          "column": 10,
+          "position": 696
+        },
+        "endLoc": {
+          "line": 103,
+          "column": 40,
+          "position": 783
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": ",\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(invalidData);\n      expect(result.success).toBe(false);\n    });\n    \n    it('should reject invalid emergency contact phone'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 306,
+        "end": 318,
+        "startLoc": {
+          "line": 306,
+          "column": 2,
+          "position": 2468
+        },
+        "endLoc": {
+          "line": 318,
+          "column": 48,
+          "position": 2555
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 189,
+        "end": 201,
+        "startLoc": {
+          "line": 189,
+          "column": 16,
+          "position": 1530
+        },
+        "endLoc": {
+          "line": 201,
+          "column": 48,
+          "position": 1617
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "}\n        ],\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(invalidData);\n      expect(result.success).toBe(false);\n    });\n  });\n  \n  describe('Section Schemas'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 328,
+        "end": 342,
+        "startLoc": {
+          "line": 328,
+          "column": 11,
+          "position": 2627
+        },
+        "endLoc": {
+          "line": 342,
+          "column": 18,
+          "position": 2723
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/beneficiary-validation.test.ts",
+        "start": 305,
+        "end": 273,
+        "startLoc": {
+          "line": 305,
+          "column": 2,
+          "position": 2464
+        },
+        "endLoc": {
+          "line": 273,
+          "column": 41,
+          "position": 2178
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 7,
+      "fragment": ");\n      \n      expect(result).toBeDefined();\n      expect(result.success).toBe(true);\n      expect(result.data).toBeDefined();\n      if (result.data) {\n        expect(result.data.firstName).toBe('Updated'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/lib/api.test.ts",
+        "start": 107,
+        "end": 113,
+        "startLoc": {
+          "line": 107,
+          "column": 11,
+          "position": 922
+        },
+        "endLoc": {
+          "line": 113,
+          "column": 10,
+          "position": 988
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/lib/api.test.ts",
+        "start": 28,
+        "end": 34,
+        "startLoc": {
+          "line": 28,
+          "column": 16,
+          "position": 224
+        },
+        "endLoc": {
+          "line": 34,
+          "column": 7,
+          "position": 290
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": ": sanitized,\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(data);\n      expect(result.success).toBe(true);\n    });\n    \n    it('should reject invalid email format'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/integration/beneficiary-sanitization.test.ts",
+        "start": 108,
+        "end": 120,
+        "startLoc": {
+          "line": 108,
+          "column": 6,
+          "position": 817
+        },
+        "endLoc": {
+          "line": 120,
+          "column": 37,
+          "position": 907
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/integration/beneficiary-sanitization.test.ts",
+        "start": 69,
+        "end": 81,
+        "startLoc": {
+          "line": 69,
+          "column": 12,
+          "position": 510
+        },
+        "endLoc": {
+          "line": 81,
+          "column": 33,
+          "position": 600
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": ": sanitized,\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(data);\n      expect(result.success).toBe(true);\n    });\n    \n    it('should reject negative income after sanitization'",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/integration/beneficiary-sanitization.test.ts",
+        "start": 140,
+        "end": 152,
+        "startLoc": {
+          "line": 140,
+          "column": 14,
+          "position": 1067
+        },
+        "endLoc": {
+          "line": 152,
+          "column": 51,
+          "position": 1157
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/integration/beneficiary-sanitization.test.ts",
+        "start": 69,
+        "end": 81,
+        "startLoc": {
+          "line": 69,
+          "column": 12,
+          "position": 510
+        },
+        "endLoc": {
+          "line": 81,
+          "column": 33,
+          "position": 600
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": "const data = {\n        firstName: 'Ahmet',\n        lastName: 'Yılmaz',\n        nationality: 'Türkiye',\n        monthlyIncome: sanitized,\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(data);\n      expect(result.success).toBe(false",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/integration/beneficiary-sanitization.test.ts",
+        "start": 159,
+        "end": 172,
+        "startLoc": {
+          "line": 159,
+          "column": 7,
+          "position": 1211
+        },
+        "endLoc": {
+          "line": 172,
+          "column": 6,
+          "position": 1318
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/integration/beneficiary-sanitization.test.ts",
+        "start": 136,
+        "end": 149,
+        "startLoc": {
+          "line": 136,
+          "column": 7,
+          "position": 1036
+        },
+        "endLoc": {
+          "line": 149,
+          "column": 5,
+          "position": 1143
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ",\n        category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,\n        fundRegion: FundRegion.SERBEST,\n        fileConnection: FileConnection.CALISMA_SAHASI,\n        fileNumber: 'FILE001',\n        mernisCheck: false\n      };\n      \n      const result = beneficiarySchema.safeParse(data);\n      expect(result.success).toBe(true);\n    });\n  }",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/integration/beneficiary-sanitization.test.ts",
+        "start": 320,
+        "end": 331,
+        "startLoc": {
+          "line": 320,
+          "column": 18,
+          "position": 2598
+        },
+        "endLoc": {
+          "line": 331,
+          "column": 2,
+          "position": 2681
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/integration/beneficiary-sanitization.test.ts",
+        "start": 69,
+        "end": 81,
+        "startLoc": {
+          "line": 69,
+          "column": 10,
+          "position": 513
+        },
+        "endLoc": {
+          "line": 81,
+          "column": 3,
+          "position": 598
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ", () => {\n    const mockUseInfiniteQuery = vi.mocked(useInfiniteQuery);\n    mockUseInfiniteQuery.mockReturnValue({\n      data: { pages: [] },\n      fetchNextPage: vi.fn(),\n      hasNextPage: true,\n      isFetching: false,\n      isFetchingNextPage: false,\n      isLoading: false,\n    } as any);\n\n    renderHook",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/hooks/useInfiniteScroll.test.ts",
+        "start": 40,
+        "end": 51,
+        "startLoc": {
+          "line": 40,
+          "column": 52,
+          "position": 345
+        },
+        "endLoc": {
+          "line": 51,
+          "column": 11,
+          "position": 441
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/hooks/useInfiniteScroll.test.ts",
+        "start": 17,
+        "end": 28,
+        "startLoc": {
+          "line": 17,
+          "column": 41,
+          "position": 143
+        },
+        "endLoc": {
+          "line": 28,
+          "column": 6,
+          "position": 239
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 15,
+      "fragment": "]\n      },\n      fetchNextPage: vi.fn(),\n      hasNextPage: true,\n      isFetching: false,\n      isFetchingNextPage: false,\n      isLoading: false,\n    } as any);\n\n    const { result } = renderHook(() => useInfiniteScroll({\n      queryKey: ['test'],\n      queryFn: vi.fn(),\n    }));\n\n    expect(result",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/hooks/useInfiniteScroll.test.ts",
+        "start": 71,
+        "end": 85,
+        "startLoc": {
+          "line": 71,
+          "column": 9,
+          "position": 626
+        },
+        "endLoc": {
+          "line": 85,
+          "column": 7,
+          "position": 733
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/hooks/useInfiniteScroll.test.ts",
+        "start": 20,
+        "end": 33,
+        "startLoc": {
+          "line": 20,
+          "column": 2,
+          "position": 184
+        },
+        "endLoc": {
+          "line": 33,
+          "column": 21,
+          "position": 290
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 14,
+      "fragment": ",\n      fetchNextPage: vi.fn(),\n      hasNextPage: true,\n      isFetching: false,\n      isFetchingNextPage: false,\n      isLoading: false,\n    } as any);\n\n    const { result } = renderHook(() => useInfiniteScroll({\n      queryKey: ['test'],\n      queryFn: vi.fn(),\n    }));\n\n    expect(result.current.data).toEqual([]",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/hooks/useInfiniteScroll.test.ts",
+        "start": 92,
+        "end": 105,
+        "startLoc": {
+          "line": 92,
+          "column": 10,
+          "position": 819
+        },
+        "endLoc": {
+          "line": 105,
+          "column": 2,
+          "position": 932
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/hooks/useInfiniteScroll.test.ts",
+        "start": 20,
+        "end": 85,
+        "startLoc": {
+          "line": 20,
+          "column": 2,
+          "position": 187
+        },
+        "endLoc": {
+          "line": 85,
+          "column": 8,
+          "position": 743
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 17,
+      "fragment": ", () => {\n    const mockUseInfiniteQuery = vi.mocked(useInfiniteQuery);\n    mockUseInfiniteQuery.mockReturnValue({\n      data: { pages: [] },\n      fetchNextPage: vi.fn(),\n      hasNextPage: true,\n      isFetching: false,\n      isFetchingNextPage: false,\n      isLoading: false,\n    } as any);\n\n    const { result } = renderHook(() => useInfiniteScroll({\n      queryKey: ['test'],\n      queryFn: vi.fn(),\n    }));\n\n    expect(result.current.ref",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/hooks/useInfiniteScroll.test.ts",
+        "start": 109,
+        "end": 125,
+        "startLoc": {
+          "line": 109,
+          "column": 47,
+          "position": 962
+        },
+        "endLoc": {
+          "line": 125,
+          "column": 4,
+          "position": 1113
+        }
+      },
+      "secondFile": {
+        "name": "src/__tests__/hooks/useInfiniteScroll.test.ts",
+        "start": 17,
+        "end": 85,
+        "startLoc": {
+          "line": 17,
+          "column": 41,
+          "position": 143
+        },
+        "endLoc": {
+          "line": 85,
+          "column": 5,
+          "position": 737
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 30,
+      "fragment": ",\n    Permission.DONATIONS_READ,\n    Permission.DONATIONS_CREATE,\n    Permission.DONATIONS_UPDATE,\n    Permission.DONATIONS_APPROVE,\n    Permission.BENEFICIARIES_READ,\n    Permission.BENEFICIARIES_CREATE,\n    Permission.BENEFICIARIES_UPDATE,\n    Permission.AID_REQUESTS_READ,\n    Permission.AID_REQUESTS_CREATE,\n    Permission.AID_REQUESTS_UPDATE,\n    Permission.AID_REQUESTS_APPROVE,\n    Permission.SCHOLARSHIPS_READ,\n    Permission.SCHOLARSHIPS_CREATE,\n    Permission.SCHOLARSHIPS_UPDATE,\n    Permission.EVENTS_READ,\n    Permission.EVENTS_CREATE,\n    Permission.EVENTS_UPDATE,\n    Permission.MESSAGING_READ,\n    Permission.MESSAGING_SEND,\n    Permission.MESSAGING_BULK,\n    Permission.FINANCIAL_READ,\n    Permission.FINANCIAL_CREATE,\n    Permission.FINANCIAL_UPDATE,\n    Permission.PARTNERS_READ,\n    Permission.PARTNERS_CREATE,\n    Permission.PARTNERS_UPDATE,\n    Permission.REPORTS_READ,\n    Permission.REPORTS_EXPORT,\n    Permission.STORAGE_READ",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/types/auth.ts",
+        "start": 169,
+        "end": 198,
+        "startLoc": {
+          "line": 169,
+          "column": 11,
+          "position": 1035
+        },
+        "endLoc": {
+          "line": 198,
+          "column": 13,
+          "position": 1208
+        }
+      },
+      "secondFile": {
+        "name": "src/types/auth.ts",
+        "start": 134,
+        "end": 163,
+        "startLoc": {
+          "line": 134,
+          "column": 13,
+          "position": 823
+        },
+        "endLoc": {
+          "line": 163,
+          "column": 14,
+          "position": 996
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 28,
+      "fragment": "= [\n  {\n    email: 'admin@test.com',\n    password: 'admin123',\n    name: 'Admin User',\n    role: UserRole.ADMIN\n  },\n  {\n    email: 'manager@test.com',\n    password: 'manager123',\n    name: 'Manager User',\n    role: UserRole.MANAGER\n  },\n  {\n    email: 'member@test.com',\n    password: 'member123',\n    name: 'Member User',\n    role: UserRole.MEMBER\n  },\n  {\n    email: 'viewer@test.com',\n    password: 'viewer123',\n    name: 'Viewer User',\n    role: UserRole.VIEWER\n  }\n];\n\nexport",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/scripts/create-test-users.ts",
+        "start": 17,
+        "end": 44,
+        "startLoc": {
+          "line": 17,
+          "column": 2,
+          "position": 92
+        },
+        "endLoc": {
+          "line": 44,
+          "column": 7,
+          "position": 243
+        }
+      },
+      "secondFile": {
+        "name": "src/scripts/migrate-to-appwrite.ts",
+        "start": 45,
+        "end": 72,
+        "startLoc": {
+          "line": 45,
+          "column": 2,
+          "position": 198
+        },
+        "endLoc": {
+          "line": 72,
+          "column": 4,
+          "position": 351
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 13,
+      "fragment": "NEXT_PUBLIC_APPWRITE_ENDPOINT: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,\n      NEXT_PUBLIC_APPWRITE_PROJECT_ID: process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID,\n      NEXT_PUBLIC_DATABASE_ID: process.env.NEXT_PUBLIC_DATABASE_ID,\n      NEXT_PUBLIC_STORAGE_DOCUMENTS: process.env.NEXT_PUBLIC_STORAGE_DOCUMENTS,\n      NEXT_PUBLIC_STORAGE_RECEIPTS: process.env.NEXT_PUBLIC_STORAGE_RECEIPTS,\n      NEXT_PUBLIC_STORAGE_PHOTOS: process.env.NEXT_PUBLIC_STORAGE_PHOTOS,\n      NEXT_PUBLIC_STORAGE_REPORTS: process.env.NEXT_PUBLIC_STORAGE_REPORTS,\n      NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,\n      NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,\n      NEXT_PUBLIC_ENABLE_REALTIME: process.env.NEXT_PUBLIC_ENABLE_REALTIME,\n      NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS,\n\n      // Server-only vars",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/env-validation.ts",
+        "start": 118,
+        "end": 130,
+        "startLoc": {
+          "line": 118,
+          "column": 7,
+          "position": 1104
+        },
+        "endLoc": {
+          "line": 130,
+          "column": 20,
+          "position": 1226
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/env-validation.ts",
+        "start": 85,
+        "end": 96,
+        "startLoc": {
+          "line": 85,
+          "column": 7,
+          "position": 815
+        },
+        "endLoc": {
+          "line": 96,
+          "column": 2,
+          "position": 936
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 6,
+      "fragment": ",\n    });\n  } catch (error) {\n    if (error instanceof z.ZodError) {\n      const missingVars = error.issues.map((e) => `  - ${e.path.join('.')}: ${e.message}`).join('\\n');\n      throw new Error(`❌ Server environment validation failed:\\n",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/lib/env-validation.ts",
+        "start": 148,
+        "end": 153,
+        "startLoc": {
+          "line": 148,
+          "column": 21,
+          "position": 1406
+        },
+        "endLoc": {
+          "line": 153,
+          "column": 43,
+          "position": 1491
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/env-validation.ts",
+        "start": 95,
+        "end": 100,
+        "startLoc": {
+          "line": 95,
+          "column": 29,
+          "position": 933
+        },
+        "endLoc": {
+          "line": 100,
+          "column": 43,
+          "position": 1018
+        }
+      }
+    },
+    {
+      "format": "typescript",
+      "lines": 12,
+      "fragment": ",\n    media: query,\n    onchange: null,\n    addListener: () => {},\n    removeListener: () => {},\n    addEventListener: () => {},\n    removeEventListener: () => {},\n    dispatchEvent: () => {},\n  }),\n})\n\n// Mock ResizeObserver",
+      "tokens": 0,
+      "firstFile": {
+        "name": "src/__tests__/setup.ts",
+        "start": 7,
+        "end": 18,
+        "startLoc": {
+          "line": 7,
+          "column": 6,
+          "position": 47
+        },
+        "endLoc": {
+          "line": 18,
+          "column": 23,
+          "position": 137
+        }
+      },
+      "secondFile": {
+        "name": "src/lib/testing/loading-state-tester.ts",
+        "start": 158,
+        "end": 167,
+        "startLoc": {
+          "line": 158,
+          "column": 2,
+          "position": 1338
+        },
+        "endLoc": {
+          "line": 167,
+          "column": 2,
+          "position": 1427
+        }
+      }
+    }
+  ]
+}

@@ -1,8 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import {
+  handleGetById,
+  handleUpdate,
+  handleDelete,
+  extractParams,
+  errorResponse,
+  successResponse,
+  type ValidationResult,
+} from '@/lib/api/route-helpers';
 
-function validateMessageUpdate(data: any): { isValid: boolean; errors: string[] } {
+function validateMessageUpdate(data: any): ValidationResult {
   const errors: string[] = [];
   if (data.message_type && !['sms', 'email', 'internal'].includes(data.message_type)) {
     errors.push('Geçersiz mesaj türü');
@@ -20,64 +29,25 @@ function validateMessageUpdate(data: any): { isValid: boolean; errors: string[] 
  * GET /api/messages/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'ID parametresi gerekli' }, { status: 400 });
-    }
-
-    const response = await api.messages.getMessage(id);
-    if (response.error || !response.data) {
-      return NextResponse.json({ success: false, error: 'Kayıt bulunamadı' }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true, data: response.data });
-  } catch (error: any) {
-    console.error('Get message error:', error);
-    return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
-  }
+  const { id } = await extractParams(params);
+  return handleGetById(id, api.messages.getMessage, 'Mesaj');
 }
 
 /**
  * PUT /api/messages/[id]
  */
 async function updateMessageHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    const body = await request.json();
-
-    const validation = validateMessageUpdate(body);
-    if (!validation.isValid) {
-      return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
-    }
-
-    const response = await api.messages.updateMessage(id, body);
-    if (response.error || !response.data) {
-      return NextResponse.json({ success: false, error: response.error || 'Güncelleme başarısız' }, { status: 400 });
-    }
-
-    return NextResponse.json({ success: true, data: response.data, message: 'Mesaj başarıyla güncellendi' });
-  } catch (error: any) {
-    console.error('Update message error:', error);
-    return NextResponse.json({ success: false, error: 'Güncelleme işlemi başarısız' }, { status: 500 });
-  }
+  const { id } = await extractParams(params);
+  const body = await request.json();
+  return handleUpdate(id, body, validateMessageUpdate, api.messages.updateMessage, 'Mesaj');
 }
 
 /**
  * DELETE /api/messages/[id]
  */
 async function deleteMessageHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
-    const response = await api.messages.deleteMessage(id);
-    if (response.error) {
-      return NextResponse.json({ success: false, error: response.error }, { status: 400 });
-    }
-    return NextResponse.json({ success: true, message: 'Mesaj başarıyla silindi' });
-  } catch (error: any) {
-    console.error('Delete message error:', error);
-    return NextResponse.json({ success: false, error: 'Silme işlemi başarısız' }, { status: 500 });
-  }
+  const { id } = await extractParams(params);
+  return handleDelete(id, api.messages.deleteMessage, 'Mesaj');
 }
 
 /**
@@ -86,15 +56,20 @@ async function deleteMessageHandler(request: NextRequest, { params }: { params: 
  */
 async function sendMessageHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = await params;
+    const { id } = await extractParams(params);
+    if (!id) {
+      return errorResponse('ID parametresi gerekli', 400);
+    }
+
     const response = await api.messages.sendMessage(id);
     if (response.error || !response.data) {
-      return NextResponse.json({ success: false, error: response.error || 'Gönderim başarısız' }, { status: 400 });
+      return errorResponse(response.error || 'Gönderim başarısız', 400);
     }
-    return NextResponse.json({ success: true, data: response.data, message: 'Mesaj gönderildi' });
+    
+    return successResponse(response.data, 'Mesaj gönderildi');
   } catch (error: any) {
     console.error('Send message error:', error);
-    return NextResponse.json({ success: false, error: 'Gönderim işlemi başarısız' }, { status: 500 });
+    return errorResponse('Gönderim işlemi başarısız', 500);
   }
 }
 
