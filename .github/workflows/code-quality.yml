@@ -36,11 +36,13 @@ jobs:
           if ! npm ci --dry-run > /dev/null 2>&1; then
             echo "❌ ERROR: package.json and package-lock.json are out of sync!"
             echo ""
-            echo "To fix this issue:"
-            echo "  1. Run 'npm install' locally"
+            echo "Showing differences for package-lock.json (if any):"
+            git --no-pager diff -- package-lock.json || true
+            echo ""
+            echo "To fix locally:"
+            echo "  1. Run: npm install"
             echo "  2. Commit the updated package-lock.json"
             echo "  3. Push your changes"
-            echo ""
             exit 1
           fi
           echo "✅ package.json and package-lock.json are in sync"
