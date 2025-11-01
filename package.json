@@ -35,6 +35,11 @@
     "test:prod-enhanced": "tsx scripts/test-production-build-enhanced.ts",
     "test:integration": "npm run test:full-system && npm run test:browsers",
     "test:all": "npm run test && npm run test:e2e && npm run test:all-boundaries && npm run test:integration",
+    "appwrite:setup": "tsx scripts/setup-appwrite.ts",
+    "appwrite:deploy": "appwrite deploy",
+    "appwrite:deploy:quick": "bash scripts/deploy-appwrite.sh",
+    "appwrite:init": "appwrite init",
+    "appwrite:validate": "node scripts/validate-appwrite-config.js",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -122,6 +127,7 @@
     "@vitejs/plugin-react": "^4.0.4",
     "@vitest/coverage-v8": "^0.34.6",
     "@vitest/ui": "^0.34.6",
+    "appwrite-cli": "^7.0.0",
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",

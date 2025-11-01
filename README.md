@@ -47,6 +47,28 @@ npm run dev
 
 ---
 
+## 🔧 Appwrite Backend Kurulumu
+
+Bu proje mock backend ile birlikte gelir, ancak gerçek Appwrite backend'i kurmak için:
+
+**📚 Detaylı Kurulum Rehberi**: [APPWRITE_DEPLOYMENT.md](./APPWRITE_DEPLOYMENT.md)
+
+### Hızlı Başlangıç
+
+```bash
+# 1. Environment değişkenlerini ayarla
+cp .env.example .env.local
+# .env.local dosyasını düzenle ve Appwrite bilgilerini gir
+
+# 2. Otomatik kurulum (Önerilen)
+npm run appwrite:setup
+
+# 3. Veya interaktif kurulum
+npm run appwrite:deploy:quick
+```
+
+---
+
 ## Diagnostic Tools
 
 This project includes comprehensive diagnostic tools to help with configuration, connectivity, and testing. These tools are essential for troubleshooting Appwrite setup and ensuring smooth development.
