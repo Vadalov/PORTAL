@@ -1,0 +1,1044 @@
+{
+  "projectId": "",
+  "projectName": "Dernek Yönetim Sistemi",
+  "databases": [
+    {
+      "databaseId": "dernek_db",
+      "name": "Dernek Yönetim Sistemi",
+      "enabled": true,
+      "collections": [
+        {
+          "$id": "users",
+          "name": "Users",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "name",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "email",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "role",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "avatar",
+              "type": "string",
+              "size": 500,
+              "required": false
+            },
+            {
+              "key": "isActive",
+              "type": "boolean",
+              "required": true,
+              "default": true
+            },
+            {
+              "key": "labels",
+              "type": "string",
+              "size": 50,
+              "required": false,
+              "array": true
+            }
+          ],
+          "indexes": [
+            {
+              "key": "email_index",
+              "type": "unique",
+              "attributes": ["email"]
+            },
+            {
+              "key": "role_index",
+              "type": "key",
+              "attributes": ["role"]
+            }
+          ]
+        },
+        {
+          "$id": "beneficiaries",
+          "name": "Beneficiaries",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "photo",
+              "type": "string",
+              "size": 500,
+              "required": false
+            },
+            {
+              "key": "sponsorType",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "firstName",
+              "type": "string",
+              "size": 100,
+              "required": true
+            },
+            {
+              "key": "lastName",
+              "type": "string",
+              "size": 100,
+              "required": true
+            },
+            {
+              "key": "nationality",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "identityNumber",
+              "type": "string",
+              "size": 11,
+              "required": false
+            },
+            {
+              "key": "mernisCheck",
+              "type": "boolean",
+              "required": false,
+              "default": false
+            },
+            {
+              "key": "category",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "fundRegion",
+              "type": "string",
+              "size": 100,
+              "required": false
+            },
+            {
+              "key": "fileConnection",
+              "type": "string",
+              "size": 100,
+              "required": false
+            },
+            {
+              "key": "fileNumber",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "mobilePhone",
+              "type": "string",
+              "size": 20,
+              "required": false
+            },
+            {
+              "key": "email",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "familyMemberCount",
+              "type": "integer",
+              "required": false
+            },
+            {
+              "key": "country",
+              "type": "string",
+              "size": 100,
+              "required": false
+            },
+            {
+              "key": "city",
+              "type": "string",
+              "size": 100,
+              "required": false
+            },
+            {
+              "key": "district",
+              "type": "string",
+              "size": 100,
+              "required": false
+            },
+            {
+              "key": "neighborhood",
+              "type": "string",
+              "size": 100,
+              "required": false
+            },
+            {
+              "key": "address",
+              "type": "string",
+              "size": 500,
+              "required": false
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "createdBy",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "updatedBy",
+              "type": "string",
+              "size": 50,
+              "required": false
+            }
+          ],
+          "indexes": [
+            {
+              "key": "identity_index",
+              "type": "key",
+              "attributes": ["identityNumber"]
+            },
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            },
+            {
+              "key": "city_index",
+              "type": "key",
+              "attributes": ["city"]
+            }
+          ]
+        },
+        {
+          "$id": "donations",
+          "name": "Donations",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "donor_name",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "donor_phone",
+              "type": "string",
+              "size": 20,
+              "required": false
+            },
+            {
+              "key": "donor_email",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "amount",
+              "type": "double",
+              "required": true
+            },
+            {
+              "key": "currency",
+              "type": "string",
+              "size": 10,
+              "required": true
+            },
+            {
+              "key": "donation_type",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "payment_method",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "donation_purpose",
+              "type": "string",
+              "size": 200,
+              "required": false
+            },
+            {
+              "key": "notes",
+              "type": "string",
+              "size": 1000,
+              "required": false
+            },
+            {
+              "key": "receipt_number",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "receipt_file_id",
+              "type": "string",
+              "size": 100,
+              "required": false
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true
+            }
+          ],
+          "indexes": [
+            {
+              "key": "donor_index",
+              "type": "fulltext",
+              "attributes": ["donor_name"]
+            },
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            },
+            {
+              "key": "receipt_index",
+              "type": "unique",
+              "attributes": ["receipt_number"]
+            }
+          ]
+        },
+        {
+          "$id": "aid_requests",
+          "name": "Aid Requests",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "beneficiary_id",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "request_type",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "description",
+              "type": "string",
+              "size": 1000,
+              "required": false
+            },
+            {
+              "key": "amount_requested",
+              "type": "double",
+              "required": false
+            },
+            {
+              "key": "priority",
+              "type": "string",
+              "size": 20,
+              "required": false
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "approved_by",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "approved_at",
+              "type": "datetime",
+              "required": false
+            }
+          ],
+          "indexes": [
+            {
+              "key": "beneficiary_index",
+              "type": "key",
+              "attributes": ["beneficiary_id"]
+            },
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            }
+          ]
+        },
+        {
+          "$id": "aid_applications",
+          "name": "Aid Applications",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "applicant_name",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "application_date",
+              "type": "datetime",
+              "required": true
+            },
+            {
+              "key": "stage",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "description",
+              "type": "string",
+              "size": 1000,
+              "required": false
+            }
+          ],
+          "indexes": [
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            },
+            {
+              "key": "stage_index",
+              "type": "key",
+              "attributes": ["stage"]
+            }
+          ]
+        },
+        {
+          "$id": "scholarships",
+          "name": "Scholarships",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "student_name",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "tc_no",
+              "type": "string",
+              "size": 11,
+              "required": false
+            },
+            {
+              "key": "school_name",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "grade",
+              "type": "integer",
+              "required": false
+            },
+            {
+              "key": "scholarship_amount",
+              "type": "double",
+              "required": false
+            },
+            {
+              "key": "scholarship_type",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "start_date",
+              "type": "datetime",
+              "required": false
+            },
+            {
+              "key": "end_date",
+              "type": "datetime",
+              "required": false
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true
+            }
+          ],
+          "indexes": [
+            {
+              "key": "student_index",
+              "type": "fulltext",
+              "attributes": ["student_name"]
+            },
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            }
+          ]
+        },
+        {
+          "$id": "parameters",
+          "name": "Parameters",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "category",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "name_tr",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "name_en",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "name_ar",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "name_ru",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "name_fr",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "value",
+              "type": "string",
+              "size": 100,
+              "required": true
+            },
+            {
+              "key": "order",
+              "type": "integer",
+              "required": false,
+              "default": 0
+            },
+            {
+              "key": "is_active",
+              "type": "boolean",
+              "required": true,
+              "default": true
+            }
+          ],
+          "indexes": [
+            {
+              "key": "category_index",
+              "type": "key",
+              "attributes": ["category"]
+            },
+            {
+              "key": "category_order",
+              "type": "key",
+              "attributes": ["category", "order"]
+            }
+          ]
+        },
+        {
+          "$id": "tasks",
+          "name": "Tasks",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "title",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "description",
+              "type": "string",
+              "size": 1000,
+              "required": false
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true,
+              "default": "pending"
+            },
+            {
+              "key": "priority",
+              "type": "string",
+              "size": 20,
+              "required": false
+            },
+            {
+              "key": "assigned_to",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "category",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "completed_at",
+              "type": "datetime",
+              "required": false
+            },
+            {
+              "key": "is_read",
+              "type": "boolean",
+              "required": false,
+              "default": false
+            }
+          ],
+          "indexes": [
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            },
+            {
+              "key": "assigned_index",
+              "type": "key",
+              "attributes": ["assigned_to"]
+            }
+          ]
+        },
+        {
+          "$id": "meetings",
+          "name": "Meetings",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "title",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "description",
+              "type": "string",
+              "size": 1000,
+              "required": false
+            },
+            {
+              "key": "meeting_date",
+              "type": "datetime",
+              "required": true
+            },
+            {
+              "key": "location",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "organizer",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "participants",
+              "type": "string",
+              "size": 50,
+              "required": false,
+              "array": true
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true,
+              "default": "scheduled"
+            },
+            {
+              "key": "meeting_type",
+              "type": "string",
+              "size": 50,
+              "required": false
+            }
+          ],
+          "indexes": [
+            {
+              "key": "date_index",
+              "type": "key",
+              "attributes": ["meeting_date"]
+            },
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            }
+          ]
+        },
+        {
+          "$id": "messages",
+          "name": "Messages",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "subject",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "content",
+              "type": "string",
+              "size": 5000,
+              "required": true
+            },
+            {
+              "key": "message_type",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "sender",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "recipients",
+              "type": "string",
+              "size": 50,
+              "required": false,
+              "array": true
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true,
+              "default": "draft"
+            },
+            {
+              "key": "is_bulk",
+              "type": "boolean",
+              "required": false,
+              "default": false
+            },
+            {
+              "key": "sent_at",
+              "type": "datetime",
+              "required": false
+            }
+          ],
+          "indexes": [
+            {
+              "key": "sender_index",
+              "type": "key",
+              "attributes": ["sender"]
+            },
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            }
+          ]
+        },
+        {
+          "$id": "finance_records",
+          "name": "Finance Records",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "type",
+              "type": "string",
+              "size": 20,
+              "required": true
+            },
+            {
+              "key": "category",
+              "type": "string",
+              "size": 50,
+              "required": true
+            },
+            {
+              "key": "amount",
+              "type": "double",
+              "required": true
+            },
+            {
+              "key": "description",
+              "type": "string",
+              "size": 500,
+              "required": false
+            },
+            {
+              "key": "date",
+              "type": "datetime",
+              "required": true
+            },
+            {
+              "key": "reference",
+              "type": "string",
+              "size": 100,
+              "required": false
+            }
+          ],
+          "indexes": [
+            {
+              "key": "type_index",
+              "type": "key",
+              "attributes": ["type"]
+            },
+            {
+              "key": "date_index",
+              "type": "key",
+              "attributes": ["date"]
+            }
+          ]
+        },
+        {
+          "$id": "orphans",
+          "name": "Orphans",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "name",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "birth_date",
+              "type": "datetime",
+              "required": false
+            },
+            {
+              "key": "gender",
+              "type": "string",
+              "size": 20,
+              "required": false
+            },
+            {
+              "key": "guardian_name",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true
+            }
+          ],
+          "indexes": [
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            }
+          ]
+        },
+        {
+          "$id": "sponsors",
+          "name": "Sponsors",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "name",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "contact_person",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "email",
+              "type": "string",
+              "size": 255,
+              "required": false
+            },
+            {
+              "key": "phone",
+              "type": "string",
+              "size": 20,
+              "required": false
+            },
+            {
+              "key": "type",
+              "type": "string",
+              "size": 50,
+              "required": false
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true
+            }
+          ],
+          "indexes": [
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            },
+            {
+              "key": "name_index",
+              "type": "fulltext",
+              "attributes": ["name"]
+            }
+          ]
+        },
+        {
+          "$id": "campaigns",
+          "name": "Campaigns",
+          "enabled": true,
+          "documentSecurity": false,
+          "attributes": [
+            {
+              "key": "title",
+              "type": "string",
+              "size": 255,
+              "required": true
+            },
+            {
+              "key": "description",
+              "type": "string",
+              "size": 2000,
+              "required": false
+            },
+            {
+              "key": "start_date",
+              "type": "datetime",
+              "required": true
+            },
+            {
+              "key": "end_date",
+              "type": "datetime",
+              "required": false
+            },
+            {
+              "key": "target_amount",
+              "type": "double",
+              "required": false
+            },
+            {
+              "key": "current_amount",
+              "type": "double",
+              "required": false,
+              "default": 0
+            },
+            {
+              "key": "status",
+              "type": "string",
+              "size": 50,
+              "required": true
+            }
+          ],
+          "indexes": [
+            {
+              "key": "status_index",
+              "type": "key",
+              "attributes": ["status"]
+            },
+            {
+              "key": "date_index",
+              "type": "key",
+              "attributes": ["start_date"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "storage": {
+    "buckets": [
+      {
+        "$id": "documents",
+        "name": "Documents",
+        "enabled": true,
+        "maximumFileSize": 20971520,
+        "allowedFileExtensions": ["pdf", "doc", "docx", "xls", "xlsx", "txt"],
+        "compression": "gzip",
+        "encryption": false,
+        "antivirus": false
+      },
+      {
+        "$id": "receipts",
+        "name": "Receipts",
+        "enabled": true,
+        "maximumFileSize": 10485760,
+        "allowedFileExtensions": ["pdf", "jpg", "jpeg", "png"],
+        "compression": "gzip",
+        "encryption": false,
+        "antivirus": false
+      },
+      {
+        "$id": "photos",
+        "name": "Photos",
+        "enabled": true,
+        "maximumFileSize": 10485760,
+        "allowedFileExtensions": ["jpg", "jpeg", "png", "gif", "webp"],
+        "compression": "gzip",
+        "encryption": false,
+        "antivirus": false
+      },
+      {
+        "$id": "reports",
+        "name": "Reports",
+        "enabled": true,
+        "maximumFileSize": 52428800,
+        "allowedFileExtensions": ["pdf", "xls", "xlsx", "csv"],
+        "compression": "gzip",
+        "encryption": false,
+        "antivirus": false
+      }
+    ]
+  }
+}
