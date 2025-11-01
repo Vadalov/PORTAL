@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom'
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -24,7 +26,9 @@ global.ResizeObserver = class ResizeObserver {
 
 // Mock IntersectionObserver
 ;(global as any).IntersectionObserver = class IntersectionObserver {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   observe(_element: Element): void {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   unobserve(_element: Element): void {}
   disconnect(): void {}
 }

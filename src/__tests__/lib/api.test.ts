@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   createBeneficiary,
   getBeneficiary,
@@ -9,6 +9,8 @@ import {
   checkMernis,
 } from '@/lib/api/mock-api';
 import type { BeneficiaryQuickAdd, BeneficiaryStatus } from '@/types/beneficiary';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe('Mock API', () => {
   describe('createBeneficiary', () => {

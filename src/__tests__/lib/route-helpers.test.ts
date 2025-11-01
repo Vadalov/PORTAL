@@ -6,9 +6,10 @@ import {
   handleUpdate,
   handleDelete,
   extractParams,
-  type ApiOperation,
   type ValidationResult,
 } from '@/lib/api/route-helpers';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe('Route Helpers', () => {
   describe('successResponse', () => {

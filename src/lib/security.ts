@@ -43,35 +43,216 @@ export class InputSanitizer {
 }
 
 // Rate limiting utilities
-export class RateLimiter {
-  private static attempts = new Map<string, { count: number; resetTime: number }>();
+export interface RateLimitConfig {
+  maxRequests: number;
+  windowMs: number;
+  skipSuccessfulRequests?: boolean;
+  skipFailedRequests?: boolean;
+}
 
-  static checkLimit(identifier: string, maxAttempts: number = 5, windowMs: number = 15 * 60 * 1000): boolean {
+export interface RateLimitRecord {
+  count: number;
+  resetTime: number;
+  firstRequest: number;
+}
+
+export class RateLimiter {
+  private static attempts = new Map<string, RateLimitRecord>();
+  private static violations = new Map<string, number>();
+  
+  // Whitelist and blacklist configuration
+  private static whitelistIPs = new Set(
+    process.env.RATE_LIMIT_WHITELIST_IPS?.split(',').map(ip => ip.trim()) || []
+  );
+  private static blacklistIPs = new Set(
+    process.env.RATE_LIMIT_BLACKLIST_IPS?.split(',').map(ip => ip.trim()) || []
+  );
+  
+  // Configurable limits via environment variables
+  private static defaultConfig: RateLimitConfig = {
+    maxRequests: parseInt(process.env.RATE_LIMIT_DEFAULT_MAX || '100'),
+    windowMs: parseInt(process.env.RATE_LIMIT_DEFAULT_WINDOW || '900000'), // 15 minutes
+  };
+  
+  // Premium user multiplier (authenticated users get higher limits)
+  private static premiumMultiplier = parseFloat(process.env.RATE_LIMIT_PREMIUM_MULTIPLIER || '2.0');
+
+  static checkLimit(
+    identifier: string,
+    maxAttempts?: number,
+    windowMs?: number,
+    userId?: string,
+    isAuthenticated: boolean = false
+  ): { allowed: boolean; remaining: number; resetTime: number } {
     const now = Date.now();
+    
+    // Extract IP from identifier
+    const ip = identifier.split('-')[0];
+    
+    // Check whitelist (skip rate limiting)
+    if (this.whitelistIPs.has(ip)) {
+      return {
+        allowed: true,
+        remaining: Infinity,
+        resetTime: now + windowMs!
+      };
+    }
+    
+    // Check blacklist (always deny)
+    if (this.blacklistIPs.has(ip)) {
+      this.recordViolation(identifier);
+      return {
+        allowed: false,
+        remaining: 0,
+        resetTime: now + (windowMs || this.defaultConfig.windowMs)
+      };
+    }
+
+    const config: RateLimitConfig = {
+      maxRequests: maxAttempts || this.defaultConfig.maxRequests,
+      windowMs: windowMs || this.defaultConfig.windowMs,
+    };
+    
+    // Apply premium multiplier for authenticated users
+    if (isAuthenticated && userId) {
+      config.maxRequests = Math.floor(config.maxRequests * this.premiumMultiplier);
+    }
+
     const record = this.attempts.get(identifier);
 
+    // Reset if window has expired
     if (!record || now > record.resetTime) {
-      this.attempts.set(identifier, { count: 1, resetTime: now + windowMs });
-      return true;
+      const newRecord: RateLimitRecord = {
+        count: 1,
+        resetTime: now + config.windowMs,
+        firstRequest: now
+      };
+      this.attempts.set(identifier, newRecord);
+      
+      return {
+        allowed: true,
+        remaining: config.maxRequests - 1,
+        resetTime: newRecord.resetTime
+      };
     }
 
-    if (record.count >= maxAttempts) {
-      return false;
+    // Check if limit exceeded
+    if (record.count >= config.maxRequests) {
+      this.recordViolation(identifier);
+      
+      return {
+        allowed: false,
+        remaining: 0,
+        resetTime: record.resetTime
+      };
     }
 
+    // Increment counter
     record.count++;
-    return true;
+    
+    return {
+      allowed: true,
+      remaining: config.maxRequests - record.count,
+      resetTime: record.resetTime
+    };
   }
 
   static getRemainingAttempts(identifier: string): number {
     const record = this.attempts.get(identifier);
-    if (!record) return 5;
+    if (!record) return this.defaultConfig.maxRequests;
+    
+    const now = Date.now();
+    if (now > record.resetTime) {
+      return this.defaultConfig.maxRequests;
+    }
+    
+    return Math.max(0, this.defaultConfig.maxRequests - record.count);
+  }
 
-    return Math.max(0, 5 - record.count);
+  static getRemainingTime(identifier: string): number {
+    const record = this.attempts.get(identifier);
+    if (!record) return 0;
+    
+    const now = Date.now();
+    return Math.max(0, record.resetTime - now);
   }
 
   static reset(identifier: string): void {
     this.attempts.delete(identifier);
+  }
+
+  static resetAll(): void {
+    this.attempts.clear();
+    this.violations.clear();
+  }
+
+  private static recordViolation(identifier: string): void {
+    const currentViolations = this.violations.get(identifier) || 0;
+    this.violations.set(identifier, currentViolations + 1);
+    
+    console.warn(`🚫 Rate limit violation for ${identifier}`, {
+      violations: currentViolations + 1,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  static getViolationCount(identifier: string): number {
+    return this.violations.get(identifier) || 0;
+  }
+
+  static getAllViolations(): Array<{ identifier: string; count: number }> {
+    return Array.from(this.violations.entries()).map(([identifier, count]) => ({
+      identifier,
+      count
+    }));
+  }
+
+  static getStats(): {
+    totalRequests: number;
+    activeLimits: number;
+    totalViolations: number;
+    whitelistedIPs: number;
+    blacklistedIPs: number;
+  } {
+    const totalRequests = Array.from(this.attempts.values()).reduce(
+      (sum, record) => sum + record.count, 0
+    );
+    
+    const totalViolations = Array.from(this.violations.values()).reduce(
+      (sum, count) => sum + count, 0
+    );
+
+    return {
+      totalRequests,
+      activeLimits: this.attempts.size,
+      totalViolations,
+      whitelistedIPs: this.whitelistIPs.size,
+      blacklistedIPs: this.blacklistIPs.size
+    };
+  }
+
+  static updateWhitelist(ips: string[]): void {
+    this.whitelistIPs = new Set(ips);
+  }
+
+  static updateBlacklist(ips: string[]): void {
+    this.blacklistIPs = new Set(ips);
+  }
+
+  static addToWhitelist(ip: string): void {
+    this.whitelistIPs.add(ip);
+  }
+
+  static addToBlacklist(ip: string): void {
+    this.blacklistIPs.add(ip);
+  }
+
+  static removeFromWhitelist(ip: string): void {
+    this.whitelistIPs.delete(ip);
+  }
+
+  static removeFromBlacklist(ip: string): void {
+    this.blacklistIPs.delete(ip);
   }
 }
 

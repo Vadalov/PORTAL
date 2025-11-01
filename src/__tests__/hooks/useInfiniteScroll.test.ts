@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useInfiniteScroll, usePaginatedQuery } from '@/hooks/useInfiniteScroll';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Mock TanStack Query
 vi.mock('@tanstack/react-query', () => ({
   useInfiniteQuery: vi.fn(),
@@ -25,7 +27,7 @@ describe('useInfiniteScroll Hook', () => {
       isLoading: false,
     } as any);
 
-    const { result } = renderHook(() => useInfiniteScroll({
+    renderHook(() => useInfiniteScroll({
       queryKey: ['test'],
       queryFn: vi.fn(),
     }));

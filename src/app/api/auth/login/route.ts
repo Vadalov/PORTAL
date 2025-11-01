@@ -3,12 +3,13 @@ import { serverAccount, ensureServerInitialized } from '@/lib/appwrite/server';
 import { generateCsrfToken } from '@/lib/csrf';
 import { cookies } from 'next/headers';
 import { UserRole, ROLE_PERMISSIONS } from '@/types/auth';
+import { authRateLimit } from '@/lib/rate-limit';
 
 /**
  * POST /api/auth/login
  * Handle user login with Appwrite authentication
  */
-export async function POST(request: NextRequest) {
+export const POST = authRateLimit(async (request: NextRequest) => {
   try {
     // Ensure server is initialized
     ensureServerInitialized();
@@ -111,4 +112,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
