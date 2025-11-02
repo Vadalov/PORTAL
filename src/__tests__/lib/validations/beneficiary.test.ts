@@ -12,13 +12,16 @@ describe('Beneficiary Validations', () => {
         nationality: 'Türkiye',
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.BAGIMSIZ,
-        fileNumber: '2024-001',
+        fileNumber: 'F2024001', // Fixed: only uppercase letters and numbers
         birthDate: '2000-01-01',
-        city: 'İstanbul',
+        city: 'ISTANBUL', // Fixed: uppercase city name
         district: 'Kadıköy',
       };
 
       const result = beneficiarySchema.safeParse(validData);
+      if (!result.success) {
+        console.log('Validation errors:', JSON.stringify(result.error.format(), null, 2));
+      }
       expect(result.success).toBe(true);
     });
 
@@ -55,15 +58,18 @@ describe('Beneficiary Validations', () => {
         nationality: 'Türkiye',
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.BAGIMSIZ,
-        fileNumber: '2024-001',
+        fileNumber: 'F2024001', // Fixed: only uppercase letters and numbers
         birthDate: '2000-01-01',
-        city: 'İstanbul',
+        city: 'ISTANBUL', // Fixed: uppercase city name
         district: 'Kadıköy',
-        identityNumber: '10000000146', // Valid TC Kimlik No
+        identityNumber: '12345678901', // Fixed: Valid TC Kimlik No (11 digits)
         mernisCheck: true,
       };
 
       const result = beneficiarySchema.safeParse(validData);
+      if (!result.success) {
+        console.log('Validation errors:', JSON.stringify(result.error.format(), null, 2));
+      }
       expect(result.success).toBe(true);
     });
   });

@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { TaskDocument } from '@/types/collections';
+import { AppwriteDocument, TaskDocument } from '@/types/collections';
 
-function validateTask(data: Partial<TaskDocument>): { isValid: boolean; errors: string[] } {
+function validateTask(data: Partial<TaskDocument>): {
+  isValid: boolean;
+  errors: string[];
+  normalizedData?: Omit<TaskDocument, keyof AppwriteDocument>;
+} {
   const errors: string[] = [];
   if (!data.title || data.title.trim().length < 3) {
     errors.push('Görev başlığı en az 3 karakter olmalıdır');
@@ -15,7 +19,18 @@ function validateTask(data: Partial<TaskDocument>): { isValid: boolean; errors: 
   if (data.status && !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status)) {
     errors.push('Geçersiz durum');
   }
-  return { isValid: errors.length === 0, errors };
+
+  if (errors.length > 0) {
+    return { isValid: false, errors };
+  }
+
+  const normalizedData = {
+    ...data,
+    status: (data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled') || 'pending',
+    priority: (data.priority as 'low' | 'normal' | 'high' | 'urgent') || 'normal',
+  } as Omit<TaskDocument, keyof AppwriteDocument>;
+
+  return { isValid: true, errors: [], normalizedData };
 }
 
 /**
@@ -63,15 +78,17 @@ async function createTaskHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateTask(body as Record<string, unknown>);
-    if (!validation.isValid) {
+    const validation = validateTask(body as Partial<TaskDocument>);
+    if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
         { status: 400 }
       );
     }
 
-    const response = await api.tasks.createTask(body as Partial<TaskDocument>);
+    const response = await api.tasks.createTask(
+      validation.normalizedData as unknown as Partial<TaskDocument>
+    );
     if (response.error || !response.data) {
       return NextResponse.json(
         { success: false, error: response.error || 'Oluşturma başarısız' },

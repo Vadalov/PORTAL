@@ -3,16 +3,34 @@ import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
 import logger from '@/lib/logger';
-import { UserDocument } from '@/types/collections';
+import { AppwriteDocument, UserDocument } from '@/types/collections';
 
-function validateUser(data: Partial<UserDocument>): { isValid: boolean; errors: string[] } {
+function validateUser(data: Partial<UserDocument>): {
+  isValid: boolean;
+  errors: string[];
+  normalizedData?: Omit<UserDocument, keyof AppwriteDocument>;
+} {
   const errors: string[] = [];
   if (!data.name || data.name.trim().length < 2) errors.push('Ad Soyad en az 2 karakter olmalıdır');
   if (!data.email || !InputSanitizer.validateEmail(data.email))
     errors.push('Geçerli bir e-posta zorunludur');
   if (!data.role || !['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER', 'VOLUNTEER'].includes(data.role))
     errors.push('Geçersiz rol');
-  return { isValid: errors.length === 0, errors };
+
+  if (errors.length > 0) {
+    return { isValid: false, errors };
+  }
+
+  const normalizedData = {
+    name: data.name!,
+    email: data.email!,
+    role: data.role!,
+    avatar: data.avatar,
+    isActive: data.isActive ?? true,
+    labels: data.labels ?? [],
+  } as Omit<UserDocument, keyof AppwriteDocument>;
+
+  return { isValid: true, errors: [], normalizedData };
 }
 
 /**
@@ -45,17 +63,16 @@ async function createUserHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateUser(body as Record<string, unknown>);
-    if (!validation.isValid) {
+    const validation = validateUser(body as Partial<UserDocument>);
+    if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
         { status: 400 }
       );
     }
-    const response = await api.users.createUser({
-      ...(body as Partial<UserDocument>),
-      isActive: true,
-    });
+    const response = await api.users.createUser(
+      validation.normalizedData as unknown as Partial<UserDocument>
+    );
     if (response.error || !response.data) {
       return NextResponse.json(
         { success: false, error: response.error || 'Oluşturma başarısız' },

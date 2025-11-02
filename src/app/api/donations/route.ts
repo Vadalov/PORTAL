@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { DonationDocument } from '@/types/collections';
+import { AppwriteDocument, DonationDocument } from '@/types/collections';
 
 /**
  * Validate donation payload
  */
-function validateDonation(data: Partial<DonationDocument>): { isValid: boolean; errors: string[] } {
+function validateDonation(data: Partial<DonationDocument>): {
+  isValid: boolean;
+  errors: string[];
+  normalizedData?: Omit<DonationDocument, keyof AppwriteDocument>;
+} {
   const errors: string[] = [];
 
   if (!data.donor_name || data.donor_name.trim().length < 2) {
@@ -25,11 +29,18 @@ function validateDonation(data: Partial<DonationDocument>): { isValid: boolean; 
   if (data.donor_phone && !/^[0-9\s\-\+\(\)]{10,15}$/.test(data.donor_phone)) {
     errors.push('Geçersiz telefon numarası');
   }
-  if (!data.status) {
-    data.status = 'pending';
+
+  if (errors.length > 0) {
+    return { isValid: false, errors };
   }
 
-  return { isValid: errors.length === 0, errors };
+  // Normalize data with defaults
+  const normalizedData = {
+    ...data,
+    status: (data.status as 'pending' | 'completed' | 'cancelled') || 'pending',
+  } as Omit<DonationDocument, keyof AppwriteDocument>;
+
+  return { isValid: true, errors: [], normalizedData };
 }
 
 /**
@@ -70,14 +81,16 @@ async function createDonationHandler(request: NextRequest) {
   try {
     body = await request.json();
     const validation = validateDonation(body as Partial<DonationDocument>);
-    if (!validation.isValid) {
+    if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
         { status: 400 }
       );
     }
 
-    const response = await api.donations.createDonation(body as Partial<DonationDocument>);
+    const response = await api.donations.createDonation(
+      validation.normalizedData as unknown as Partial<DonationDocument>
+    );
     if (response.error) {
       return NextResponse.json({ success: false, error: response.error }, { status: 400 });
     }

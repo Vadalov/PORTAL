@@ -135,7 +135,8 @@ export function isClientInitialized(): boolean {
  */
 export function initializeClient(): void {
   validateAppwriteConfig(); // This will throw if config is invalid
-  console.log('✅ Appwrite client initialized successfully');
+  // Client initialized successfully (logged via warn for visibility)
+  console.warn('✅ Appwrite client initialized successfully');
 }
 
 /**
@@ -156,7 +157,7 @@ export function ensureClientInitialized(): boolean {
  */
 export async function handleAppwriteError<T>(
   operation: () => Promise<T>,
-  fallback?: T
+  _fallback?: T
 ): Promise<T> {
   try {
     return await operation();
@@ -165,14 +166,16 @@ export async function handleAppwriteError<T>(
     console.error('Appwrite Error:', error);
 
     // Handle specific error types
-    if (error.code === 401) {
-      throw new Error('Yetkisiz erişim. Lütfen tekrar giriş yapın.');
-    } else if (error.code === 404) {
-      throw new Error('Kayıt bulunamadı.');
-    } else if (error.code === 429) {
-      throw new Error('Çok fazla istek. Lütfen bekleyin.');
-    } else if (error.code >= 500) {
-      throw new Error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
+    if (error.code !== undefined) {
+      if (error.code === 401) {
+        throw new Error('Yetkisiz erişim. Lütfen tekrar giriş yapın.');
+      } else if (error.code === 404) {
+        throw new Error('Kayıt bulunamadı.');
+      } else if (error.code === 429) {
+        throw new Error('Çok fazla istek. Lütfen bekleyin.');
+      } else if (error.code >= 500) {
+        throw new Error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
+      }
     }
 
     throw new Error(error.message || 'Beklenmeyen bir hata oluştu.');

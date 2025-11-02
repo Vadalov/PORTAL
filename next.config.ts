@@ -11,6 +11,7 @@ const baseConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
     optimizeCss: true,
+    turbopackUseSystemTlsCerts: true, // Enable system TLS certificates for Google Fonts
   },
 
   // Turbopack configuration
