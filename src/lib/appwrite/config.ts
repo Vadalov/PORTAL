@@ -1,16 +1,22 @@
 /**
  * Appwrite Configuration
  * Central configuration for Appwrite client initialization
- * 
+ *
  * Enhanced with comprehensive validation utilities from validation.ts
- * 
+ *
  * Usage examples:
  * - getConfigStatus(): Get detailed config validation status
  * - getConfigValidationWarnings(): Retrieve warnings from safe validations
  * - See validation.ts for detailed validation functions
  */
 
-import { validateAppwriteEndpoint, validateProjectId, validateApiKey, getValidationReport, ValidationSeverity } from './validation';
+import {
+  validateAppwriteEndpoint,
+  validateProjectId,
+  validateApiKey,
+  getValidationReport,
+  ValidationSeverity,
+} from './validation';
 
 export const appwriteConfig = {
   endpoint: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || '',
@@ -37,6 +43,7 @@ export const COLLECTIONS = {
   ORPHANS: 'orphans',
   SPONSORS: 'sponsors',
   CAMPAIGNS: 'campaigns',
+  SETTINGS: 'settings',
 } as const;
 
 // Storage Bucket IDs
@@ -133,9 +140,11 @@ export function validateAppwriteConfig() {
 export function validateAppwriteConfigSafe(): boolean {
   let isValid = true;
   configValidationWarnings = []; // Reset warnings
-  
+
   if (!appwriteConfig.endpoint) {
-    console.warn('⚠️ NEXT_PUBLIC_APPWRITE_ENDPOINT is not defined. Appwrite client may not work properly.');
+    console.warn(
+      '⚠️ NEXT_PUBLIC_APPWRITE_ENDPOINT is not defined. Appwrite client may not work properly.'
+    );
     isValid = false;
     configValidationWarnings.push('NEXT_PUBLIC_APPWRITE_ENDPOINT is not defined');
   } else {
@@ -149,9 +158,11 @@ export function validateAppwriteConfigSafe(): boolean {
       configValidationWarnings.push(endpointValidation.message);
     }
   }
-  
+
   if (!appwriteConfig.projectId) {
-    console.warn('⚠️ NEXT_PUBLIC_APPWRITE_PROJECT_ID is not defined. Appwrite client may not work properly.');
+    console.warn(
+      '⚠️ NEXT_PUBLIC_APPWRITE_PROJECT_ID is not defined. Appwrite client may not work properly.'
+    );
     isValid = false;
     configValidationWarnings.push('NEXT_PUBLIC_APPWRITE_PROJECT_ID is not defined');
   } else {
@@ -165,7 +176,7 @@ export function validateAppwriteConfigSafe(): boolean {
       configValidationWarnings.push(projectIdValidation.message);
     }
   }
-  
+
   return isValid;
 }
 
@@ -187,9 +198,11 @@ export function validateServerConfig() {
  */
 export function validateServerConfigSafe(): boolean {
   const clientValid = validateAppwriteConfigSafe();
-  
+
   if (!appwriteConfig.apiKey) {
-    console.warn('⚠️ APPWRITE_API_KEY is not defined. Server-side operations may not work properly.');
+    console.warn(
+      '⚠️ APPWRITE_API_KEY is not defined. Server-side operations may not work properly.'
+    );
     configValidationWarnings.push('APPWRITE_API_KEY is not defined');
     return false;
   } else {
@@ -203,7 +216,7 @@ export function validateServerConfigSafe(): boolean {
       return false;
     }
   }
-  
+
   return clientValid;
 }
 
@@ -225,12 +238,16 @@ export function getConfigValidationWarnings(): string[] {
 export function getConfigStatus() {
   const report = getValidationReport();
   const warnings = getConfigValidationWarnings();
-  
+
   return {
     isValid: report.summary.errors === 0,
     warnings,
-    errors: report.results.filter(r => r.severity === ValidationSeverity.ERROR).map(r => r.message),
-    suggestions: report.results.filter(r => r.suggestion).map(r => ({ variable: r.variable, suggestion: r.suggestion })),
+    errors: report.results
+      .filter((r) => r.severity === ValidationSeverity.ERROR)
+      .map((r) => r.message),
+    suggestions: report.results
+      .filter((r) => r.suggestion)
+      .map((r) => ({ variable: r.variable, suggestion: r.suggestion })),
     timestamp: report.timestamp,
   };
 }

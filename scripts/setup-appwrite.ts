@@ -1,7 +1,7 @@
 /**
  * Appwrite Backend Setup Script
  * Creates all necessary collections and storage buckets
- * 
+ *
  * Usage: npx tsx scripts/setup-appwrite.ts
  */
 
@@ -80,7 +80,7 @@ const STORAGE_BUCKETS = {
 async function setupDatabase() {
   try {
     console.log('📦 Creating database...');
-    
+
     try {
       await databases.get(DATABASE_ID);
       console.log(`✅ Database '${DATABASE_ID}' already exists`);
@@ -100,7 +100,12 @@ async function setupDatabase() {
   }
 }
 
-async function createCollection(collectionId: string, collectionName: string, attributes: AttributeDefinition[], indexes: IndexDefinition[] = []) {
+async function createCollection(
+  collectionId: string,
+  collectionName: string,
+  attributes: AttributeDefinition[],
+  indexes: IndexDefinition[] = []
+) {
   try {
     // Check if collection exists
     try {
@@ -150,9 +155,14 @@ async function createCollection(collectionId: string, collectionName: string, at
         console.log(`  ✓ Attribute '${attr.key}' created`);
       } catch (error: any) {
         // Handle both SDK-style error.code and fetch-style response status
-        const appwriteError = error as { code?: number; response?: { status?: number }; message?: string };
+        const appwriteError = error as {
+          code?: number;
+          response?: { status?: number };
+          message?: string;
+        };
         const status = appwriteError.code ?? appwriteError.response?.status;
-        if (status !== 409) { // 409 = attribute already exists
+        if (status !== 409) {
+          // 409 = attribute already exists
           console.warn(`  ⚠ Attribute '${attr.key}': ${appwriteError.message || error}`);
         }
       }
@@ -161,10 +171,18 @@ async function createCollection(collectionId: string, collectionName: string, at
     // Add indexes
     for (const index of indexes) {
       try {
-        await databases.createIndex(DATABASE_ID, collectionId, index.key, index.type as any, index.attributes, index.orders || undefined);
+        await databases.createIndex(
+          DATABASE_ID,
+          collectionId,
+          index.key,
+          index.type as any,
+          index.attributes,
+          index.orders || undefined
+        );
         console.log(`  ✓ Index '${index.key}' created`);
       } catch (error: any) {
-        if (error.code !== 409) { // 409 = index already exists
+        if (error.code !== 409) {
+          // 409 = index already exists
           console.warn(`  ⚠ Index '${index.key}': ${error.message}`);
         }
       }
@@ -316,6 +334,28 @@ async function setupCollections() {
     { key: 'value', type: AttributeType.String, required: true },
     { key: 'order', type: AttributeType.Integer, required: false },
     { key: 'is_active', type: AttributeType.Boolean, required: true, default: true },
+  ]);
+
+  // Settings collection (system-wide configuration)
+  await createCollection(COLLECTIONS.SETTINGS, 'Settings', [
+    { key: 'organization_name', type: AttributeType.String, required: true },
+    { key: 'organization_address', type: AttributeType.String, required: false },
+    { key: 'organization_phone', type: AttributeType.String, required: false },
+    { key: 'organization_email', type: AttributeType.String, required: false },
+    { key: 'email_enabled', type: AttributeType.Boolean, required: false, default: false },
+    { key: 'smtp_host', type: AttributeType.String, required: false },
+    { key: 'smtp_port', type: AttributeType.Integer, required: false },
+    { key: 'smtp_user', type: AttributeType.String, required: false },
+    { key: 'smtp_password', type: AttributeType.String, required: false },
+    { key: 'from_email', type: AttributeType.String, required: false },
+    { key: 'email_notifications', type: AttributeType.Boolean, required: false, default: true },
+    { key: 'push_notifications', type: AttributeType.Boolean, required: false, default: false },
+    { key: 'sms_notifications', type: AttributeType.Boolean, required: false, default: false },
+    { key: 'session_timeout', type: AttributeType.Integer, required: false, default: 30 },
+    { key: 'max_login_attempts', type: AttributeType.Integer, required: false, default: 5 },
+    { key: 'maintenance_mode', type: AttributeType.Boolean, required: false, default: false },
+    { key: 'require_two_factor', type: AttributeType.Boolean, required: false, default: false },
+    { key: 'password_min_length', type: AttributeType.Integer, required: false, default: 8 },
   ]);
 }
 
