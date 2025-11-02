@@ -26,7 +26,6 @@ import {
   BeneficiaryCategory,
   FundRegion,
   FileConnection,
-  BeneficiaryQuickAdd,
 } from '@/types/beneficiary';
 import {
   quickAddBeneficiarySchema,
@@ -59,6 +58,7 @@ const fundRegionLabels: Record<FundRegion, string> = {
 };
 
 const fileConnectionLabels: Record<FileConnection, string> = {
+  [FileConnection.BAGIMSIZ]: 'Bağımsız',
   [FileConnection.PARTNER_KURUM]: 'Partner Kurum',
   [FileConnection.CALISMA_SAHASI]: 'Çalışma Sahası',
 };
@@ -107,7 +107,7 @@ export function BeneficiaryQuickAddModal({ open, onOpenChange }: BeneficiaryQuic
 
       setValue('fileNumber', fileNumber);
       toast.success('Dosya numarası oluşturuldu');
-    } catch (error) {
+    } catch (_error) {
       toast.error('Dosya numarası oluşturulurken hata oluştu');
     } finally {
       setIsGeneratingFileNumber(false);

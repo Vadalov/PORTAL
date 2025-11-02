@@ -87,7 +87,7 @@ async function createTaskHandler(request: NextRequest) {
     }
 
     const response = await api.tasks.createTask(
-      validation.normalizedData as unknown as Partial<TaskDocument>
+      validation.normalizedData
     );
     if (response.error || !response.data) {
       return NextResponse.json(

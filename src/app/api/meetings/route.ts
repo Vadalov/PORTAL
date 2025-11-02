@@ -90,7 +90,7 @@ async function createMeetingHandler(request: NextRequest) {
     }
 
     const response = await api.meetings.createMeeting(
-      validation.normalizedData as unknown as Partial<MeetingDocument>
+      validation.normalizedData
     );
     if (response.error || !response.data) {
       return NextResponse.json(

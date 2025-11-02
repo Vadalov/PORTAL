@@ -71,7 +71,7 @@ async function createUserHandler(request: NextRequest) {
       );
     }
     const response = await api.users.createUser(
-      validation.normalizedData as unknown as Partial<UserDocument>
+      validation.normalizedData
     );
     if (response.error || !response.data) {
       return NextResponse.json(

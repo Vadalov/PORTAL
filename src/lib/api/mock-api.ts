@@ -5,7 +5,6 @@ import {
   Beneficiary,
   BeneficiaryQuickAdd,
   BeneficiaryListResponse,
-  BeneficiaryResponse,
   BeneficiarySearchParams,
   PhotoUploadResponse,
   MernisCheckResponse,
@@ -144,7 +143,7 @@ const mockBeneficiaries: Beneficiary[] = [
 ];
 
 // === APPWRITE-ALIGNED MOCK STORAGE ===
-let mockAppwriteBeneficiaries: BeneficiaryDocument[] = mockBeneficiaries.map((b, idx) => ({
+let mockAppwriteBeneficiaries: BeneficiaryDocument[] = mockBeneficiaries.map((b) => ({
   $id: b.id,
   $createdAt: b.createdAt,
   $updatedAt: b.updatedAt,
@@ -262,7 +261,7 @@ export const createBeneficiary = async (
       error: null,
       message: 'İhtiyaç sahibi başarıyla oluşturuldu',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       data: null,
@@ -325,7 +324,7 @@ export const updateBeneficiary = async (
       data: updatedBeneficiary,
       message: 'İhtiyaç sahibi başarıyla güncellendi',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'İhtiyaç sahibi güncellenirken hata oluştu',
@@ -353,7 +352,7 @@ export const getBeneficiary = async (id: string): Promise<ApiResponse<Beneficiar
       success: true,
       data: beneficiary,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'İhtiyaç sahibi getirilirken hata oluştu',
@@ -436,7 +435,7 @@ export const getBeneficiaries = async (
         limit,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'İhtiyaç sahipleri listesi getirilirken hata oluştu',
@@ -467,7 +466,7 @@ export const deleteBeneficiary = async (id: string): Promise<ApiResponse<void>> 
       success: true,
       message: 'İhtiyaç sahibi başarıyla silindi',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'İhtiyaç sahibi silinirken hata oluştu',
@@ -506,7 +505,7 @@ export const uploadBeneficiaryPhoto = async (
         message: 'Fotoğraf başarıyla yüklendi',
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Fotoğraf yüklenirken hata oluştu',
@@ -551,7 +550,7 @@ export const checkMernis = async (
         },
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Mernis kontrolü yapılırken hata oluştu',
@@ -581,7 +580,7 @@ export const generateFileNumber = async (
       data: fileNumber,
       message: 'Dosya numarası oluşturuldu',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Dosya numarası oluşturulurken hata oluştu',
@@ -626,7 +625,7 @@ export const getBeneficiaryStats = async (): Promise<
       success: true,
       data: stats,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'İstatistikler getirilirken hata oluştu',
@@ -695,7 +694,7 @@ export const exportBeneficiaries = async (
       data: csvContent,
       message: 'CSV dosyası oluşturuldu',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'CSV export işlemi sırasında hata oluştu',
@@ -841,14 +840,14 @@ export async function appwriteGetBeneficiaries(
   // Simple filters support
   Object.entries(filters).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    list = list.filter((b: unknown) => b[key] === value);
+    list = list.filter((b: unknown) => (b as any)[key] === value);
   });
 
   // Order
   if (orderBy) {
     list.sort((a: unknown, b: unknown) => {
-      const av = a[orderBy];
-      const bv = b[orderBy];
+      const av = (a as any)[orderBy];
+      const bv = (b as any)[orderBy];
       if (av === bv) return 0;
       const res = av > bv ? 1 : -1;
       return orderType === 'desc' ? -res : res;
@@ -897,16 +896,11 @@ import {
   ScholarshipListResponse,
   StudentListResponse,
   ApplicationListResponse,
-  ScholarshipResponse,
-  StudentResponse,
-  ApplicationResponse,
   ScholarshipSearchParams,
   StudentSearchParams,
   ApplicationSearchParams,
   ScholarshipStats,
   StudentStats,
-  PaymentStats,
-  OrphanStats,
 } from '@/types/scholarship';
 
 // Mock storage for scholarships
@@ -1010,7 +1004,7 @@ const mockApplications: ScholarshipApplication[] = [
 ];
 
 // Mock storage for payments
-const mockPayments: Payment[] = [
+const _mockPayments: Payment[] = [
   {
     id: 'payment-001',
     applicationId: 'application-001',
@@ -1031,7 +1025,7 @@ const mockPayments: Payment[] = [
 ];
 
 // Mock storage for orphan assistance
-const mockOrphanAssistance: OrphanAssistance[] = [
+const _mockOrphanAssistance: OrphanAssistance[] = [
   {
     id: 'orphan-001',
     studentId: 'student-001',
@@ -1112,7 +1106,7 @@ export const getScholarships = async (
         limit,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Burs listesi getirilirken hata oluştu',
@@ -1140,7 +1134,7 @@ export const getScholarship = async (id: string): Promise<ApiResponse<Scholarshi
       success: true,
       data: scholarship,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Burs getirilirken hata oluştu',
@@ -1183,7 +1177,7 @@ export const createScholarship = async (
       data: newScholarship,
       message: 'Burs başarıyla oluşturuldu',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Burs oluşturulurken hata oluştu',
@@ -1224,7 +1218,7 @@ export const updateScholarship = async (
       data: updatedScholarship,
       message: 'Burs başarıyla güncellendi',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Burs güncellenirken hata oluştu',
@@ -1254,7 +1248,7 @@ export const deleteScholarship = async (id: string): Promise<ApiResponse<void>> 
       success: true,
       message: 'Burs başarıyla silindi',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Burs silinirken hata oluştu',
@@ -1325,7 +1319,7 @@ export const getStudents = async (
         limit,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Öğrenci listesi getirilirken hata oluştu',
@@ -1353,7 +1347,7 @@ export const getStudent = async (id: string): Promise<ApiResponse<Student>> => {
       success: true,
       data: student,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Öğrenci getirilirken hata oluştu',
@@ -1409,7 +1403,7 @@ export const createStudent = async (data: Partial<Student>): Promise<ApiResponse
       data: newStudent,
       message: 'Öğrenci başarıyla oluşturuldu',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Öğrenci oluşturulurken hata oluştu',
@@ -1488,7 +1482,7 @@ export const getApplications = async (
         limit,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Başvuru listesi getirilirken hata oluştu',
@@ -1538,7 +1532,7 @@ export const createApplication = async (
       data: newApplication,
       message: 'Başvuru başarıyla oluşturuldu',
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Başvuru oluşturulurken hata oluştu',
@@ -1586,7 +1580,7 @@ export const getScholarshipStats = async (): Promise<ApiResponse<ScholarshipStat
         approvalRate,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'İstatistikler getirilirken hata oluştu',
@@ -1629,7 +1623,7 @@ export const getStudentStats = async (): Promise<ApiResponse<StudentStats>> => {
         byStatus,
       },
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
       error: 'Öğrenci istatistikleri getirilirken hata oluştu',

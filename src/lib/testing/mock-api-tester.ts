@@ -12,9 +12,7 @@ import {
 } from '@/lib/api/mock-api';
 import { mockAuthApi } from '@/lib/api/mock-auth-api';
 import {
-  AppwriteResponse,
   BeneficiaryDocument,
-  QueryParams,
   CreateDocumentData,
   UpdateDocumentData,
 } from '@/types/collections';
@@ -227,8 +225,7 @@ export class MockAPITester {
         passed: false,
         message: 'Should have thrown error',
       });
-    } catch (err: unknown) {
-      const error = err as Error;
+    } catch (_err: unknown) {
       tests.push({
         testName: 'auth login invalid',
         passed: true,
@@ -257,8 +254,7 @@ export class MockAPITester {
         passed: false,
         message: 'Should have thrown error',
       });
-    } catch (err: unknown) {
-      const error = err as Error;
+    } catch (_err: unknown) {
       tests.push({
         testName: 'auth getCurrentUser',
         passed: true,
@@ -393,8 +389,8 @@ export class MockAPITester {
 
     // Test create with missing required fields
     try {
-      const createData: unknown = { name: 'Test' }; // Missing required fields
-      const response = await appwriteCreateBeneficiary(createData);
+    const createData: unknown = { name: 'Test' }; // Missing required fields
+    const response = await appwriteCreateBeneficiary(createData as any);
       if (response.error) {
         tests.push({
           testName: 'error missing fields',

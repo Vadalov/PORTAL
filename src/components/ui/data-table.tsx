@@ -168,7 +168,7 @@ export function DataTable<T extends Record<string, unknown>>({
                   <AnimatePresence mode="popLayout">
                     {filteredData.map((item, index) => (
                       <motion.tr
-                        key={item.id || item.$id || index}
+                        key={String(item.id || item.$id || index)}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}

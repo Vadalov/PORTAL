@@ -33,7 +33,7 @@ import {
 } from '@/lib/validations/message';
 import { useFormMutation } from '@/hooks/useFormMutation';
 import { toast } from 'sonner';
-import type { UserDocument } from '@/types/collections';
+import type { UserDocument, MessageDocument } from '@/types/collections';
 
 interface MessageFormProps {
   onSuccess?: () => void;
@@ -69,7 +69,7 @@ export function MessageForm({
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm<MessageFormData>({
+  } = useForm({
     resolver: zodResolver(messageSchema),
     defaultValues: {
       message_type: initialData?.message_type || defaultMessageType || 'sms',
@@ -107,11 +107,20 @@ export function MessageForm({
     }
   }, [initialData, setValue]);
 
-  const createMessageMutation = useFormMutation<unknown, MessageFormData>({
+  const createMessageMutation = useFormMutation<MessageDocument, MessageFormData>({
     queryKey: ['messages'],
     successMessage: 'Mesaj başarıyla oluşturuldu.',
     errorMessage: 'Mesaj oluşturulurken hata oluştu',
-    mutationFn: (data: MessageFormData) => api.messages.createMessage(data),
+    mutationFn: async (data: MessageFormData) => {
+      const response = await api.messages.createMessage(data);
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      if (!response.data) {
+        throw new Error('Mesaj oluşturulamadı');
+      }
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
@@ -425,8 +434,8 @@ export function MessageForm({
             <div className="space-y-2">
               <Label>Durum</Label>
               <div className="flex items-center gap-2">
-                <Badge className={getStatusColor(watch('status'))}>
-                  {getStatusLabel(watch('status'))}
+                <Badge className={getStatusColor(watch('status') || 'draft')}>
+                  {getStatusLabel(watch('status') || 'draft')}
                 </Badge>
                 {watch('sent_at') && (
                   <span className="text-sm text-gray-500">
@@ -500,7 +509,7 @@ export function MessageForm({
               <Button
                 type="button"
                 onClick={() => {
-                  const data = watch();
+                  const data = watch() as MessageFormData;
                   handleSend(data);
                 }}
                 disabled={isSubmitting || selectedRecipients.length === 0}

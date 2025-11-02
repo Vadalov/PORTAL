@@ -83,19 +83,19 @@ export async function handleGetById<T>(
 ): Promise<NextResponse<ApiResponse<T>>> {
   try {
     if (!id) {
-      return errorResponse('ID parametresi gerekli', 400);
+      return errorResponse('ID parametresi gerekli', 400) as any;
     }
 
     const response = await getOperation(id);
 
     if (response.error || !response.data) {
-      return errorResponse(`${resourceName} bulunamadı`, 404);
+      return errorResponse(`${resourceName} bulunamadı`, 404) as any;
     }
 
     return successResponse(response.data as T);
   } catch (error: unknown) {
     console.error(`Get ${resourceName} error:`, error);
-    return errorResponse('Veri alınamadı', 500);
+    return errorResponse('Veri alınamadı', 500) as any;
   }
 }
 
@@ -116,24 +116,24 @@ export async function handleUpdate<T, U = unknown>(
 ): Promise<NextResponse<ApiResponse<T>>> {
   try {
     if (!id) {
-      return errorResponse('ID parametresi gerekli', 400);
+      return errorResponse('ID parametresi gerekli', 400) as any;
     }
 
     const validation = validate(body);
     if (!validation.isValid) {
-      return errorResponse('Doğrulama hatası', 400, validation.errors);
+      return errorResponse('Doğrulama hatası', 400, validation.errors) as any;
     }
 
     const response = await updateOperation(id, body);
 
     if (response.error || !response.data) {
-      return errorResponse(response.error || 'Güncelleme başarısız', 400);
+      return errorResponse(response.error || 'Güncelleme başarısız', 400) as any;
     }
 
     return successResponse(response.data as T, `${resourceName} güncellendi`);
   } catch (error: unknown) {
     console.error(`Update ${resourceName} error:`, error);
-    return errorResponse('Güncelleme işlemi başarısız', 500);
+    return errorResponse('Güncelleme işlemi başarısız', 500) as any;
   }
 }
 
@@ -150,19 +150,19 @@ export async function handleDelete(
 ): Promise<NextResponse<ApiResponse>> {
   try {
     if (!id) {
-      return errorResponse('ID parametresi gerekli', 400);
+      return errorResponse('ID parametresi gerekli', 400) as any;
     }
 
     const response = await deleteOperation(id);
 
     if (response.error) {
-      return errorResponse(response.error, 400);
+      return errorResponse(response.error, 400) as any;
     }
 
     return successResponse(null, `${resourceName} silindi`);
   } catch (error: unknown) {
     console.error(`Delete ${resourceName} error:`, error);
-    return errorResponse('Silme işlemi başarısız', 500);
+    return errorResponse('Silme işlemi başarısız', 500) as any;
   }
 }
 
@@ -184,7 +184,7 @@ export async function parseBody<T = unknown>(
   try {
     const body = await request.json();
     return { data: body };
-  } catch (error) {
+  } catch (_error) {
     return { error: 'Geçersiz istek verisi' };
   }
 }
@@ -227,8 +227,8 @@ export async function handleApiError<T>(
   // Handle duplicate errors
   const duplicateCheck = handleDuplicateError(error);
   if (duplicateCheck.isDuplicate) {
-    return errorResponse(duplicateCheck.message, 409);
+    return errorResponse(duplicateCheck.message, 409) as any;
   }
 
-  return errorResponse(defaultMessage, 500);
+  return errorResponse(defaultMessage, 500) as any;
 }

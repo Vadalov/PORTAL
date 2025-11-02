@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "ask": ["Read(!/home/pc/PORTAL/**)", "Edit(!/home/pc/PORTAL/**)"],
-    "allow": ["Read(/home/pc/PORTAL/**)", "Edit(/home/pc/PORTAL/**)"]
-  },
-  "memoryImport": {},
-  "monitoring": {}
-}

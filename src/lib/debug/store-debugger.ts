@@ -168,7 +168,7 @@ class StoreDebuggerClass {
     console.log('Current State:', state);
 
     if (persistApi) {
-      console.log('Hydrated:', persistApi.hasHydrated?.() ?? 'unknown');
+      console.log('Hydrated:', (persistApi as any).hasHydrated?.() ?? 'unknown');
     }
 
     // Log localStorage
@@ -188,7 +188,7 @@ class StoreDebuggerClass {
         if (sessionValue) {
           console.log('Auth Session:', JSON.parse(sessionValue));
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('❌ Failed to read localStorage:', error);
       }
     }
@@ -219,8 +219,8 @@ class StoreDebuggerClass {
 
     const mismatches: string[] = [];
 
-    Object.keys(currentState).forEach((key) => {
-      if (defaultState[key] !== undefined && currentState[key] !== defaultState[key]) {
+    Object.keys(currentState as object).forEach((key) => {
+      if (defaultState[key] !== undefined && (currentState as any)[key] !== defaultState[key]) {
         mismatches.push(key);
       }
     });
@@ -232,7 +232,7 @@ class StoreDebuggerClass {
       mismatches.forEach((key) => {
         console.error(`  ${key}:`, {
           default: defaultState[key],
-          current: currentState[key],
+          current: (currentState as any)[key],
         });
       });
 
@@ -314,7 +314,7 @@ class StoreDebuggerClass {
         if (sessionValue) {
           sessionData = JSON.parse(sessionValue);
         }
-      } catch (error) {
+      } catch (_error) {
         // Ignore
       }
     }
@@ -322,7 +322,7 @@ class StoreDebuggerClass {
     return {
       storeName,
       currentState: state,
-      hydrated: persistApi?.hasHydrated?.() ?? 'unknown',
+      hydrated: (persistApi as any)?.hasHydrated?.() ?? 'unknown',
       timing: timing
         ? {
             duration: timing.duration,

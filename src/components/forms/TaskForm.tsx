@@ -29,7 +29,7 @@ import {
   isTaskDueSoon,
 } from '@/lib/validations/task';
 import { useFormMutation } from '@/hooks/useFormMutation';
-import type { UserDocument } from '@/types/collections';
+import type { UserDocument, TaskDocument } from '@/types/collections';
 
 interface TaskFormProps {
   onSuccess?: () => void;
@@ -83,11 +83,20 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
   const users: UserDocument[] = []; // Empty for now
 
   // Create task mutation
-  const createTaskMutation = useFormMutation<TaskFormData, TaskFormData>({
+  const createTaskMutation = useFormMutation<TaskDocument, TaskFormData>({
     queryKey: ['tasks'],
     successMessage: 'Görev başarıyla oluşturuldu',
     errorMessage: 'Görev oluşturulurken hata oluştu',
-    mutationFn: (data: TaskFormData) => api.tasks.createTask(data),
+    mutationFn: async (data: TaskFormData) => {
+      const response = await api.tasks.createTask(data);
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      if (!response.data) {
+        throw new Error('Görev oluşturulamadı');
+      }
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
@@ -95,11 +104,20 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
   });
 
   // Update task mutation
-  const updateTaskMutation = useFormMutation<TaskFormData, TaskFormData>({
+  const updateTaskMutation = useFormMutation<TaskDocument, TaskFormData>({
     queryKey: ['tasks'],
     successMessage: 'Görev başarıyla güncellendi',
     errorMessage: 'Görev güncellenirken hata oluştu',
-    mutationFn: (data: TaskFormData) => api.tasks.updateTask(taskId!, data),
+    mutationFn: async (data: TaskFormData) => {
+      const response = await api.tasks.updateTask(taskId!, data);
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      if (!response.data) {
+        throw new Error('Görev güncellenemedi');
+      }
+      return response.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();

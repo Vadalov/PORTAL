@@ -64,10 +64,10 @@ export async function createEntity<T extends AuditableEntity>(
       data: newEntity,
       message: options.successMessage,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
-      data: null,
+      data: undefined,
       error: options.errorMessage,
     };
   }
@@ -90,7 +90,7 @@ export async function updateEntity<T>(
     if (index === -1) {
       return {
         success: false,
-        data: null,
+        data: undefined,
         error: options.notFoundMessage,
       };
     }
@@ -109,10 +109,10 @@ export async function updateEntity<T>(
       data: updated,
       message: options.successMessage,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
-      data: null,
+      data: undefined,
       error: options.errorMessage,
     };
   }
@@ -130,7 +130,7 @@ export async function getEntityById<T>(
     if (!entity) {
       return {
         success: false,
-        data: null,
+        data: undefined,
         error: notFoundMessage,
       };
     }
@@ -139,10 +139,10 @@ export async function getEntityById<T>(
       success: true,
       data: entity,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
-      data: null,
+      data: undefined,
       error: 'Error retrieving entity',
     };
   }
@@ -161,7 +161,7 @@ export async function deleteEntity(
     if (index === -1) {
       return {
         success: false,
-        data: null,
+        data: undefined,
         error: notFoundMessage,
       };
     }
@@ -173,10 +173,10 @@ export async function deleteEntity(
       data: undefined,
       message: successMessage,
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       success: false,
-      data: null,
+      data: undefined,
       error: 'Error deleting entity',
     };
   }

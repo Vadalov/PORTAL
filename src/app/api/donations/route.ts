@@ -89,7 +89,7 @@ async function createDonationHandler(request: NextRequest) {
     }
 
     const response = await api.donations.createDonation(
-      validation.normalizedData as unknown as Partial<DonationDocument>
+      validation.normalizedData
     );
     if (response.error) {
       return NextResponse.json({ success: false, error: response.error }, { status: 400 });

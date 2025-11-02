@@ -91,7 +91,7 @@ async function createMessageHandler(request: NextRequest) {
     }
 
     const response = await api.messages.createMessage(
-      validation.normalizedData as unknown as Partial<MessageDocument>
+      validation.normalizedData
     );
     if (response.error || !response.data) {
       return NextResponse.json(
