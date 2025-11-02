@@ -145,9 +145,9 @@ export default function BeneficiariesPage() {
           </>
         }
       >
-        <DataTable
-          data={beneficiaries}
-          columns={columns}
+        <DataTable<Record<string, unknown>>
+          data={beneficiaries as unknown as Record<string, unknown>[]}
+          columns={columns as unknown as import('@/components/ui/data-table').Column<Record<string, unknown>>[]}
           isLoading={isLoading}
           error={error as Error}
           emptyMessage="İhtiyaç sahibi bulunamadı"

@@ -85,7 +85,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
           bucketId: 'receipts',
           permissions: []
         });
-        uploadedFileId = (uploadResult as any).data?.$id;
+        uploadedFileId = uploadResult.data?.$id;
       }
 
       // Create donation with file reference
@@ -178,7 +178,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
                 <Label htmlFor="currency">Para Birimi *</Label>
                 <Select
                   value={watch('currency')}
-                  onValueChange={(value) => setValue('currency', value as any)}
+                  onValueChange={(value) => setValue('currency', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Para birimi seçin" />

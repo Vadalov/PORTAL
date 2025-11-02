@@ -44,3 +44,24 @@ next-env.d.ts
 
 .cursor/rules/kluster-code-verify.mdc
 .kluster
+
+# test results
+/test-results/
+*.test-results
+
+# temporary documentation files
+.analysis-progress.md
+.devam-progress.md
+.progress-update.txt
+.roomodes
+REFACTORING_PLAN.md
+REFACTORING_SUMMARY.md
+
+# obsolete documentation
+COMPONENT_GUIDE.md
+DOCUMENTATION_INDEX.md
+QUICK_START.md
+README_TR.md
+SECURITY.md
+TESTING-CHECKLIST.md
+testsprite_tests/

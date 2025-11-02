@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ErrorAlert } from '@/components/ui/error-alert';
 import { 
   Transaction, 
   CreateTransactionInput,
@@ -27,14 +28,12 @@ import {
   TrendingUp,
   TrendingDown,
   Loader2,
-  AlertCircle,
   FileText,
   ArrowUpDown,
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { formatCurrency, formatDate } from '@/lib/utils/format';
 
 interface PaginationInfo {
   page: number;
@@ -229,19 +228,6 @@ export default function GelirGiderPage() {
   // Handle pagination
   const handlePageChange = (newPage: number) => {
     setFilters(prev => ({ ...prev, page: newPage }));
-  };
-
-  // Format currency
-  const formatCurrency = (amount: number, currency: string = 'TRY') => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency
-    }).format(amount);
-  };
-
-  // Format date
-  const formatDate = (date: Date) => {
-    return format(date, 'dd MMMM yyyy', { locale: tr });
   };
 
   // Get status badge
@@ -451,22 +437,7 @@ export default function GelirGiderPage() {
       </div>
 
       {/* Error Alert */}
-      {error && (
-        <AlertDialog>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                <AlertCircle className="w-5 h-5 text-red-500 inline mr-2" />
-                Hata
-              </AlertDialogTitle>
-              <AlertDialogDescription>{error}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setError(null)}>Tamam</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <ErrorAlert error={error} onDismiss={() => setError(null)} />
 
       {/* Statistics Cards */}
       {stats && (

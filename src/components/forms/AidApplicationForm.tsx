@@ -74,7 +74,7 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
   });
 
   const createApplicationMutation = useMutation({
-    mutationFn: (data: any) =>
+    mutationFn: (data: AidApplicationFormData) =>
       aidApplicationsApi.createAidApplication({
         ...data,
         stage: 'draft',
@@ -122,7 +122,7 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
                 <Label htmlFor="applicant_type">Başvuran Türü *</Label>
                 <Select
                   value={watch('applicant_type')}
-                  onValueChange={(value) => setValue('applicant_type', value as any)}
+                  onValueChange={(value) => setValue('applicant_type', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -176,7 +176,7 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
                 <Label htmlFor="priority">Öncelik</Label>
                 <Select
                   value={watch('priority')}
-                  onValueChange={(value) => setValue('priority', value as any)}
+                  onValueChange={(value) => setValue('priority', value)}
                 >
                   <SelectTrigger>
                     <SelectValue />

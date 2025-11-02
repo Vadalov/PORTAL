@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   const limit = Number(searchParams.get('limit') || '20');
   const search = searchParams.get('search') || undefined;
 
-  const filters: Record<string, any> = {};
+  const filters: Record<string, unknown> = {};
   const message_type = searchParams.get('message_type');
   const status = searchParams.get('status');
   const sender = searchParams.get('sender');
@@ -65,10 +65,10 @@ export async function GET(request: NextRequest) {
  * POST /api/messages
  */
 async function createMessageHandler(request: NextRequest) {
-  let body: any = null;
+  let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateMessage(body);
+    const validation = validateMessage(body as Record<string, unknown>);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }

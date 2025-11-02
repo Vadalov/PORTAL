@@ -3,6 +3,7 @@ import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { BeneficiaryFormData } from '@/types/beneficiary';
+import { handleGetById, handleUpdate, handleDelete, extractParams, handleApiError } from '@/lib/api/route-helpers';
 
 /**
  * Validate beneficiary data for updates
@@ -49,39 +50,24 @@ async function getBeneficiaryHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id } = await extractParams(params);
+  
   try {
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'ID parametresi gerekli' },
-        { status: 400 }
-      );
-    }
-
-    const response = await api.beneficiaries.getBeneficiary(id);
-
-    if (response.error) {
-      return NextResponse.json(
-        { success: false, error: 'Kayıt bulunamadı' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: response.data,
-      message: 'Kayıt başarıyla getirildi',
-    });
+    return await handleGetById(
+      id,
+      (id) => api.beneficiaries.getBeneficiary(id),
+      'İhtiyaç sahibi'
+    );
   } catch (error: unknown) {
-    logger.error('Get beneficiary error', error, {
-      endpoint: '/api/beneficiaries/[id]',
-      method: request.method,
-      beneficiaryId: id
-    });
-    
-    return NextResponse.json(
-      { success: false, error: 'Veri alınamadı' },
-      { status: 500 }
+    return handleApiError(
+      error,
+      logger,
+      {
+        endpoint: '/api/beneficiaries/[id]',
+        method: request.method,
+        beneficiaryId: id
+      },
+      'Veri alınamadı'
     );
   }
 }
@@ -94,65 +80,28 @@ async function updateBeneficiaryHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id } = await extractParams(params);
+  
   try {
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'ID parametresi gerekli' },
-        { status: 400 }
-      );
-    }
-
     const body = await request.json();
     
-    if (!body) {
-      return NextResponse.json(
-        { success: false, error: 'Veri bulunamadı' },
-        { status: 400 }
-      );
-    }
-
-    // Validate update data
-    const validation = validateBeneficiaryUpdate(body);
-    if (!validation.isValid) {
-      return NextResponse.json(
-        { success: false, error: 'Doğrulama hatası', details: validation.errors },
-        { status: 400 }
-      );
-    }
-
-    const response = await api.beneficiaries.updateBeneficiary(id, body);
-
-    if (response.error) {
-      return NextResponse.json(
-        { success: false, error: 'Güncelleme başarısız' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: response.data,
-      message: 'İhtiyaç sahibi başarıyla güncellendi',
-    });
+    return await handleUpdate(
+      id,
+      body,
+      validateBeneficiaryUpdate,
+      (id, data) => api.beneficiaries.updateBeneficiary(id, data),
+      'İhtiyaç sahibi'
+    );
   } catch (error: unknown) {
-    logger.error('Update beneficiary error', error, {
-      endpoint: '/api/beneficiaries/[id]',
-      method: request.method,
-      beneficiaryId: id
-    });
-    
-    // Handle duplicate TC number
-    if (error.message?.includes('duplicate') || error.message?.includes('unique')) {
-      return NextResponse.json(
-        { success: false, error: 'Bu TC Kimlik No zaten kayıtlı' },
-        { status: 409 }
-      );
-    }
-
-    return NextResponse.json(
-      { success: false, error: 'Güncelleme işlemi başarısız' },
-      { status: 500 }
+    return handleApiError(
+      error,
+      logger,
+      {
+        endpoint: '/api/beneficiaries/[id]',
+        method: request.method,
+        beneficiaryId: id
+      },
+      'Güncelleme işlemi başarısız'
     );
   }
 }
@@ -165,38 +114,24 @@ async function deleteBeneficiaryHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
+  const { id } = await extractParams(params);
+  
   try {
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'ID parametresi gerekli' },
-        { status: 400 }
-      );
-    }
-
-    const response = await api.beneficiaries.deleteBeneficiary(id);
-
-    if (response.error) {
-      return NextResponse.json(
-        { success: false, error: 'Silme işlemi başarısız' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: 'İhtiyaç sahibi başarıyla silindi',
-    });
+    return await handleDelete(
+      id,
+      (id) => api.beneficiaries.deleteBeneficiary(id),
+      'İhtiyaç sahibi'
+    );
   } catch (error: unknown) {
-    logger.error('Delete beneficiary error', error, {
-      endpoint: '/api/beneficiaries/[id]',
-      method: request.method,
-      beneficiaryId: id
-    });
-    
-    return NextResponse.json(
-      { success: false, error: 'Silme işlemi başarısız' },
-      { status: 500 }
+    return handleApiError(
+      error,
+      logger,
+      {
+        endpoint: '/api/beneficiaries/[id]',
+        method: request.method,
+        beneficiaryId: id
+      },
+      'Silme işlemi başarısız'
     );
   }
 }

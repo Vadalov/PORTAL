@@ -17,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -32,7 +31,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -40,19 +38,10 @@ import {
   Plus, 
   Search, 
   Filter, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  User, 
-  BookOpen, 
-  Mail, 
-  Phone,
-  MapPin,
-  GraduationCap,
-  DollarSign,
-  Users,
-  Heart
+  FileText
 } from 'lucide-react';
+import { StudentCard } from '@/components/scholarships/StudentCard';
+import { SimplePagination } from '@/components/ui/pagination';
 
 export default function OgrencilerPage() {
   const searchParams = useSearchParams();
@@ -128,43 +117,6 @@ export default function OgrencilerPage() {
     }
   };
 
-  const getStatusBadge = (status: StudentStatus) => {
-    const statusConfig = {
-      [StudentStatus.ACTIVE]: { variant: 'default' as const, text: 'Aktif' },
-      [StudentStatus.GRADUATED]: { variant: 'secondary' as const, text: 'Mezun' },
-      [StudentStatus.SUSPENDED]: { variant: 'destructive' as const, text: 'Askıya Alındı' },
-      [StudentStatus.DROPPED_OUT]: { variant: 'outline' as const, text: 'Okulu Bıraktı' },
-      [StudentStatus.TRANSFERRED]: { variant: 'outline' as const, text: 'Transfer' }
-    };
-
-    const config = statusConfig[status];
-
-    return (
-      <Badge variant={config.variant}>
-        {config.text}
-      </Badge>
-    );
-  };
-
-  const getEducationLevelBadge = (level: EducationLevel) => {
-    const levelConfig = {
-      [EducationLevel.PRIMARY]: { text: 'İlkokul' },
-      [EducationLevel.SECONDARY]: { text: 'Ortaokul' },
-      [EducationLevel.HIGH_SCHOOL]: { text: 'Lise' },
-      [EducationLevel.BACHELOR]: { text: 'Lisans' },
-      [EducationLevel.MASTER]: { text: 'Yüksek Lisans' },
-      [EducationLevel.DOCTORATE]: { text: 'Doktora' },
-      [EducationLevel.VOCATIONAL]: { text: 'Meslek' }
-    };
-
-    const config = levelConfig[level];
-
-    return (
-      <Badge variant="outline">
-        {config.text}
-      </Badge>
-    );
-  };
 
   const handleCreateStudent = async () => {
     try {
@@ -365,7 +317,7 @@ export default function OgrencilerPage() {
             </div>
           ) : students.length === 0 ? (
             <div className="text-center py-8">
-              <User className="mx-auto h-12 w-12 text-muted-foreground" />
+              <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-semibold">Öğrenci bulunamadı</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Yeni bir öğrenci kaydı oluşturun
@@ -374,190 +326,14 @@ export default function OgrencilerPage() {
           ) : (
             <div className="space-y-4">
               {students.map((student) => (
-                <Card key={student.id} className="border">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold">
-                            {student.firstName} {student.lastName}
-                          </h3>
-                          {getStatusBadge(student.status)}
-                          {student.isOrphan && (
-                            <Badge variant="outline" className="text-red-600 border-red-600">
-                              <Heart className="h-3 w-3 mr-1" />
-                              Yetim
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <GraduationCap className="h-4 w-4" />
-                            <span>{student.institution}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <BookOpen className="h-4 w-4" />
-                            <span>{getEducationLevelBadge(student.educationLevel)}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4" />
-                            <span>{student.grade}</span>
-                          </div>
-                          {student.gpa && (
-                            <div className="flex items-center gap-2">
-                              <DollarSign className="h-4 w-4" />
-                              <span>GPA: {student.gpa}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-muted-foreground">
-                          {student.phone && (
-                            <div className="flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              <span>{student.phone}</span>
-                            </div>
-                          )}
-                          {student.email && (
-                            <div className="flex items-center gap-1">
-                              <Mail className="h-3 w-3" />
-                              <span>{student.email}</span>
-                            </div>
-                          )}
-                          {student.city && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              <span>{student.city}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>Öğrenci Detayları</DialogTitle>
-                              <DialogDescription>
-                                {student.firstName} {student.lastName} - {student.institution}
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <Label className="text-sm font-medium">Ad Soyad</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.firstName} {student.lastName}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">TC No</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.nationalId || '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Durum</Label>
-                                  <div className="mt-1">
-                                    {getStatusBadge(student.status)}
-                                  </div>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Eğitim Seviyesi</Label>
-                                  <div className="mt-1">
-                                    {getEducationLevelBadge(student.educationLevel)}
-                                  </div>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Eğitim Kurumu</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.institution}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Bölüm</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.department || '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Sınıf</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.grade || '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">GPA</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.gpa || '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">E-posta</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.email || '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Telefon</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.phone || '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Şehir</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.city || '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Aile Geliri</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.familyIncome ? `${student.familyIncome} TL` : '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Aile Büyüklüğü</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.familySize || '-'}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Yetim Durumu</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.isOrphan ? 'Evet' : 'Hayır'}
-                                  </p>
-                                </div>
-                              </div>
-                              {student.isOrphan && student.guardianName && (
-                                <div>
-                                  <Label className="text-sm font-medium">Veli Bilgileri</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.guardianName} ({student.guardianRelation}) - {student.guardianPhone}
-                                  </p>
-                                </div>
-                              )}
-                              {student.notes && (
-                                <div>
-                                  <Label className="text-sm font-medium">Notlar</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {student.notes}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <StudentCard
+                  key={student.id}
+                  student={student}
+                  onEdit={(stud) => {
+                    // TODO: Implement edit functionality
+                    console.log('Edit student:', stud);
+                  }}
+                />
               ))}
             </div>
           )}
@@ -566,29 +342,12 @@ export default function OgrencilerPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Sayfa {currentPage} / {totalPages} (Toplam {totalCount} kayıt)
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Önceki
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Sonraki
-            </Button>
-          </div>
-        </div>
+        <SimplePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          isLoading={loading}
+        />
       )}
 
       {/* Create Student Dialog */}

@@ -198,7 +198,8 @@ export class ConnectivityTester {
         return await operation();
       } catch (error: unknown) {
         lastError = error;
-        (lastError as any).retryCount = i + 1;
+        const errorWithRetry = error as { retryCount?: number };
+        errorWithRetry.retryCount = i + 1;
         
         if (i < this.maxRetries - 1) {
           const delay = this.baseDelay * Math.pow(2, i);

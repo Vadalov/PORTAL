@@ -72,8 +72,9 @@ export default function ParametersPage() {
       toast.success('Parametre durumu güncellendi');
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
     },
-    onError: (error: any) => {
-      toast.error(`Güncelleme hatası: ${  error.message}`);
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Bilinmeyen hata';
+      toast.error(`Güncelleme hatası: ${message}`);
     },
   });
 
@@ -257,14 +258,15 @@ function ParameterForm({ onSuccess }: { onSuccess?: () => void }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => parametersApi.createParameter(data),
+    mutationFn: (data: typeof formData) => parametersApi.createParameter(data as Omit<typeof formData, 'category'> & { category: ParameterCategory }),
     onSuccess: () => {
       toast.success('Parametre eklendi');
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
-      toast.error(`Hata: ${  error.message}`);
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Bilinmeyen hata';
+      toast.error(`Hata: ${message}`);
     },
   });
 

@@ -41,7 +41,8 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
       queryClient.invalidateQueries({ queryKey: ['aid-applications'] });
     },
     onError: (error: unknown) => {
-      toast.error(`Hata: ${  error.message}`);
+      const message = error instanceof Error ? error.message : 'Bilinmeyen hata';
+      toast.error(`Hata: ${message}`);
     },
   });
 

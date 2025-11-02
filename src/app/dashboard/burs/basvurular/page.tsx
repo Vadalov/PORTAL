@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
@@ -35,37 +34,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { 
   Plus, 
   Search, 
   Filter, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  FileText, 
-  Users, 
-  DollarSign,
-  Calendar,
-  CheckCircle,
-  XCircle,
-  Clock,
-  UserCheck
+  FileText
 } from 'lucide-react';
+import { ApplicationCard } from '@/components/scholarships/ApplicationCard';
+import { SimplePagination } from '@/components/ui/pagination';
 
 interface ApplicationWithDetails extends ScholarshipApplication {
   scholarship?: Scholarship;
@@ -150,28 +129,6 @@ export default function BursBasvurularPage() {
     }
   };
 
-  const getStatusBadge = (status: ApplicationStatus) => {
-    const statusConfig = {
-      [ApplicationStatus.DRAFT]: { variant: 'secondary' as const, icon: FileText, text: 'Taslak' },
-      [ApplicationStatus.SUBMITTED]: { variant: 'default' as const, icon: Clock, text: 'Gönderildi' },
-      [ApplicationStatus.UNDER_REVIEW]: { variant: 'default' as const, icon: Eye, text: 'İnceleniyor' },
-      [ApplicationStatus.APPROVED]: { variant: 'default' as const, icon: CheckCircle, text: 'Onaylandı' },
-      [ApplicationStatus.REJECTED]: { variant: 'destructive' as const, icon: XCircle, text: 'Reddedildi' },
-      [ApplicationStatus.WAITLIST]: { variant: 'secondary' as const, icon: Clock, text: 'Beklemede' },
-      [ApplicationStatus.WITHDRAWN]: { variant: 'outline' as const, icon: UserCheck, text: 'Çekildi' },
-      [ApplicationStatus.CANCELLED]: { variant: 'destructive' as const, icon: XCircle, text: 'İptal' }
-    };
-
-    const config = statusConfig[status];
-    const Icon = config.icon;
-
-    return (
-      <Badge variant={config.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
-        {config.text}
-      </Badge>
-    );
-  };
 
   const handleCreateApplication = async () => {
     try {
@@ -326,100 +283,14 @@ export default function BursBasvurularPage() {
           ) : (
             <div className="space-y-4">
               {applications.map((application) => (
-                <Card key={application.id} className="border">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold">
-                            {application.student?.firstName} {application.student?.lastName}
-                          </h3>
-                          {getStatusBadge(application.status)}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4" />
-                            <span>{application.scholarship?.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            <span>{application.student?.institution}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>
-                              {new Date(application.applicationDate).toLocaleDateString('tr-TR')}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                              <DialogTitle>Başvuru Detayları</DialogTitle>
-                              <DialogDescription>
-                                {application.student?.firstName} {application.student?.lastName} - {application.scholarship?.name}
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <Label className="text-sm font-medium">Öğrenci</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {application.student?.firstName} {application.student?.lastName}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Burs</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {application.scholarship?.name}
-                                  </p>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Durum</Label>
-                                  <div className="mt-1">
-                                    {getStatusBadge(application.status)}
-                                  </div>
-                                </div>
-                                <div>
-                                  <Label className="text-sm font-medium">Başvuru Tarihi</Label>
-                                  <p className="text-sm text-muted-foreground">
-                                    {new Date(application.applicationDate).toLocaleDateString('tr-TR')}
-                                  </p>
-                                </div>
-                              </div>
-                              {application.personalStatement && (
-                                <div>
-                                  <Label className="text-sm font-medium">Kişisel Beyan</Label>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    {application.personalStatement}
-                                  </p>
-                                </div>
-                              )}
-                              {application.familySituation && (
-                                <div>
-                                  <Label className="text-sm font-medium">Aile Durumu</Label>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    {application.familySituation}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ApplicationCard
+                  key={application.id}
+                  application={application}
+                  onEdit={(app) => {
+                    setSelectedApplication(app);
+                    // TODO: Implement edit functionality
+                  }}
+                />
               ))}
             </div>
           )}
@@ -428,29 +299,12 @@ export default function BursBasvurularPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Sayfa {currentPage} / {totalPages} (Toplam {totalCount} kayıt)
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Önceki
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Sonraki
-            </Button>
-          </div>
-        </div>
+        <SimplePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          isLoading={loading}
+        />
       )}
 
       {/* Create Application Dialog */}

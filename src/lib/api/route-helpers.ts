@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Standard API response type
  */
-export type ApiResponse<T = any> = {
+export type ApiResponse<T = unknown> = {
   success: boolean;
   data?: T;
   error?: string;
@@ -28,7 +28,7 @@ export type ValidationResult = {
  * Generic API operation that returns data or error
  * Flexible to support both mock and real API responses
  */
-export type ApiOperation<T = any> = {
+export type ApiOperation<T = unknown> = {
   data?: T | null;
   error?: string | null;
   total?: number;
@@ -107,7 +107,7 @@ export async function handleGetById<T>(
  * @param updateOperation - Function that updates the resource
  * @param resourceName - Name of resource for success message
  */
-export async function handleUpdate<T, U = any>(
+export async function handleUpdate<T, U = unknown>(
   id: string | undefined,
   body: U,
   validate: (data: U) => ValidationResult,
@@ -187,7 +187,7 @@ export async function extractParams<T extends Record<string, string>>(
 /**
  * Parse JSON body with error handling
  */
-export async function parseBody<T = any>(
+export async function parseBody<T = unknown>(
   request: NextRequest
 ): Promise<{ data?: T; error?: string }> {
   try {
@@ -196,4 +196,48 @@ export async function parseBody<T = any>(
   } catch (error) {
     return { error: 'Geçersiz istek verisi' };
   }
+}
+
+/**
+ * Handle duplicate key errors (e.g., duplicate TC number)
+ */
+export function handleDuplicateError(
+  error: unknown,
+  duplicateKey: string = 'TC Kimlik No',
+  defaultMessage: string = 'Bu kayıt zaten mevcut'
+): { isDuplicate: boolean; message: string } {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  const isDuplicate = 
+    errorMessage?.toLowerCase().includes('duplicate') ||
+    errorMessage?.toLowerCase().includes('unique') ||
+    errorMessage?.toLowerCase().includes('already exists');
+
+  return {
+    isDuplicate,
+    message: isDuplicate ? `${duplicateKey} zaten kayıtlı` : defaultMessage
+  };
+}
+
+/**
+ * Standard error handler with logging
+ */
+export async function handleApiError<T>(
+  error: unknown,
+  logger: { error: (message: string, error: unknown, context?: Record<string, unknown>) => void },
+  context: {
+    endpoint: string;
+    method: string;
+    [key: string]: unknown;
+  },
+  defaultMessage: string = 'İşlem başarısız'
+): Promise<NextResponse<ApiResponse<T>>> {
+  logger.error('API error', error, context);
+  
+  // Handle duplicate errors
+  const duplicateCheck = handleDuplicateError(error);
+  if (duplicateCheck.isDuplicate) {
+    return errorResponse(duplicateCheck.message, 409);
+  }
+
+  return errorResponse(defaultMessage, 500);
 }

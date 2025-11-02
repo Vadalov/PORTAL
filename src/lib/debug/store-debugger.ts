@@ -10,7 +10,7 @@
 import type { StoreApi, UseBoundStore } from 'zustand';
 
 type StoreState = {
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 type HydrationTiming = {
@@ -20,7 +20,7 @@ type HydrationTiming = {
 };
 
 class StoreDebuggerClass {
-  private stores: Map<string, UseBoundStore<StoreApi<StoreState>>> = new Map();
+  private stores: Map<string, UseBoundStore<StoreApi<unknown>>> = new Map();
   private hydrationTimings: Map<string, HydrationTiming> = new Map();
   private isInitialized = false;
 
@@ -40,7 +40,7 @@ class StoreDebuggerClass {
       return;
     }
 
-    this.stores.set(storeName, store as any);
+    this.stores.set(storeName, store);
     this.isInitialized = true;
 
     console.log(`🔍 StoreDebugger initialized for ${storeName}`);
@@ -56,8 +56,8 @@ class StoreDebuggerClass {
 
     // Expose to window for manual debugging
     if (typeof window !== 'undefined') {
-      (window as any).__STORE_DEBUGGER__ = this;
-      (window as any).__AUTH_STORE__ = store;
+      (window as { __STORE_DEBUGGER__?: StoreDebuggerClass; __AUTH_STORE__?: UseBoundStore<StoreApi<T>> }).__STORE_DEBUGGER__ = this;
+      (window as { __STORE_DEBUGGER__?: StoreDebuggerClass; __AUTH_STORE__?: UseBoundStore<StoreApi<T>> }).__AUTH_STORE__ = store;
     }
   }
 
@@ -131,8 +131,8 @@ class StoreDebuggerClass {
   /**
    * Get difference between two states
    */
-  private getStateDiff(prevState: StoreState, currentState: StoreState): Record<string, any> {
-    const diff: Record<string, any> = {};
+  private getStateDiff(prevState: StoreState, currentState: StoreState): Record<string, unknown> {
+    const diff: Record<string, unknown> = {};
 
     Object.keys(currentState).forEach((key) => {
       if (prevState[key] !== currentState[key]) {
@@ -158,7 +158,7 @@ class StoreDebuggerClass {
     }
 
     const state = store.getState();
-    const persistApi = (store as any).persist;
+    const persistApi = (store as unknown as { persist?: unknown }).persist;
 
     console.group(`🔐 ${storeName} State`);
 
@@ -297,11 +297,11 @@ class StoreDebuggerClass {
     }
 
     const state = store.getState();
-    const persistApi = (store as any).persist;
+    const persistApi = (store as unknown as { persist?: unknown }).persist;
     const timing = this.hydrationTimings.get(storeName);
 
-    let localStorageData: any = null;
-    let sessionData: any = null;
+    let localStorageData: unknown = null;
+    let sessionData: unknown = null;
 
     if (typeof window !== 'undefined') {
       try {

@@ -16,9 +16,9 @@ type RequestLog = {
   status?: number;
   success: boolean;
   requestHeaders?: Record<string, string>;
-  requestBody?: any;
+  requestBody?: unknown;
   responseHeaders?: Record<string, string>;
-  responseBody?: any;
+  responseBody?: unknown;
   error?: string;
 };
 
@@ -52,7 +52,7 @@ class NetworkMonitorClass {
 
     // Expose to window for manual debugging
     if (typeof window !== 'undefined') {
-      (window as any).__NETWORK_MONITOR__ = this;
+      (window as { __NETWORK_MONITOR__?: NetworkMonitorClass }).__NETWORK_MONITOR__ = this;
     }
   }
 

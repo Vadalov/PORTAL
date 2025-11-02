@@ -1,1 +1,0 @@
-Progress: 1145 → 665 errors (42% improvement)

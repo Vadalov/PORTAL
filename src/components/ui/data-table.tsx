@@ -48,7 +48,7 @@ export interface DataTableProps<T> {
   onRowClick?: (item: T, index: number) => void;
 }
 
-export function DataTable<T extends Record<string, any>>({
+export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
   isLoading = false,

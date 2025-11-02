@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
   const limit = Number(searchParams.get('limit') || '20');
   const search = searchParams.get('search') || undefined;
 
-  const filters: Record<string, any> = {};
+  const filters: Record<string, unknown> = {};
   const status = searchParams.get('status');
   const meeting_type = searchParams.get('meeting_type');
   const organizer = searchParams.get('organizer');
@@ -64,10 +64,10 @@ export async function GET(request: NextRequest) {
  * POST /api/meetings
  */
 async function createMeetingHandler(request: NextRequest) {
-  let body: any = null;
+  let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateMeeting(body);
+    const validation = validateMeeting(body as Record<string, unknown>);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }

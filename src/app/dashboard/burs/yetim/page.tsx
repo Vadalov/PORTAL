@@ -28,7 +28,6 @@ import {
   Heart, 
   User, 
   Phone, 
-  MapPin, 
   Calendar,
   DollarSign,
   FileText,
@@ -41,6 +40,8 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
+import { SimplePagination } from '@/components/ui/pagination';
+import { ORPHAN_TYPE_OPTIONS } from '@/lib/constants/orphan-types';
 
 interface OrphanAssistance {
   id: string;
@@ -382,10 +383,11 @@ export default function YetimPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Tüm türler</SelectItem>
-                  <SelectItem value="FULL_ORPHAN">Tam Yetim</SelectItem>
-                  <SelectItem value="PARTIAL_ORPHAN">Kısmi Yetim</SelectItem>
-                  <SelectItem value="ABANDONED">Terk Edilmiş</SelectItem>
-                  <SelectItem value="PROTECTED">Koruma Altında</SelectItem>
+                  {ORPHAN_TYPE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

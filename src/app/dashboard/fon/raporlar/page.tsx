@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { ErrorAlert } from '@/components/ui/error-alert';
 import { 
   FinancialReport, 
   ReportType,
@@ -23,14 +23,12 @@ import {
   Eye,
   Plus,
   Loader2,
-  AlertCircle,
   DollarSign,
   FileSpreadsheet,
   FileDown,
   RefreshCw
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { tr } from 'date-fns/locale';
+import { formatCurrency, formatDate } from '@/lib/utils/format';
 
 const REPORT_TYPE_LABELS: Record<ReportType, string> = {
   cash_flow: 'Nakit Akışı',
@@ -208,19 +206,6 @@ export default function RaporlarPage() {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount: number, currency: string = 'TRY') => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency
-    }).format(amount);
-  };
-
-  // Format date
-  const formatDate = (date: Date | string) => {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    return format(dateObj, 'dd MMMM yyyy', { locale: tr });
-  };
 
   // Mock chart component (replace with actual chart library)
   const SimpleChart = ({ data, type }: { data: unknown[], type: 'line' | 'pie' | 'bar' }) => {
@@ -355,22 +340,7 @@ export default function RaporlarPage() {
       </div>
 
       {/* Error Alert */}
-      {error && (
-        <AlertDialog>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                <AlertCircle className="w-5 h-5 text-red-500 inline mr-2" />
-                Hata
-              </AlertDialogTitle>
-              <AlertDialogDescription>{error}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setError(null)}>Tamam</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <ErrorAlert error={error} onDismiss={() => setError(null)} />
 
       {/* Dashboard Metrics */}
       {dashboardMetrics && (

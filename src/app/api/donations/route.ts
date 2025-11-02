@@ -66,15 +66,15 @@ export async function GET(request: NextRequest) {
  * Create donation
  */
 async function createDonationHandler(request: NextRequest) {
-  let body: any = null;
+  let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateDonation(body);
+    const validation = validateDonation(body as Partial<DonationDocument>);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }
 
-    const response = await api.donations.createDonation(body);
+    const response = await api.donations.createDonation(body as Partial<DonationDocument>);
     if (response.error) {
       return NextResponse.json({ success: false, error: response.error }, { status: 400 });
     }

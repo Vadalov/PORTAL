@@ -53,25 +53,25 @@ export function BeneficiaryForm({ onSuccess, onCancel }: BeneficiaryFormProps) {
   } = useForm<BeneficiaryFormData>({
     resolver: zodResolver(beneficiarySchema),
     defaultValues: {
-    family_size: 1,
-    income_level: '0-3000',
+      family_size: 1,
+      income_level: '0-3000',
       status: 'active',
-  },
+    },
   });
 
   const createBeneficiaryMutation = useMutation({
-    mutationFn: (data: BeneficiaryFormData) => {
+    mutationFn: async (data: BeneficiaryFormData) => {
       // Map status values to Turkish
       const statusMap = {
         'active': 'AKTIF',
         'inactive': 'PASIF',
         'archived': 'SILINDI'
       } as const;
-      
+
       return api.beneficiaries.createBeneficiary({
         ...data,
         status: statusMap[data.status] || 'AKTIF'
-      }) as Promise<any>;
+      });
     },
     onSuccess: () => {
       toast.success('İhtiyaç sahibi başarıyla eklendi');
@@ -211,7 +211,7 @@ export function BeneficiaryForm({ onSuccess, onCancel }: BeneficiaryFormProps) {
                 <Label htmlFor="income_level">Gelir Düzeyi *</Label>
                 <Select
                   value={watch('income_level')}
-                  onValueChange={(value) => setValue('income_level', value as any)}
+                  onValueChange={(value) => setValue('income_level', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Gelir düzeyi seçin" />

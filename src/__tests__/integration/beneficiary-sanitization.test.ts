@@ -48,9 +48,9 @@ describe('Beneficiary Sanitization Integration', () => {
     it('should sanitize TC with formatting', () => {
       const rawTc = '100-000-001-46'; // With dashes
       const sanitized = sanitizeTcNo(rawTc);
-      
-      // Should extract digits but fail validation (invalid checksum)
-      expect(sanitized).toBeNull();
+
+      // Should extract digits and return valid TC
+      expect(sanitized).toBe('10000000146');
     });
   });
   

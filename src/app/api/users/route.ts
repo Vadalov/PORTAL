@@ -40,10 +40,10 @@ export async function GET(request: NextRequest) {
  * POST /api/users
  */
 async function createUserHandler(request: NextRequest) {
-  let body: any = null;
+  let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateUser(body);
+    const validation = validateUser(body as Record<string, unknown>);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }

@@ -60,10 +60,10 @@ export async function GET(request: NextRequest) {
  * POST /api/tasks
  */
 async function createTaskHandler(request: NextRequest) {
-  let body: any = null;
+  let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateTask(body);
+    const validation = validateTask(body as Record<string, unknown>);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }
