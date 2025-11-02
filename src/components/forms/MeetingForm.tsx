@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { User, Calendar, MapPin, Users, FileText, Clock, AlertCircle } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
+import { useFormMutation } from '@/hooks/useFormMutation';
 import {
   meetingSchema,
   meetingEditSchema,
@@ -63,10 +63,10 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
   // Fetch users for participant selection - disabled for now
   // const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
   //   queryKey: ['users'],
-  //   queryFn: () => api.users.getUsers({ limit: 100 } as any),
+  //   queryFn: () => api.users.getUsers({ limit: 100 }),
   // });
 
-  const users: any[] = []; // Empty for now
+  const users: unknown[] = []; // Empty for now
 
   // Form setup
   const {
@@ -115,7 +115,10 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
   }, [selectedDate, selectedTime, setValue]);
 
   // Create/Update mutation
-  const mutation = useMutation({
+  const mutation = useFormMutation<unknown, MeetingFormData | MeetingEditFormData>({
+    queryKey: ['meetings'],
+    successMessage: isEditMode ? 'Toplantı başarıyla güncellendi' : 'Toplantı başarıyla oluşturuldu',
+    errorMessage: `Toplantı ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} hata oluştu`,
     mutationFn: async (data: MeetingFormData | MeetingEditFormData) => {
       if (isEditMode && meetingId) {
         return await api.meetings.updateMeeting(meetingId, data);
@@ -124,33 +127,22 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-meetings-count'] });
-      toast.success(isEditMode ? 'Toplantı başarıyla güncellendi' : 'Toplantı başarıyla oluşturuldu');
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(
-        `Toplantı ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} hata oluştu: ${error.message}`
-      );
     },
   });
 
   // Start meeting mutation
-  const startMeetingMutation = useMutation({
+  const startMeetingMutation = useFormMutation<unknown, void>({
+    queryKey: ['meetings'],
+    successMessage: 'Toplantı başlatıldı',
+    errorMessage: 'Toplantı başlatılırken hata oluştu',
     mutationFn: async () => {
-      if (!meetingId) return;
+      if (!meetingId) return {} as unknown;
       return await api.meetings.updateMeetingStatus(meetingId, 'ongoing');
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
-      toast.success('Toplantı başlatıldı');
-      onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Toplantı başlatılırken hata oluştu: ${error.message}`);
-    },
+    onSuccess: onSuccess,
   });
 
   const onSubmit = (data: MeetingFormData | MeetingEditFormData) => {

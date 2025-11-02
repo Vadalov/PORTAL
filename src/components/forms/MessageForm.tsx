@@ -10,22 +10,22 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
-import { toast } from 'sonner';
 import { Loader2, X, AlertCircle, MessageSquare, Mail, Users, Send, Save, Phone, AtSign } from 'lucide-react';
-import { 
-  messageSchema, 
-  type MessageFormData, 
-  getMessageTypeLabel, 
-  getStatusLabel, 
+import {
+  messageSchema,
+  type MessageFormData,
+  getMessageTypeLabel,
+  getStatusLabel,
   getStatusColor,
   validateRecipients,
   getSmsMessageCount,
   estimateSmsCost,
   formatPhoneNumber
 } from '@/lib/validations/message';
+import { useFormMutation } from '@/hooks/useFormMutation';
 import type { UserDocument } from '@/types/collections';
 
 interface MessageFormProps {
@@ -52,8 +52,8 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(messageSchema) as any,
+  } = useForm<MessageFormData>({
+    resolver: zodResolver(messageSchema),
     defaultValues: {
       message_type: initialData?.message_type || defaultMessageType || 'sms',
       sender: user?.id || '',
@@ -75,9 +75,9 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
   // Fetch users for recipient selection - disabled for now
   // const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
   //   queryKey: ['users'],
-  //   queryFn: () => api.users.getUsers({ limit: 100 } as any),
+  //   queryFn: () => api.users.getUsers({ limit: 100 }),
   // });
-  const users: any[] = []; // Empty for now
+  const users: UserDocument[] = []; // Empty for now
 
   useEffect(() => {
     if (initialData) {
@@ -90,43 +90,37 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
     }
   }, [initialData, setValue]);
 
-  const createMessageMutation = useMutation({
+  const createMessageMutation = useFormMutation<unknown, MessageFormData>({
+    queryKey: ['messages'],
+    successMessage: 'Mesaj başarıyla oluşturuldu.',
+    errorMessage: 'Mesaj oluşturulurken hata oluştu',
     mutationFn: (data: MessageFormData) => api.messages.createMessage(data),
     onSuccess: () => {
-      toast.success('Mesaj başarıyla oluşturuldu.');
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: unknown) => {
-      toast.error(`Mesaj oluşturulurken hata oluştu: ${  error.message}`);
-    },
   });
 
-  const updateMessageMutation = useMutation({
+  const updateMessageMutation = useFormMutation<unknown, { id: string; data: MessageFormData }>({
+    queryKey: ['messages'],
+    successMessage: 'Mesaj başarıyla güncellendi.',
+    errorMessage: 'Mesaj güncellenirken hata oluştu',
     mutationFn: (data: { id: string; data: MessageFormData }) =>
       api.messages.updateMessage(data.id, data.data),
     onSuccess: () => {
-      toast.success('Mesaj başarıyla güncellendi.');
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Mesaj güncellenirken hata oluştu: ${  error.message}`);
     },
   });
 
-  const sendMessageMutation = useMutation({
+  const sendMessageMutation = useFormMutation<unknown, string>({
+    queryKey: ['messages'],
+    successMessage: 'Mesaj başarıyla gönderildi.',
+    errorMessage: 'Mesaj gönderilirken hata oluştu',
     mutationFn: (id: string) => api.messages.sendMessage(id),
     onSuccess: () => {
-      toast.success('Mesaj başarıyla gönderildi.');
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Mesaj gönderilirken hata oluştu: ${  error.message}`);
     },
   });
 
@@ -276,7 +270,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
         <CardTitle>{isEditMode ? 'Mesajı Düzenle' : 'Yeni Mesaj Oluştur'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Message Type */}
           <div className="space-y-2">
             <Label htmlFor="message_type">Mesaj Türü *</Label>
