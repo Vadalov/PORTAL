@@ -8,7 +8,7 @@ const inter = Inter({
   subsets: ['latin'],
   variable: '--font-body',
   display: 'swap',
-  preload: true,
+  preload: false, // Disable preload to avoid unused resource warnings
 });
 
 const poppins = Poppins({
@@ -24,7 +24,7 @@ const montserrat = Montserrat({
   weight: ['500', '600', '700', '800', '900'],
   variable: '--font-heading',
   display: 'swap',
-  preload: true,
+  preload: false, // Disable preload to avoid unused resource warnings
 });
 
 export const metadata: Metadata = {
