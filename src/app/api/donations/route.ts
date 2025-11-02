@@ -69,7 +69,8 @@ async function createDonationHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateDonation(body as Partial<DonationDocument>);
+    const donationData = body as Partial<DonationDocument>;
+    const validation = validateDonation(donationData);
     if (!validation.isValid) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
@@ -77,7 +78,13 @@ async function createDonationHandler(request: NextRequest) {
       );
     }
 
-    const response = await api.donations.createDonation(body as Partial<DonationDocument>);
+    // Ensure required fields have defaults
+    const createData = {
+      ...donationData,
+      status: donationData.status || 'pending',
+    } as Parameters<typeof api.donations.createDonation>[0];
+
+    const response = await api.donations.createDonation(createData);
     if (response.error) {
       return NextResponse.json({ success: false, error: response.error }, { status: 400 });
     }

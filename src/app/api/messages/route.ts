@@ -68,6 +68,7 @@ async function createMessageHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
+    const messageData = body as Partial<MessageDocument>;
     const validation = validateMessage(body as Record<string, unknown>);
     if (!validation.isValid) {
       return NextResponse.json(
@@ -76,7 +77,13 @@ async function createMessageHandler(request: NextRequest) {
       );
     }
 
-    const response = await api.messages.createMessage(body as Partial<MessageDocument>);
+    // Ensure required fields have defaults
+    const createData = {
+      ...messageData,
+      status: messageData.status || 'draft',
+    } as Parameters<typeof api.messages.createMessage>[0];
+
+    const response = await api.messages.createMessage(createData);
     if (response.error || !response.data) {
       return NextResponse.json(
         { success: false, error: response.error || 'Oluşturma başarısız' },

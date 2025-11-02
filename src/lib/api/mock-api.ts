@@ -841,12 +841,12 @@ export async function appwriteGetBeneficiaries(
   // Simple filters support
   Object.entries(filters).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    list = list.filter((b: unknown) => b[key] === value);
+    list = list.filter((b: any) => b[key] === value);
   });
 
   // Order
   if (orderBy) {
-    list.sort((a: unknown, b: unknown) => {
+    list.sort((a: any, b: any) => {
       const av = a[orderBy];
       const bv = b[orderBy];
       if (av === bv) return 0;

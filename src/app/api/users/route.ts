@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 async function createUserHandler(request: NextRequest) {
   let body: unknown = null;
   try {
-    body = await request.json();
+    const userData = body as Partial<UserDocument>;
     const validation = validateUser(body as Record<string, unknown>);
     if (!validation.isValid) {
       return NextResponse.json(
@@ -52,10 +52,17 @@ async function createUserHandler(request: NextRequest) {
         { status: 400 }
       );
     }
-    const response = await api.users.createUser({
-      ...(body as Partial<UserDocument>),
+
+    // Ensure required fields are present
+    const createData = {
+      ...userData,
+      name: userData.name || '',
+      email: userData.email || '',
+      role: userData.role || 'VIEWER',
       isActive: true,
-    });
+    } as Parameters<typeof api.users.createUser>[0];
+
+    const response = await api.users.createUser(createData);
     if (response.error || !response.data) {
       return NextResponse.json(
         { success: false, error: response.error || 'Oluşturma başarısız' },

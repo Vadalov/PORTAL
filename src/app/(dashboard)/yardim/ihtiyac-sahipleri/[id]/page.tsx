@@ -29,8 +29,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 
 // Form validation schema
-type DocSchema = z.infer<typeof docSchema>;
-
 const docSchema = z.object({
   name: z.string().min(2, 'İsim zorunludur'),
   tc_no: z

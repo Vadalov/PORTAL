@@ -59,6 +59,7 @@ const fundRegionLabels: Record<FundRegion, string> = {
 };
 
 const fileConnectionLabels: Record<FileConnection, string> = {
+  [FileConnection.BAGIMSIZ]: 'Bağımsız',
   [FileConnection.PARTNER_KURUM]: 'Partner Kurum',
   [FileConnection.CALISMA_SAHASI]: 'Çalışma Sahası',
 };

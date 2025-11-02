@@ -60,7 +60,7 @@ export function useFormMutation<TData = unknown, TVariables = unknown>({
   const mutation = useMutation<TData, unknown, TVariables>({
     mutationFn,
     ...options,
-    onSuccess: (data, variables, context) => {
+    onSuccess: (data, variables, context, mutationContext) => {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: Array.isArray(queryKey) ? queryKey : [queryKey] });
 
@@ -73,7 +73,7 @@ export function useFormMutation<TData = unknown, TVariables = unknown>({
       onSuccess?.();
 
       // Call additional options' onSuccess
-      options?.onSuccess?.(data, variables, context);
+      options?.onSuccess?.(data, variables, context, mutationContext);
     },
     onError: (error: unknown) => {
       // Get error message

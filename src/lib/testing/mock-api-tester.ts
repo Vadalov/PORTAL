@@ -394,7 +394,7 @@ export class MockAPITester {
     // Test create with missing required fields
     try {
       const createData: unknown = { name: 'Test' }; // Missing required fields
-      const response = await appwriteCreateBeneficiary(createData);
+      const response = await appwriteCreateBeneficiary(createData as any);
       if (response.error) {
         tests.push({
           testName: 'error missing fields',

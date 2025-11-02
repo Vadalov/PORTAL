@@ -144,7 +144,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
                 <Label>Aşama Değiştir</Label>
                 <Select
                   value={application.stage}
-                  onValueChange={(value) => updateStageMutation.mutate({ stage: value as any })}
+                  onValueChange={(value) => updateStageMutation.mutate({ stage: value as 'draft' | 'under_review' | 'approved' | 'ongoing' | 'completed' })}
                 >
                   <SelectTrigger>
                     <SelectValue />

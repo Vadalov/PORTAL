@@ -97,8 +97,9 @@ export default function ParametersPage() {
       toast.success('Parametre silindi');
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
     },
-    onError: (error: any) => {
-      toast.error(`Silme hatası: ${error.message}`);
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen hata';
+      toast.error(`Silme hatası: ${errorMessage}`);
     },
   });
 

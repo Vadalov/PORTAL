@@ -167,8 +167,8 @@ class StoreDebuggerClass {
 
     console.log('Current State:', state);
 
-    if (persistApi) {
-      console.log('Hydrated:', persistApi.hasHydrated?.() ?? 'unknown');
+    if (persistApi && typeof persistApi === 'object' && 'hasHydrated' in persistApi) {
+      console.log('Hydrated:', (persistApi as any).hasHydrated?.() ?? 'unknown');
     }
 
     // Log localStorage
@@ -219,8 +219,8 @@ class StoreDebuggerClass {
 
     const mismatches: string[] = [];
 
-    Object.keys(currentState).forEach((key) => {
-      if (defaultState[key] !== undefined && currentState[key] !== defaultState[key]) {
+    Object.keys(currentState as object).forEach((key) => {
+      if ((defaultState as any)[key] !== undefined && (currentState as any)[key] !== (defaultState as any)[key]) {
         mismatches.push(key);
       }
     });
@@ -231,8 +231,8 @@ class StoreDebuggerClass {
 
       mismatches.forEach((key) => {
         console.error(`  ${key}:`, {
-          default: defaultState[key],
-          current: currentState[key],
+          default: (defaultState as any)[key],
+          current: (currentState as any)[key],
         });
       });
 
@@ -322,7 +322,9 @@ class StoreDebuggerClass {
     return {
       storeName,
       currentState: state,
-      hydrated: persistApi?.hasHydrated?.() ?? 'unknown',
+      hydrated: (persistApi && typeof persistApi === 'object' && 'hasHydrated' in persistApi) 
+        ? (persistApi as any).hasHydrated?.() ?? 'unknown'
+        : 'unknown',
       timing: timing
         ? {
             duration: timing.duration,

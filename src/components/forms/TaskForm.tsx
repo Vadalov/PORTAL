@@ -83,11 +83,11 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
   const users: UserDocument[] = []; // Empty for now
 
   // Create task mutation
-  const createTaskMutation = useFormMutation<TaskFormData, TaskFormData>({
+  const createTaskMutation = useFormMutation({
     queryKey: ['tasks'],
     successMessage: 'Görev başarıyla oluşturuldu',
     errorMessage: 'Görev oluşturulurken hata oluştu',
-    mutationFn: (data: TaskFormData) => api.tasks.createTask(data),
+    mutationFn: (data: TaskFormData) => api.tasks.createTask(data as any),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
@@ -95,11 +95,11 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
   });
 
   // Update task mutation
-  const updateTaskMutation = useFormMutation<TaskFormData, TaskFormData>({
+  const updateTaskMutation = useFormMutation({
     queryKey: ['tasks'],
     successMessage: 'Görev başarıyla güncellendi',
     errorMessage: 'Görev güncellenirken hata oluştu',
-    mutationFn: (data: TaskFormData) => api.tasks.updateTask(taskId!, data),
+    mutationFn: (data: TaskFormData) => api.tasks.updateTask(taskId!, data as any),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
