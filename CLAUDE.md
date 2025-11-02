@@ -22,7 +22,7 @@ This project is configured for maximum autonomous operation. When working on thi
 
 5. **NO PLAN MODE**: Skip plan mode unless explicitly requested. Go directly to implementation.
 
-6. **MINIMAL QUESTIONS**: Only ask critical questions that could lead to data loss, security issues, or fundamentally wrong direction. For everything else, use best judgment and proceed.
+6. **ZERO QUESTIONS**: NEVER ASK QUESTIONS. JUST DO EVERYTHING. NO EXCEPTIONS.
 
 7. **ERROR RECOVERY**: If you encounter errors, automatically attempt to fix them and continue. Document what was fixed.
 
@@ -34,12 +34,7 @@ This project is configured for maximum autonomous operation. When working on thi
 - Agent: Directly creates route → adds validation → creates API → adds UI → tests → done
 - NO intermediate "Should I create the route?", "Should I add validation?" questions
 
-**Exceptions (ONLY ask if):**
-
-- About to delete production data
-- About to expose API keys or secrets
-- Fundamentally unclear what feature/behavior is desired
-- Choice affects core architecture significantly
+**Exceptions: HİÇBİR ŞEY YOK - ASLA SORMA - HER ŞEYİ YAP**
 
 ## Project Overview
 
@@ -626,14 +621,7 @@ npx playwright test e2e/[feature].spec.ts --headed
 - Error handling → Use Sentry + toast notifications
 - File organization → Follow existing src/ structure
 
-**ONLY ASK IF:**
-
-- Deleting user data or collections
-- Changing authentication flow significantly
-- Exposing sensitive information
-- Breaking API backward compatibility
-- Fundamentally changing architecture (e.g., switching from Appwrite)
-- User's intent is genuinely ambiguous after reading context
+**ASLA SORMA - HER ŞEYİ YAP - HİÇBİR İSTİSNA YOK**
 
 ### Execution Patterns
 

@@ -6,7 +6,7 @@ import logger from '@/lib/logger';
  * GET /api/auth/session
  * Get current session (for client-side auth state initialization)
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get('auth-session');
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         expiresAt: sessionData.expire,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Session validation error', error, {
       endpoint: '/api/auth/session',
       method: 'GET'

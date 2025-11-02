@@ -135,7 +135,7 @@ class NetworkMonitorClass {
         this.trackSpecialEndpoints(url, log);
 
         return response;
-      } catch (error: any) {
+      } catch (error: unknown) {
         const endTime = performance.now();
 
         log.duration = endTime - startTime;

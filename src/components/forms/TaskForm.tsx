@@ -78,7 +78,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Görev oluşturulurken hata oluştu: ${  error.message}`);
     },
   });
@@ -92,7 +92,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Görev güncellenirken hata oluştu: ${  error.message}`);
     },
   });

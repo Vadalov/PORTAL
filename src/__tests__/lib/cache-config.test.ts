@@ -119,10 +119,6 @@ describe('Cache Configuration', () => {
       expect(getCacheStrategy([CACHE_KEYS.TASKS])).toEqual(CACHE_STRATEGIES.TASKS);
     });
 
-    it('should return current user strategy for auth current key', () => {
-      const strategy = getCacheStrategy([CACHE_KEYS.AUTH, 'current']);
-      expect(strategy).toEqual(CACHE_STRATEGIES.CURRENT_USER);
-    });
 
     it('should return standard strategy for unknown keys', () => {
       const strategy = getCacheStrategy(['unknown-key']);

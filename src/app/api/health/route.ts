@@ -5,7 +5,7 @@ import { getConfigStatus } from '@/lib/appwrite/config';
 import logger from '@/lib/logger';
 
 // Cache for detailed health checks (30 seconds)
-let healthCache: { data: any; timestamp: number } | null = null;
+let healthCache: { data: unknown; timestamp: number } | null = null;
 const CACHE_DURATION = 30 * 1000; // 30 seconds
 
 export async function GET(request: Request) {
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
   if (provider === 'appwrite') {
     try {
       connectivityReport = await connectivityTester.getConnectivityReport();
-    } catch (error: any) {
+    } catch (error: unknown) {
       connectivityError = error.message;
       logger.error('Connectivity test failed', error, {
         endpoint: '/api/health',

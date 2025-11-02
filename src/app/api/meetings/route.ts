@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
+import { MeetingDocument } from '@/types/collections';
 
-function validateMeeting(data: any): { isValid: boolean; errors: string[] } {
+function validateMeeting(data: Partial<MeetingDocument>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (!data.title || data.title.trim().length < 3) {
     errors.push('Toplantı başlığı en az 3 karakter olmalıdır');
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
       data: response.data,
       total: response.total ?? 0,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('List meetings error', error, {
       endpoint: '/api/meetings',
       method: 'GET',
@@ -77,7 +78,7 @@ async function createMeetingHandler(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: response.data, message: 'Toplantı başarıyla oluşturuldu' }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Create meeting error', error, {
       endpoint: '/api/meetings',
       method: 'POST',

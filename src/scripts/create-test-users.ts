@@ -3,7 +3,7 @@
  * Creates test users in Appwrite database for development
  */
 
-import { serverUsers, handleServerError } from '@/lib/appwrite/server';
+import { serverUsers } from '@/lib/appwrite/server';
 import { UserRole } from '@/types/auth';
 import { ID } from 'node-appwrite';
 
@@ -60,12 +60,13 @@ export async function createTestUsers() {
 
       console.log(`✅ Created user: ${user.name} (${user.role})`);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if it's a duplicate user error
-      if (error.code === 409 || error.message?.includes('already exists')) {
+      const err = error as { code?: number; message?: string };
+      if (err.code === 409 || err.message?.includes('already exists')) {
         console.log(`⚠️ User ${user.email} already exists, skipping...`);
       } else {
-        console.error(`❌ Failed to create user ${user.email}:`, error.message);
+        console.error(`❌ Failed to create user ${user.email}:`, err.message);
       }
     }
   }

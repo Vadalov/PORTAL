@@ -34,7 +34,7 @@ async function uploadHandler(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: response.data, message: 'Dosya yüklendi' }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('File upload error', error, {
       endpoint: '/api/storage/upload',
       method: 'POST',

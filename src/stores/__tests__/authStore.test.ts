@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
 import { useAuthStore } from '../authStore'
+import { Permission, UserRole } from '@/types/auth'
 
 // Mock fetch globally
 const fetchMock = vi.fn()
@@ -14,6 +15,9 @@ const localStorageMock = {
   clear: vi.fn(),
 }
 Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+
+// Track login attempts for rate limiting test
+let loginAttempts = 0
 
 // Helper to create a fresh store instance for testing
 function createTestStore() {
@@ -34,9 +38,10 @@ describe('AuthStore', () => {
     vi.clearAllMocks()
     localStorage.clear()
     fetchMock.mockClear()
+    loginAttempts = 0 // Reset attempt counter
 
     // Setup default fetch mocks
-    fetchMock.mockImplementation(async (url: string, options?: any) => {
+    fetchMock.mockImplementation(async (url: string, options?: RequestInit) => {
       if (url === '/api/csrf') {
         return {
           ok: true,
@@ -45,7 +50,18 @@ describe('AuthStore', () => {
       }
 
       if (url === '/api/auth/login' && options?.method === 'POST') {
-        const body = JSON.parse(options.body)
+        const body = JSON.parse(options.body as string)
+        loginAttempts++
+
+        // Rate limiting test: after 5 attempts, return 429
+        if (body.email === 'wrong@email.com' && loginAttempts > 5) {
+          return {
+            ok: false,
+            status: 429,
+            json: async () => ({ error: 'Çok fazla deneme yapıldı. Lütfen 15 dakika sonra tekrar deneyin.' }),
+          }
+        }
+
         if (body.email === 'admin@test.com' && body.password === 'admin123') {
           return {
             ok: true,
@@ -56,8 +72,15 @@ describe('AuthStore', () => {
                   id: 'user-123',
                   name: 'Test Admin',
                   email: 'admin@test.com',
-                  role: 'ADMIN',
-                  permissions: ['beneficiaries.read', 'beneficiaries.write', 'users.read'],
+                  role: UserRole.ADMIN,
+                  permissions: [Permission.BENEFICIARIES_READ, Permission.USERS_READ, Permission.BENEFICIARIES_UPDATE],
+                  avatar: null,
+                  isActive: true,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                },
+                session: {
+                  expire: new Date(Date.now() + 3600000).toISOString(), // 1 hour from now
                 },
               },
             }),
@@ -70,6 +93,8 @@ describe('AuthStore', () => {
       }
 
       if (url === '/api/auth/logout' && options?.method === 'POST') {
+        // Clear localStorage on logout
+        localStorage.clear()
         return {
           ok: true,
           json: async () => ({ success: true }),
@@ -152,8 +177,8 @@ describe('AuthStore', () => {
         await result.current.login('admin@test.com', 'admin123')
       })
 
-      expect(result.current.hasPermission('beneficiaries:read' as any)).toBe(true)
-      expect(result.current.hasRole('ADMIN' as any)).toBe(true)
+      expect(result.current.hasPermission(Permission.BENEFICIARIES_READ)).toBe(true)
+      expect(result.current.hasRole(UserRole.ADMIN)).toBe(true)
     })
   })
 
@@ -179,8 +204,9 @@ describe('AuthStore', () => {
           await result.current.login('wrong@email.com', 'wrongpass')
         })
         expect.fail('Expected rate limiting to trigger')
-      } catch (error: any) {
-        expect(error.message).toContain('Çok fazla deneme')
+      } catch (error: unknown) {
+        const err = error as { message?: string };
+        expect(err.message).toContain('Çok fazla deneme')
       }
     })
   })

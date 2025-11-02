@@ -48,7 +48,7 @@ interface ErrorMetadata {
 // ErrorSimulator class
 export class ErrorSimulator {
   private errors: ErrorMetadata[] = [];
-  private sentryEvents: any[] = [];
+  private sentryEvents : unknown] = [];
 
   // Error simulation methods
   throwRenderError(message?: string): never {
@@ -158,7 +158,7 @@ export class ErrorSimulator {
     if (typeof window !== 'undefined' && (window as any).Sentry) {
       // Check if Sentry captured the error
       const events = (window as any).Sentry.getEvents?.() || [];
-      return events.some((event: any) => event.event_id === errorId);
+      return events.some((event : unknown => event.event_id === errorId);
     }
     return false;
   }

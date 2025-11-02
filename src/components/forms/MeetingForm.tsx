@@ -130,7 +130,7 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
       toast.success(isEditMode ? 'Toplantı başarıyla güncellendi' : 'Toplantı başarıyla oluşturuldu');
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(
         `Toplantı ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} hata oluştu: ${error.message}`
       );
@@ -148,7 +148,7 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
       toast.success('Toplantı başlatıldı');
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Toplantı başlatılırken hata oluştu: ${error.message}`);
     },
   });

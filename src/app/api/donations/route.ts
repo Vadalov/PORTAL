@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
+import { DonationDocument } from '@/types/collections';
 
 /**
  * Validate donation payload
  */
-function validateDonation(data: any): { isValid: boolean; errors: string[] } {
+function validateDonation(data: Partial<DonationDocument>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   if (!data.donor_name || data.donor_name.trim().length < 2) {
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
       data: response.data,
       total: response.total ?? 0,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('List donations error', error, {
       endpoint: '/api/donations',
       method: 'GET',
@@ -79,7 +80,7 @@ async function createDonationHandler(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: response.data, message: 'Bağış başarıyla oluşturuldu' }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Create donation error', error, {
       endpoint: '/api/donations',
       method: 'POST',

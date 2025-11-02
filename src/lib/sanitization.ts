@@ -281,7 +281,7 @@ export function sanitizeObject<T extends Record<string, any>>(
   if (!obj || typeof obj !== 'object') return obj;
 
   const { allowHtml = false, fieldsToIgnore = [] } = options;
-  const sanitized: any = Array.isArray(obj) ? [] : {};
+  const sanitized : unknown= Array.isArray(obj) ? [] : {};
 
   for (const key in obj) {
     if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;

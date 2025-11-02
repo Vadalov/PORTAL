@@ -11,8 +11,9 @@ import {
   successResponse,
   type ValidationResult,
 } from '@/lib/api/route-helpers';
+import { MessageDocument } from '@/types/collections';
 
-function validateMessageUpdate(data: any): ValidationResult {
+function validateMessageUpdate(data: Partial<MessageDocument>): ValidationResult {
   const errors: string[] = [];
   if (data.message_type && !['sms', 'email', 'internal'].includes(data.message_type)) {
     errors.push('Geçersiz mesaj türü');
@@ -69,7 +70,7 @@ async function sendMessageHandler(request: NextRequest, { params }: { params: Pr
     }
     
     return successResponse(response.data, 'Mesaj gönderildi');
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Send message error', error, {
       endpoint: '/api/messages/[id]',
       method: 'POST',

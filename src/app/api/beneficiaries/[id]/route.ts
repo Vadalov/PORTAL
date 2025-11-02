@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
+import { BeneficiaryFormData } from '@/types/beneficiary';
 
 /**
  * Validate beneficiary data for updates
  */
-function validateBeneficiaryUpdate(data: any): { isValid: boolean; errors: string[] } {
+function validateBeneficiaryUpdate(data: BeneficiaryFormData): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   // Optional fields validation (only if provided)
@@ -71,7 +72,7 @@ async function getBeneficiaryHandler(
       data: response.data,
       message: 'Kayıt başarıyla getirildi',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Get beneficiary error', error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,
@@ -134,7 +135,7 @@ async function updateBeneficiaryHandler(
       data: response.data,
       message: 'İhtiyaç sahibi başarıyla güncellendi',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Update beneficiary error', error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,
@@ -186,7 +187,7 @@ async function deleteBeneficiaryHandler(
       success: true,
       message: 'İhtiyaç sahibi başarıyla silindi',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Delete beneficiary error', error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,

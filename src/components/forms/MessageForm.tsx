@@ -98,7 +98,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Mesaj oluşturulurken hata oluştu: ${  error.message}`);
     },
   });
@@ -112,7 +112,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Mesaj güncellenirken hata oluştu: ${  error.message}`);
     },
   });
@@ -125,7 +125,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Mesaj gönderilirken hata oluştu: ${  error.message}`);
     },
   });

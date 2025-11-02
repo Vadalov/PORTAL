@@ -15,7 +15,7 @@ export async function createDatabase() {
   return await handleServerError(async () => {
     try {
       return await serverDatabases.get(DATABASE_ID);
-    } catch (error: any) {
+    } catch (error : unknown {
       if (error.code === 404) {
         console.log('Creating database...');
         return await serverDatabases.create(DATABASE_ID, 'Dernek Yönetim Sistemi');
@@ -32,7 +32,7 @@ export async function createUsersCollection() {
   return await handleServerError(async () => {
     try {
       return await serverDatabases.getCollection(DATABASE_ID, COLLECTIONS.USERS);
-    } catch (error: any) {
+    } catch (error : unknown {
       if (error.code === 404) {
         console.log('Creating users collection...');
         const collection = await serverDatabases.createCollection(
@@ -69,7 +69,7 @@ export async function createBeneficiariesCollection() {
   return await handleServerError(async () => {
     try {
       return await serverDatabases.getCollection(DATABASE_ID, COLLECTIONS.BENEFICIARIES);
-    } catch (error: any) {
+    } catch (error : unknown {
       if (error.code === 404) {
         console.log('Creating beneficiaries collection...');
         const collection = await serverDatabases.createCollection(
@@ -113,7 +113,7 @@ export async function createDonationsCollection() {
   return await handleServerError(async () => {
     try {
       return await serverDatabases.getCollection(DATABASE_ID, COLLECTIONS.DONATIONS);
-    } catch (error: any) {
+    } catch (error : unknown {
       if (error.code === 404) {
         console.log('Creating donations collection...');
         const collection = await serverDatabases.createCollection(
@@ -164,7 +164,7 @@ export async function createStorageBuckets() {
     try {
       await serverStorage.getBucket(bucket.id);
       console.log(`Bucket ${bucket.name} already exists`);
-    } catch (error: any) {
+    } catch (error : unknown {
       if (error.code === 404) {
         console.log(`Creating bucket ${bucket.name}...`);
         await serverStorage.createBucket(bucket.id, bucket.name, bucket.permissions);

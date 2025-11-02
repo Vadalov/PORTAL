@@ -42,7 +42,7 @@ export class PerformanceMonitor {
 }
 
 // Web Vitals monitoring
-export function reportWebVitals(metric: any) {
+export function reportWebVitals(metric: unknown) {
   if (process.env.NODE_ENV === 'development') {
     console.log('📊 Web Vital:', metric);
   }
@@ -58,7 +58,7 @@ export function reportWebVitals(metric: any) {
 // Cache utilities
 export class Cache {
   private static instance: Cache;
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private cache = new Map<string, { data: unknown; timestamp: number; ttl: number }>();
 
   static getInstance(): Cache {
     if (!Cache.instance) {
@@ -67,7 +67,7 @@ export class Cache {
     return Cache.instance;
   }
 
-  set(key: string, data: any, ttl: number = 5 * 60 * 1000): void { // 5 minutes default
+  set(key: string, data: unknown, ttl: number = 5 * 60 * 1000): void { // 5 minutes default
     this.cache.set(key, {
       data,
       timestamp: Date.now(),

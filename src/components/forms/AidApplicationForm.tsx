@@ -85,7 +85,7 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
       queryClient.invalidateQueries({ queryKey: ['aid-applications'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Başvuru oluşturulurken hata oluştu: ${  error.message}`);
     },
   });

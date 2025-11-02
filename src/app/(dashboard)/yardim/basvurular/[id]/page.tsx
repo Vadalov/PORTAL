@@ -40,7 +40,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
       queryClient.invalidateQueries({ queryKey: ['aid-application', id] });
       queryClient.invalidateQueries({ queryKey: ['aid-applications'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Hata: ${  error.message}`);
     },
   });

@@ -93,7 +93,7 @@ class LoadingStateTester {
       document.body.removeChild(container);
 
       return this.endTest(`LoadingOverlay Render - ${variant}`, passed, passed ? undefined : 'Overlay did not render');
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest(`LoadingOverlay Render - ${variant}`, false, error.message);
     }
   }
@@ -139,7 +139,7 @@ class LoadingStateTester {
       document.body.removeChild(container);
 
       return this.endTest('Accessibility Test', !!passed, passed ? undefined : 'Missing ARIA attributes or screen reader text');
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Accessibility Test', false, error.message);
     }
   }
@@ -194,7 +194,7 @@ class LoadingStateTester {
       });
 
       return this.endTest('Motion Reduce Test', !!hasMotionReduce, hasMotionReduce ? undefined : 'Motion reduce not applied');
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Motion Reduce Test', false, error.message);
     }
   }
@@ -224,7 +224,7 @@ class LoadingStateTester {
       document.body.removeChild(container);
 
       return this.endTest('Fullscreen Mode Test', passed, passed ? undefined : 'Fullscreen overlay not applied');
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Fullscreen Mode Test', false, error.message);
     }
   }
@@ -239,7 +239,7 @@ class LoadingStateTester {
       const passed = true; // Placeholder - would check actual rendering
 
       return this.endTest('Auth Initialization Loading Test', passed);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Auth Initialization Loading Test', false, error.message);
     }
   }
@@ -253,7 +253,7 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Auth Redirect Flow Test', passed);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Auth Redirect Flow Test', false, error.message);
     }
   }
@@ -267,7 +267,7 @@ class LoadingStateTester {
       const passed = typeof hasHydrated === 'boolean';
 
       return this.endTest('Hydration Wait Test', passed, passed ? undefined : '_hasHydrated not properly set');
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Hydration Wait Test', false, error.message);
     }
   }
@@ -281,7 +281,7 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Provider Loading Test', passed);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Provider Loading Test', false, error.message);
     }
   }
@@ -308,7 +308,7 @@ class LoadingStateTester {
       document.body.removeChild(container);
 
       return this.endTest(`Render Time Measurement - ${variant}`, renderTime < 100, undefined, { renderTime });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest(`Render Time Measurement - ${variant}`, false, error.message);
     }
   }
@@ -339,7 +339,7 @@ class LoadingStateTester {
       const passed = fps >= 50; // 50+ FPS considered smooth
 
       return this.endTest('Animation Frame Rate Test', passed, undefined, { fps });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Animation Frame Rate Test', false, error.message);
     }
   }
@@ -370,7 +370,7 @@ class LoadingStateTester {
       document.body.removeChild(container);
 
       return this.endTest(`Loading Duration Test - ${duration}ms`, passed, undefined, { actualDuration, expectedDuration: duration });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest(`Loading Duration Test - ${duration}ms`, false, error.message);
     }
   }
@@ -385,7 +385,7 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest(`Delayed Show Test - ${delay}ms`, passed);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest(`Delayed Show Test - ${delay}ms`, false, error.message);
     }
   }
@@ -400,7 +400,7 @@ class LoadingStateTester {
       const passed = true;
 
       return this.endTest(`Visual Snapshot - ${variant}`, passed, undefined, { snapshot: `snapshot-${variant}` });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest(`Visual Snapshot - ${variant}`, false, error.message);
     }
   }
@@ -414,7 +414,7 @@ class LoadingStateTester {
       const passed = true;
 
       return this.endTest('Snapshot Comparison', passed);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Snapshot Comparison', false, error.message);
     }
   }
@@ -429,7 +429,7 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Responsive Layout Test', passed, undefined, { testedSizes: sizes });
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Responsive Layout Test', false, error.message);
     }
   }
@@ -443,7 +443,7 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Loading + Error Boundary Test', passed);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Loading + Error Boundary Test', false, error.message);
     }
   }
@@ -457,7 +457,7 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Loading + Suspense Test', passed);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Loading + Suspense Test', false, error.message);
     }
   }
@@ -471,7 +471,7 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Complete Auth Loading Flow Test', passed);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.endTest('Complete Auth Loading Flow Test', false, error.message);
     }
   }

@@ -140,13 +140,13 @@ describe('Beneficiary Validation Schema', () => {
     
     it('should reject marriage for under 18', () => {
       const today = new Date();
-      const birthDate = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
-      
+      const birthDateStr = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate()).toISOString();
+
       const invalidData = {
         firstName: 'Ahmet',
         lastName: 'Yılmaz',
         nationality: 'Türkiye',
-        birthDate,
+        birthDate: birthDateStr,
         maritalStatus: MaritalStatus.EVLI, // Under 18 cannot be married
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
         fundRegion: FundRegion.SERBEST,
@@ -154,7 +154,7 @@ describe('Beneficiary Validation Schema', () => {
         fileNumber: 'FILE001',
         mernisCheck: false
       };
-      
+
       const result = beneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {

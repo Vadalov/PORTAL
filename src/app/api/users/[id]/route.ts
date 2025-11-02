@@ -10,8 +10,9 @@ import {
   extractParams,
   type ValidationResult,
 } from '@/lib/api/route-helpers';
+import { UserDocument } from '@/types/collections';
 
-function validateUserUpdate(data: any): ValidationResult {
+function validateUserUpdate(data: Partial<UserDocument>): ValidationResult {
   const errors: string[] = [];
   if (data.name && data.name.trim().length < 2) errors.push('Ad Soyad en az 2 karakter olmalıdır');
   if (data.email && !InputSanitizer.validateEmail(data.email)) errors.push('Geçersiz e-posta');

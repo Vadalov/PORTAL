@@ -94,7 +94,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       // ✅ Enhanced error handling
       const userMessage = formatErrorMessage(error);
       toast.error(`İhtiyaç sahibi eklenirken hata oluştu: ${userMessage}`);
@@ -114,7 +114,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       // ✅ Enhanced error handling
       const userMessage = formatErrorMessage(error);
       toast.error(`İhtiyaç sahibi güncellenirken hata oluştu: ${userMessage}`);
@@ -245,7 +245,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
       }
 
       // Success handled by mutation onSuccess callback
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Enhanced error handling
       const userMessage = formatErrorMessage(error);
       toast.error(userMessage);

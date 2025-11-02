@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
+import { MessageDocument } from '@/types/collections';
 
-function validateMessage(data: any): { isValid: boolean; errors: string[] } {
+function validateMessage(data: Partial<MessageDocument>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (!data.message_type || !['sms', 'email', 'internal'].includes(data.message_type)) {
     errors.push('Geçersiz mesaj türü');
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
       data: response.data,
       total: response.total ?? 0,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('List messages error', error, {
       endpoint: '/api/messages',
       method: 'GET',
@@ -78,7 +79,7 @@ async function createMessageHandler(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: response.data, message: 'Mesaj taslağı oluşturuldu' }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Create message error', error, {
       endpoint: '/api/messages',
       method: 'POST',

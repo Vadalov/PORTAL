@@ -71,7 +71,7 @@ export async function handleServerError<T>(
 ): Promise<T> {
   try {
     return await operation();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Appwrite Server Error:', error);
     
     // Handle specific error types

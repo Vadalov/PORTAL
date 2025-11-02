@@ -9,8 +9,9 @@ import {
   type ValidationResult,
 } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
+import { MeetingDocument } from '@/types/collections';
 
-function validateMeetingUpdate(data: any): ValidationResult {
+function validateMeetingUpdate(data: Partial<MeetingDocument>): ValidationResult {
   const errors: string[] = [];
   if (data.title && data.title.trim().length < 3) {
     errors.push('Toplantı başlığı en az 3 karakter olmalıdır');

@@ -9,8 +9,9 @@ import {
   extractParams,
   type ValidationResult,
 } from '@/lib/api/route-helpers';
-  
-function validateApplicationUpdate(data: any): ValidationResult {
+import { AidApplicationDocument } from '@/types/collections';
+
+function validateApplicationUpdate(data: Partial<AidApplicationDocument>): ValidationResult {
   const errors: string[] = [];
   if (data.stage && !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage)) errors.push('Geçersiz aşama');
   if (data.status && !['open', 'closed'].includes(data.status)) errors.push('Geçersiz durum');

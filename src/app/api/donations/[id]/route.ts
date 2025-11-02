@@ -9,8 +9,9 @@ import {
   type ValidationResult,
 } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
+import { DonationDocument } from '@/types/collections';
 
-function validateDonationUpdate(data: any): ValidationResult {
+function validateDonationUpdate(data: Partial<DonationDocument>): ValidationResult {
   const errors: string[] = [];
   if (data.amount !== undefined && Number(data.amount) <= 0) {
     errors.push('Bağış tutarı pozitif olmalıdır');

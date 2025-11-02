@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
+import { TaskDocument } from '@/types/collections';
 
-function validateTask(data: any): { isValid: boolean; errors: string[] } {
+function validateTask(data: Partial<TaskDocument>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (!data.title || data.title.trim().length < 3) {
     errors.push('Görev başlığı en az 3 karakter olmalıdır');
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
   const limit = Number(searchParams.get('limit') || '20');
   const search = searchParams.get('search') || undefined;
 
-  const filters: Record<string, any> = {};
+  const filters: Record<string, string> = {};
   const status = searchParams.get('status');
   const priority = searchParams.get('priority');
   const assigned_to = searchParams.get('assigned_to');
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
       data: response.data,
       total: response.total ?? 0,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('List tasks error', error, {
       endpoint: '/api/tasks',
       method: 'GET',
@@ -73,7 +74,7 @@ async function createTaskHandler(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: response.data, message: 'Görev başarıyla oluşturuldu' }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Create task error', error, {
       endpoint: '/api/tasks',
       method: 'POST',

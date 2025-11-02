@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { aidApplicationsApi as api } from '@/lib/api';
 import logger from '@/lib/logger';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import { AidApplicationDocument } from '@/types/collections';
 
-function validateApplication(data: any): { isValid: boolean; errors: string[] } {
+function validateApplication(data: Partial<AidApplicationDocument>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (!data.applicant_name || data.applicant_name.trim().length < 2) errors.push('Başvuru sahibi adı zorunludur');
   if (!data.application_date) errors.push('Başvuru tarihi zorunludur');
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
   const page = Number(searchParams.get('page') || '1');
   const limit = Number(searchParams.get('limit') || '20');
   const search = searchParams.get('search') || undefined;
-  const filters: Record<string, any> = {};
+  const filters: Record<string, string> = {};
   const stage = searchParams.get('stage');
   const status = searchParams.get('status');
 
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
   try {
     const response = await api.getAidApplications({ page, limit, search, filters });
     return NextResponse.json({ success: true, data: response.data, total: response.total ?? 0 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('List aid applications error', error, {
       endpoint: '/api/aid-applications',
       method: 'GET',
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
  * POST /api/aid-applications
  */
 async function createApplicationHandler(request: NextRequest) {
-  let body: any = null;
+  let body: Partial<AidApplicationDocument> | null = null;
   try {
     body = await request.json();
     const validation = validateApplication(body);
@@ -60,7 +61,7 @@ async function createApplicationHandler(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: response.data, message: 'Başvuru oluşturuldu' }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Create aid application error', error, {
       endpoint: '/api/aid-applications',
       method: 'POST',

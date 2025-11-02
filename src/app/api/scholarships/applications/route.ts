@@ -92,7 +92,7 @@ async function getApplicationsHandler(request: NextRequest) {
       );
     }
 
-    const response: ApiResponse<any> = {
+    const response: ApiResponse<unknown> = {
       success: true,
       data: result.data?.data || [],
       total: result.data?.total || 0,

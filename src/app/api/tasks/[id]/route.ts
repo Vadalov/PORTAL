@@ -9,8 +9,9 @@ import {
   type ValidationResult,
 } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
+import { TaskDocument } from '@/types/collections';
 
-function validateTaskUpdate(data: any): ValidationResult {
+function validateTaskUpdate(data: Partial<TaskDocument>): ValidationResult {
   const errors: string[] = [];
   if (data.title && data.title.trim().length < 3) {
     errors.push('Görev başlığı en az 3 karakter olmalıdır');

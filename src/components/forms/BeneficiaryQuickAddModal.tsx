@@ -140,7 +140,7 @@ export function BeneficiaryQuickAddModal({
       } else {
         toast.error(result.error || 'İhtiyaç sahibi oluşturulamadı');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.message || 'İhtiyaç sahibi oluşturulurken hata oluştu');
     } finally {
       setIsLoading(false);

@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { appwriteApi } from '@/lib/api/appwrite-api';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue as _SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle as _DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import {
   Search,
@@ -23,7 +23,7 @@ import {
   CheckSquare,
   Play,
   CheckCircle,
-  XCircle
+  XCircle as _XCircle
 } from 'lucide-react';
 import { TaskForm } from '@/components/forms/TaskForm';
 import { KanbanBoard } from '@/components/tasks/KanbanBoard';
@@ -101,7 +101,7 @@ export default function TasksPage() {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Görev durumu güncellenirken hata oluştu: ${  error.message}`);
     },
   });
@@ -114,7 +114,7 @@ export default function TasksPage() {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Görev silinirken hata oluştu: ${  error.message}`);
     },
   });

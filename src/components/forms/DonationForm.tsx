@@ -68,7 +68,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`Bağış kaydedilirken hata oluştu: ${  error.message}`);
     },
   });

@@ -47,7 +47,7 @@ async function testConnection() {
     console.log('\n👤 Testing account endpoint...');
     const accountData = await account.get();
     console.log('   ✅ Account data retrieved:', accountData);
-  } catch (error: any) {
+  } catch (error : unknown {
     // Expected to fail if not logged in
     if (error.code === 401) {
       console.log('   ℹ️  No active session (expected for fresh setup)');

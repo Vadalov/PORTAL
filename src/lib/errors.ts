@@ -244,7 +244,7 @@ export function translateError(code: string | number): string {
 /**
  * Parse and format error for user display
  */
-export function formatErrorMessage(error: any): string {
+export function formatErrorMessage(error: unknown): string {
   // Handle AppError instances
   if (error instanceof AppError) {
     return error.message;
@@ -279,7 +279,7 @@ export function formatErrorMessage(error: any): string {
 /**
  * Log error for debugging (in development) and monitoring (in production)
  */
-export function logError(error: any, context?: string): void {
+export function logError(error: unknown, context?: string): void {
   const message = `Error${context ? ` in ${context}` : ''}`;
   logger.error(message, error, {
     code: error?.code,
@@ -299,7 +299,7 @@ export interface ErrorResponse {
   details?: unknown;
 }
 
-export function createErrorResponse(error: any): ErrorResponse {
+export function createErrorResponse(error: unknown): ErrorResponse {
   if (error instanceof AppError) {
     return {
       success: false,
@@ -320,10 +320,10 @@ export function createErrorResponse(error: any): ErrorResponse {
  * Wrap async route handler with error handling
  */
 export function withErrorHandling<T>(
-  handler: (...args: any[]) => Promise<T>,
+  handler: (...args: unknown[]) => Promise<T>,
   context?: string
 ) {
-  return async (...args: any[]): Promise<T> => {
+  return async (...args: unknown[]): Promise<T> => {
     try {
       return await handler(...args);
     } catch (error) {

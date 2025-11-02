@@ -16,7 +16,7 @@ interface TestResult {
   timing: number;
   error?: string;
   retryCount?: number;
-  details?: any;
+  details? : unknown
 }
 
 interface ConnectivityReport {
@@ -77,7 +77,7 @@ export class ConnectivityTester {
         timing,
         details: { status: response.status, statusText: response.statusText }
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const timing = Date.now() - startTime;
       return {
         success: false,
@@ -107,7 +107,7 @@ export class ConnectivityTester {
         timing,
         error: 'Account service returned user data unexpectedly (should be 401)',
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const timing = Date.now() - startTime;
       
       // 401 is expected (no session)
@@ -147,7 +147,7 @@ export class ConnectivityTester {
         timing,
         details: { databaseCount: result.databases?.length || 0 }
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const timing = Date.now() - startTime;
       return {
         success: false,
@@ -176,7 +176,7 @@ export class ConnectivityTester {
         timing,
         details: { bucketCount: result.buckets?.length || 0 }
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const timing = Date.now() - startTime;
       return {
         success: false,
@@ -191,12 +191,12 @@ export class ConnectivityTester {
    * Helper method for retry logic with exponential backoff
    */
   private async testWithRetry<T>(operation: () => Promise<T>): Promise<T> {
-    let lastError: any;
+    let lastError : unknown
     
     for (let i = 0; i < this.maxRetries; i++) {
       try {
         return await operation();
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
         (lastError as any).retryCount = i + 1;
         

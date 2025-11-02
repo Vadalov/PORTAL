@@ -156,7 +156,7 @@ export async function handleAppwriteError<T>(
 ): Promise<T> {
   try {
     return await operation();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Appwrite Error:', error);
     
     // Handle specific error types
@@ -187,7 +187,7 @@ export async function withRetry<T>(
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await operation();
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
       
       // Don't retry on authentication errors

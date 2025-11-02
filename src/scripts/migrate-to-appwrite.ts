@@ -3,7 +3,7 @@
  * Migrates existing mock JSON data to Appwrite collections
  */
 
-import { serverDatabases, serverUsers, handleServerError } from '@/lib/appwrite/server';
+import { serverDatabases, serverUsers } from '@/lib/appwrite/server';
 import { DATABASE_ID, COLLECTIONS } from '@/lib/appwrite/config';
 import { ID } from 'node-appwrite';
 import { createUserLabels } from '@/lib/appwrite/permissions';
@@ -94,11 +94,12 @@ export async function createTestUsers() {
       );
 
       console.log(`Created test user: ${user.name} (${user.email})`);
-    } catch (error: any) {
-      if (error.code === 409) {
+    } catch (error: unknown) {
+      const err = error as { code?: number; message?: string };
+      if (err.code === 409) {
         console.log(`Test user ${user.email} already exists, skipping...`);
       } else {
-        console.error(`Error creating test user ${user.name}:`, error.message);
+        console.error(`Error creating test user ${user.name}:`, err.message);
       }
     }
   }

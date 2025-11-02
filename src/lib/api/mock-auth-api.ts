@@ -156,7 +156,7 @@ export const mockAuthApi = {
     };
   },
 
-  async getBeneficiaries(params?: any) {
+  async getBeneficiaries(params? : unknown {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 300));
     
@@ -224,7 +224,7 @@ export const mockAuthApi = {
     };
   },
 
-  async getDonations(params?: any) {
+  async getDonations(params? : unknown {
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 300));
     

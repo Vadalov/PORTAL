@@ -22,7 +22,9 @@ describe('Utils Library', () => {
 
     it('should merge Tailwind classes correctly', () => {
       const result = cn('p-4', 'padding-2');
-      expect(result).toContain('p-2'); // Should merge conflicting classes
+      // These are different properties so both should be present
+      expect(result).toContain('p-4');
+      expect(result).toContain('padding-2');
     });
 
     it('should handle array of classes', () => {

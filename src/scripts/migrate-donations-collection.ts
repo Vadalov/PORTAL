@@ -2,7 +2,7 @@
  * Migration Script: Add receipt_file_id to donations collection
  */
 
-import { serverDatabases, handleServerError } from '@/lib/appwrite/server';
+import { serverDatabases } from '@/lib/appwrite/server';
 import { DATABASE_ID, COLLECTIONS } from '@/lib/appwrite/config';
 
 export async function migrateDonationsCollection() {
@@ -14,8 +14,9 @@ export async function migrateDonationsCollection() {
       await serverDatabases.getAttribute(DATABASE_ID, COLLECTIONS.DONATIONS, 'receipt_file_id');
       console.log('receipt_file_id attribute already exists, skipping migration');
       return;
-    } catch (error: any) {
-      if (error.code !== 404) {
+    } catch (error: unknown) {
+      const err = error as { code?: number };
+      if (err.code !== 404) {
         throw error;
       }
     }
@@ -32,8 +33,9 @@ export async function migrateDonationsCollection() {
 
     console.log('Migration completed successfully!');
 
-  } catch (error: any) {
-    console.error('Migration failed:', error.message);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    console.error('Migration failed:', err.message);
     throw error;
   }
 }

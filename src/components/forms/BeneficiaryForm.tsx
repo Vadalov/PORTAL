@@ -78,7 +78,7 @@ export function BeneficiaryForm({ onSuccess, onCancel }: BeneficiaryFormProps) {
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
       onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast.error(`İhtiyaç sahibi eklenirken hata oluştu: ${  error.message}`);
     },
   });

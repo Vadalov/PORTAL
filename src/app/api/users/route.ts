@@ -3,8 +3,9 @@ import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
 import logger from '@/lib/logger';
+import { UserDocument } from '@/types/collections';
 
-function validateUser(data: any): { isValid: boolean; errors: string[] } {
+function validateUser(data: Partial<UserDocument>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (!data.name || data.name.trim().length < 2) errors.push('Ad Soyad en az 2 karakter olmalıdır');
   if (!data.email || !InputSanitizer.validateEmail(data.email)) errors.push('Geçerli bir e-posta zorunludur');
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
   try {
     const response = await api.users.getUsers({ page, limit, search, orderBy: '$createdAt' });
     return NextResponse.json({ success: true, data: response.data, total: response.total ?? 0 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('List users error', error, {
       endpoint: '/api/users',
       method: 'GET',
@@ -51,7 +52,7 @@ async function createUserHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
     }
     return NextResponse.json({ success: true, data: response.data, message: 'Kullanıcı oluşturuldu' }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Create user error', error, {
       endpoint: '/api/users',
       method: 'POST',
