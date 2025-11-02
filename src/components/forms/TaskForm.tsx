@@ -10,12 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DatePicker } from '@/components/ui/date-picker';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
-import { toast } from 'sonner';
 import { Loader2, X, AlertCircle, User, Calendar } from 'lucide-react';
 import { taskSchema, type TaskFormData, getPriorityColor, getStatusColor, getPriorityLabel, getStatusLabel, isTaskDueSoon } from '@/lib/validations/task';
+import { useFormMutation } from '@/hooks/useFormMutation';
 import type { UserDocument } from '@/types/collections';
 
 interface TaskFormProps {
@@ -63,37 +63,33 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
   // Fetch users for assignment - disabled for now
   // const { data: usersResponse } = useQuery({
   //   queryKey: ['users'],
-  //   queryFn: () => api.users.getUsers({ limit: 100 } as any),
+  //   queryFn: () => api.users.getUsers({ limit: 100 }),
   //   enabled: true,
   // });
 
-  const users: any[] = []; // Empty for now
+  const users: UserDocument[] = []; // Empty for now
 
   // Create task mutation
-  const createTaskMutation = useMutation({
+  const createTaskMutation = useFormMutation<TaskFormData, TaskFormData>({
+    queryKey: ['tasks'],
+    successMessage: 'Görev başarıyla oluşturuldu',
+    errorMessage: 'Görev oluşturulurken hata oluştu',
     mutationFn: (data: TaskFormData) => api.tasks.createTask(data),
     onSuccess: () => {
-      toast.success('Görev başarıyla oluşturuldu');
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Görev oluşturulurken hata oluştu: ${  error.message}`);
     },
   });
 
   // Update task mutation
-  const updateTaskMutation = useMutation({
+  const updateTaskMutation = useFormMutation<TaskFormData, TaskFormData>({
+    queryKey: ['tasks'],
+    successMessage: 'Görev başarıyla güncellendi',
+    errorMessage: 'Görev güncellenirken hata oluştu',
     mutationFn: (data: TaskFormData) => api.tasks.updateTask(taskId!, data),
     onSuccess: () => {
-      toast.success('Görev başarıyla güncellendi');
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Görev güncellenirken hata oluştu: ${  error.message}`);
     },
   });
 
@@ -227,7 +223,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
               <Label htmlFor="priority">Öncelik *</Label>
               <Select
                 value={watch('priority')}
-                onValueChange={(value) => setValue('priority', value as any)}
+                onValueChange={(value) => setValue('priority', value as TaskFormData['priority'])}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Öncelik seçin" />
@@ -272,7 +268,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
               <Label htmlFor="status">Durum *</Label>
               <Select
                 value={watch('status')}
-                onValueChange={(value) => setValue('status', value as any)}
+                onValueChange={(value) => setValue('status', value as TaskFormData['status'])}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Durum seçin" />
