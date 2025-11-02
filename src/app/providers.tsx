@@ -6,6 +6,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import { useState } from 'react';
+import { createOptimizedQueryClient, cacheUtils } from '@/lib/cache-config';
+import { persistentCache } from '@/lib/persistent-cache';
 
 import { SuspenseBoundary } from '@/components/ui/suspense-boundary';
 
@@ -13,20 +15,12 @@ import { SuspenseBoundary } from '@/components/ui/suspense-boundary';
 interface WindowWithDebug extends Window {
   __AUTH_STORE__?: typeof useAuthStore;
   __QUERY_CLIENT__?: QueryClient;
+  __CACHE__?: typeof persistentCache;
+  __CACHE_UTILS__?: typeof cacheUtils;
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 60 * 1000, // 1 minute
-            refetchOnWindowFocus: false,
-          },
-        },
-      })
-  );
+  const [queryClient] = useState(() => createOptimizedQueryClient());
 
   const [mounted] = useState(true);
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
@@ -35,27 +29,37 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Initialize debug utilities (development only)
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Debug mode enabled');
-
       // Expose to window for manual debugging (safe)
       if (typeof window !== 'undefined') {
         const windowWithDebug = window as WindowWithDebug;
         windowWithDebug.__AUTH_STORE__ = useAuthStore;
         windowWithDebug.__QUERY_CLIENT__ = queryClient;
+        windowWithDebug.__CACHE__ = persistentCache;
+        windowWithDebug.__CACHE_UTILS__ = cacheUtils;
       }
     }
   }, [queryClient]);
 
+  // Periodic cache cleanup
+  useEffect(() => {
+    // Clean up expired cache entries every 5 minutes
+    const cleanupInterval = setInterval(
+      async () => {
+        const cleaned = await persistentCache.cleanup();
+        if (cleaned > 0 && process.env.NODE_ENV === 'development') {
+          // Cleanup logged by persistent cache
+        }
+      },
+      5 * 60 * 1000
+    );
+
+    return () => clearInterval(cleanupInterval);
+  }, []);
+
   // Wait for both mounted and hydration complete before initializing auth
   useEffect(() => {
     if (mounted && hasHydrated && initializeAuth) {
-      // Log store state before initialization
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔐 Auth Store State:', useAuthStore.getState());
-        console.log('💾 LocalStorage auth-session:', localStorage.getItem('auth-session'));
-        console.log('🔄 Store hydrated:', useAuthStore.persist?.hasHydrated?.());
-      }
-
+      // Initialize auth when ready
       initializeAuth();
     }
   }, [mounted, hasHydrated, initializeAuth]);
@@ -79,14 +83,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
         fullscreen={true}
         loadingText="Uygulama yükleniyor..."
         onSuspend={() => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('⏸️ [App] Suspended');
-          }
+          // Suspended state
         }}
         onResume={() => {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('▶️ [App] Resumed');
-          }
+          // Resumed state
         }}
       >
         {children}
