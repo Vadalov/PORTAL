@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -11,16 +11,26 @@ import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('isahamid@gmail.com');
-  const [password, setPassword] = useState('vadalov95');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [mounted, setMounted] = useState(false);
+  const initRef = useRef(false);
   const { login, isAuthenticated, isLoading, initializeAuth } = useAuthStore();
 
-  // Handle hydration
+  // Handle hydration - split into two effects to avoid cascading renders
   useEffect(() => {
-    setMounted(true);
-    initializeAuth();
-  }, [initializeAuth]);
+    if (!initRef.current) {
+      initRef.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMounted(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mounted && initRef.current) {
+      initializeAuth();
+    }
+  }, [mounted, initializeAuth]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -39,8 +49,10 @@ export default function LoginPage() {
 
       // Use router.push instead of window.location.href to preserve state
       router.push('/genel');
-    } catch (err: any) {
-      toast.error(err.message || 'Giriş başarısız');
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : typeof err === 'string' ? err : 'Giriş başarısız';
+      toast.error(errorMessage);
     }
   };
 
@@ -66,12 +78,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Dernek Yönetim Sistemi
-          </CardTitle>
-          <p className="text-center text-sm text-gray-500">
-            Hesabınıza giriş yapın
-          </p>
+          <CardTitle className="text-2xl font-bold text-center">Dernek Yönetim Sistemi</CardTitle>
+          <p className="text-center text-sm text-gray-500">Hesabınıza giriş yapın</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -101,26 +109,9 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
             </Button>
-
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-xs font-semibold text-blue-900 mb-2">
-                Test Hesapları:
-              </p>
-              <div className="space-y-1 text-xs text-blue-800">
-                <p><strong>Admin (Tüm Yetkiler):</strong> isahamid@gmail.com / vadalov95</p>
-                <p>Admin: admin@test.com / admin123</p>
-                <p>Manager: manager@test.com / manager123</p>
-                <p>Member: member@test.com / member123</p>
-                <p>Viewer: viewer@test.com / viewer123</p>
-              </div>
-            </div>
           </form>
         </CardContent>
       </Card>
