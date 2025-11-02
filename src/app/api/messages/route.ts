@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { MessageDocument } from '@/types/collections';
+import { AppwriteDocument, MessageDocument } from '@/types/collections';
 
-function validateMessage(data: Partial<MessageDocument>): { isValid: boolean; errors: string[] } {
+function validateMessage(data: Partial<MessageDocument>): {
+  isValid: boolean;
+  errors: string[];
+  normalizedData?: Omit<MessageDocument, keyof AppwriteDocument>;
+} {
   const errors: string[] = [];
   if (!data.message_type || !['sms', 'email', 'internal'].includes(data.message_type)) {
     errors.push('Geçersiz mesaj türü');
@@ -18,7 +22,17 @@ function validateMessage(data: Partial<MessageDocument>): { isValid: boolean; er
   if (!data.content || data.content.trim().length < 3) {
     errors.push('İçerik en az 3 karakter olmalıdır');
   }
-  return { isValid: errors.length === 0, errors };
+
+  if (errors.length > 0) {
+    return { isValid: false, errors };
+  }
+
+  const normalizedData = {
+    ...data,
+    status: (data.status as 'draft' | 'sent' | 'failed') || 'draft',
+  } as Omit<MessageDocument, keyof AppwriteDocument>;
+
+  return { isValid: true, errors: [], normalizedData };
 }
 
 /**
@@ -68,15 +82,17 @@ async function createMessageHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateMessage(body as Record<string, unknown>);
-    if (!validation.isValid) {
+    const validation = validateMessage(body as Partial<MessageDocument>);
+    if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
         { status: 400 }
       );
     }
 
-    const response = await api.messages.createMessage(body as Partial<MessageDocument>);
+    const response = await api.messages.createMessage(
+      validation.normalizedData as unknown as Partial<MessageDocument>
+    );
     if (response.error || !response.data) {
       return NextResponse.json(
         { success: false, error: response.error || 'Oluşturma başarısız' },

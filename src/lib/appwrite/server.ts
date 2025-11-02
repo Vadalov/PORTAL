@@ -66,7 +66,7 @@ export { Query };
 /**
  * Server-side error handling wrapper
  */
-export async function handleServerError<T>(operation: () => Promise<T>, fallback?: T): Promise<T> {
+export async function handleServerError<T>(operation: () => Promise<T>, _fallback?: T): Promise<T> {
   try {
     return await operation();
   } catch (err: unknown) {
@@ -74,14 +74,16 @@ export async function handleServerError<T>(operation: () => Promise<T>, fallback
     console.error('Appwrite Server Error:', error);
 
     // Handle specific error types
-    if (error.code === 401) {
-      throw new Error('API key geçersiz veya eksik.');
-    } else if (error.code === 404) {
-      throw new Error('Kayıt bulunamadı.');
-    } else if (error.code === 429) {
-      throw new Error('Çok fazla istek. Lütfen bekleyin.');
-    } else if (error.code >= 500) {
-      throw new Error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
+    if (error.code !== undefined) {
+      if (error.code === 401) {
+        throw new Error('API key geçersiz veya eksik.');
+      } else if (error.code === 404) {
+        throw new Error('Kayıt bulunamadı.');
+      } else if (error.code === 429) {
+        throw new Error('Çok fazla istek. Lütfen bekleyin.');
+      } else if (error.code >= 500) {
+        throw new Error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
+      }
     }
 
     throw new Error(error.message || 'Beklenmeyen bir hata oluştu.');
@@ -123,7 +125,8 @@ export function isServerInitialized(): boolean {
  */
 export function initializeServerClient(): void {
   validateServerConfig(); // This will throw if config is invalid
-  console.log('✅ Appwrite server client initialized successfully');
+  // Server client initialized successfully (logged via warn for visibility)
+  console.warn('✅ Appwrite server client initialized successfully');
 }
 
 /**

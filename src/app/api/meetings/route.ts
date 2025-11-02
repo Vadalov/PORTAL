@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { MeetingDocument } from '@/types/collections';
+import { AppwriteDocument, MeetingDocument } from '@/types/collections';
 
-function validateMeeting(data: Partial<MeetingDocument>): { isValid: boolean; errors: string[] } {
+function validateMeeting(data: Partial<MeetingDocument>): {
+  isValid: boolean;
+  errors: string[];
+  normalizedData?: Omit<MeetingDocument, keyof AppwriteDocument>;
+} {
   const errors: string[] = [];
   if (!data.title || data.title.trim().length < 3) {
     errors.push('Toplantı başlığı en az 3 karakter olmalıdır');
@@ -15,7 +19,17 @@ function validateMeeting(data: Partial<MeetingDocument>): { isValid: boolean; er
   if (data.status && !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status)) {
     errors.push('Geçersiz durum');
   }
-  return { isValid: errors.length === 0, errors };
+
+  if (errors.length > 0) {
+    return { isValid: false, errors };
+  }
+
+  const normalizedData = {
+    ...data,
+    status: (data.status as 'scheduled' | 'ongoing' | 'completed' | 'cancelled') || 'scheduled',
+  } as Omit<MeetingDocument, keyof AppwriteDocument>;
+
+  return { isValid: true, errors: [], normalizedData };
 }
 
 /**
@@ -67,15 +81,17 @@ async function createMeetingHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateMeeting(body as Record<string, unknown>);
-    if (!validation.isValid) {
+    const validation = validateMeeting(body as Partial<MeetingDocument>);
+    if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
         { status: 400 }
       );
     }
 
-    const response = await api.meetings.createMeeting(body as Partial<MeetingDocument>);
+    const response = await api.meetings.createMeeting(
+      validation.normalizedData as unknown as Partial<MeetingDocument>
+    );
     if (response.error || !response.data) {
       return NextResponse.json(
         { success: false, error: response.error || 'Oluşturma başarısız' },
