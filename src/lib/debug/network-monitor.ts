@@ -29,7 +29,12 @@ class NetworkMonitorClass {
   private requestIdCounter = 0;
 
   constructor() {
-    this.originalFetch = fetch.bind(window);
+    // SSR safety check - only bind in browser environment
+    if (typeof window !== 'undefined') {
+      this.originalFetch = fetch.bind(window);
+    } else {
+      this.originalFetch = fetch;
+    }
   }
 
   /**
@@ -52,7 +57,8 @@ class NetworkMonitorClass {
 
     // Expose to window for manual debugging
     if (typeof window !== 'undefined') {
-      (window as { __NETWORK_MONITOR__?: NetworkMonitorClass }).__NETWORK_MONITOR__ = this;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).__NETWORK_MONITOR__ = this;
     }
   }
 
@@ -64,7 +70,8 @@ class NetworkMonitorClass {
 
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       const requestId = `req_${++this.requestIdCounter}`;
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      const url =
+        typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
       const method = init?.method || 'GET';
       const startTime = performance.now();
 
@@ -135,12 +142,12 @@ class NetworkMonitorClass {
         this.trackSpecialEndpoints(url, log);
 
         return response;
-      } catch (error: unknown) {
+      } catch (error) {
         const endTime = performance.now();
 
         log.duration = endTime - startTime;
         log.success = false;
-        log.error = error.message || 'Network request failed';
+        log.error = error instanceof Error ? error.message : 'Network request failed';
 
         this.requests.push(log);
         this.logFailedRequest(log);
@@ -153,7 +160,9 @@ class NetworkMonitorClass {
   /**
    * Convert Headers object to plain object
    */
-  private headersToObject(headers: Headers | Record<string, string> | string[][]): Record<string, string> {
+  private headersToObject(
+    headers: Headers | Record<string, string> | string[][]
+  ): Record<string, string> {
     const obj: Record<string, string> = {};
 
     if (headers instanceof Headers) {
@@ -332,7 +341,7 @@ class NetworkMonitorClass {
         successfulRequests,
         failedRequests,
         successRate: totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0,
-        averageDuration: `${averageDuration.toFixed(2)  }ms`,
+        averageDuration: averageDuration.toFixed(2) + 'ms',
       },
       endpoints: Array.from(endpointStats.entries()).map(([endpoint, stats]) => ({
         endpoint,
@@ -343,7 +352,7 @@ class NetworkMonitorClass {
       slowestRequests: slowestRequests.map((req) => ({
         url: req.url,
         method: req.method,
-        duration: `${req.duration?.toFixed(2)  }ms`,
+        duration: req.duration?.toFixed(2) + 'ms',
         status: req.status,
       })),
       failedRequests: this.getFailedRequests().map((req) => ({
