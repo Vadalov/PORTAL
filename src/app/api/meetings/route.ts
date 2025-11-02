@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
   const limit = Number(searchParams.get('limit') || '20');
   const search = searchParams.get('search') || undefined;
 
-  const filters: Record<string, unknown> = {};
+  const filters: Record<string, string | number | boolean | undefined> = {};
   const status = searchParams.get('status');
   const meeting_type = searchParams.get('meeting_type');
   const organizer = searchParams.get('organizer');
@@ -72,7 +72,7 @@ async function createMeetingHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }
 
-    const response = await api.meetings.createMeeting(body);
+    const response = await api.meetings.createMeeting(body as any);
     if (response.error || !response.data) {
       return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
     }
@@ -82,8 +82,8 @@ async function createMeetingHandler(request: NextRequest) {
     logger.error('Create meeting error', error, {
       endpoint: '/api/meetings',
       method: 'POST',
-      title: body?.title,
-      meetingDate: body?.meeting_date
+      title: (body as any)?.title,
+      meetingDate: (body as any)?.meeting_date
     });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }

@@ -68,7 +68,7 @@ async function createTaskHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }
 
-    const response = await api.tasks.createTask(body);
+    const response = await api.tasks.createTask(body as any);
     if (response.error || !response.data) {
       return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
     }
@@ -78,7 +78,7 @@ async function createTaskHandler(request: NextRequest) {
     logger.error('Create task error', error, {
       endpoint: '/api/tasks',
       method: 'POST',
-      title: body?.title
+      title: (body as any)?.title
     });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }

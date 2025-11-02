@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   if (healthCache && (now - healthCache.timestamp) < CACHE_DURATION) {
     return NextResponse.json({
       ...baseResponse,
-      ...healthCache.data,
+      ...(healthCache.data as object),
       cached: true,
     });
   }
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
     try {
       connectivityReport = await connectivityTester.getConnectivityReport();
     } catch (error: unknown) {
-      connectivityError = error.message;
+      connectivityError = error instanceof Error ? error.message : 'Bilinmeyen hata';
       logger.error('Connectivity test failed', error, {
         endpoint: '/api/health',
         provider,

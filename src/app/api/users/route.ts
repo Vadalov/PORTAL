@@ -47,7 +47,7 @@ async function createUserHandler(request: NextRequest) {
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }
-    const response = await api.users.createUser({ ...body, isActive: true });
+    const response = await api.users.createUser({ ...(body as any), isActive: true });
     if (response.error || !response.data) {
       return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
     }
@@ -56,7 +56,7 @@ async function createUserHandler(request: NextRequest) {
     logger.error('Create user error', error, {
       endpoint: '/api/users',
       method: 'POST',
-      email: body?.email // Safe to log email for debugging
+      email: (body as any)?.email // Safe to log email for debugging
     });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }

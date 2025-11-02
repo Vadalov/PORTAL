@@ -8,31 +8,32 @@ import { handleGetById, handleUpdate, handleDelete, extractParams, handleApiErro
 /**
  * Validate beneficiary data for updates
  */
-function validateBeneficiaryUpdate(data: BeneficiaryFormData): { isValid: boolean; errors: string[] } {
+function validateBeneficiaryUpdate(data: unknown): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
+  const beneficiaryData = data as any;
 
   // Optional fields validation (only if provided)
-  if (data.name && data.name.trim().length < 2) {
+  if (beneficiaryData.name && beneficiaryData.name.trim().length < 2) {
     errors.push('Ad Soyad en az 2 karakter olmalıdır');
   }
 
-  if (data.tc_no && !/^\d{11}$/.test(data.tc_no)) {
+  if (beneficiaryData.tc_no && !/^\d{11}$/.test(beneficiaryData.tc_no)) {
     errors.push('TC Kimlik No 11 haneli olmalıdır');
   }
 
-  if (data.phone && !/^[0-9\s\-\+\(\)]{10,15}$/.test(data.phone)) {
+  if (beneficiaryData.phone && !/^[0-9\s\-\+\(\)]{10,15}$/.test(beneficiaryData.phone)) {
     errors.push('Geçerli bir telefon numarası giriniz');
   }
 
-  if (data.address && data.address.trim().length < 10) {
+  if (beneficiaryData.address && beneficiaryData.address.trim().length < 10) {
     errors.push('Adres en az 10 karakter olmalıdır');
   }
 
-  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+  if (beneficiaryData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(beneficiaryData.email)) {
     errors.push('Geçerli bir email adresi giriniz');
   }
 
-  if (data.status && !['TASLAK', 'AKTIF', 'PASIF', 'SILINDI'].includes(data.status)) {
+  if (beneficiaryData.status && !['TASLAK', 'AKTIF', 'PASIF', 'SILINDI'].includes(beneficiaryData.status)) {
     errors.push('Geçersiz durum değeri');
   }
 
@@ -83,13 +84,13 @@ async function updateBeneficiaryHandler(
   const { id } = await extractParams(params);
   
   try {
-    const body = await request.json();
-    
+    const body = await request.json() as Partial<BeneficiaryFormData>;
+
     return await handleUpdate(
       id,
       body,
       validateBeneficiaryUpdate,
-      (id, data) => api.beneficiaries.updateBeneficiary(id, data),
+      (id, data) => api.beneficiaries.updateBeneficiary(id, data as any),
       'İhtiyaç sahibi'
     );
   } catch (error: unknown) {

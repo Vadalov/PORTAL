@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   const limit = Number(searchParams.get('limit') || '20');
   const search = searchParams.get('search') || undefined;
 
-  const filters: Record<string, unknown> = {};
+  const filters: Record<string, string | number | boolean | undefined> = {};
   const message_type = searchParams.get('message_type');
   const status = searchParams.get('status');
   const sender = searchParams.get('sender');
@@ -73,7 +73,7 @@ async function createMessageHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }
 
-    const response = await api.messages.createMessage(body);
+    const response = await api.messages.createMessage(body as any);
     if (response.error || !response.data) {
       return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
     }
@@ -83,8 +83,8 @@ async function createMessageHandler(request: NextRequest) {
     logger.error('Create message error', error, {
       endpoint: '/api/messages',
       method: 'POST',
-      messageType: body?.message_type,
-      recipientCount: body?.recipients?.length
+      messageType: (body as any)?.message_type,
+      recipientCount: (body as any)?.recipients?.length
     });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }

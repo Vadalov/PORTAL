@@ -69,12 +69,12 @@ async function createDonationHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateDonation(body as Partial<DonationDocument>);
+    const validation = validateDonation(body as any);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }
 
-    const response = await api.donations.createDonation(body as Partial<DonationDocument>);
+    const response = await api.donations.createDonation(body as any);
     if (response.error) {
       return NextResponse.json({ success: false, error: response.error }, { status: 400 });
     }
@@ -84,8 +84,8 @@ async function createDonationHandler(request: NextRequest) {
     logger.error('Create donation error', error, {
       endpoint: '/api/donations',
       method: 'POST',
-      donorName: body?.donor_name,
-      amount: body?.amount
+      donorName: (body as any)?.donor_name,
+      amount: (body as any)?.amount
     });
     return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
   }
