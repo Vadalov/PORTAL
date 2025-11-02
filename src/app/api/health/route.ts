@@ -17,9 +17,17 @@ export async function GET(request: Request) {
   const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || '';
   const databaseId = process.env.NEXT_PUBLIC_DATABASE_ID || '';
   const apiKey = process.env.APPWRITE_API_KEY ? 'SET' : 'NOT_SET';
-  const provider = (process.env.NEXT_PUBLIC_BACKEND_PROVIDER || process.env.BACKEND_PROVIDER || 'mock').toLowerCase();
+  const provider = (
+    process.env.NEXT_PUBLIC_BACKEND_PROVIDER ||
+    process.env.BACKEND_PROVIDER ||
+    'mock'
+  ).toLowerCase();
 
-  const configOk = Boolean(endpoint && projectId && (provider === 'mock' || (provider === 'appwrite' && apiKey === 'SET' && databaseId)));
+  const configOk = Boolean(
+    endpoint &&
+      projectId &&
+      (provider === 'mock' || (provider === 'appwrite' && apiKey === 'SET' && databaseId))
+  );
 
   const baseResponse = {
     ok: true,
@@ -41,10 +49,10 @@ export async function GET(request: Request) {
 
   // Check cache for detailed checks
   const now = Date.now();
-  if (healthCache && (now - healthCache.timestamp) < CACHE_DURATION) {
+  if (healthCache && now - healthCache.timestamp < CACHE_DURATION) {
     return NextResponse.json({
       ...baseResponse,
-      ...healthCache.data,
+      ...(healthCache.data as object),
       cached: true,
     });
   }
@@ -60,11 +68,11 @@ export async function GET(request: Request) {
     try {
       connectivityReport = await connectivityTester.getConnectivityReport();
     } catch (error: unknown) {
-      connectivityError = error.message;
+      connectivityError = error instanceof Error ? error.message : 'Bilinmeyen hata';
       logger.error('Connectivity test failed', error, {
         endpoint: '/api/health',
         provider,
-        detailed: true
+        detailed: true,
       });
     }
   }
@@ -82,7 +90,11 @@ export async function GET(request: Request) {
 
   // Determine status code
   let statusCode = 200;
-  if (provider === 'appwrite' && connectivityReport && connectivityReport.summary.overallHealth < 50) {
+  if (
+    provider === 'appwrite' &&
+    connectivityReport &&
+    connectivityReport.summary.overallHealth < 50
+  ) {
     statusCode = 503; // Service unavailable
   }
 
@@ -100,8 +112,11 @@ export async function GET(request: Request) {
     timestamp: now,
   };
 
-  return NextResponse.json({
-    ...baseResponse,
-    ...detailedData,
-  }, { status: statusCode });
+  return NextResponse.json(
+    {
+      ...baseResponse,
+      ...detailedData,
+    },
+    { status: statusCode }
+  );
 }

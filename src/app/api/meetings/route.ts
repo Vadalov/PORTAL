@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
   const limit = Number(searchParams.get('limit') || '20');
   const search = searchParams.get('search') || undefined;
 
-  const filters: Record<string, unknown> = {};
+  const filters: Record<string, string | number | boolean | undefined> = {};
   const status = searchParams.get('status');
   const meeting_type = searchParams.get('meeting_type');
   const organizer = searchParams.get('organizer');
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       method: 'GET',
       page,
       limit,
-      filters
+      filters,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -69,23 +69,35 @@ async function createMeetingHandler(request: NextRequest) {
     body = await request.json();
     const validation = validateMeeting(body as Record<string, unknown>);
     if (!validation.isValid) {
-      return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
     }
 
-    const response = await api.meetings.createMeeting(body);
+    const response = await api.meetings.createMeeting(body as Partial<MeetingDocument>);
     if (response.error || !response.data) {
-      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: response.error || 'Oluşturma başarısız' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ success: true, data: response.data, message: 'Toplantı başarıyla oluşturuldu' }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: response.data, message: 'Toplantı başarıyla oluşturuldu' },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     logger.error('Create meeting error', error, {
       endpoint: '/api/meetings',
       method: 'POST',
-      title: body?.title,
-      meetingDate: body?.meeting_date
+      title: (body as Record<string, unknown>)?.title,
+      meetingDate: (body as Record<string, unknown>)?.meeting_date,
     });
-    return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Oluşturma işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

@@ -1,20 +1,30 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { ErrorAlert } from '@/components/ui/error-alert';
-import { 
-  FinancialReport, 
-  ReportType,
-  DashboardMetrics,
-  ApiResponse
-} from '@/types/financial';
+import { FinancialReport, ReportType, DashboardMetrics, ApiResponse } from '@/types/financial';
 import {
   FileText,
   BarChart3,
@@ -26,7 +36,7 @@ import {
   DollarSign,
   FileSpreadsheet,
   FileDown,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 
@@ -37,7 +47,7 @@ const REPORT_TYPE_LABELS: Record<ReportType, string> = {
   monthly_summary: 'Aylık Özet',
   yearly_summary: 'Yıllık Özet',
   donor_report: 'Bağışçı Raporu',
-  expense_report: 'Gider Raporu'
+  expense_report: 'Gider Raporu',
 };
 
 interface ReportStats {
@@ -59,14 +69,16 @@ export default function RaporlarPage() {
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<ReportStats | null>(null);
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
-  
+
   // Report generation form
   const [showGenerateForm, setShowGenerateForm] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generateFormData, setGenerateFormData] = useState({
     type: 'monthly_summary' as ReportType,
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0]
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+      .toISOString()
+      .split('T')[0],
+    endDate: new Date().toISOString().split('T')[0],
   });
 
   // Chart data states
@@ -75,7 +87,7 @@ export default function RaporlarPage() {
     categoryDistribution: Array<{ category: string; amount: number; percentage: number }>;
   }>({
     monthlyTrend: [],
-    categoryDistribution: []
+    categoryDistribution: [],
   });
 
   // Fetch reports
@@ -129,10 +141,10 @@ export default function RaporlarPage() {
           { category: 'Üyelik Aidatı', amount: 28000, percentage: 22.4 },
           { category: 'İdari Giderler', amount: 25000, percentage: 20 },
           { category: 'Program Giderleri', amount: 18000, percentage: 14.4 },
-          { category: 'Diğer', amount: 9000, percentage: 7.2 }
-        ]
+          { category: 'Diğer', amount: 9000, percentage: 7.2 },
+        ],
       };
-      
+
       setStats(mockStats);
 
       // Generate chart data
@@ -141,25 +153,24 @@ export default function RaporlarPage() {
       for (let i = 11; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthName = format(date, 'MMM yyyy', { locale: tr });
-        
+
         monthlyTrend.push({
           month: monthName,
           income: Math.random() * 20000 + 5000,
           expense: Math.random() * 15000 + 3000,
-          balance: 0 // Will be calculated
+          balance: 0, // Will be calculated
         });
       }
-      
+
       // Calculate balances
-      monthlyTrend.forEach(month => {
+      monthlyTrend.forEach((month) => {
         month.balance = month.income - month.expense;
       });
 
       setChartData({
         monthlyTrend,
-        categoryDistribution: mockStats.topCategories
+        categoryDistribution: mockStats.topCategories,
       });
-
     } catch (err) {
       console.error('Stats fetch error:', err);
     }
@@ -206,9 +217,8 @@ export default function RaporlarPage() {
     }
   };
 
-
   // Mock chart component (replace with actual chart library)
-  const SimpleChart = ({ data, type }: { data: unknown[], type: 'line' | 'pie' | 'bar' }) => {
+  const SimpleChart = ({ data, type }: { data: unknown[]; type: 'line' | 'pie' | 'bar' }) => {
     return (
       <div className="w-full h-64 bg-muted/30 rounded-lg flex items-center justify-center">
         <div className="text-center">
@@ -216,9 +226,7 @@ export default function RaporlarPage() {
           <p className="text-sm text-muted-foreground">
             {type === 'line' ? 'Çizgi Grafiği' : type === 'pie' ? 'Pasta Grafiği' : 'Çubuk Grafiği'}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {data.length} veri noktası
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">{data.length} veri noktası</p>
         </div>
       </div>
     );
@@ -252,12 +260,16 @@ export default function RaporlarPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Finansal Raporlar</h1>
-          <p className="text-muted-foreground">
-            Detaylı finansal analizler ve raporlar oluşturun
-          </p>
+          <p className="text-muted-foreground">Detaylı finansal analizler ve raporlar oluşturun</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => { fetchReports(); fetchStats(); }}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              fetchReports();
+              fetchStats();
+            }}
+          >
             <RefreshCw className="w-4 h-4 mr-2" />
             Yenile
           </Button>
@@ -278,16 +290,20 @@ export default function RaporlarPage() {
               <form onSubmit={handleGenerateReport} className="space-y-4">
                 <div>
                   <Label htmlFor="report-type">Rapor Türü</Label>
-                  <Select 
-                    value={generateFormData.type} 
-                    onValueChange={(value) => setGenerateFormData(prev => ({ ...prev, type: value as ReportType }))}
+                  <Select
+                    value={generateFormData.type}
+                    onValueChange={(value) =>
+                      setGenerateFormData((prev) => ({ ...prev, type: value as ReportType }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(REPORT_TYPE_LABELS).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                        <SelectItem key={key} value={key}>
+                          {label}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -299,7 +315,9 @@ export default function RaporlarPage() {
                       id="start-date"
                       type="date"
                       value={generateFormData.startDate}
-                      onChange={(e) => setGenerateFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                      onChange={(e) =>
+                        setGenerateFormData((prev) => ({ ...prev, startDate: e.target.value }))
+                      }
                       required
                     />
                   </div>
@@ -309,15 +327,17 @@ export default function RaporlarPage() {
                       id="end-date"
                       type="date"
                       value={generateFormData.endDate}
-                      onChange={(e) => setGenerateFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                      onChange={(e) =>
+                        setGenerateFormData((prev) => ({ ...prev, endDate: e.target.value }))
+                      }
                       required
                     />
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
+                  <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setShowGenerateForm(false)}
                   >
                     İptal
@@ -384,9 +404,7 @@ export default function RaporlarPage() {
               <div className="text-2xl font-bold text-blue-600">
                 {formatCurrency(dashboardMetrics.yearly.netBalance)}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Toplam bakiye
-              </p>
+              <p className="text-xs text-muted-foreground">Toplam bakiye</p>
             </CardContent>
           </Card>
 
@@ -400,9 +418,11 @@ export default function RaporlarPage() {
                 %{dashboardMetrics.currentMonth.budgetUtilization.toFixed(1)}
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div 
+                <div
                   className={`h-2 rounded-full ${dashboardMetrics.currentMonth.budgetUtilization > 100 ? 'bg-red-500' : 'bg-blue-500'}`}
-                  style={{ width: `${Math.min(dashboardMetrics.currentMonth.budgetUtilization, 100)}%` }}
+                  style={{
+                    width: `${Math.min(dashboardMetrics.currentMonth.budgetUtilization, 100)}%`,
+                  }}
                 />
               </div>
             </CardContent>
@@ -419,9 +439,7 @@ export default function RaporlarPage() {
               <TrendingUp className="w-5 h-5" />
               Aylık Trend
             </CardTitle>
-            <CardDescription>
-              Son 12 ayın gelir-gider trendi
-            </CardDescription>
+            <CardDescription>Son 12 ayın gelir-gider trendi</CardDescription>
           </CardHeader>
           <CardContent>
             <SimpleChart data={chartData.monthlyTrend} type="line" />
@@ -435,9 +453,7 @@ export default function RaporlarPage() {
               <PieChart className="w-5 h-5" />
               Kategori Dağılımı
             </CardTitle>
-            <CardDescription>
-              Gelir ve gider kategorilerinin dağılımı
-            </CardDescription>
+            <CardDescription>Gelir ve gider kategorilerinin dağılımı</CardDescription>
           </CardHeader>
           <CardContent>
             <SimpleChart data={chartData.categoryDistribution} type="pie" />
@@ -470,9 +486,7 @@ export default function RaporlarPage() {
               <div className="text-2xl font-bold text-green-600">
                 {formatCurrency(stats.totalRevenue)}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Raporlanan dönem
-              </p>
+              <p className="text-xs text-muted-foreground">Raporlanan dönem</p>
             </CardContent>
           </Card>
 
@@ -482,12 +496,12 @@ export default function RaporlarPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${stats.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <div
+                className={`text-2xl font-bold ${stats.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}
+              >
                 {formatCurrency(stats.netBalance)}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Gelir - Gider
-              </p>
+              <p className="text-xs text-muted-foreground">Gelir - Gider</p>
             </CardContent>
           </Card>
         </div>
@@ -505,32 +519,37 @@ export default function RaporlarPage() {
           {reports.length > 0 ? (
             <div className="space-y-4">
               {reports.map((report) => (
-                <div key={report.id} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                <div
+                  key={report.id}
+                  className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold">{report.title}</h3>
-                        <Badge variant="outline">
-                          {REPORT_TYPE_LABELS[report.type]}
-                        </Badge>
+                        <Badge variant="outline">{REPORT_TYPE_LABELS[report.type]}</Badge>
                       </div>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
                         <div>
-                          <span className="font-medium">Başlangıç:</span><br />
+                          <span className="font-medium">Başlangıç:</span>
+                          <br />
                           {formatDate(report.dateRange.startDate)}
                         </div>
                         <div>
-                          <span className="font-medium">Bitiş:</span><br />
+                          <span className="font-medium">Bitiş:</span>
+                          <br />
                           {formatDate(report.dateRange.endDate)}
                         </div>
                         <div>
-                          <span className="font-medium">Toplam Gelir:</span><br />
+                          <span className="font-medium">Toplam Gelir:</span>
+                          <br />
                           <span className="text-green-600 font-medium">
                             {formatCurrency(report.data.summary.totalIncome)}
                           </span>
                         </div>
                         <div>
-                          <span className="font-medium">Toplam Gider:</span><br />
+                          <span className="font-medium">Toplam Gider:</span>
+                          <br />
                           <span className="text-red-600 font-medium">
                             {formatCurrency(report.data.summary.totalExpense)}
                           </span>
@@ -541,18 +560,10 @@ export default function RaporlarPage() {
                       <Button variant="outline" size="sm">
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleExportPDF(report)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => handleExportPDF(report)}>
                         <FileDown className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleExportExcel(report)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => handleExportExcel(report)}>
                         <FileSpreadsheet className="w-4 h-4" />
                       </Button>
                     </div>
@@ -560,17 +571,22 @@ export default function RaporlarPage() {
                   <div className="mt-3 pt-3 border-t">
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="font-medium">Net Bakiye:</span><br />
-                        <span className={`font-semibold ${report.data.summary.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className="font-medium">Net Bakiye:</span>
+                        <br />
+                        <span
+                          className={`font-semibold ${report.data.summary.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        >
                           {formatCurrency(report.data.summary.netBalance)}
                         </span>
                       </div>
                       <div>
-                        <span className="font-medium">İşlem Sayısı:</span><br />
+                        <span className="font-medium">İşlem Sayısı:</span>
+                        <br />
                         {report.data.summary.transactionCount}
                       </div>
                       <div>
-                        <span className="font-medium">Oluşturulma:</span><br />
+                        <span className="font-medium">Oluşturulma:</span>
+                        <br />
                         {formatDate(report.generatedAt)}
                       </div>
                     </div>
@@ -580,7 +596,9 @@ export default function RaporlarPage() {
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              {loading ? 'Raporlar yükleniyor...' : (
+              {loading ? (
+                'Raporlar yükleniyor...'
+              ) : (
                 <div>
                   <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium mb-2">Henüz rapor oluşturulmamış</h3>

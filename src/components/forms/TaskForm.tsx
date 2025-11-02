@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,16 +5,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DatePicker } from '@/components/ui/date-picker';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
-import { toast } from 'sonner';
-import { Loader2, X, AlertCircle, User, Calendar } from 'lucide-react';
-import { taskSchema, type TaskFormData, getPriorityColor, getStatusColor, getPriorityLabel, getStatusLabel, isTaskDueSoon } from '@/lib/validations/task';
+import { Loader2, X, AlertCircle, User } from 'lucide-react';
+import {
+  taskSchema,
+  type TaskFormData,
+  getPriorityColor,
+  getStatusColor,
+  getPriorityLabel,
+  getStatusLabel,
+  isTaskDueSoon,
+} from '@/lib/validations/task';
+import { useFormMutation } from '@/hooks/useFormMutation';
 import type { UserDocument } from '@/types/collections';
 
 interface TaskFormProps {
@@ -63,37 +76,33 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
   // Fetch users for assignment - disabled for now
   // const { data: usersResponse } = useQuery({
   //   queryKey: ['users'],
-  //   queryFn: () => api.users.getUsers({ limit: 100 } as any),
+  //   queryFn: () => api.users.getUsers({ limit: 100 }),
   //   enabled: true,
   // });
 
-  const users: any[] = []; // Empty for now
+  const users: UserDocument[] = []; // Empty for now
 
   // Create task mutation
-  const createTaskMutation = useMutation({
+  const createTaskMutation = useFormMutation<TaskFormData, TaskFormData>({
+    queryKey: ['tasks'],
+    successMessage: 'Görev başarıyla oluşturuldu',
+    errorMessage: 'Görev oluşturulurken hata oluştu',
     mutationFn: (data: TaskFormData) => api.tasks.createTask(data),
     onSuccess: () => {
-      toast.success('Görev başarıyla oluşturuldu');
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Görev oluşturulurken hata oluştu: ${  error.message}`);
     },
   });
 
   // Update task mutation
-  const updateTaskMutation = useMutation({
+  const updateTaskMutation = useFormMutation<TaskFormData, TaskFormData>({
+    queryKey: ['tasks'],
+    successMessage: 'Görev başarıyla güncellendi',
+    errorMessage: 'Görev güncellenirken hata oluştu',
     mutationFn: (data: TaskFormData) => api.tasks.updateTask(taskId!, data),
     onSuccess: () => {
-      toast.success('Görev başarıyla güncellendi');
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Görev güncellenirken hata oluştu: ${  error.message}`);
     },
   });
 
@@ -123,7 +132,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
   };
 
   const removeTag = (tagToRemove: string) => {
-    const newTags = tags.filter(tag => tag !== tagToRemove);
+    const newTags = tags.filter((tag) => tag !== tagToRemove);
     setTags(newTags);
     setValue('tags', newTags);
   };
@@ -152,8 +161,6 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
     }
   };
 
-  const currentStatus = watch('status');
-  const currentPriority = watch('priority');
   const isDueSoon = dueDate && isTaskDueSoon(dueDate.toISOString());
 
   return (
@@ -161,7 +168,9 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
       <CardHeader>
         <CardTitle>{isEditMode ? 'Görev Düzenle' : 'Yeni Görev Ekle'}</CardTitle>
         <CardDescription>
-          {isEditMode ? 'Görev bilgilerini güncelleyin' : 'Görev bilgilerini girerek yeni kayıt oluşturun'}
+          {isEditMode
+            ? 'Görev bilgilerini güncelleyin'
+            : 'Görev bilgilerini girerek yeni kayıt oluşturun'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -175,9 +184,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
               placeholder="Görev başlığını girin"
               autoFocus
             />
-            {errors.title && (
-              <p className="text-sm text-red-600">{errors.title.message}</p>
-            )}
+            {errors.title && <p className="text-sm text-red-600">{errors.title.message}</p>}
           </div>
 
           {/* Description */}
@@ -227,7 +234,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
               <Label htmlFor="priority">Öncelik *</Label>
               <Select
                 value={watch('priority')}
-                onValueChange={(value) => setValue('priority', value as any)}
+                onValueChange={(value) => setValue('priority', value as TaskFormData['priority'])}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Öncelik seçin" />
@@ -235,9 +242,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
                 <SelectContent>
                   <SelectItem value="low">
                     <div className="flex items-center gap-2">
-                      <Badge className={getPriorityColor('low')}>
-                        {getPriorityLabel('low')}
-                      </Badge>
+                      <Badge className={getPriorityColor('low')}>{getPriorityLabel('low')}</Badge>
                     </div>
                   </SelectItem>
                   <SelectItem value="normal">
@@ -249,9 +254,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
                   </SelectItem>
                   <SelectItem value="high">
                     <div className="flex items-center gap-2">
-                      <Badge className={getPriorityColor('high')}>
-                        {getPriorityLabel('high')}
-                      </Badge>
+                      <Badge className={getPriorityColor('high')}>{getPriorityLabel('high')}</Badge>
                     </div>
                   </SelectItem>
                   <SelectItem value="urgent">
@@ -263,16 +266,14 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
                   </SelectItem>
                 </SelectContent>
               </Select>
-              {errors.priority && (
-                <p className="text-sm text-red-600">{errors.priority.message}</p>
-              )}
+              {errors.priority && <p className="text-sm text-red-600">{errors.priority.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="status">Durum *</Label>
               <Select
                 value={watch('status')}
-                onValueChange={(value) => setValue('status', value as any)}
+                onValueChange={(value) => setValue('status', value as TaskFormData['status'])}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Durum seçin" />
@@ -308,9 +309,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
                   </SelectItem>
                 </SelectContent>
               </Select>
-              {errors.status && (
-                <p className="text-sm text-red-600">{errors.status.message}</p>
-              )}
+              {errors.status && <p className="text-sm text-red-600">{errors.status.message}</p>}
             </div>
           </div>
 
@@ -331,9 +330,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
                 </div>
               )}
             </div>
-            {errors.due_date && (
-              <p className="text-sm text-red-600">{errors.due_date.message}</p>
-            )}
+            {errors.due_date && <p className="text-sm text-red-600">{errors.due_date.message}</p>}
           </div>
 
           {/* Category */}
@@ -345,9 +342,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
               placeholder="Kategori (örn: Bağış, Yardım, İdari)"
               maxLength={50}
             />
-            {errors.category && (
-              <p className="text-sm text-red-600">{errors.category.message}</p>
-            )}
+            {errors.category && <p className="text-sm text-red-600">{errors.category.message}</p>}
           </div>
 
           {/* Tags */}
@@ -363,17 +358,13 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
                 disabled={tags.length >= 10}
               />
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">
-                  {tags.length}/10 etiket
-                </span>
+                <span className="text-sm text-gray-500">{tags.length}/10 etiket</span>
                 {tags.length >= 10 && (
-                  <span className="text-sm text-red-500">
-                    Maksimum etiket sayısına ulaşıldı
-                  </span>
+                  <span className="text-sm text-red-500">Maksimum etiket sayısına ulaşıldı</span>
                 )}
               </div>
             </div>
-            
+
             {/* Display tags */}
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
@@ -391,25 +382,21 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
                 ))}
               </div>
             )}
-            {errors.tags && (
-              <p className="text-sm text-red-600">{errors.tags.message}</p>
-            )}
+            {errors.tags && <p className="text-sm text-red-600">{errors.tags.message}</p>}
           </div>
 
           {/* Form Actions */}
           <div className="flex flex-col sm:flex-row gap-4 pt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 sm:flex-none"
-            >
+            <Button type="submit" disabled={isSubmitting} className="flex-1 sm:flex-none">
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   {isEditMode ? 'Güncelleniyor...' : 'Kaydediliyor...'}
                 </>
+              ) : isEditMode ? (
+                'Güncelle'
               ) : (
-                isEditMode ? 'Güncelle' : 'Kaydet'
+                'Kaydet'
               )}
             </Button>
 

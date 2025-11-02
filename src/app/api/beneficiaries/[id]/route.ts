@@ -1,44 +1,75 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { BeneficiaryFormData } from '@/types/beneficiary';
-import { handleGetById, handleUpdate, handleDelete, extractParams, handleApiError } from '@/lib/api/route-helpers';
+import {
+  handleGetById,
+  handleUpdate,
+  handleDelete,
+  extractParams,
+  handleApiError,
+} from '@/lib/api/route-helpers';
 
 /**
  * Validate beneficiary data for updates
  */
-function validateBeneficiaryUpdate(data: BeneficiaryFormData): { isValid: boolean; errors: string[] } {
+function validateBeneficiaryUpdate(data: unknown): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
+  const beneficiaryData = data as Record<string, unknown>;
 
   // Optional fields validation (only if provided)
-  if (data.name && data.name.trim().length < 2) {
+  if (
+    beneficiaryData.name &&
+    typeof beneficiaryData.name === 'string' &&
+    beneficiaryData.name.trim().length < 2
+  ) {
     errors.push('Ad Soyad en az 2 karakter olmalıdır');
   }
 
-  if (data.tc_no && !/^\d{11}$/.test(data.tc_no)) {
+  if (
+    beneficiaryData.tc_no &&
+    typeof beneficiaryData.tc_no === 'string' &&
+    !/^\d{11}$/.test(beneficiaryData.tc_no)
+  ) {
     errors.push('TC Kimlik No 11 haneli olmalıdır');
   }
 
-  if (data.phone && !/^[0-9\s\-\+\(\)]{10,15}$/.test(data.phone)) {
+  if (
+    beneficiaryData.phone &&
+    typeof beneficiaryData.phone === 'string' &&
+    !/^[0-9\s\-\+\(\)]{10,15}$/.test(beneficiaryData.phone)
+  ) {
     errors.push('Geçerli bir telefon numarası giriniz');
   }
 
-  if (data.address && data.address.trim().length < 10) {
+  if (
+    beneficiaryData.address &&
+    typeof beneficiaryData.address === 'string' &&
+    beneficiaryData.address.trim().length < 10
+  ) {
     errors.push('Adres en az 10 karakter olmalıdır');
   }
 
-  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+  if (
+    beneficiaryData.email &&
+    typeof beneficiaryData.email === 'string' &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(beneficiaryData.email)
+  ) {
     errors.push('Geçerli bir email adresi giriniz');
   }
 
-  if (data.status && !['TASLAK', 'AKTIF', 'PASIF', 'SILINDI'].includes(data.status)) {
+  if (
+    beneficiaryData.status &&
+    typeof beneficiaryData.status === 'string' &&
+    !['TASLAK', 'AKTIF', 'PASIF', 'SILINDI'].includes(beneficiaryData.status)
+  ) {
     errors.push('Geçersiz durum değeri');
   }
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -51,13 +82,9 @@ async function getBeneficiaryHandler(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await extractParams(params);
-  
+
   try {
-    return await handleGetById(
-      id,
-      (id) => api.beneficiaries.getBeneficiary(id),
-      'İhtiyaç sahibi'
-    );
+    return await handleGetById(id, (id) => api.beneficiaries.getBeneficiary(id), 'İhtiyaç sahibi');
   } catch (error: unknown) {
     return handleApiError(
       error,
@@ -65,7 +92,7 @@ async function getBeneficiaryHandler(
       {
         endpoint: '/api/beneficiaries/[id]',
         method: request.method,
-        beneficiaryId: id
+        beneficiaryId: id,
       },
       'Veri alınamadı'
     );
@@ -81,15 +108,15 @@ async function updateBeneficiaryHandler(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await extractParams(params);
-  
+
   try {
-    const body = await request.json();
-    
+    const body = (await request.json()) as Partial<BeneficiaryFormData>;
+
     return await handleUpdate(
       id,
       body,
       validateBeneficiaryUpdate,
-      (id, data) => api.beneficiaries.updateBeneficiary(id, data),
+      (id, data) => api.beneficiaries.updateBeneficiary(id, data as Partial<BeneficiaryFormData>),
       'İhtiyaç sahibi'
     );
   } catch (error: unknown) {
@@ -99,7 +126,7 @@ async function updateBeneficiaryHandler(
       {
         endpoint: '/api/beneficiaries/[id]',
         method: request.method,
-        beneficiaryId: id
+        beneficiaryId: id,
       },
       'Güncelleme işlemi başarısız'
     );
@@ -115,7 +142,7 @@ async function deleteBeneficiaryHandler(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await extractParams(params);
-  
+
   try {
     return await handleDelete(
       id,
@@ -129,7 +156,7 @@ async function deleteBeneficiaryHandler(
       {
         endpoint: '/api/beneficiaries/[id]',
         method: request.method,
-        beneficiaryId: id
+        beneficiaryId: id,
       },
       'Silme işlemi başarısız'
     );

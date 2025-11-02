@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { User, Calendar, MapPin, Users, FileText, Clock, AlertCircle } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { User, MapPin, Users, FileText, Clock, AlertCircle } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +23,8 @@ import { Badge } from '@/components/ui/badge';
 
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
+import { useFormMutation } from '@/hooks/useFormMutation';
+import { toast } from 'sonner';
 import {
   meetingSchema,
   meetingEditSchema,
@@ -63,10 +64,10 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
   // Fetch users for participant selection - disabled for now
   // const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
   //   queryKey: ['users'],
-  //   queryFn: () => api.users.getUsers({ limit: 100 } as any),
+  //   queryFn: () => api.users.getUsers({ limit: 100 }),
   // });
 
-  const users: any[] = []; // Empty for now
+  const users: unknown[] = []; // Empty for now
 
   // Form setup
   const {
@@ -115,7 +116,12 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
   }, [selectedDate, selectedTime, setValue]);
 
   // Create/Update mutation
-  const mutation = useMutation({
+  const mutation = useFormMutation<unknown, MeetingFormData | MeetingEditFormData>({
+    queryKey: ['meetings'],
+    successMessage: isEditMode
+      ? 'Toplantı başarıyla güncellendi'
+      : 'Toplantı başarıyla oluşturuldu',
+    errorMessage: `Toplantı ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} hata oluştu`,
     mutationFn: async (data: MeetingFormData | MeetingEditFormData) => {
       if (isEditMode && meetingId) {
         return await api.meetings.updateMeeting(meetingId, data);
@@ -124,33 +130,22 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       queryClient.invalidateQueries({ queryKey: ['upcoming-meetings-count'] });
-      toast.success(isEditMode ? 'Toplantı başarıyla güncellendi' : 'Toplantı başarıyla oluşturuldu');
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(
-        `Toplantı ${isEditMode ? 'güncellenirken' : 'oluşturulurken'} hata oluştu: ${error.message}`
-      );
     },
   });
 
   // Start meeting mutation
-  const startMeetingMutation = useMutation({
+  const startMeetingMutation = useFormMutation<unknown, void>({
+    queryKey: ['meetings'],
+    successMessage: 'Toplantı başlatıldı',
+    errorMessage: 'Toplantı başlatılırken hata oluştu',
     mutationFn: async () => {
-      if (!meetingId) return;
+      if (!meetingId) return {} as unknown;
       return await api.meetings.updateMeetingStatus(meetingId, 'ongoing');
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['meetings'] });
-      toast.success('Toplantı başlatıldı');
-      onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Toplantı başlatılırken hata oluştu: ${error.message}`);
-    },
+    onSuccess,
   });
 
   const onSubmit = (data: MeetingFormData | MeetingEditFormData) => {
@@ -304,12 +299,7 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
               <User className="mr-1 inline h-4 w-4" />
               Düzenleyen
             </Label>
-            <Input
-              id="organizer"
-              value={user?.name || ''}
-              disabled
-              className="h-9 bg-gray-100"
-            />
+            <Input id="organizer" value={user?.name || ''} disabled className="h-9 bg-gray-100" />
           </div>
 
           {/* Participants */}
@@ -351,9 +341,7 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
                 </Badge>
               ))}
             </div>
-            <p className="text-sm text-gray-500">
-              {selectedParticipants.length} katılımcı seçildi
-            </p>
+            <p className="text-sm text-gray-500">{selectedParticipants.length} katılımcı seçildi</p>
             {errors.participants && (
               <p className="text-sm text-red-500">{errors.participants.message}</p>
             )}
@@ -366,10 +354,7 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
               <Select
                 defaultValue={initialData?.status || 'scheduled'}
                 onValueChange={(value) =>
-                  setValue(
-                    'status',
-                    value as 'scheduled' | 'ongoing' | 'completed' | 'cancelled'
-                  )
+                  setValue('status', value as 'scheduled' | 'ongoing' | 'completed' | 'cancelled')
                 }
               >
                 <SelectTrigger className="h-9">
@@ -407,7 +392,9 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
               <FileText className="mr-1 inline h-4 w-4" />
               Notlar
               {watchedStatus === 'completed' && (
-                <span className="ml-1 text-sm text-blue-600">(Tamamlanan toplantı için önemli)</span>
+                <span className="ml-1 text-sm text-blue-600">
+                  (Tamamlanan toplantı için önemli)
+                </span>
               )}
             </Label>
             <Textarea

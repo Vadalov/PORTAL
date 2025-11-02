@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       method: 'GET',
       page,
       limit,
-      filters
+      filters,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -65,22 +65,34 @@ async function createTaskHandler(request: NextRequest) {
     body = await request.json();
     const validation = validateTask(body as Record<string, unknown>);
     if (!validation.isValid) {
-      return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
     }
 
-    const response = await api.tasks.createTask(body);
+    const response = await api.tasks.createTask(body as Partial<TaskDocument>);
     if (response.error || !response.data) {
-      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: response.error || 'Oluşturma başarısız' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ success: true, data: response.data, message: 'Görev başarıyla oluşturuldu' }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: response.data, message: 'Görev başarıyla oluşturuldu' },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     logger.error('Create task error', error, {
       endpoint: '/api/tasks',
       method: 'POST',
-      title: body?.title
+      title: (body as Record<string, unknown>)?.title,
     });
-    return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Oluşturma işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

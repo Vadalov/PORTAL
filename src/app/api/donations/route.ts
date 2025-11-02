@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       endpoint: '/api/donations',
       method: 'GET',
       page,
-      limit
+      limit,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -71,7 +71,10 @@ async function createDonationHandler(request: NextRequest) {
     body = await request.json();
     const validation = validateDonation(body as Partial<DonationDocument>);
     if (!validation.isValid) {
-      return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
     }
 
     const response = await api.donations.createDonation(body as Partial<DonationDocument>);
@@ -79,15 +82,21 @@ async function createDonationHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: response.error }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, data: response.data, message: 'Bağış başarıyla oluşturuldu' }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: response.data, message: 'Bağış başarıyla oluşturuldu' },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     logger.error('Create donation error', error, {
       endpoint: '/api/donations',
       method: 'POST',
-      donorName: body?.donor_name,
-      amount: body?.amount
+      donorName: (body as Partial<DonationDocument>)?.donor_name,
+      amount: (body as Partial<DonationDocument>)?.amount,
     });
-    return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Oluşturma işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

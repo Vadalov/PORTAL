@@ -7,25 +7,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
-import { toast } from 'sonner';
-import { Loader2, X, AlertCircle, MessageSquare, Mail, Users, Send, Save, Phone, AtSign } from 'lucide-react';
-import { 
-  messageSchema, 
-  type MessageFormData, 
-  getMessageTypeLabel, 
-  getStatusLabel, 
+import { Loader2, X, MessageSquare, Mail, Users, Send, Save, Phone, AtSign } from 'lucide-react';
+import {
+  messageSchema,
+  type MessageFormData,
+  getMessageTypeLabel,
+  getStatusLabel,
   getStatusColor,
   validateRecipients,
   getSmsMessageCount,
   estimateSmsCost,
-  formatPhoneNumber
+  formatPhoneNumber,
 } from '@/lib/validations/message';
+import { useFormMutation } from '@/hooks/useFormMutation';
+import { toast } from 'sonner';
 import type { UserDocument } from '@/types/collections';
 
 interface MessageFormProps {
@@ -36,14 +43,24 @@ interface MessageFormProps {
   defaultMessageType?: 'sms' | 'email' | 'internal';
 }
 
-export function MessageForm({ onSuccess, onCancel, initialData, messageId, defaultMessageType }: MessageFormProps) {
+export function MessageForm({
+  onSuccess,
+  onCancel,
+  initialData,
+  messageId,
+  defaultMessageType,
+}: MessageFormProps) {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const isEditMode = !!messageId;
 
-  const [selectedRecipients, setSelectedRecipients] = useState<string[]>(initialData?.recipients || []);
+  const [selectedRecipients, setSelectedRecipients] = useState<string[]>(
+    initialData?.recipients || []
+  );
   const [recipientInput, setRecipientInput] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(initialData?.template_id || null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(
+    initialData?.template_id || null
+  );
   const [showPreview, setShowPreview] = useState(false);
 
   const {
@@ -52,8 +69,8 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
     setValue,
     watch,
     formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(messageSchema) as any,
+  } = useForm<MessageFormData>({
+    resolver: zodResolver(messageSchema),
     defaultValues: {
       message_type: initialData?.message_type || defaultMessageType || 'sms',
       sender: user?.id || '',
@@ -75,9 +92,9 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
   // Fetch users for recipient selection - disabled for now
   // const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
   //   queryKey: ['users'],
-  //   queryFn: () => api.users.getUsers({ limit: 100 } as any),
+  //   queryFn: () => api.users.getUsers({ limit: 100 }),
   // });
-  const users: any[] = []; // Empty for now
+  const _users: UserDocument[] = []; // Empty for now
 
   useEffect(() => {
     if (initialData) {
@@ -90,43 +107,37 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
     }
   }, [initialData, setValue]);
 
-  const createMessageMutation = useMutation({
+  const createMessageMutation = useFormMutation<unknown, MessageFormData>({
+    queryKey: ['messages'],
+    successMessage: 'Mesaj başarıyla oluşturuldu.',
+    errorMessage: 'Mesaj oluşturulurken hata oluştu',
     mutationFn: (data: MessageFormData) => api.messages.createMessage(data),
     onSuccess: () => {
-      toast.success('Mesaj başarıyla oluşturuldu.');
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: unknown) => {
-      toast.error(`Mesaj oluşturulurken hata oluştu: ${  error.message}`);
-    },
   });
 
-  const updateMessageMutation = useMutation({
+  const updateMessageMutation = useFormMutation<unknown, { id: string; data: MessageFormData }>({
+    queryKey: ['messages'],
+    successMessage: 'Mesaj başarıyla güncellendi.',
+    errorMessage: 'Mesaj güncellenirken hata oluştu',
     mutationFn: (data: { id: string; data: MessageFormData }) =>
       api.messages.updateMessage(data.id, data.data),
     onSuccess: () => {
-      toast.success('Mesaj başarıyla güncellendi.');
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Mesaj güncellenirken hata oluştu: ${  error.message}`);
     },
   });
 
-  const sendMessageMutation = useMutation({
+  const sendMessageMutation = useFormMutation<unknown, string>({
+    queryKey: ['messages'],
+    successMessage: 'Mesaj başarıyla gönderildi.',
+    errorMessage: 'Mesaj gönderilirken hata oluştu',
     mutationFn: (id: string) => api.messages.sendMessage(id),
     onSuccess: () => {
-      toast.success('Mesaj başarıyla gönderildi.');
-      queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
-    },
-    onError: (error: unknown) => {
-      toast.error(`Mesaj gönderilirken hata oluştu: ${  error.message}`);
     },
   });
 
@@ -134,7 +145,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
     if (e.key === 'Enter' && recipientInput.trim() !== '') {
       e.preventDefault();
       const newRecipient = recipientInput.trim();
-      
+
       // Validate recipient format based on message type
       const validationErrors = validateRecipients([newRecipient], messageType);
       if (validationErrors.length > 0) {
@@ -156,7 +167,9 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
   };
 
   const handleRemoveRecipient = (recipientToRemove: string) => {
-    const updatedRecipients = selectedRecipients.filter((recipient) => recipient !== recipientToRemove);
+    const updatedRecipients = selectedRecipients.filter(
+      (recipient) => recipient !== recipientToRemove
+    );
     setSelectedRecipients(updatedRecipients);
     setValue('recipients', updatedRecipients);
   };
@@ -224,51 +237,72 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
 
   const getRecipientPlaceholder = () => {
     switch (messageType) {
-      case 'sms': return 'Telefon numarası girin (5XXXXXXXXX)';
-      case 'email': return 'E-posta adresi girin';
-      case 'internal': return 'Kullanıcı adı girin';
-      default: return 'Alıcı girin';
+      case 'sms':
+        return 'Telefon numarası girin (5XXXXXXXXX)';
+      case 'email':
+        return 'E-posta adresi girin';
+      case 'internal':
+        return 'Kullanıcı adı girin';
+      default:
+        return 'Alıcı girin';
     }
   };
 
   const getRecipientIcon = () => {
     switch (messageType) {
-      case 'sms': return <Phone className="h-4 w-4" />;
-      case 'email': return <AtSign className="h-4 w-4" />;
-      case 'internal': return <Users className="h-4 w-4" />;
-      default: return <MessageSquare className="h-4 w-4" />;
+      case 'sms':
+        return <Phone className="h-4 w-4" />;
+      case 'email':
+        return <AtSign className="h-4 w-4" />;
+      case 'internal':
+        return <Users className="h-4 w-4" />;
+      default:
+        return <MessageSquare className="h-4 w-4" />;
     }
   };
 
   const getContentPlaceholder = () => {
     switch (messageType) {
-      case 'sms': return 'SMS mesajınızı yazın (max 160 karakter)';
-      case 'email': return 'E-posta içeriğinizi yazın';
-      case 'internal': return 'Kurum içi mesajınızı yazın';
-      default: return 'Mesaj içeriğinizi yazın';
+      case 'sms':
+        return 'SMS mesajınızı yazın (max 160 karakter)';
+      case 'email':
+        return 'E-posta içeriğinizi yazın';
+      case 'internal':
+        return 'Kurum içi mesajınızı yazın';
+      default:
+        return 'Mesaj içeriğinizi yazın';
     }
   };
 
   const getContentRows = () => {
     switch (messageType) {
-      case 'sms': return 4;
-      case 'email': return 8;
-      case 'internal': return 6;
-      default: return 6;
+      case 'sms':
+        return 4;
+      case 'email':
+        return 8;
+      case 'internal':
+        return 6;
+      default:
+        return 6;
     }
   };
 
   const getContentMaxLength = () => {
     switch (messageType) {
-      case 'sms': return 160;
-      case 'email': return 5000;
-      case 'internal': return 5000;
-      default: return 5000;
+      case 'sms':
+        return 160;
+      case 'email':
+        return 5000;
+      case 'internal':
+        return 5000;
+      default:
+        return 5000;
     }
   };
 
   const smsMessageCount = messageType === 'sms' ? getSmsMessageCount(content) : 1;
-  const estimatedCost = messageType === 'sms' ? estimateSmsCost(selectedRecipients.length, content) : 0;
+  const estimatedCost =
+    messageType === 'sms' ? estimateSmsCost(selectedRecipients.length, content) : 0;
 
   return (
     <Card className="w-full mx-auto shadow-none border-none">
@@ -276,13 +310,15 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
         <CardTitle>{isEditMode ? 'Mesajı Düzenle' : 'Yeni Mesaj Oluştur'}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Message Type */}
           <div className="space-y-2">
             <Label htmlFor="message_type">Mesaj Türü *</Label>
             <Select
               value={messageType}
-              onValueChange={(value) => setValue('message_type', value as MessageFormData['message_type'])}
+              onValueChange={(value) =>
+                setValue('message_type', value as MessageFormData['message_type'])
+              }
               disabled={isEditMode}
             >
               <SelectTrigger className="h-9">
@@ -308,9 +344,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
 
           {/* Recipients */}
           <div className="space-y-2">
-            <Label htmlFor="recipients">
-              Alıcılar ({selectedRecipients.length}/100) *
-            </Label>
+            <Label htmlFor="recipients">Alıcılar ({selectedRecipients.length}/100) *</Label>
             <div className="relative">
               {getRecipientIcon()}
               <Input
@@ -329,7 +363,10 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
               {selectedRecipients.map((recipient, index) => (
                 <Badge key={index} variant="secondary" className="flex items-center gap-1">
                   {messageType === 'sms' ? formatPhoneNumber(recipient) : recipient}
-                  <X className="h-3 w-3 cursor-pointer" onClick={() => handleRemoveRecipient(recipient)} />
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={() => handleRemoveRecipient(recipient)}
+                  />
                 </Badge>
               ))}
             </div>
@@ -345,9 +382,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
                 placeholder="Mesaj konusu"
                 className="h-9"
               />
-              {errors.subject && (
-                <p className="text-sm text-red-600">{errors.subject.message}</p>
-              )}
+              {errors.subject && <p className="text-sm text-red-600">{errors.subject.message}</p>}
             </div>
           )}
 
@@ -361,13 +396,13 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
               rows={getContentRows()}
               maxLength={getContentMaxLength()}
             />
-            {errors.content && (
-              <p className="text-sm text-red-600">{errors.content.message}</p>
-            )}
-            
+            {errors.content && <p className="text-sm text-red-600">{errors.content.message}</p>}
+
             {/* Character count and warnings */}
             <div className="flex justify-between text-sm text-gray-500">
-              <span>{content.length}/{getContentMaxLength()} karakter</span>
+              <span>
+                {content.length}/{getContentMaxLength()} karakter
+              </span>
               {messageType === 'sms' && (
                 <div className="flex items-center gap-2">
                   {smsMessageCount > 1 && (
@@ -412,7 +447,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
             >
               {showPreview ? 'Önizlemeyi Gizle' : 'Önizleme'}
             </Button>
-            
+
             {showPreview && (
               <Card className="bg-gray-50">
                 <CardContent className="pt-4">
@@ -442,11 +477,7 @@ export function MessageForm({ onSuccess, onCancel, initialData, messageId, defau
 
           {/* Form Actions */}
           <div className="flex flex-col sm:flex-row gap-4 pt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 sm:flex-none"
-            >
+            <Button type="submit" disabled={isSubmitting} className="flex-1 sm:flex-none">
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

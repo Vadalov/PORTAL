@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
   const limit = Number(searchParams.get('limit') || '20');
   const search = searchParams.get('search') || undefined;
 
-  const filters: Record<string, unknown> = {};
+  const filters: Record<string, string | number | boolean | undefined> = {};
   const message_type = searchParams.get('message_type');
   const status = searchParams.get('status');
   const sender = searchParams.get('sender');
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       method: 'GET',
       page,
       limit,
-      filters
+      filters,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -70,23 +70,37 @@ async function createMessageHandler(request: NextRequest) {
     body = await request.json();
     const validation = validateMessage(body as Record<string, unknown>);
     if (!validation.isValid) {
-      return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
     }
 
-    const response = await api.messages.createMessage(body);
+    const response = await api.messages.createMessage(body as Partial<MessageDocument>);
     if (response.error || !response.data) {
-      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: response.error || 'Oluşturma başarısız' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ success: true, data: response.data, message: 'Mesaj taslağı oluşturuldu' }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: response.data, message: 'Mesaj taslağı oluşturuldu' },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     logger.error('Create message error', error, {
       endpoint: '/api/messages',
       method: 'POST',
-      messageType: body?.message_type,
-      recipientCount: body?.recipients?.length
+      messageType: (body as Record<string, unknown>)?.message_type,
+      recipientCount: Array.isArray((body as Record<string, unknown>)?.recipients)
+        ? ((body as Record<string, unknown>)?.recipients as unknown[]).length
+        : 0,
     });
-    return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Oluşturma işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

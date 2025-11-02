@@ -8,8 +8,10 @@ import { UserDocument } from '@/types/collections';
 function validateUser(data: Partial<UserDocument>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (!data.name || data.name.trim().length < 2) errors.push('Ad Soyad en az 2 karakter olmalıdır');
-  if (!data.email || !InputSanitizer.validateEmail(data.email)) errors.push('Geçerli bir e-posta zorunludur');
-  if (!data.role || !['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER', 'VOLUNTEER'].includes(data.role)) errors.push('Geçersiz rol');
+  if (!data.email || !InputSanitizer.validateEmail(data.email))
+    errors.push('Geçerli bir e-posta zorunludur');
+  if (!data.role || !['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER', 'VOLUNTEER'].includes(data.role))
+    errors.push('Geçersiz rol');
   return { isValid: errors.length === 0, errors };
 }
 
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest) {
       method: 'GET',
       page,
       limit,
-      search
+      search,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -45,20 +47,35 @@ async function createUserHandler(request: NextRequest) {
     body = await request.json();
     const validation = validateUser(body as Record<string, unknown>);
     if (!validation.isValid) {
-      return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
     }
-    const response = await api.users.createUser({ ...body, isActive: true });
+    const response = await api.users.createUser({
+      ...(body as Partial<UserDocument>),
+      isActive: true,
+    });
     if (response.error || !response.data) {
-      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: response.error || 'Oluşturma başarısız' },
+        { status: 400 }
+      );
     }
-    return NextResponse.json({ success: true, data: response.data, message: 'Kullanıcı oluşturuldu' }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: response.data, message: 'Kullanıcı oluşturuldu' },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     logger.error('Create user error', error, {
       endpoint: '/api/users',
       method: 'POST',
-      email: body?.email // Safe to log email for debugging
+      email: (body as Record<string, unknown>)?.email, // Safe to log email for debugging
     });
-    return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Oluşturma işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 
