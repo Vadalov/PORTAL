@@ -50,6 +50,9 @@ async function createApplicationHandler(request: NextRequest) {
   let body: Partial<AidApplicationDocument> | null = null;
   try {
     body = await request.json();
+    if (!body) {
+      return NextResponse.json({ success: false, error: 'Geçersiz istek verisi' }, { status: 400 });
+    }
     const validation = validateApplication(body);
     if (!validation.isValid) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
