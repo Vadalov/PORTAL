@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { aidApplicationsApi as api } from '@/lib/api';
 import logger from '@/lib/logger';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import { AidApplicationDocument } from '@/types/collections';
+import { AidApplicationDocument, CreateDocumentData } from '@/types/collections';
 
 function validateApplication(data: Partial<AidApplicationDocument>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -58,7 +58,18 @@ async function createApplicationHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
     }
 
-    const response = await api.createAidApplication(body);
+    // After validation, ensure all required fields are present with proper types
+    // Validation ensures status is 'open' | 'closed', but TypeScript needs explicit type
+    const applicationData: CreateDocumentData<AidApplicationDocument> = {
+      ...body,
+      status: body.status || 'open',
+      application_date: body.application_date || new Date().toISOString(),
+      applicant_name: body.applicant_name!,
+      applicant_type: body.applicant_type || 'person',
+      stage: body.stage || 'draft',
+    } as CreateDocumentData<AidApplicationDocument>;
+
+    const response = await api.createAidApplication(applicationData);
     if (response.error || !response.data) {
       return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
     }
