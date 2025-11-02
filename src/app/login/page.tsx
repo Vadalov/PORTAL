@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
@@ -14,17 +14,23 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mounted, setMounted] = useState(false);
+  const initRef = useRef(false);
   const { login, isAuthenticated, isLoading, initializeAuth } = useAuthStore();
 
-  // Handle hydration
+  // Handle hydration - split into two effects to avoid cascading renders
   useEffect(() => {
-    // Use setTimeout to avoid cascading renders
-    const timer = setTimeout(() => {
+    if (!initRef.current) {
+      initRef.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setMounted(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mounted && initRef.current) {
       initializeAuth();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [initializeAuth]);
+    }
+  }, [mounted, initializeAuth]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -44,8 +50,9 @@ export default function LoginPage() {
       // Use router.push instead of window.location.href to preserve state
       router.push('/genel');
     } catch (err: unknown) {
-      const error = err as Error;
-      toast.error(error.message || 'Giriş başarısız');
+      const errorMessage =
+        err instanceof Error ? err.message : typeof err === 'string' ? err : 'Giriş başarısız';
+      toast.error(errorMessage);
     }
   };
 
