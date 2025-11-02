@@ -259,7 +259,13 @@ export function formatErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  const err = error as any;
+  const err = error as { 
+    code?: number; 
+    message?: string; 
+    response?: { message?: string };
+    status?: number;
+    statusCode?: number;
+  };
 
   // Handle Appwrite errors
   if (err?.code) {
@@ -272,9 +278,11 @@ export function formatErrorMessage(error: unknown): string {
   // Handle HTTP status codes
   if (err?.status || err?.statusCode) {
     const status = err.status || err.statusCode;
-    const translated = translateError(status);
-    if (translated !== ERROR_MESSAGES['general_unknown']) {
-      return translated;
+    if (status !== undefined) {
+      const translated = translateError(status);
+      if (translated !== ERROR_MESSAGES['general_unknown']) {
+        return translated;
+      }
     }
   }
 

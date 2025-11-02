@@ -4,6 +4,18 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 
+// Define Sentry types
+interface SentryInstance {
+  captureException: (error: Error, options?: Record<string, unknown>) => void;
+  showReportDialog?: () => void;
+}
+
+declare global {
+  interface Window {
+    Sentry?: SentryInstance;
+  }
+}
+
 /**
  * Error component for Next.js App Router
  * Catches errors in route segments
@@ -39,8 +51,8 @@ export default function Error({
     }
 
     // Send error to Sentry
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
+    if (typeof window !== 'undefined' && window.Sentry) {
+      window.Sentry.captureException(error, {
         tags: { digest: error.digest, type: 'route-error' },
       });
     }

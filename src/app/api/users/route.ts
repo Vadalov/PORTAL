@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
  * POST /api/users
  */
 async function createUserHandler(request: NextRequest) {
-  let body: unknown = null;
+  const body: unknown = null;
   try {
     const userData = body as Partial<UserDocument>;
     const validation = validateUser(body as Record<string, unknown>);

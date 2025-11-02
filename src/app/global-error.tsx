@@ -7,12 +7,15 @@ interface PerformanceMemory {
   totalJSHeapSize?: number;
 }
 
+// Define Sentry types
+interface SentryInstance {
+  captureException: (error: Error, options?: Record<string, unknown>) => void;
+  showReportDialog?: () => void;
+}
+
 declare global {
   interface Window {
-    Sentry?: {
-      captureException: (error: Error, options?: Record<string, unknown>) => void;
-      showReportDialog?: () => void;
-    };
+    Sentry?: SentryInstance;
     __GLOBAL_ERROR__?: {
       error: Error & { digest?: string };
       digest?: string;

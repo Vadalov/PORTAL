@@ -128,7 +128,7 @@ export class ErrorSimulator {
       stack: error.stack,
       caught: false, // Will be updated when caught
       recoveryAttempts: 0,
-      componentStack: (error as any).componentStack,
+      componentStack: (error as Error & { componentStack?: string }).componentStack,
     };
     this.errors.push(metadata);
   }

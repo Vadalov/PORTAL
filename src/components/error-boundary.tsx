@@ -4,6 +4,18 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 
+// Define Sentry types
+interface SentryInstance {
+  captureException: (error: Error, options?: Record<string, unknown>) => void;
+  showReportDialog?: () => void;
+}
+
+declare global {
+  interface Window {
+    Sentry?: SentryInstance;
+  }
+}
+
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
@@ -70,8 +82,8 @@ export class ErrorBoundary extends Component<Props, State> {
     ErrorBoundary.errors.push(error);
 
     // Send error to Sentry if available
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
+    if (typeof window !== 'undefined' && window.Sentry) {
+      window.Sentry.captureException(error, {
         contexts: { react: errorInfo },
         tags: { boundaryName: this.props.name || 'unnamed' },
         extra: { retryCount: this.state.retryCount },
