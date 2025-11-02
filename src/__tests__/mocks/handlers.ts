@@ -1,4 +1,4 @@
-import { rest } from 'msw'
+import { rest } from 'msw';
 
 export const handlers = [
   // CSRF token handler
@@ -13,7 +13,7 @@ export const handlers = [
 
   // Auth handlers
   rest.post('https://cloud.appwrite.io/v1/account/sessions/email', async (req, res, ctx) => {
-    const { email, password } = await req.json()
+    const { email, password } = await req.json();
 
     if (email === 'admin@test.com' && password === 'admin123') {
       return res(
@@ -23,10 +23,10 @@ export const handlers = [
           expire: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           accessToken: 'mock-access-token',
         })
-      )
+      );
     }
 
-    return res(ctx.status(401), ctx.json({ message: 'Invalid credentials' }))
+    return res(ctx.status(401), ctx.json({ message: 'Invalid credentials' }));
   }),
 
   rest.get('https://cloud.appwrite.io/v1/account', (req, res, ctx) => {
@@ -36,25 +36,28 @@ export const handlers = [
         name: 'Test Admin',
         email: 'admin@test.com',
       })
-    )
+    );
   }),
 
   // Beneficiaries handlers
-  rest.get('https://cloud.appwrite.io/v1/databases/*/collections/beneficiaries/documents', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        documents: [
-          {
-            $id: 'beneficiary-1',
-            name: 'Ahmet Yılmaz',
-            tcNo: '12345678901',
-            status: 'active',
-          },
-        ],
-        total: 1,
-      })
-    )
-  }),
+  rest.get(
+    'https://cloud.appwrite.io/v1/databases/*/collections/beneficiaries/documents',
+    (req, res, ctx) => {
+      return res(
+        ctx.json({
+          documents: [
+            {
+              $id: 'beneficiary-1',
+              name: 'Ahmet Yılmaz',
+              tcNo: '12345678901',
+              status: 'active',
+            },
+          ],
+          total: 1,
+        })
+      );
+    }
+  ),
 
   // Logout handler
   rest.post('/api/auth/logout', (req, res, ctx) => {
@@ -72,6 +75,6 @@ export const handlers = [
           activeUsers: 12,
         },
       })
-    )
+    );
   }),
-]
+];

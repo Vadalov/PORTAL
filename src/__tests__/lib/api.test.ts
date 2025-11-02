@@ -8,7 +8,13 @@ import {
   uploadBeneficiaryPhoto,
   checkMernis,
 } from '@/lib/api/mock-api';
-import type { BeneficiaryQuickAdd, BeneficiaryStatus, BeneficiaryCategory, FundRegion, FileConnection } from '@/types/beneficiary';
+import type {
+  BeneficiaryQuickAdd,
+  BeneficiaryStatus,
+  BeneficiaryCategory,
+  FundRegion,
+  FileConnection,
+} from '@/types/beneficiary';
 
 describe('Mock API', () => {
   describe('createBeneficiary', () => {
@@ -26,7 +32,7 @@ describe('Mock API', () => {
       };
 
       const result = await createBeneficiary(beneficiaryData);
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
@@ -48,7 +54,7 @@ describe('Mock API', () => {
       };
 
       const result = await createBeneficiary(invalidData);
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(false);
     });
@@ -57,7 +63,7 @@ describe('Mock API', () => {
   describe('getBeneficiary', () => {
     it('should get beneficiary by id', async () => {
       const result = await getBeneficiary('123');
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
@@ -65,7 +71,7 @@ describe('Mock API', () => {
 
     it('should handle non-existent beneficiary', async () => {
       const result = await getBeneficiary('non-existent');
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(false);
     });
@@ -74,7 +80,7 @@ describe('Mock API', () => {
   describe('getBeneficiaries', () => {
     it('should list beneficiaries with default params', async () => {
       const result = await getBeneficiaries();
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
@@ -91,7 +97,7 @@ describe('Mock API', () => {
       };
 
       const result = await getBeneficiaries(searchParams);
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
     });
@@ -105,7 +111,7 @@ describe('Mock API', () => {
       };
 
       const result = await updateBeneficiary('123', updateData);
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
@@ -117,7 +123,7 @@ describe('Mock API', () => {
     it('should handle update of non-existent beneficiary', async () => {
       const updateData = { firstName: 'Test' };
       const result = await updateBeneficiary('non-existent', updateData);
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(false);
     });
@@ -126,14 +132,14 @@ describe('Mock API', () => {
   describe('deleteBeneficiary', () => {
     it('should delete existing beneficiary', async () => {
       const result = await deleteBeneficiary('123');
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
     });
 
     it('should handle delete of non-existent beneficiary', async () => {
       const result = await deleteBeneficiary('non-existent');
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(false);
     });
@@ -143,9 +149,9 @@ describe('Mock API', () => {
     it('should upload photo for beneficiary', async () => {
       // Mock File object
       const mockFile = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-      
+
       const result = await uploadBeneficiaryPhoto('123', mockFile);
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
@@ -155,7 +161,7 @@ describe('Mock API', () => {
   describe('checkMernis', () => {
     it('should validate TC Kimlik No', async () => {
       const result = await checkMernis('12345678901');
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
       expect(result.data).toBeDefined();
@@ -163,7 +169,7 @@ describe('Mock API', () => {
 
     it('should reject invalid TC Kimlik No', async () => {
       const result = await checkMernis('invalid');
-      
+
       expect(result).toBeDefined();
       expect(result.success).toBe(false);
     });

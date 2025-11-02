@@ -5,14 +5,14 @@ import {
   basicInfoSchema,
   identityInfoSchema,
   personalDataSchema,
-  healthInfoSchema
+  healthInfoSchema,
 } from '@/lib/validations/beneficiary';
 import {
   BeneficiaryCategory,
   FundRegion,
   FileConnection,
   MaritalStatus,
-  Gender
+  Gender,
 } from '@/types/beneficiary';
 
 describe('Beneficiary Validation Schema', () => {
@@ -26,13 +26,13 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = quickAddBeneficiarySchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
-    
+
     it('should reject invalid TC Kimlik No', () => {
       const invalidData = {
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
@@ -42,16 +42,16 @@ describe('Beneficiary Validation Schema', () => {
         identityNumber: '12345678901', // Invalid checksum
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
-        fileNumber: 'FILE001'
+        fileNumber: 'FILE001',
       };
-      
+
       const result = quickAddBeneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toContain('Geçersiz TC Kimlik No');
       }
     });
-    
+
     it('should reject short names', () => {
       const invalidData = {
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
@@ -60,13 +60,13 @@ describe('Beneficiary Validation Schema', () => {
         nationality: 'Türkiye',
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
-        fileNumber: 'FILE001'
+        fileNumber: 'FILE001',
       };
-      
+
       const result = quickAddBeneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
-    
+
     it('should reject invalid file number format', () => {
       const invalidData = {
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
@@ -75,14 +75,14 @@ describe('Beneficiary Validation Schema', () => {
         nationality: 'Türkiye',
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
-        fileNumber: 'file-001' // Lowercase not allowed
+        fileNumber: 'file-001', // Lowercase not allowed
       };
-      
+
       const result = quickAddBeneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
   });
-  
+
   describe('beneficiarySchema - Required Fields', () => {
     it('should validate all required fields', () => {
       const validData = {
@@ -93,19 +93,19 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
-    
+
     it('should reject missing required fields', () => {
       const invalidData = {
-        firstName: 'Ahmet'
+        firstName: 'Ahmet',
         // Missing lastName, category, etc.
       };
-      
+
       const result = beneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -113,7 +113,7 @@ describe('Beneficiary Validation Schema', () => {
       }
     });
   });
-  
+
   describe('beneficiarySchema - Conditional Validation', () => {
     it('should require Mernis check when TC Kimlik No is provided', () => {
       const invalidData = {
@@ -125,22 +125,24 @@ describe('Beneficiary Validation Schema', () => {
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
-        fileNumber: 'FILE001'
+        fileNumber: 'FILE001',
       };
-      
+
       const result = beneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
       if (!result.success) {
-        const mernisError = result.error.issues.find(issue => 
-          issue.path.includes('mernisCheck')
-        );
+        const mernisError = result.error.issues.find((issue) => issue.path.includes('mernisCheck'));
         expect(mernisError).toBeDefined();
       }
     });
-    
+
     it('should reject marriage for under 18', () => {
       const today = new Date();
-      const birthDateStr = new Date(today.getFullYear() - 16, today.getMonth(), today.getDate()).toISOString();
+      const birthDateStr = new Date(
+        today.getFullYear() - 16,
+        today.getMonth(),
+        today.getDate()
+      ).toISOString();
 
       const invalidData = {
         firstName: 'Ahmet',
@@ -152,7 +154,7 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
 
       const result = beneficiarySchema.safeParse(invalidData);
@@ -162,7 +164,7 @@ describe('Beneficiary Validation Schema', () => {
       }
     });
   });
-  
+
   describe('beneficiarySchema - Email Validation', () => {
     it('should accept valid email', () => {
       const validData = {
@@ -174,13 +176,13 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
-    
+
     it('should reject invalid email', () => {
       const invalidData = {
         firstName: 'Ahmet',
@@ -191,13 +193,13 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
-    
+
     it('should accept empty string for optional email', () => {
       const validData = {
         firstName: 'Ahmet',
@@ -208,14 +210,14 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
   });
-  
+
   describe('beneficiarySchema - Number Validation', () => {
     it('should accept valid income/expense', () => {
       const validData = {
@@ -228,13 +230,13 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
-    
+
     it('should reject negative income', () => {
       const invalidData = {
         firstName: 'Ahmet',
@@ -245,13 +247,13 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
-    
+
     it('should reject excessive income', () => {
       const invalidData = {
         firstName: 'Ahmet',
@@ -262,14 +264,14 @@ describe('Beneficiary Validation Schema', () => {
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
   });
-  
+
   describe('beneficiarySchema - Emergency Contacts', () => {
     it('should accept valid emergency contacts', () => {
       const validData = {
@@ -280,20 +282,20 @@ describe('Beneficiary Validation Schema', () => {
           {
             name: 'Mehmet Yılmaz',
             relationship: 'Kardeş',
-            phone: '5551234567'
-          }
+            phone: '5551234567',
+          },
         ],
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
-    
+
     it('should reject more than 2 emergency contacts', () => {
       const invalidData = {
         firstName: 'Ahmet',
@@ -302,19 +304,19 @@ describe('Beneficiary Validation Schema', () => {
         emergencyContacts: [
           { name: 'Contact 1', relationship: 'Kardeş', phone: '5551234567' },
           { name: 'Contact 2', relationship: 'Anne', phone: '5551234568' },
-          { name: 'Contact 3', relationship: 'Baba', phone: '5551234569' }
+          { name: 'Contact 3', relationship: 'Baba', phone: '5551234569' },
         ],
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
-    
+
     it('should reject invalid emergency contact phone', () => {
       const invalidData = {
         firstName: 'Ahmet',
@@ -324,21 +326,21 @@ describe('Beneficiary Validation Schema', () => {
           {
             name: 'Mehmet Yılmaz',
             relationship: 'Kardeş',
-            phone: '123' // Too short
-          }
+            phone: '123', // Too short
+          },
         ],
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
         fileNumber: 'FILE001',
-        mernisCheck: false
+        mernisCheck: false,
       };
-      
+
       const result = beneficiarySchema.safeParse(invalidData);
       expect(result.success).toBe(false);
     });
   });
-  
+
   describe('Section Schemas', () => {
     it('should validate basicInfoSchema', () => {
       const validData = {
@@ -348,39 +350,39 @@ describe('Beneficiary Validation Schema', () => {
         category: BeneficiaryCategory.IHTIYAC_SAHIBI_AILE,
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.CALISMA_SAHASI,
-        fileNumber: 'FILE001'
+        fileNumber: 'FILE001',
       };
-      
+
       const result = basicInfoSchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
-    
+
     it('should validate identityInfoSchema', () => {
       const validData = {
         fatherName: 'Mehmet',
-        motherName: 'Ayşe'
+        motherName: 'Ayşe',
       };
-      
+
       const result = identityInfoSchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
-    
+
     it('should validate personalDataSchema', () => {
       const validData = {
         gender: Gender.ERKEK,
-        maritalStatus: MaritalStatus.BEKAR
+        maritalStatus: MaritalStatus.BEKAR,
       };
-      
+
       const result = personalDataSchema.safeParse(validData);
       expect(result.success).toBe(true);
     });
-    
+
     it('should validate healthInfoSchema', () => {
       const validData = {
         healthProblem: 'Yok',
-        diseases: []
+        diseases: [],
       };
-      
+
       const result = healthInfoSchema.safeParse(validData);
       expect(result.success).toBe(true);
     });

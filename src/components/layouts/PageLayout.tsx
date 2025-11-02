@@ -71,17 +71,11 @@ export function PageLayout({
               )}
             </div>
             {description && (
-              <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-                {description}
-              </p>
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base">{description}</p>
             )}
           </div>
         </div>
-        {actions && (
-          <div className="flex items-center gap-2 shrink-0">
-            {actions}
-          </div>
-        )}
+        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
       </motion.div>
 
       {/* Page Content */}

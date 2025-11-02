@@ -6,8 +6,20 @@ import { parametersApi } from '@/lib/api/appwrite-api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -57,7 +69,8 @@ export default function ParametersPage() {
         search,
         filters: {
           category: categoryFilter === 'all' ? undefined : categoryFilter,
-          is_active: statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
+          is_active:
+            statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
         },
       }),
   });
@@ -85,7 +98,7 @@ export default function ParametersPage() {
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
     },
     onError: (error: any) => {
-      toast.error(`Silme hatası: ${  error.message}`);
+      toast.error(`Silme hatası: ${error.message}`);
     },
   });
 
@@ -220,7 +233,9 @@ export default function ParametersPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => toggleStatusMutation.mutate({ id: param.$id, is_active: !param.is_active })}
+                      onClick={() =>
+                        toggleStatusMutation.mutate({ id: param.$id, is_active: !param.is_active })
+                      }
                     >
                       {param.is_active ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
                     </Button>
@@ -258,7 +273,10 @@ function ParameterForm({ onSuccess }: { onSuccess?: () => void }) {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: typeof formData) => parametersApi.createParameter(data as Omit<typeof formData, 'category'> & { category: ParameterCategory }),
+    mutationFn: (data: typeof formData) =>
+      parametersApi.createParameter(
+        data as Omit<typeof formData, 'category'> & { category: ParameterCategory }
+      ),
     onSuccess: () => {
       toast.success('Parametre eklendi');
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
@@ -285,7 +303,9 @@ function ParameterForm({ onSuccess }: { onSuccess?: () => void }) {
         <Label>Kategori *</Label>
         <Select
           value={formData.category}
-          onValueChange={(value) => setFormData({ ...formData, category: value as ParameterCategory })}
+          onValueChange={(value) =>
+            setFormData({ ...formData, category: value as ParameterCategory })
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder="Kategori seçin" />
@@ -343,4 +363,3 @@ function ParameterForm({ onSuccess }: { onSuccess?: () => void }) {
     </form>
   );
 }
-

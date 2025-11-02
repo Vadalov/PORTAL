@@ -49,6 +49,9 @@ next-env.d.ts
 /test-results/
 *.test-results
 
+# code quality reports
+/jscpd-report/
+
 # temporary documentation files
 .analysis-progress.md
 .devam-progress.md

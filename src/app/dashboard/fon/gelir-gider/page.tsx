@@ -6,18 +6,41 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { ErrorAlert } from '@/components/ui/error-alert';
-import { 
-  Transaction, 
+import {
+  Transaction,
   CreateTransactionInput,
   TransactionQuery,
-  ApiResponse
+  ApiResponse,
 } from '@/types/financial';
-import { 
+import {
   Plus,
   Search,
   Filter,
@@ -31,7 +54,7 @@ import {
   FileText,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/format';
 
@@ -71,12 +94,12 @@ const CATEGORY_LABELS: Record<string, string> = {
   office_supplies: 'Ofis Malzemeleri',
   utilities: 'Faturalar',
   transportation: 'Ulaşım',
-  other_expense: 'Diğer Gider'
+  other_expense: 'Diğer Gider',
 };
 
 const TYPE_LABELS = {
   income: 'Gelir',
-  expense: 'Gider'
+  expense: 'Gider',
 };
 
 export default function GelirGiderPage() {
@@ -85,15 +108,15 @@ export default function GelirGiderPage() {
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<TransactionStats | null>(null);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
-  
+
   // Filters
   const [filters, setFilters] = useState<TransactionQuery>({
     page: 1,
     limit: 20,
     sortBy: 'date',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
   });
-  
+
   // Transaction form
   const [showAddForm, setShowAddForm] = useState(false);
   const [_editingTransaction, _setEditingTransaction] = useState<Transaction | null>(null);
@@ -105,7 +128,7 @@ export default function GelirGiderPage() {
     description: '',
     date: new Date(),
     status: 'pending',
-    tags: []
+    tags: [],
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -212,22 +235,25 @@ export default function GelirGiderPage() {
       description: '',
       date: new Date(),
       status: 'pending',
-      tags: []
+      tags: [],
     });
   };
 
   // Handle filter changes
-  const handleFilterChange = (key: keyof TransactionQuery, value: TransactionQuery[keyof TransactionQuery]) => {
-    setFilters(prev => ({
+  const handleFilterChange = (
+    key: keyof TransactionQuery,
+    value: TransactionQuery[keyof TransactionQuery]
+  ) => {
+    setFilters((prev) => ({
       ...prev,
       [key]: value,
-      page: key !== 'page' ? 1 : (value as number) // Reset to first page when filters change
+      page: key !== 'page' ? 1 : (value as number), // Reset to first page when filters change
     }));
   };
 
   // Handle pagination
   const handlePageChange = (newPage: number) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
+    setFilters((prev) => ({ ...prev, page: newPage }));
   };
 
   // Get status badge
@@ -235,20 +261,16 @@ export default function GelirGiderPage() {
     const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
       pending: 'outline',
       completed: 'default',
-      cancelled: 'destructive'
+      cancelled: 'destructive',
     };
 
     const labels: Record<string, string> = {
       pending: 'Bekliyor',
       completed: 'Tamamlandı',
-      cancelled: 'İptal'
+      cancelled: 'İptal',
     };
 
-    return (
-      <Badge variant={variants[status] || 'outline'}>
-        {labels[status] || status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'outline'}>{labels[status] || status}</Badge>;
   };
 
   // Get sort icon
@@ -256,17 +278,19 @@ export default function GelirGiderPage() {
     if (filters.sortBy !== field) {
       return <ArrowUpDown className="w-4 h-4" />;
     }
-    return filters.sortOrder === 'asc' ? 
-      <ArrowUp className="w-4 h-4" /> : 
-      <ArrowDown className="w-4 h-4" />;
+    return filters.sortOrder === 'asc' ? (
+      <ArrowUp className="w-4 h-4" />
+    ) : (
+      <ArrowDown className="w-4 h-4" />
+    );
   };
 
   // Handle sort
   const handleSort = (field: 'date' | 'amount' | 'category') => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       sortBy: field,
-      sortOrder: prev.sortBy === field && prev.sortOrder === 'desc' ? 'asc' : 'desc'
+      sortOrder: prev.sortBy === field && prev.sortOrder === 'desc' ? 'asc' : 'desc',
     }));
   };
 
@@ -286,9 +310,7 @@ export default function GelirGiderPage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Gelir-Gider Yönetimi</h1>
-          <p className="text-muted-foreground">
-            Finansal işlemlerinizi yönetin ve takip edin
-          </p>
+          <p className="text-muted-foreground">Finansal işlemlerinizi yönetin ve takip edin</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={fetchTransactions}>
@@ -305,16 +327,14 @@ export default function GelirGiderPage() {
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Yeni İşlem Ekle</DialogTitle>
-                <DialogDescription>
-                  Yeni bir gelir veya gider işlemi oluşturun
-                </DialogDescription>
+                <DialogDescription>Yeni bir gelir veya gider işlemi oluşturun</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="type">Tür</Label>
-                    <Select 
-                      value={formData.type} 
+                    <Select
+                      value={formData.type}
                       onValueChange={(value) => handleFilterChange('type', value)}
                     >
                       <SelectTrigger>
@@ -328,16 +348,20 @@ export default function GelirGiderPage() {
                   </div>
                   <div>
                     <Label htmlFor="category">Kategori</Label>
-                    <Select 
-                      value={formData.category} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, category: value }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                          <SelectItem key={key} value={key}>{label}</SelectItem>
+                          <SelectItem key={key} value={key}>
+                            {label}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -351,16 +375,23 @@ export default function GelirGiderPage() {
                       type="number"
                       step="0.01"
                       value={formData.amount}
-                      onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          amount: parseFloat(e.target.value) || 0,
+                        }))
+                      }
                       placeholder="0.00"
                       required
                     />
                   </div>
                   <div>
                     <Label htmlFor="currency">Para Birimi</Label>
-                    <Select 
-                      value={formData.currency} 
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+                    <Select
+                      value={formData.currency}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({ ...prev, currency: value }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -378,7 +409,9 @@ export default function GelirGiderPage() {
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, description: e.target.value }))
+                    }
                     placeholder="İşlem açıklaması..."
                     required
                   />
@@ -389,8 +422,12 @@ export default function GelirGiderPage() {
                     <Input
                       id="date"
                       type="date"
-                      value={formData.date ? new Date(formData.date).toISOString().split('T')[0] : ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, date: new Date(e.target.value) }))}
+                      value={
+                        formData.date ? new Date(formData.date).toISOString().split('T')[0] : ''
+                      }
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, date: new Date(e.target.value) }))
+                      }
                       required
                     />
                   </div>
@@ -398,7 +435,12 @@ export default function GelirGiderPage() {
                     <Label htmlFor="status">Durum</Label>
                     <Select
                       value={formData.status}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as 'pending' | 'completed' | 'cancelled' }))}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          status: value as 'pending' | 'completed' | 'cancelled',
+                        }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -412,11 +454,7 @@ export default function GelirGiderPage() {
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowAddForm(false)}
-                  >
+                  <Button type="button" variant="outline" onClick={() => setShowAddForm(false)}>
                     İptal
                   </Button>
                   <Button type="submit" disabled={submitting}>
@@ -466,9 +504,7 @@ export default function GelirGiderPage() {
               <div className="text-2xl font-bold text-red-600">
                 {formatCurrency(stats.totalExpense)}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {stats.transactionCount} toplam işlem
-              </p>
+              <p className="text-xs text-muted-foreground">{stats.transactionCount} toplam işlem</p>
             </CardContent>
           </Card>
 
@@ -478,12 +514,12 @@ export default function GelirGiderPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${stats.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <div
+                className={`text-2xl font-bold ${stats.netBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}
+              >
                 {formatCurrency(stats.netBalance)}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Gelir - Gider
-              </p>
+              <p className="text-xs text-muted-foreground">Gelir - Gider</p>
             </CardContent>
           </Card>
 
@@ -493,12 +529,8 @@ export default function GelirGiderPage() {
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {stats.pendingTransactions}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Onay bekleyen
-              </p>
+              <div className="text-2xl font-bold text-yellow-600">{stats.pendingTransactions}</div>
+              <p className="text-xs text-muted-foreground">Onay bekleyen</p>
             </CardContent>
           </Card>
         </div>
@@ -529,8 +561,8 @@ export default function GelirGiderPage() {
             </div>
             <div>
               <Label htmlFor="type-filter">Tür</Label>
-              <Select 
-                value={filters.type || ''} 
+              <Select
+                value={filters.type || ''}
                 onValueChange={(value) => handleFilterChange('type', value || undefined)}
               >
                 <SelectTrigger>
@@ -545,8 +577,8 @@ export default function GelirGiderPage() {
             </div>
             <div>
               <Label htmlFor="category-filter">Kategori</Label>
-              <Select 
-                value={filters.category || ''} 
+              <Select
+                value={filters.category || ''}
                 onValueChange={(value) => handleFilterChange('category', value || undefined)}
               >
                 <SelectTrigger>
@@ -555,15 +587,17 @@ export default function GelirGiderPage() {
                 <SelectContent>
                   <SelectItem value="">Tüm Kategoriler</SelectItem>
                   {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label htmlFor="status-filter">Durum</Label>
-              <Select 
-                value={filters.status || ''} 
+              <Select
+                value={filters.status || ''}
                 onValueChange={(value) => handleFilterChange('status', value || undefined)}
               >
                 <SelectTrigger>
@@ -605,7 +639,12 @@ export default function GelirGiderPage() {
                 step="0.01"
                 placeholder="0.00"
                 value={filters.minAmount || ''}
-                onChange={(e) => handleFilterChange('minAmount', e.target.value ? parseFloat(e.target.value) : undefined)}
+                onChange={(e) =>
+                  handleFilterChange(
+                    'minAmount',
+                    e.target.value ? parseFloat(e.target.value) : undefined
+                  )
+                }
               />
             </div>
           </div>
@@ -625,21 +664,21 @@ export default function GelirGiderPage() {
             <div className="space-y-4">
               {/* Table Header */}
               <div className="hidden md:grid md:grid-cols-7 gap-4 p-4 text-sm font-medium text-muted-foreground border-b">
-                <button 
+                <button
                   onClick={() => handleSort('date')}
                   className="flex items-center gap-1 hover:text-foreground"
                 >
                   Tarih {getSortIcon('date')}
                 </button>
                 <div>Açıklama</div>
-                <button 
+                <button
                   onClick={() => handleSort('category')}
                   className="flex items-center gap-1 hover:text-foreground"
                 >
                   Kategori {getSortIcon('category')}
                 </button>
                 <div>Tür</div>
-                <button 
+                <button
                   onClick={() => handleSort('amount')}
                   className="flex items-center gap-1 hover:text-foreground"
                 >
@@ -651,13 +690,16 @@ export default function GelirGiderPage() {
 
               {/* Transaction Rows */}
               {transactions.map((transaction) => (
-                <div key={transaction.id} className="grid md:grid-cols-7 gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <div
+                  key={transaction.id}
+                  className="grid md:grid-cols-7 gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                >
                   {/* Date */}
                   <div className="text-sm">
                     <div className="md:hidden font-medium">Tarih</div>
                     {formatDate(transaction.date)}
                   </div>
-                  
+
                   {/* Description */}
                   <div>
                     <div className="md:hidden font-medium">Açıklama</div>
@@ -672,13 +714,13 @@ export default function GelirGiderPage() {
                       </div>
                     )}
                   </div>
-                  
+
                   {/* Category */}
                   <div className="text-sm">
                     <div className="md:hidden font-medium">Kategori</div>
                     {CATEGORY_LABELS[transaction.category] || transaction.category}
                   </div>
-                  
+
                   {/* Type */}
                   <div className="text-sm">
                     <div className="md:hidden font-medium">Tür</div>
@@ -686,21 +728,24 @@ export default function GelirGiderPage() {
                       {TYPE_LABELS[transaction.type]}
                     </Badge>
                   </div>
-                  
+
                   {/* Amount */}
                   <div className="text-sm">
                     <div className="md:hidden font-medium">Tutar</div>
-                    <div className={`font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount, transaction.currency)}
+                    <div
+                      className={`font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}
+                    >
+                      {transaction.type === 'income' ? '+' : '-'}
+                      {formatCurrency(transaction.amount, transaction.currency)}
                     </div>
                   </div>
-                  
+
                   {/* Status */}
                   <div className="text-sm">
                     <div className="md:hidden font-medium">Durum</div>
                     {getStatusBadge(transaction.status)}
                   </div>
-                  
+
                   {/* Actions */}
                   <div className="text-sm">
                     <div className="md:hidden font-medium">İşlemler</div>
@@ -747,17 +792,17 @@ export default function GelirGiderPage() {
                 Sayfa {pagination.page} / {pagination.totalPages} ({pagination.total} toplam)
               </div>
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={!pagination.hasPrev}
                   onClick={() => handlePageChange(pagination.page - 1)}
                 >
                   Önceki
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={!pagination.hasNext}
                   onClick={() => handlePageChange(pagination.page + 1)}
                 >

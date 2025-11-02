@@ -132,11 +132,8 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
       >
         <span className="sr-only">Yükleniyor...</span>
         {renderAnimation()}
-        {text && (
-          <p className="mt-4 font-body text-sm text-muted-foreground">{text}</p>
-        )}
+        {text && <p className="mt-4 font-body text-sm text-muted-foreground">{text}</p>}
       </motion.div>
     </AnimatePresence>
   );
 };
-

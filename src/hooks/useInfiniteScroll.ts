@@ -12,7 +12,7 @@ interface UseInfiniteScrollOptions {
 
 /**
  * Hook for infinite scroll with TanStack Query
- * 
+ *
  * @example
  * ```tsx
  * const { data, hasMore, isLoading, isFetchingNextPage, ref } = useInfiniteScroll({
@@ -20,7 +20,7 @@ interface UseInfiniteScrollOptions {
  *   queryKey: ['beneficiaries', search],
  *   queryFn: (page) => appwriteApi.beneficiaries.getBeneficiaries({ page, limit: 20, search }),
  * });
- * 
+ *
  * return (
  *   <>
  *     {data.map(item => <Item key={item.$id} item={item} />)}
@@ -39,27 +39,21 @@ export function useInfiniteScroll({
 }: UseInfiniteScrollOptions) {
   const observerTarget = useRef<HTMLDivElement>(null);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    isLoading,
-  } = useInfiniteQuery({
-    queryKey,
-    queryFn: ({ pageParam }) =>
-      queryFn(pageParam).then((response) => ({
-        items: response.data,
-        total: response.total,
-        nextPage: pageParam + 1,
-      })),
-    initialPageParam,
-    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
-      const totalFetched = (lastPageParam as number) * limit;
-      return totalFetched < lastPage.total ? (lastPageParam as number) + 1 : undefined;
-    },
-  });
+  const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey,
+      queryFn: ({ pageParam }) =>
+        queryFn(pageParam).then((response) => ({
+          items: response.data,
+          total: response.total,
+          nextPage: pageParam + 1,
+        })),
+      initialPageParam,
+      getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+        const totalFetched = (lastPageParam as number) * limit;
+        return totalFetched < lastPage.total ? (lastPageParam as number) + 1 : undefined;
+      },
+    });
 
   // Intersection Observer for auto-load
   useEffect(() => {

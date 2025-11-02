@@ -115,63 +115,43 @@ export function StudentCard({ student, onEdit }: StudentCardProps) {
                     </div>
                     <div>
                       <Label className="text-sm font-medium">TC No</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.nationalId || '-'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.nationalId || '-'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Durum</Label>
-                      <div className="mt-1">
-                        {getStudentStatusBadge(student.status)}
-                      </div>
+                      <div className="mt-1">{getStudentStatusBadge(student.status)}</div>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Eğitim Seviyesi</Label>
-                      <div className="mt-1">
-                        {getEducationLevelBadge(student.educationLevel)}
-                      </div>
+                      <div className="mt-1">{getEducationLevelBadge(student.educationLevel)}</div>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Eğitim Kurumu</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.institution}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.institution}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Bölüm</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.department || '-'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.department || '-'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Sınıf</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.grade || '-'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.grade || '-'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">GPA</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.gpa || '-'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.gpa || '-'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">E-posta</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.email || '-'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.email || '-'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Telefon</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.phone || '-'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.phone || '-'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Şehir</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.city || '-'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.city || '-'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Aile Geliri</Label>
@@ -181,9 +161,7 @@ export function StudentCard({ student, onEdit }: StudentCardProps) {
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Aile Büyüklüğü</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.familySize || '-'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.familySize || '-'}</p>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Yetim Durumu</Label>
@@ -196,16 +174,15 @@ export function StudentCard({ student, onEdit }: StudentCardProps) {
                     <div>
                       <Label className="text-sm font-medium">Veli Bilgileri</Label>
                       <p className="text-sm text-muted-foreground">
-                        {student.guardianName} ({student.guardianRelation}) - {student.guardianPhone}
+                        {student.guardianName} ({student.guardianRelation}) -{' '}
+                        {student.guardianPhone}
                       </p>
                     </div>
                   )}
                   {student.notes && (
                     <div>
                       <Label className="text-sm font-medium">Notlar</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {student.notes}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{student.notes}</p>
                     </div>
                   )}
                 </div>
@@ -222,4 +199,3 @@ export function StudentCard({ student, onEdit }: StudentCardProps) {
     </Card>
   );
 }
-

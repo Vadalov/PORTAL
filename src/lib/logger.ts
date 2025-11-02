@@ -36,8 +36,8 @@ const minPriority = logLevelPriority[minLogLevel];
 
 const colors: Record<LogLevel, string> = {
   debug: '\x1b[36m', // Cyan
-  info: '\x1b[32m',  // Green
-  warn: '\x1b[33m',  // Yellow
+  info: '\x1b[32m', // Green
+  warn: '\x1b[33m', // Yellow
   error: '\x1b[31m', // Red
   fatal: '\x1b[35m', // Magenta
 };
@@ -45,9 +45,13 @@ const resetColor = '\x1b[0m';
 
 function maskSensitive(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) return obj;
-  const masked = Array.isArray(obj) ? [...obj] : { ...obj };
+  const masked: Record<string, any> = Array.isArray(obj) ? [...obj] : { ...obj };
   for (const key in masked) {
-    if (key.toLowerCase().includes('password') || key.toLowerCase().includes('token') || key.toLowerCase().includes('apikey')) {
+    if (
+      key.toLowerCase().includes('password') ||
+      key.toLowerCase().includes('token') ||
+      key.toLowerCase().includes('apikey')
+    ) {
       masked[key] = '***MASKED***';
     } else {
       masked[key] = maskSensitive(masked[key]);
@@ -59,7 +63,7 @@ function maskSensitive(obj: unknown): unknown {
 function shortenStackTrace(error: Error): Error {
   if (isProduction && error.stack) {
     const lines = error.stack.split('\n');
-    error.stack = `${lines.slice(0, 5).join('\n')  }\n... (truncated)`;
+    error.stack = `${lines.slice(0, 5).join('\n')}\n... (truncated)`;
   }
   return error;
 }
@@ -77,7 +81,12 @@ class LoggerImpl implements Logger {
     return logLevelPriority[level] >= minPriority;
   }
 
-  private log(level: LogLevel, message: string, error?: Error | unknown, context?: LogContext): void {
+  private log(
+    level: LogLevel,
+    message: string,
+    error?: Error | unknown,
+    context?: LogContext
+  ): void {
     if (!this.shouldLog(level)) return;
 
     const timestamp = new Date().toISOString();
@@ -102,7 +111,7 @@ class LoggerImpl implements Logger {
     if (isDevelopment) {
       const color = colors[level];
       console.log(`${color}${level.toUpperCase()}${resetColor} ${timestamp} ${message}`);
-      if (Object.keys(safeContext).length > 0) {
+      if (safeContext && typeof safeContext === 'object' && Object.keys(safeContext).length > 0) {
         console.log(JSON.stringify(safeContext, null, 2));
       }
       if (safeError) {
@@ -114,9 +123,9 @@ class LoggerImpl implements Logger {
 
     if ((level === 'error' || level === 'fatal') && process.env.SENTRY_DSN) {
       Sentry.captureException(safeError || new Error(message), {
-        tags: { level, ...safeContext },
-        extra: safeContext,
-      });
+        tags: { level },
+        extra: safeContext as Record<string, any>,
+      } as any);
     }
   }
 

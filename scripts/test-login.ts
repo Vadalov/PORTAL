@@ -1,7 +1,7 @@
 /**
  * Login Test Script
  * Yeni oluşturulan kullanıcı ile login testi
- * 
+ *
  * Usage: npx tsx scripts/test-login.ts
  */
 
@@ -97,9 +97,9 @@ async function testLogin() {
       console.log('⚠️  Session endpoint yanıt vermedi');
     }
 
-    console.log(`\n${  '='.repeat(60)}`);
+    console.log(`\n${'='.repeat(60)}`);
     console.log('🎉 Tüm testler başarılı!');
-    console.log('\n💡 Frontend\'de login yapmak için:');
+    console.log("\n💡 Frontend'de login yapmak için:");
     console.log(`   1. ${BASE_URL}/login adresine gidin`);
     console.log(`   2. Email: ${EMAIL}`);
     console.log(`   3. Password: ${PASSWORD.replace(/./g, '*')}`);
@@ -117,4 +117,3 @@ async function testLogin() {
 }
 
 testLogin();
-

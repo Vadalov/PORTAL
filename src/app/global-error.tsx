@@ -96,44 +96,53 @@ export default function GlobalError({
     error.message?.toLowerCase().includes('mismatch');
 
   // Browser check for global scope
-  const isUnsupportedBrowser = typeof window !== 'undefined' && /MSIE|Trident/.test(navigator.userAgent);
+  const isUnsupportedBrowser =
+    typeof window !== 'undefined' && /MSIE|Trident/.test(navigator.userAgent);
 
   // Add error type specific recovery
-  const isNetworkError = error.message?.toLowerCase().includes('fetch') ||
-                         error.message?.toLowerCase().includes('network') ||
-                         error.message?.toLowerCase().includes('connection');
-  const isStoreError = error.message?.toLowerCase().includes('store') ||
-                       error.message?.toLowerCase().includes('zustand') ||
-                       error.message?.toLowerCase().includes('state');
+  const isNetworkError =
+    error.message?.toLowerCase().includes('fetch') ||
+    error.message?.toLowerCase().includes('network') ||
+    error.message?.toLowerCase().includes('connection');
+  const isStoreError =
+    error.message?.toLowerCase().includes('store') ||
+    error.message?.toLowerCase().includes('zustand') ||
+    error.message?.toLowerCase().includes('state');
 
   return (
     <html>
       <body>
-        <div style={{
-          display: 'flex',
-          minHeight: '100vh',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: '#f9fafb',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          padding: '1rem',
-        }}>
-          <div style={{
-            maxWidth: '28rem',
-            width: '100%',
-            backgroundColor: 'white',
-            borderRadius: '0.5rem',
-            padding: '2rem',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-          }}>
+        <div
+          style={{
+            display: 'flex',
+            minHeight: '100vh',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#f9fafb',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            padding: '1rem',
+          }}
+        >
+          <div
+            style={{
+              maxWidth: '28rem',
+              width: '100%',
+              backgroundColor: 'white',
+              borderRadius: '0.5rem',
+              padding: '2rem',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+            }}
+          >
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-              <div style={{
-                display: 'inline-flex',
-                padding: '0.75rem',
-                backgroundColor: '#fee2e2',
-                borderRadius: '9999px',
-                marginBottom: '1rem',
-              }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  padding: '0.75rem',
+                  backgroundColor: '#fee2e2',
+                  borderRadius: '9999px',
+                  marginBottom: '1rem',
+                }}
+              >
                 <svg
                   style={{ width: '2rem', height: '2rem', color: '#dc2626' }}
                   fill="none"
@@ -148,72 +157,89 @@ export default function GlobalError({
                   />
                 </svg>
               </div>
-              <h1 style={{
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: '#111827',
-                marginBottom: '0.5rem',
-              }}>
+              <h1
+                style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: '#111827',
+                  marginBottom: '0.5rem',
+                }}
+              >
                 Kritik Bir Hata Oluştu
               </h1>
-              <p style={{
-                color: '#6b7280',
-                marginBottom: '1.5rem',
-              }}>
+              <p
+                style={{
+                  color: '#6b7280',
+                  marginBottom: '1.5rem',
+                }}
+              >
                 Uygulama beklenmedik bir hatayla karşılaştı. Lütfen sayfayı yenileyin.
               </p>
               {isUnsupportedBrowser && (
-                <div style={{
-                  backgroundColor: '#fef3c7',
-                  border: '1px solid #f59e0b',
-                  borderRadius: '0.375rem',
-                  padding: '0.75rem',
-                  marginBottom: '1.5rem',
-                }}>
-                  <p style={{
-                    fontSize: '0.875rem',
-                    color: '#92400e',
-                    margin: 0,
-                  }}>
-                    ⚠️ Bu tarayıcı desteklenmiyor. Lütfen Chrome, Firefox, Safari veya Edge kullanın.
+                <div
+                  style={{
+                    backgroundColor: '#fef3c7',
+                    border: '1px solid #f59e0b',
+                    borderRadius: '0.375rem',
+                    padding: '0.75rem',
+                    marginBottom: '1.5rem',
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: '0.875rem',
+                      color: '#92400e',
+                      margin: 0,
+                    }}
+                  >
+                    ⚠️ Bu tarayıcı desteklenmiyor. Lütfen Chrome, Firefox, Safari veya Edge
+                    kullanın.
                   </p>
                 </div>
               )}
             </div>
 
             {process.env.NODE_ENV === 'development' && (
-              <details style={{
-                backgroundColor: '#f3f4f6',
-                padding: '1rem',
-                borderRadius: '0.375rem',
-                marginBottom: '1.5rem',
-                fontSize: '0.875rem',
-              }}>
-                <summary style={{
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  color: '#374151',
-                }}>
+              <details
+                style={{
+                  backgroundColor: '#f3f4f6',
+                  padding: '1rem',
+                  borderRadius: '0.375rem',
+                  marginBottom: '1.5rem',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <summary
+                  style={{
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    color: '#374151',
+                  }}
+                >
                   Hata Detayları (Development)
                 </summary>
                 <div style={{ marginTop: '0.5rem' }}>
                   <strong>Error:</strong>
-                  <pre style={{
-                    marginTop: '0.25rem',
-                    overflow: 'auto',
-                    fontSize: '0.75rem',
-                    color: '#dc2626',
-                  }}>
+                  <pre
+                    style={{
+                      marginTop: '0.25rem',
+                      overflow: 'auto',
+                      fontSize: '0.75rem',
+                      color: '#dc2626',
+                    }}
+                  >
                     {error.message}
                   </pre>
                   {error.digest && (
                     <>
                       <strong>Digest:</strong>
-                      <pre style={{
-                        marginTop: '0.25rem',
-                        fontSize: '0.75rem',
-                        color: '#6b7280',
-                      }}>
+                      <pre
+                        style={{
+                          marginTop: '0.25rem',
+                          fontSize: '0.75rem',
+                          color: '#6b7280',
+                        }}
+                      >
                         {error.digest}
                       </pre>
                     </>
@@ -236,13 +262,13 @@ export default function GlobalError({
                   fontWeight: '500',
                   cursor: 'pointer',
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#2563eb')}
               >
                 Tekrar Dene
               </button>
               <button
-                onClick={() => window.location.href = '/'}
+                onClick={() => (window.location.href = '/')}
                 style={{
                   width: '100%',
                   padding: '0.5rem 1rem',
@@ -254,8 +280,8 @@ export default function GlobalError({
                   fontWeight: '500',
                   cursor: 'pointer',
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'white')}
               >
                 Ana Sayfaya Dön
               </button>
@@ -271,7 +297,9 @@ export default function GlobalError({
                       timestamp: new Date().toISOString(),
                       localStorage: { ...localStorage },
                     };
-                    const blob = new Blob([JSON.stringify(errorReport, null, 2)], { type: 'application/json' });
+                    const blob = new Blob([JSON.stringify(errorReport, null, 2)], {
+                      type: 'application/json',
+                    });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
@@ -290,8 +318,8 @@ export default function GlobalError({
                     fontWeight: '500',
                     cursor: 'pointer',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d97706'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f59e0b'}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#d97706')}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#f59e0b')}
                 >
                   📥 Download Error Report
                 </button>
@@ -314,8 +342,8 @@ export default function GlobalError({
                     fontWeight: '500',
                     cursor: 'pointer',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
                 >
                   🗑️ Clear Storage & Reload
                 </button>
@@ -334,8 +362,8 @@ export default function GlobalError({
                     fontWeight: '500',
                     cursor: 'pointer',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0e7490'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#0891b2'}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#0e7490')}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#0891b2')}
                 >
                   🔄 Check Connection & Retry
                 </button>
@@ -358,8 +386,8 @@ export default function GlobalError({
                     fontWeight: '500',
                     cursor: 'pointer',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#6d28d9'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#7c3aed'}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#6d28d9')}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#7c3aed')}
                 >
                   🔧 Reset Application State
                 </button>
@@ -367,23 +395,27 @@ export default function GlobalError({
             </div>
 
             {(isHydrationError || isStoreError) && (
-              <p style={{
-                textAlign: 'center',
-                fontSize: '0.75rem',
-                color: '#dc2626',
-                marginTop: '1rem',
-                fontWeight: '600',
-              }}>
+              <p
+                style={{
+                  textAlign: 'center',
+                  fontSize: '0.75rem',
+                  color: '#dc2626',
+                  marginTop: '1rem',
+                  fontWeight: '600',
+                }}
+              >
                 ⚠️ Bu işlem tüm yerel verileri silecek
               </p>
             )}
 
-            <p style={{
-              textAlign: 'center',
-              fontSize: '0.75rem',
-              color: '#9ca3af',
-              marginTop: '1.5rem',
-            }}>
+            <p
+              style={{
+                textAlign: 'center',
+                fontSize: '0.75rem',
+                color: '#9ca3af',
+                marginTop: '1.5rem',
+              }}
+            >
               Sorun devam ederse lütfen sistem yöneticisi ile iletişime geçin.
             </p>
           </div>

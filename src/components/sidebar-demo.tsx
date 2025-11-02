@@ -1,52 +1,39 @@
-"use client";
-import React, { useState } from "react";
-import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
-import {
-  IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconUserBolt,
-} from "@tabler/icons-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+'use client';
+import React, { useState } from 'react';
+import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
+import { IconArrowLeft, IconBrandTabler, IconSettings, IconUserBolt } from '@tabler/icons-react';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export function SidebarDemo() {
   const links = [
     {
-      label: "Dashboard",
-      href: "#",
-      icon: (
-        <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      label: 'Dashboard',
+      href: '#',
+      icon: <IconBrandTabler className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
     },
     {
-      label: "Profile",
-      href: "#",
-      icon: (
-        <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      label: 'Profile',
+      href: '#',
+      icon: <IconUserBolt className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
     },
     {
-      label: "Settings",
-      href: "#",
-      icon: (
-        <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      label: 'Settings',
+      href: '#',
+      icon: <IconSettings className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
     },
     {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      label: 'Logout',
+      href: '#',
+      icon: <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />,
     },
   ];
   const [open, setOpen] = useState(false);
   return (
     <div
       className={cn(
-        "mx-auto flex w-full max-w-7xl flex-1 flex-col overflow-hidden rounded-md border border-border bg-muted md:flex-row dark:border-neutral-700 dark:bg-neutral-800",
-        "h-[60vh]", // for your use case, use `h-screen` instead of `h-[60vh]`
+        'mx-auto flex w-full max-w-7xl flex-1 flex-col overflow-hidden rounded-md border border-border bg-muted md:flex-row dark:border-neutral-700 dark:bg-neutral-800',
+        'h-[60vh]' // for your use case, use `h-screen` instead of `h-[60vh]`
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
@@ -62,8 +49,8 @@ export function SidebarDemo() {
           <div>
             <SidebarLink
               link={{
-                label: "Manu Arora",
-                href: "#",
+                label: 'Manu Arora',
+                href: '#',
                 icon: (
                   <img
                     src="https://assets.aceternity.com/manu.png"
@@ -120,7 +107,7 @@ const Dashboard = () => {
         <div className="flex gap-2">
           {[...new Array(4)].map((i, idx) => (
             <div
-              key={`first-array-demo-1${  idx}`}
+              key={`first-array-demo-1${idx}`}
               className="h-20 w-full animate-pulse rounded-lg bg-muted dark:bg-neutral-800"
             ></div>
           ))}
@@ -128,7 +115,7 @@ const Dashboard = () => {
         <div className="flex flex-1 gap-2">
           {[...new Array(2)].map((i, idx) => (
             <div
-              key={`second-array-demo-1${  idx}`}
+              key={`second-array-demo-1${idx}`}
               className="h-full w-full animate-pulse rounded-lg bg-muted dark:bg-neutral-800"
             ></div>
           ))}
@@ -137,4 +124,3 @@ const Dashboard = () => {
     </div>
   );
 };
-

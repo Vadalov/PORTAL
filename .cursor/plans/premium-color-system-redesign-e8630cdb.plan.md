@@ -1,4 +1,5 @@
 <!-- e8630cdb-83c0-4c72-b58a-0a2cd9f31981 6a3a7a5a-9138-4438-a2c0-689d62218bfc -->
+
 # Full Project Modernization & Consistency Overhaul
 
 ## Current Setup Verification
@@ -10,7 +11,7 @@
 
 ## High-level Approach
 
-1) Systematic audit → 2) Design system finalize → 3) Component standardize → 4) Layout/Nav unify → 5) Forms & validation modernize → 6) State & data patterns unify → 7) Performance & a11y pass → 8) Consistency QA
+1. Systematic audit → 2) Design system finalize → 3) Component standardize → 4) Layout/Nav unify → 5) Forms & validation modernize → 6) State & data patterns unify → 7) Performance & a11y pass → 8) Consistency QA
 
 ## 1. Repository Audit & Cleanup
 

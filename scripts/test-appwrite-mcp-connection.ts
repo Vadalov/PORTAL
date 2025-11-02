@@ -1,7 +1,7 @@
 /**
  * Appwrite MCP Connection Test
  * MCP Server kullanarak Appwrite bağlantısını ve auth durumunu test eder
- * 
+ *
  * Usage: npx tsx scripts/test-appwrite-mcp-connection.ts
  */
 
@@ -18,7 +18,12 @@ interface TestResult {
 
 const results: TestResult[] = [];
 
-function addResult(name: string, status: 'PASS' | 'FAIL' | 'WARNING', message: string, details?: any) {
+function addResult(
+  name: string,
+  status: 'PASS' | 'FAIL' | 'WARNING',
+  message: string,
+  details?: any
+) {
   results.push({ name, status, message, details });
 }
 
@@ -36,8 +41,8 @@ async function runTests() {
     addResult(
       'NEXT_PUBLIC_APPWRITE_ENDPOINT',
       endpoint.endsWith('/v1') ? 'PASS' : 'WARNING',
-      endpoint.endsWith('/v1') 
-        ? `✅ Endpoint: ${endpoint}` 
+      endpoint.endsWith('/v1')
+        ? `✅ Endpoint: ${endpoint}`
         : `⚠️  Endpoint format: ${endpoint} (should end with /v1)`,
       endpoint
     );
@@ -52,8 +57,15 @@ async function runTests() {
   }
 
   if (apiKey) {
-    const keyType = apiKey.startsWith('standard_') ? 'Standard' : apiKey.startsWith('secret_') ? 'Secret' : 'Unknown';
-    addResult('APPWRITE_API_KEY', 'PASS', `✅ API Key mevcut (${keyType})`, { length: apiKey.length, type: keyType });
+    const keyType = apiKey.startsWith('standard_')
+      ? 'Standard'
+      : apiKey.startsWith('secret_')
+        ? 'Secret'
+        : 'Unknown';
+    addResult('APPWRITE_API_KEY', 'PASS', `✅ API Key mevcut (${keyType})`, {
+      length: apiKey.length,
+      type: keyType,
+    });
   } else {
     addResult('APPWRITE_API_KEY', 'FAIL', '❌ API Key tanımlı değil');
   }
@@ -61,10 +73,12 @@ async function runTests() {
   // 2. Config Dosyası Kontrolü
   console.log('\n📋 2. Config Dosyası Kontrolü');
   try {
-    const { appwriteConfig, validateAppwriteConfigSafe, getConfigStatus } = await import('../src/lib/appwrite/config');
+    const { appwriteConfig, validateAppwriteConfigSafe, getConfigStatus } = await import(
+      '../src/lib/appwrite/config'
+    );
     const isValid = validateAppwriteConfigSafe();
     const status = getConfigStatus();
-    
+
     addResult(
       'Config Validation',
       isValid ? 'PASS' : 'WARNING',
@@ -76,14 +90,14 @@ async function runTests() {
   }
 
   // Sonuçları yazdır
-  console.log(`\n${  '='.repeat(60)}`);
+  console.log(`\n${'='.repeat(60)}`);
   console.log('\n📊 TEST SONUÇLARI\n');
 
-  const passed = results.filter(r => r.status === 'PASS').length;
-  const failed = results.filter(r => r.status === 'FAIL').length;
-  const warnings = results.filter(r => r.status === 'WARNING').length;
+  const passed = results.filter((r) => r.status === 'PASS').length;
+  const failed = results.filter((r) => r.status === 'FAIL').length;
+  const warnings = results.filter((r) => r.status === 'WARNING').length;
 
-  results.forEach(result => {
+  results.forEach((result) => {
     const icon = result.status === 'PASS' ? '✅' : result.status === 'FAIL' ? '❌' : '⚠️';
     console.log(`${icon} ${result.name}: ${result.message}`);
     if (result.details && typeof result.details === 'object') {
@@ -91,7 +105,7 @@ async function runTests() {
     }
   });
 
-  console.log(`\n${  '='.repeat(60)}`);
+  console.log(`\n${'='.repeat(60)}`);
   console.log(`\n📈 Özet:`);
   console.log(`   ✅ Başarılı: ${passed}`);
   console.log(`   ⚠️  Uyarı: ${warnings}`);

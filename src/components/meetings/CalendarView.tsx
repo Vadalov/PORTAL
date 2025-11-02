@@ -248,7 +248,9 @@ export function CalendarView({ meetings, onMeetingClick, onDateClick }: Calendar
 
                         {/* Meeting Type */}
                         <div className="flex items-center gap-2">
-                          <div className={`h-2 w-2 rounded-full ${getMeetingTypeColor(meeting.meeting_type)}`} />
+                          <div
+                            className={`h-2 w-2 rounded-full ${getMeetingTypeColor(meeting.meeting_type)}`}
+                          />
                           <span className="text-sm text-gray-600">
                             {meetingTypeLabels[meeting.meeting_type]}
                           </span>

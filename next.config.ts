@@ -1,16 +1,16 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 import withBundleAnalyzer from '@next/bundle-analyzer';
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from '@sentry/nextjs';
 
 const bundleAnalyzer = withBundleAnalyzer({
-enabled: process.env.ANALYZE === 'true',
+  enabled: process.env.ANALYZE === 'true',
 });
 
 const baseConfig: NextConfig = {
-// Performance optimizations
-experimental: {
-optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  optimizeCss: true,
+  // Performance optimizations
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizeCss: true,
   },
 
   // Turbopack configuration
@@ -70,8 +70,8 @@ optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
               "style-src 'self' 'unsafe-inline'",
               isDevelopment
-                ? "connect-src 'self' ws: wss: http: https:"  // Allow WebSocket & HTTP in dev for HMR
-                : "connect-src 'self' https:"  // Strict in production
+                ? "connect-src 'self' ws: wss: http: https:" // Allow WebSocket & HTTP in dev for HMR
+                : "connect-src 'self' https:", // Strict in production
             ].join('; '),
           },
         ],
@@ -138,9 +138,12 @@ optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
 
   // Console removal in production
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
   },
 
   // Output optimization
@@ -150,11 +153,8 @@ optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
 
 const nextConfig: NextConfig = bundleAnalyzer(baseConfig);
 
-export default withSentryConfig(
-  nextConfig,
-  {
-    silent: true,
-    org: process.env.SENTRY_ORG,
-    project: process.env.SENTRY_PROJECT,
-  }
-);
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+});

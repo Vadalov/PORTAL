@@ -40,20 +40,8 @@ export const AnimatedGradient: React.FC<AnimatedGradientProps> = ({
   };
 
   return (
-    <div
-      className={cn(
-        'absolute inset-0 pointer-events-none overflow-hidden z-0',
-        className
-      )}
-    >
-      <div
-        className={cn(
-          'w-full h-full gpu-accelerated',
-          getGradientClass(),
-          getSpeedClass()
-        )}
-      />
+    <div className={cn('absolute inset-0 pointer-events-none overflow-hidden z-0', className)}>
+      <div className={cn('w-full h-full gpu-accelerated', getGradientClass(), getSpeedClass())} />
     </div>
   );
 };
-

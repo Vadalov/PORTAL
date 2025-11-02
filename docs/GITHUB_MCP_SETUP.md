@@ -31,11 +31,13 @@ GitHub MCP server, Claude Desktop üzerinden GitHub ile doğrudan etkileşim kur
 ### 2. Token'ı Ortam Değişkeni Olarak Ayarlama
 
 **Geçici (sadece mevcut oturum):**
+
 ```bash
 export GITHUB_TOKEN='ghp_your_token_here'
 ```
 
 **Kalıcı (her oturum için):**
+
 ```bash
 echo 'export GITHUB_TOKEN="ghp_your_token_here"' >> ~/.bashrc
 source ~/.bashrc
@@ -48,6 +50,7 @@ source ~/.bashrc
 ```
 
 Bu script:
+
 - ✅ Token'ın varlığını kontrol eder
 - ✅ `~/.config/claude/mcp.json` oluşturur
 - ✅ Mevcut varsa yedek alır
@@ -62,20 +65,19 @@ Kurulum tamamlandıktan sonra Claude Desktop uygulamasını kapatıp yeniden aç
 Eğer script kullanmak istemiyorsanız:
 
 1. Config dizini oluşturun:
+
 ```bash
 mkdir -p ~/.config/claude
 ```
 
 2. `~/.config/claude/mcp.json` dosyasını oluşturun:
+
 ```json
 {
   "mcpServers": {
     "github": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
         "GITHUB_TOKEN": "your_github_token_here"
       }
@@ -91,16 +93,19 @@ mkdir -p ~/.config/claude
 Claude Desktop'ta şu komutları deneyebilirsiniz:
 
 1. **Repository bilgilerini getir:**
+
    ```
    Vadalov/PORTAL repository'sindeki son issue'ları listele
    ```
 
 2. **Dosya içeriğini oku:**
+
    ```
    PORTAL projesindeki package.json dosyasını göster
    ```
 
 3. **Issue oluştur:**
+
    ```
    PORTAL projesinde yeni bir issue oluştur
    ```
@@ -113,6 +118,7 @@ Claude Desktop'ta şu komutları deneyebilirsiniz:
 ## 🔧 Troubleshooting
 
 ### Token tanınmıyor
+
 ```bash
 # Token'ın ayarlı olduğunu kontrol edin
 echo $GITHUB_TOKEN
@@ -122,6 +128,7 @@ export GITHUB_TOKEN='your_token_here'
 ```
 
 ### MCP server çalışmıyor
+
 ```bash
 # Config dosyasını kontrol edin
 cat ~/.config/claude/mcp.json
@@ -131,6 +138,7 @@ npx -y @modelcontextprotocol/server-github --help
 ```
 
 ### Claude Desktop görmüyor
+
 1. Claude Desktop'ı tamamen kapatın (sistem tray'den de)
 2. Tekrar açın
 3. Ayarlar > MCP kısmından "github" server'ını kontrol edin
@@ -140,29 +148,34 @@ npx -y @modelcontextprotocol/server-github --help
 MCP GitHub server ile yapabilecekleriniz:
 
 ### Repository İşlemleri
+
 - Repository bilgilerini getirme
 - Dosya içeriklerini okuma/yazma
 - Branch oluşturma/listeleme
 - Fork oluşturma
 
 ### Issue Yönetimi
+
 - Issue listeleme/arama
 - Issue oluşturma/güncelleme
 - Yorum ekleme
 - Label ve milestone yönetimi
 
 ### Pull Request İşlemleri
+
 - PR listeleme/arama
 - PR oluşturma/güncelleme
 - Review ekleme
 - Merge işlemleri
 
 ### Kod Arama
+
 - Repository'lerde kod arama
 - Kullanıcı arama
 - Issue/PR arama
 
 ### Git İşlemleri
+
 - Commit listeleme/görüntüleme
 - Branch yönetimi
 - Tag işlemleri

@@ -57,7 +57,10 @@ export function validateEnvironmentVariables(): ValidationResult[] {
  * Validate Appwrite endpoint URL format
  * Must start with http:// or https:// and end with /v1
  */
-export function validateAppwriteEndpoint(value?: string, variableName = 'NEXT_PUBLIC_APPWRITE_ENDPOINT'): ValidationResult {
+export function validateAppwriteEndpoint(
+  value?: string,
+  variableName = 'NEXT_PUBLIC_APPWRITE_ENDPOINT'
+): ValidationResult {
   if (!value || value.trim() === '') {
     return {
       variable: variableName,
@@ -115,7 +118,10 @@ export function validateAppwriteEndpoint(value?: string, variableName = 'NEXT_PU
  * Validate Appwrite project ID format
  * Should be alphanumeric, typically 20-24 characters
  */
-export function validateProjectId(value?: string, variableName = 'NEXT_PUBLIC_APPWRITE_PROJECT_ID'): ValidationResult {
+export function validateProjectId(
+  value?: string,
+  variableName = 'NEXT_PUBLIC_APPWRITE_PROJECT_ID'
+): ValidationResult {
   if (!value || value.trim() === '') {
     return {
       variable: variableName,
@@ -173,7 +179,10 @@ export function validateProjectId(value?: string, variableName = 'NEXT_PUBLIC_AP
  * Validate Appwrite API key format
  * Should be a long base64-like string
  */
-export function validateApiKey(value?: string, variableName = 'APPWRITE_API_KEY'): ValidationResult {
+export function validateApiKey(
+  value?: string,
+  variableName = 'APPWRITE_API_KEY'
+): ValidationResult {
   if (!value || value.trim() === '') {
     return {
       variable: variableName,
@@ -243,7 +252,10 @@ export function validateApiKey(value?: string, variableName = 'APPWRITE_API_KEY'
  * Validate database ID format
  * Should be alphanumeric with underscores allowed
  */
-export function validateDatabaseId(value?: string, variableName = 'NEXT_PUBLIC_DATABASE_ID'): ValidationResult {
+export function validateDatabaseId(
+  value?: string,
+  variableName = 'NEXT_PUBLIC_DATABASE_ID'
+): ValidationResult {
   if (!value || value.trim() === '') {
     return {
       variable: variableName,
@@ -293,9 +305,9 @@ export function validateDatabaseId(value?: string, variableName = 'NEXT_PUBLIC_D
 export function getValidationReport(): ValidationReport {
   const results = validateEnvironmentVariables();
   const summary = {
-    errors: results.filter(r => r.severity === ValidationSeverity.ERROR).length,
-    warnings: results.filter(r => r.severity === ValidationSeverity.WARNING).length,
-    infos: results.filter(r => r.severity === ValidationSeverity.INFO).length,
+    errors: results.filter((r) => r.severity === ValidationSeverity.ERROR).length,
+    warnings: results.filter((r) => r.severity === ValidationSeverity.WARNING).length,
+    infos: results.filter((r) => r.severity === ValidationSeverity.INFO).length,
     total: results.length,
   };
 
@@ -316,27 +328,35 @@ export function printValidationReport(report: ValidationReport = getValidationRe
 
   if (report.summary.errors > 0) {
     console.log(`❌ Errors: ${report.summary.errors}`);
-    report.results.filter(r => r.severity === ValidationSeverity.ERROR).forEach(r => {
-      console.log(`  • ${r.message}`);
-      if (r.suggestion) console.log(`    💡 ${r.suggestion}`);
-    });
+    report.results
+      .filter((r) => r.severity === ValidationSeverity.ERROR)
+      .forEach((r) => {
+        console.log(`  • ${r.message}`);
+        if (r.suggestion) console.log(`    💡 ${r.suggestion}`);
+      });
   }
 
   if (report.summary.warnings > 0) {
     console.log(`⚠️  Warnings: ${report.summary.warnings}`);
-    report.results.filter(r => r.severity === ValidationSeverity.WARNING).forEach(r => {
-      console.log(`  • ${r.message}`);
-      if (r.suggestion) console.log(`    💡 ${r.suggestion}`);
-    });
+    report.results
+      .filter((r) => r.severity === ValidationSeverity.WARNING)
+      .forEach((r) => {
+        console.log(`  • ${r.message}`);
+        if (r.suggestion) console.log(`    💡 ${r.suggestion}`);
+      });
   }
 
   if (report.summary.infos > 0) {
     console.log(`ℹ️  Valid: ${report.summary.infos}`);
-    report.results.filter(r => r.severity === ValidationSeverity.INFO).forEach(r => {
-      console.log(`  • ${r.message}`);
-    });
+    report.results
+      .filter((r) => r.severity === ValidationSeverity.INFO)
+      .forEach((r) => {
+        console.log(`  • ${r.message}`);
+      });
   }
 
-  console.log(`\n📊 Summary: ${report.summary.errors} errors, ${report.summary.warnings} warnings, ${report.summary.infos} valid`);
+  console.log(
+    `\n📊 Summary: ${report.summary.errors} errors, ${report.summary.warnings} warnings, ${report.summary.infos} valid`
+  );
   console.log(`⏰ Generated at: ${new Date(report.timestamp).toLocaleString()}`);
 }

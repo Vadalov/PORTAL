@@ -14,11 +14,21 @@ import { Separator } from '@/components/ui/separator';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, User, MapPin, Users, Wallet, Heart, GraduationCap, HandHeart, UserCheck } from 'lucide-react';
+import {
+  Loader2,
+  User,
+  MapPin,
+  Users,
+  Wallet,
+  Heart,
+  GraduationCap,
+  HandHeart,
+  UserCheck,
+} from 'lucide-react';
 import { ParameterSelect } from './ParameterSelect';
 
 // Central validation schema
-import { beneficiarySchema } from '@/lib/validations/beneficiary'
+import { beneficiarySchema } from '@/lib/validations/beneficiary';
 import { z } from 'zod';
 
 // Sanitization functions
@@ -28,11 +38,11 @@ import {
   sanitizeEmail,
   sanitizeObject,
   sanitizeNumber,
-  sanitizeDate
-} from '@/lib/sanitization'
+  sanitizeDate,
+} from '@/lib/sanitization';
 
 // Error handling
-import { formatErrorMessage } from '@/lib/errors'
+import { formatErrorMessage } from '@/lib/errors';
 
 // Use central validation schema
 const advancedBeneficiarySchema = beneficiarySchema;
@@ -40,7 +50,6 @@ const advancedBeneficiarySchema = beneficiarySchema;
 // Use central type
 import type { BeneficiaryFormData } from '@/lib/validations/beneficiary';
 type AdvancedBeneficiaryFormData = z.infer<typeof advancedBeneficiarySchema>;
-
 
 interface AdvancedBeneficiaryFormProps {
   onSuccess?: () => void;
@@ -51,7 +60,14 @@ interface AdvancedBeneficiaryFormProps {
   beneficiaryId?: string;
 }
 
-export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUpdateMode = false, updateMutation, beneficiaryId }: AdvancedBeneficiaryFormProps) {
+export function AdvancedBeneficiaryForm({
+  onSuccess,
+  onCancel,
+  initialData,
+  isUpdateMode = false,
+  updateMutation,
+  beneficiaryId,
+}: AdvancedBeneficiaryFormProps) {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('personal');
@@ -94,7 +110,8 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
       onSuccess?.();
     },
-    onError: (error: unknown) => {
+    onError: (err: unknown) => {
+      const error = err as Error;
       // ✅ Enhanced error handling
       const userMessage = formatErrorMessage(error);
       toast.error(`İhtiyaç sahibi eklenirken hata oluştu: ${userMessage}`);
@@ -114,7 +131,8 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
       onSuccess?.();
     },
-    onError: (error: unknown) => {
+    onError: (err: unknown) => {
+      const error = err as Error;
       // ✅ Enhanced error handling
       const userMessage = formatErrorMessage(error);
       toast.error(`İhtiyaç sahibi güncellenirken hata oluştu: ${userMessage}`);
@@ -123,8 +141,8 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
   });
 
   // Hangi mutation kullanılacak?
-  const activeMutation = isUpdateMode 
-    ? (updateMutation || internalUpdateMutation) 
+  const activeMutation = isUpdateMode
+    ? updateMutation || internalUpdateMutation
     : createBeneficiaryMutation;
 
   // Sanitization helper function
@@ -181,10 +199,10 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
       'identityIssueDate',
       'identityExpiryDate',
       'passportExpiryDate',
-      'visaExpiryDate'
+      'visaExpiryDate',
     ] as const;
 
-    dateFields.forEach(field => {
+    dateFields.forEach((field) => {
       if (sanitized[field]) {
         const dateValue = sanitized[field];
         if (typeof dateValue === 'string') {
@@ -199,7 +217,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
     if (sanitized.emergencyContacts && Array.isArray(sanitized.emergencyContacts)) {
       sanitized.emergencyContacts = sanitized.emergencyContacts.map((contact: any) => ({
         ...contact,
-        phone: sanitizePhone(contact.phone || '') || contact.phone || ''
+        phone: sanitizePhone(contact.phone || '') || contact.phone || '',
       }));
     }
 
@@ -216,12 +234,14 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
       'jobDescription',
       'prosthetics',
       'surgeries',
-      'healthNotes'
+      'healthNotes',
     ] as const;
 
-    textFields.forEach(field => {
+    textFields.forEach((field) => {
       if (sanitized[field] && typeof sanitized[field] === 'string') {
-        sanitized[field] = sanitizeObject({ [field]: sanitized[field] }, { allowHtml: false })[field];
+        sanitized[field] = sanitizeObject({ [field]: sanitized[field] }, { allowHtml: false })[
+          field
+        ];
       }
     });
 
@@ -245,7 +265,8 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
       }
 
       // Success handled by mutation onSuccess callback
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       // Enhanced error handling
       const userMessage = formatErrorMessage(error);
       toast.error(userMessage);
@@ -372,9 +393,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                     {...register('email')}
                     placeholder="ornek@email.com"
                   />
-                  {errors.email && (
-                    <p className="text-sm text-red-600">{errors.email.message}</p>
-                  )}
+                  {errors.email && <p className="text-sm text-red-600">{errors.email.message}</p>}
                 </div>
               </div>
 
@@ -391,11 +410,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
 
                 <div className="space-y-2">
                   <Label htmlFor="nationality">Uyruk</Label>
-                  <Input
-                    id="nationality"
-                    {...register('nationality')}
-                    placeholder="Türkiye"
-                  />
+                  <Input id="nationality" {...register('nationality')} placeholder="Türkiye" />
                 </div>
               </div>
 
@@ -439,31 +454,19 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                   placeholder="Mahalle, Cadde, Sokak, Bina No, Daire"
                   rows={3}
                 />
-                {errors.address && (
-                  <p className="text-sm text-red-600">{errors.address.message}</p>
-                )}
+                {errors.address && <p className="text-sm text-red-600">{errors.address.message}</p>}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="city">Şehir *</Label>
-                  <Input
-                    id="city"
-                    {...register('city')}
-                    placeholder="İstanbul"
-                  />
-                  {errors.city && (
-                    <p className="text-sm text-red-600">{errors.city.message}</p>
-                  )}
+                  <Input id="city" {...register('city')} placeholder="İstanbul" />
+                  {errors.city && <p className="text-sm text-red-600">{errors.city.message}</p>}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="district">İlçe *</Label>
-                  <Input
-                    id="district"
-                    {...register('district')}
-                    placeholder="Başakşehir"
-                  />
+                  <Input id="district" {...register('district')} placeholder="Başakşehir" />
                   {errors.district && (
                     <p className="text-sm text-red-600">{errors.district.message}</p>
                   )}
@@ -471,11 +474,7 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
 
                 <div className="space-y-2">
                   <Label htmlFor="neighborhood">Mahalle *</Label>
-                  <Input
-                    id="neighborhood"
-                    {...register('neighborhood')}
-                    placeholder="Kayaşehir"
-                  />
+                  <Input id="neighborhood" {...register('neighborhood')} placeholder="Kayaşehir" />
                   {errors.neighborhood && (
                     <p className="text-sm text-red-600">{errors.neighborhood.message}</p>
                   )}
@@ -585,7 +584,9 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                       checked={watch('has_debt') ?? false}
                       onCheckedChange={(checked) => setValue('has_debt', !!checked)}
                     />
-                    <Label htmlFor="has_debt" className="cursor-pointer">Borcu var</Label>
+                    <Label htmlFor="has_debt" className="cursor-pointer">
+                      Borcu var
+                    </Label>
                   </div>
 
                   <div className="flex items-center space-x-2">
@@ -594,7 +595,9 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                       checked={watch('has_vehicle') ?? false}
                       onCheckedChange={(checked) => setValue('has_vehicle', !!checked)}
                     />
-                    <Label htmlFor="has_vehicle" className="cursor-pointer">Aracı var</Label>
+                    <Label htmlFor="has_vehicle" className="cursor-pointer">
+                      Aracı var
+                    </Label>
                   </div>
                 </div>
               </div>
@@ -620,7 +623,9 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                   checked={watch('hasChronicIllness')}
                   onCheckedChange={(checked) => setValue('hasChronicIllness', checked as boolean)}
                 />
-                <Label htmlFor="hasChronicIllness" className="cursor-pointer">Kronik hastalığı var</Label>
+                <Label htmlFor="hasChronicIllness" className="cursor-pointer">
+                  Kronik hastalığı var
+                </Label>
               </div>
               {/* Kronik Hastalık Detayı - Conditional */}
               {watch('hasChronicIllness') && (
@@ -754,7 +759,9 @@ export function AdvancedBeneficiaryForm({ onSuccess, onCancel, initialData, isUp
                   <Checkbox
                     id="other_organization_aid"
                     checked={watch('other_organization_aid')}
-                    onCheckedChange={(checked) => setValue('other_organization_aid', checked as boolean)}
+                    onCheckedChange={(checked) =>
+                      setValue('other_organization_aid', checked as boolean)
+                    }
                   />
                   <Label htmlFor="other_organization_aid" className="cursor-pointer">
                     Başka kuruluştan yardım alıyor

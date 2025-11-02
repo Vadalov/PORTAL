@@ -7,7 +7,12 @@ import { AlertCircle, RefreshCw, Home } from 'lucide-react';
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo, boundaryName?: string, retryCount?: number) => void;
+  onError?: (
+    error: Error,
+    errorInfo: ErrorInfo,
+    boundaryName?: string,
+    retryCount?: number
+  ) => void;
   name?: string;
   maxRetries?: number;
 }
@@ -46,7 +51,11 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error to console in development
     if (process.env.NODE_ENV === 'development') {
-      console.error(`[ErrorBoundary:${this.props.name || 'unnamed'}] caught error`, error, errorInfo);
+      console.error(
+        `[ErrorBoundary:${this.props.name || 'unnamed'}] caught error`,
+        error,
+        errorInfo
+      );
     }
 
     // Call custom error handler if provided
@@ -65,7 +74,7 @@ export class ErrorBoundary extends Component<Props, State> {
       (window as any).Sentry.captureException(error, {
         contexts: { react: errorInfo },
         tags: { boundaryName: this.props.name || 'unnamed' },
-        extra: { retryCount: this.state.retryCount }
+        extra: { retryCount: this.state.retryCount },
       });
     }
   }
@@ -128,11 +137,10 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
 
             <div className="space-y-2 text-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                Bir Hata Oluştu
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">Bir Hata Oluştu</h1>
               <p className="text-gray-600">
-                Üzgünüz, beklenmeyen bir hata oluştu. Lütfen sayfayı yenileyin veya ana sayfaya dönün.
+                Üzgünüz, beklenmeyen bir hata oluştu. Lütfen sayfayı yenileyin veya ana sayfaya
+                dönün.
               </p>
               {this.state.retryCount > 0 && (
                 <p className="text-sm text-gray-500">
@@ -140,9 +148,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </p>
               )}
               {!canRetry && (
-                <p className="text-sm text-red-600">
-                  Maksimum yeniden deneme sayısına ulaşıldı.
-                </p>
+                <p className="text-sm text-red-600">Maksimum yeniden deneme sayısına ulaşıldı.</p>
               )}
             </div>
 
@@ -172,28 +178,16 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <div className="flex flex-col gap-3">
               {canRetry && (
-                <Button
-                  onClick={this.handleReset}
-                  className="w-full"
-                  variant="default"
-                >
+                <Button onClick={this.handleReset} className="w-full" variant="default">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Tekrar Dene ({this.state.retryCount + 1}/{maxRetries})
                 </Button>
               )}
-              <Button
-                onClick={this.handleReload}
-                className="w-full"
-                variant="outline"
-              >
+              <Button onClick={this.handleReload} className="w-full" variant="outline">
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Sayfayı Yenile
               </Button>
-              <Button
-                onClick={this.handleGoHome}
-                className="w-full"
-                variant="outline"
-              >
+              <Button onClick={this.handleGoHome} className="w-full" variant="outline">
                 <Home className="mr-2 h-4 w-4" />
                 Ana Sayfaya Dön
               </Button>

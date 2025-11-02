@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 // Performance monitoring utilities
 export class PerformanceMonitor {
   private static instance: PerformanceMonitor;
@@ -67,7 +67,8 @@ export class Cache {
     return Cache.instance;
   }
 
-  set(key: string, data: unknown, ttl: number = 5 * 60 * 1000): void { // 5 minutes default
+  set(key: string, data: unknown, ttl: number = 5 * 60 * 1000): void {
+    // 5 minutes default
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
@@ -103,13 +104,13 @@ export function lazyLoadComponent<T extends React.ComponentType<any>>(
 ) {
   const Component = React.lazy(importFunc);
 
-  return (props: React.ComponentProps<T>) => 
+  return (props: React.ComponentProps<T>) =>
     React.createElement(
       React.Suspense,
       {
-        fallback: fallback 
-          ? React.createElement(fallback) 
-          : React.createElement("div", null, "Loading...")
+        fallback: fallback
+          ? React.createElement(fallback)
+          : React.createElement('div', null, 'Loading...'),
       },
       React.createElement(Component, props)
     );

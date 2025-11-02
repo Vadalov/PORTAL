@@ -41,7 +41,10 @@ export class InvalidCredentialsError extends AppError {
 }
 
 export class SessionExpiredError extends AppError {
-  constructor(message: string = 'Oturumunuz sona erdi. Lütfen tekrar giriş yapın', details?: unknown) {
+  constructor(
+    message: string = 'Oturumunuz sona erdi. Lütfen tekrar giriş yapın',
+    details?: unknown
+  ) {
     super(message, 'SESSION_EXPIRED', 401, details);
     this.name = 'SessionExpiredError';
   }
@@ -86,7 +89,10 @@ export class ConflictError extends AppError {
 
 // Rate Limiting Errors
 export class RateLimitError extends AppError {
-  constructor(message: string = 'Çok fazla istek gönderdiniz. Lütfen bekleyin', public retryAfter?: number) {
+  constructor(
+    message: string = 'Çok fazla istek gönderdiniz. Lütfen bekleyin',
+    public retryAfter?: number
+  ) {
     super(message, 'RATE_LIMIT', 429, { retryAfter });
     this.name = 'RateLimitError';
   }
@@ -168,7 +174,10 @@ export class BadRequestError extends AppError {
 }
 
 export class InternalServerError extends AppError {
-  constructor(message: string = 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin', details?: unknown) {
+  constructor(
+    message: string = 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin',
+    details?: unknown
+  ) {
     super(message, 'INTERNAL_SERVER_ERROR', 500, details);
     this.name = 'InternalServerError';
   }
@@ -189,48 +198,48 @@ export const ERROR_MESSAGES: Record<string, string> = {
   '503': 'Servis şu anda kullanılamıyor',
 
   // Custom error codes
-  'user_already_exists': 'Bu email adresi zaten kayıtlı',
-  'user_not_found': 'Kullanıcı bulunamadı',
-  'user_blocked': 'Hesabınız bloke edilmiştir. Lütfen yöneticinizle iletişime geçin',
-  'user_invalid_credentials': 'Email veya şifre hatalı',
-  'user_invalid_token': 'Geçersiz veya süresi dolmuş token',
-  'user_session_not_found': 'Oturum bulunamadı. Lütfen tekrar giriş yapın',
-  'user_session_already_exists': 'Aktif bir oturumunuz zaten var',
-  'user_password_mismatch': 'Mevcut şifreniz hatalı',
-  'user_password_recently_used': 'Bu şifreyi daha önce kullandınız',
-  'user_count_exceeded': 'Maksimum kullanıcı sayısına ulaşıldı',
-  'user_unauthorized': 'Bu işlem için yetkiniz yok',
+  user_already_exists: 'Bu email adresi zaten kayıtlı',
+  user_not_found: 'Kullanıcı bulunamadı',
+  user_blocked: 'Hesabınız bloke edilmiştir. Lütfen yöneticinizle iletişime geçin',
+  user_invalid_credentials: 'Email veya şifre hatalı',
+  user_invalid_token: 'Geçersiz veya süresi dolmuş token',
+  user_session_not_found: 'Oturum bulunamadı. Lütfen tekrar giriş yapın',
+  user_session_already_exists: 'Aktif bir oturumunuz zaten var',
+  user_password_mismatch: 'Mevcut şifreniz hatalı',
+  user_password_recently_used: 'Bu şifreyi daha önce kullandınız',
+  user_count_exceeded: 'Maksimum kullanıcı sayısına ulaşıldı',
+  user_unauthorized: 'Bu işlem için yetkiniz yok',
 
   // Collection errors
-  'collection_not_found': 'Koleksiyon bulunamadı',
-  'document_not_found': 'Kayıt bulunamadı',
-  'document_already_exists': 'Bu kayıt zaten mevcut',
-  'document_invalid_structure': 'Geçersiz veri yapısı',
-  'document_missing_payload': 'Eksik veri',
-  'document_update_conflict': 'Kayıt güncellenirken çakışma oluştu',
+  collection_not_found: 'Koleksiyon bulunamadı',
+  document_not_found: 'Kayıt bulunamadı',
+  document_already_exists: 'Bu kayıt zaten mevcut',
+  document_invalid_structure: 'Geçersiz veri yapısı',
+  document_missing_payload: 'Eksik veri',
+  document_update_conflict: 'Kayıt güncellenirken çakışma oluştu',
 
   // Storage errors
-  'storage_file_not_found': 'Dosya bulunamadı',
-  'storage_invalid_file_size': 'Dosya boyutu çok büyük',
-  'storage_invalid_file_type': 'Desteklenmeyen dosya türü',
-  'storage_device_not_found': 'Depolama alanı bulunamadı',
-  'storage_file_already_exists': 'Bu dosya zaten mevcut',
+  storage_file_not_found: 'Dosya bulunamadı',
+  storage_invalid_file_size: 'Dosya boyutu çok büyük',
+  storage_invalid_file_type: 'Desteklenmeyen dosya türü',
+  storage_device_not_found: 'Depolama alanı bulunamadı',
+  storage_file_already_exists: 'Bu dosya zaten mevcut',
 
   // Database errors
-  'database_not_found': 'Veritabanı bulunamadı',
-  'database_already_exists': 'Veritabanı zaten mevcut',
-  'database_timeout': 'Veritabanı zaman aşımı',
+  database_not_found: 'Veritabanı bulunamadı',
+  database_already_exists: 'Veritabanı zaten mevcut',
+  database_timeout: 'Veritabanı zaman aşımı',
 
   // General errors
-  'general_unknown': 'Bilinmeyen bir hata oluştu',
-  'general_mock': 'Mock servis hatası',
-  'general_argument_invalid': 'Geçersiz parametre',
-  'general_query_limit_exceeded': 'Sorgu limiti aşıldı',
-  'general_query_invalid': 'Geçersiz sorgu',
-  'general_cursor_not_found': 'İmleç bulunamadı',
-  'general_server_error': 'Sunucu hatası',
-  'general_protocol_unsupported': 'Desteklenmeyen protokol',
-  'general_rate_limit_exceeded': 'İstek limiti aşıldı',
+  general_unknown: 'Bilinmeyen bir hata oluştu',
+  general_mock: 'Mock servis hatası',
+  general_argument_invalid: 'Geçersiz parametre',
+  general_query_limit_exceeded: 'Sorgu limiti aşıldı',
+  general_query_invalid: 'Geçersiz sorgu',
+  general_cursor_not_found: 'İmleç bulunamadı',
+  general_server_error: 'Sunucu hatası',
+  general_protocol_unsupported: 'Desteklenmeyen protokol',
+  general_rate_limit_exceeded: 'İstek limiti aşıldı',
 };
 
 /**
@@ -250,17 +259,19 @@ export function formatErrorMessage(error: unknown): string {
     return error.message;
   }
 
+  const err = error as any;
+
   // Handle Appwrite errors
-  if (error?.code) {
-    const translated = translateError(error.code);
+  if (err?.code) {
+    const translated = translateError(err.code);
     if (translated !== ERROR_MESSAGES['general_unknown']) {
       return translated;
     }
   }
 
   // Handle HTTP status codes
-  if (error?.status || error?.statusCode) {
-    const status = error.status || error.statusCode;
+  if (err?.status || err?.statusCode) {
+    const status = err.status || err.statusCode;
     const translated = translateError(status);
     if (translated !== ERROR_MESSAGES['general_unknown']) {
       return translated;
@@ -268,8 +279,8 @@ export function formatErrorMessage(error: unknown): string {
   }
 
   // Handle error message
-  if (error?.message) {
-    return error.message;
+  if (err?.message) {
+    return err.message;
   }
 
   // Default
@@ -281,10 +292,11 @@ export function formatErrorMessage(error: unknown): string {
  */
 export function logError(error: unknown, context?: string): void {
   const message = `Error${context ? ` in ${context}` : ''}`;
+  const err = error as any;
   logger.error(message, error, {
-    code: error?.code,
-    status: error?.status || error?.statusCode,
-    details: error?.details,
+    code: err?.code,
+    status: err?.status || err?.statusCode,
+    details: err?.details,
     context,
   });
 }
@@ -309,10 +321,11 @@ export function createErrorResponse(error: unknown): ErrorResponse {
     };
   }
 
+  const err = error as any;
   return {
     success: false,
     error: formatErrorMessage(error),
-    code: error?.code || 'UNKNOWN_ERROR',
+    code: err?.code || 'UNKNOWN_ERROR',
   };
 }
 

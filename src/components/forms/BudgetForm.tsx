@@ -4,13 +4,15 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Budget, 
-  BudgetPeriod,
-  CreateBudgetInput
-} from '@/types/financial';
+import { Budget, BudgetPeriod, CreateBudgetInput } from '@/types/financial';
 import { Loader2, CheckCircle, Target } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -31,13 +33,13 @@ const CATEGORY_LABELS: Record<string, string> = {
   office_supplies: 'Ofis Malzemeleri',
   utilities: 'Faturalar',
   transportation: 'Ulaşım',
-  other_expense: 'Diğer Gider'
+  other_expense: 'Diğer Gider',
 };
 
 const PERIOD_OPTIONS = [
   { value: 'monthly', label: 'Aylık' },
   { value: 'quarterly', label: 'Üç Aylık' },
-  { value: 'yearly', label: 'Yıllık' }
+  { value: 'yearly', label: 'Yıllık' },
 ];
 
 interface BudgetFormProps {
@@ -49,13 +51,13 @@ interface BudgetFormProps {
   mode?: 'create' | 'edit';
 }
 
-export default function BudgetForm({ 
-  budget, 
-  onSubmit, 
-  onCancel, 
+export default function BudgetForm({
+  budget,
+  onSubmit,
+  onCancel,
   loading = false,
   className = '',
-  mode = 'create'
+  mode = 'create',
 }: BudgetFormProps) {
   const [formData, setFormData] = useState<CreateBudgetInput>({
     name: '',
@@ -63,7 +65,7 @@ export default function BudgetForm({
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
     categories: {},
-    status: 'draft'
+    status: 'draft',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -76,7 +78,7 @@ export default function BudgetForm({
         year: budget.year,
         month: budget.month,
         categories: budget.categories,
-        status: budget.status
+        status: budget.status,
       });
     }
   }, [budget, mode]);
@@ -100,7 +102,7 @@ export default function BudgetForm({
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -113,37 +115,41 @@ export default function BudgetForm({
   };
 
   // Handle field changes
-  const handleFieldChange = (field: keyof CreateBudgetInput, value: CreateBudgetInput[keyof CreateBudgetInput]) => {
-    setFormData(prev => ({
+  const handleFieldChange = (
+    field: keyof CreateBudgetInput,
+    value: CreateBudgetInput[keyof CreateBudgetInput]
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ''
+        [field]: '',
       }));
     }
   };
 
   // Handle category amount changes
   const handleCategoryChange = (category: string, planned: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       categories: {
         ...prev.categories,
         [category]: {
           ...prev.categories[category],
-          planned: planned || 0
-        }
-      }
+          planned: planned || 0,
+        },
+      },
     }));
   };
 
   // Calculate total planned amount
   const totalPlanned = Object.values(formData.categories).reduce(
-    (sum, cat) => sum + (cat.planned || 0), 0
+    (sum, cat) => sum + (cat.planned || 0),
+    0
   );
 
   return (
@@ -154,10 +160,7 @@ export default function BudgetForm({
           {mode === 'create' ? 'Yeni Bütçe' : 'Bütçeyi Düzenle'}
         </CardTitle>
         <CardDescription>
-          {mode === 'create' 
-            ? 'Yeni bir bütçe planı oluşturun'
-            : 'Mevcut bütçe planını düzenleyin'
-          }
+          {mode === 'create' ? 'Yeni bir bütçe planı oluşturun' : 'Mevcut bütçe planını düzenleyin'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -172,15 +175,13 @@ export default function BudgetForm({
                 onChange={(e) => handleFieldChange('name', e.target.value)}
                 placeholder="Örn: 2024 Kasım Bütçesi"
               />
-              {errors.name && (
-                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
-              )}
+              {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
             </div>
 
             <div>
               <Label htmlFor="period">Dönem</Label>
-              <Select 
-                value={formData.period} 
+              <Select
+                value={formData.period}
                 onValueChange={(value) => handleFieldChange('period', value as BudgetPeriod)}
               >
                 <SelectTrigger>
@@ -188,7 +189,9 @@ export default function BudgetForm({
                 </SelectTrigger>
                 <SelectContent>
                   {PERIOD_OPTIONS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -205,15 +208,17 @@ export default function BudgetForm({
                 min="2020"
                 max="2100"
                 value={formData.year}
-                onChange={(e) => handleFieldChange('year', parseInt(e.target.value) || new Date().getFullYear())}
+                onChange={(e) =>
+                  handleFieldChange('year', parseInt(e.target.value) || new Date().getFullYear())
+                }
               />
             </div>
 
             {formData.period === 'monthly' && (
               <div>
                 <Label htmlFor="month">Ay</Label>
-                <Select 
-                  value={formData.month?.toString() || ''} 
+                <Select
+                  value={formData.month?.toString() || ''}
                   onValueChange={(value) => handleFieldChange('month', parseInt(value))}
                 >
                   <SelectTrigger>
@@ -227,9 +232,7 @@ export default function BudgetForm({
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.month && (
-                  <p className="text-sm text-red-500 mt-1">{errors.month}</p>
-                )}
+                {errors.month && <p className="text-sm text-red-500 mt-1">{errors.month}</p>}
               </div>
             )}
           </div>
@@ -239,7 +242,10 @@ export default function BudgetForm({
             <Label>Kategoriler ve Planlanan Tutarlar</Label>
             <div className="grid gap-4 mt-2">
               {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                <div key={key} className="grid grid-cols-3 gap-4 items-center p-3 border rounded-lg">
+                <div
+                  key={key}
+                  className="grid grid-cols-3 gap-4 items-center p-3 border rounded-lg"
+                >
                   <div>
                     <Label className="text-sm font-medium">{label}</Label>
                   </div>
@@ -256,10 +262,9 @@ export default function BudgetForm({
                     </div>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {formData.categories[key]?.planned ? 
-                      `${(formData.categories[key]?.planned || 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}` : 
-                      'Planlanmamış'
-                    }
+                    {formData.categories[key]?.planned
+                      ? `${(formData.categories[key]?.planned || 0).toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}`
+                      : 'Planlanmamış'}
                   </div>
                 </div>
               ))}
@@ -279,8 +284,8 @@ export default function BudgetForm({
           {/* Status */}
           <div>
             <Label htmlFor="status">Durum</Label>
-            <Select 
-              value={formData.status} 
+            <Select
+              value={formData.status}
               onValueChange={(value) => handleFieldChange('status', value)}
             >
               <SelectTrigger>
@@ -296,19 +301,10 @@ export default function BudgetForm({
 
           {/* Form Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onCancel}
-              disabled={loading}
-            >
+            <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
               İptal
             </Button>
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="min-w-24"
-            >
+            <Button type="submit" disabled={loading} className="min-w-24">
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

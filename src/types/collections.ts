@@ -26,7 +26,7 @@ export interface UserDocument extends AppwriteDocument {
 }
 
 // Parameter Categories (Portal Plus)
-export type ParameterCategory = 
+export type ParameterCategory =
   | 'gender' // Cinsiyet
   | 'religion' // İnanç
   | 'marital_status' // Evlilik
@@ -79,27 +79,27 @@ export interface BeneficiaryDocument extends AppwriteDocument {
   nationality?: string;
   religion?: string; // parametre
   marital_status?: string; // parametre
-  
+
   // Adres Bilgileri
   address: string;
   city: string;
   district: string;
   neighborhood: string;
-  
+
   // Aile Bilgileri
   family_size: number;
   children_count?: number;
   orphan_children_count?: number;
   elderly_count?: number;
   disabled_count?: number;
-  
+
   // Ekonomik Durum
   income_level?: string; // parametre
   income_source?: string;
   has_debt?: boolean;
   housing_type?: string; // parametre
   has_vehicle?: boolean;
-  
+
   // Sağlık Bilgileri
   health_status?: string;
   has_chronic_illness?: boolean;
@@ -108,31 +108,31 @@ export interface BeneficiaryDocument extends AppwriteDocument {
   disability_detail?: string;
   has_health_insurance?: boolean;
   regular_medication?: string;
-  
+
   // Eğitim ve İstihdam
   education_level?: string; // parametre
   occupation?: string; // parametre
   employment_status?: string; // parametre
-  
+
   // Yardım Talebi
   aid_type?: string;
   totalAidAmount?: number;
   aid_duration?: string;
   priority?: string;
-  
+
   // Referans Bilgileri
   reference_name?: string;
   reference_phone?: string;
   reference_relation?: string;
   application_source?: string;
-  
+
   // Ek Bilgiler
   notes?: string;
   previous_aid?: boolean;
   other_organization_aid?: boolean;
   emergency?: boolean;
   contact_preference?: string;
-  
+
   // Durum ve Onay
   status: 'TASLAK' | 'AKTIF' | 'PASIF' | 'SILINDI';
   approval_status?: 'pending' | 'approved' | 'rejected';
@@ -175,23 +175,23 @@ export interface AidApplicationDocument extends AppwriteDocument {
   applicant_type: 'person' | 'organization' | 'partner'; // Kişi, Kurum, Partner
   applicant_name: string;
   beneficiary_id?: string; // İhtiyaç sahibi ile ilişki
-  
+
   // Yardım Türleri (Portal Plus'taki 5 tür)
   one_time_aid?: number; // Tek Seferlik
   regular_financial_aid?: number; // Düzenli Nakdi
   regular_food_aid?: number; // Düzenli Gıda (paket sayısı)
   in_kind_aid?: number; // Ayni Yardım (adet)
   service_referral?: number; // Hizmet Sevk (sayı)
-  
+
   // Aşama ve Durum
   stage: 'draft' | 'under_review' | 'approved' | 'ongoing' | 'completed'; // Taslak, İnceleme, Onay, Devam Ediyor, Tamamlandı
   status: 'open' | 'closed'; // Açık, Kapalı
-  
+
   // Detaylar
   description?: string;
   notes?: string;
   priority?: 'low' | 'normal' | 'high' | 'urgent';
-  
+
   // İşlem Bilgileri
   processed_by?: string;
   processed_at?: string;
@@ -281,17 +281,17 @@ export interface OrphanDocument extends AppwriteDocument {
   gender: string;
   nationality?: string;
   religion?: string;
-  
+
   // Kategori (Portal Plus parametreleri)
   category: 'ihh_orphan' | 'orphan' | 'family' | 'education_scholarship'; // İHH Yetim, Yetim, Aile, Eğitim Bursu
   special_condition?: string; // Yetim, Öksüz, Mülteci (parametre)
-  
+
   // Vasi Bilgileri
   guardian_name?: string;
   guardian_relation?: string; // Parametre (Anne, Baba, Büyükanne, vb.)
   guardian_phone?: string;
   guardian_tc_no?: string;
-  
+
   // Vefat Bilgileri (Ebeveyn)
   father_status?: string; // Hayatta, Vefat Etmiş (parametre)
   father_death_date?: string;
@@ -299,13 +299,13 @@ export interface OrphanDocument extends AppwriteDocument {
   mother_status?: string;
   mother_death_date?: string;
   mother_death_reason?: string;
-  
+
   // Adres
   address: string;
   city: string;
   district: string;
   neighborhood: string;
-  
+
   // Eğitim
   education_status?: string; // Parametre
   school_name?: string;
@@ -313,24 +313,24 @@ export interface OrphanDocument extends AppwriteDocument {
   school_institution_type?: string; // Parametre (Devlet, Özel, Vakıf)
   grade?: number;
   education_success?: string; // Parametre
-  
+
   // Sağlık
   health_status?: string;
   illness?: string; // Parametre
   treatment?: string; // Parametre
   has_disability?: boolean;
   disability_detail?: string;
-  
+
   // Sponsorluk
   sponsor_id?: string;
   sponsorship_amount?: number;
   sponsorship_start_date?: string;
   sponsorship_status?: 'active' | 'paused' | 'ended';
-  
+
   // Dökümanlar
   photo_id?: string;
   documents?: string[]; // File IDs
-  
+
   // Notlar
   notes?: string;
   status: 'active' | 'inactive' | 'graduated';
@@ -345,12 +345,12 @@ export interface SponsorDocument extends AppwriteDocument {
   address?: string;
   city?: string;
   country?: string;
-  
+
   // Sponsorluk Bilgileri
   total_sponsored: number; // Toplam sponsor olunan yetim sayısı
   monthly_amount?: number;
   start_date?: string;
-  
+
   // İletişim Tercihi
   contact_preference?: string;
   notes?: string;
@@ -416,9 +416,9 @@ export interface AppwriteError {
 }
 
 // Collection Names (for type safety)
-export type CollectionName = 
+export type CollectionName =
   | 'users'
-  | 'beneficiaries' 
+  | 'beneficiaries'
   | 'donations'
   | 'aid_requests'
   | 'aid_applications'
@@ -451,5 +451,8 @@ export type DocumentByCollection = {
 };
 
 // Utility Types
-export type CreateDocumentData<T> = Omit<T, '$id' | '$createdAt' | '$updatedAt' | '$permissions' | '$collectionId' | '$databaseId'>;
+export type CreateDocumentData<T> = Omit<
+  T,
+  '$id' | '$createdAt' | '$updatedAt' | '$permissions' | '$collectionId' | '$databaseId'
+>;
 export type UpdateDocumentData<T> = Partial<CreateDocumentData<T>>;

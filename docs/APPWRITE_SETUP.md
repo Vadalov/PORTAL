@@ -21,12 +21,14 @@ npm run validate:config
 ```
 
 This script checks:
+
 - Required environment variables are present
 - Appwrite endpoint URL format is valid (must end with /v1)
 - Project ID format (alphanumeric)
 - API key format and length
 
 Example successful output:
+
 ```
 🔍 Validating Appwrite Configuration...
 ✅ NEXT_PUBLIC_APPWRITE_ENDPOINT: Valid URL format
@@ -36,6 +38,7 @@ Example successful output:
 ```
 
 Example with errors:
+
 ```
 🔍 Validating Appwrite Configuration...
 ❌ NEXT_PUBLIC_APPWRITE_ENDPOINT: Invalid URL format - must end with /v1
@@ -46,6 +49,7 @@ Example with errors:
 ```
 
 Common validation errors:
+
 - **Invalid endpoint**: Ensure URL ends with `/v1`
 - **Missing API key**: Generate API key in Appwrite console
 - **Invalid project ID**: Check project ID in Appwrite dashboard
@@ -67,12 +71,14 @@ npm run test:connectivity
 ```
 
 This script tests:
+
 - Endpoint reachability
 - Account service connectivity
 - Database service access
 - Storage service access
 
 Example successful output:
+
 ```
 🔌 Testing Appwrite Connectivity...
 ✅ Endpoint Service (125ms)
@@ -85,6 +91,7 @@ Tests: 4/4 passed
 ```
 
 Example with failures:
+
 ```
 🔌 Testing Appwrite Connectivity...
 ❌ Endpoint Service: Connection timeout
@@ -99,6 +106,7 @@ Tests: 0/4 passed
 ```
 
 Troubleshooting connectivity issues:
+
 - **Connection timeout**: Check if Appwrite server is running and accessible
 - **DNS resolution failed**: Verify endpoint URL is correct
 - **401 Unauthorized**: Check API key permissions
@@ -114,24 +122,28 @@ Troubleshooting connectivity issues:
 4. Her user için şu bilgileri girin:
 
 #### Admin User
+
 - **Email:** admin@test.com
 - **Password:** admin123
 - **Name:** Admin User
 - **Labels:** admin
 
 #### Manager User
+
 - **Email:** manager@test.com
 - **Password:** manager123
 - **Name:** Manager User
 - **Labels:** manager
 
 #### Member User
+
 - **Email:** member@test.com
 - **Password:** member123
 - **Name:** Member User
 - **Labels:** member
 
 #### Viewer User
+
 - **Email:** viewer@test.com
 - **Password:** viewer123
 - **Name:** Viewer User
@@ -160,6 +172,7 @@ const USE_MOCK_AUTH = false; // Mock authentication'ı devre dışı bırak
 Login sayfasına gidin: http://localhost:3000/login
 
 Aşağıdaki kimlik bilgileriyle test edin:
+
 - admin@test.com / admin123
 - manager@test.com / manager123
 - member@test.com / member123
@@ -218,25 +231,25 @@ Eğer CORS hatası alırsanız, Appwrite Settings'de "Web API" domainini kontrol
 
 ## 7. Collections Referans
 
-| Collection | Açıklama | Ana Alanlar |
-|-----------|----------|-----------|
-| **users** | Sistem kullanıcıları | name, email, role, isActive, labels |
-| **beneficiaries** | İhtiyaç sahipleri | firstName, lastName, category, status |
-| **donations** | Bağışlar | donor_name, amount, status |
-| **tasks** | İşler/Görevler | title, status, assigned_to |
-| **meetings** | Toplantılar | title, meeting_date, organizer |
-| **messages** | Mesajlar | subject, message_type, sender |
-| **aid_applications** | Yardım başvuruları | applicant_name, stage, status |
-| **parameters** | Sistem parametreleri | category, name_tr, value |
+| Collection           | Açıklama             | Ana Alanlar                           |
+| -------------------- | -------------------- | ------------------------------------- |
+| **users**            | Sistem kullanıcıları | name, email, role, isActive, labels   |
+| **beneficiaries**    | İhtiyaç sahipleri    | firstName, lastName, category, status |
+| **donations**        | Bağışlar             | donor_name, amount, status            |
+| **tasks**            | İşler/Görevler       | title, status, assigned_to            |
+| **meetings**         | Toplantılar          | title, meeting_date, organizer        |
+| **messages**         | Mesajlar             | subject, message_type, sender         |
+| **aid_applications** | Yardım başvuruları   | applicant_name, stage, status         |
+| **parameters**       | Sistem parametreleri | category, name_tr, value              |
 
 ## 8. Storage Buckets
 
-| Bucket | Açıklama | Max Size |
-|--------|----------|----------|
-| **documents** | Belgeler | 100 MB |
-| **receipts** | Makbuzlar | 100 MB |
-| **photos** | Fotoğraflar | 100 MB |
-| **reports** | Raporlar | 100 MB |
+| Bucket        | Açıklama    | Max Size |
+| ------------- | ----------- | -------- |
+| **documents** | Belgeler    | 100 MB   |
+| **receipts**  | Makbuzlar   | 100 MB   |
+| **photos**    | Fotoğraflar | 100 MB   |
+| **reports**   | Raporlar    | 100 MB   |
 
 Allowed file types: jpg, jpeg, png, pdf, doc, docx, xls, xlsx, txt
 

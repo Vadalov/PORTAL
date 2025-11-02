@@ -12,6 +12,7 @@ config({ path: envPath });
 
 // Now import after env is loaded
 import { Client, Account } from 'appwrite';
+import type { AppwriteError } from './types';
 
 async function testConnection() {
   console.log('🔍 Testing Appwrite Connection...\n');
@@ -33,9 +34,7 @@ async function testConnection() {
   console.log(`   Project ID: ${projectId}\n`);
 
   // Create client
-  const client = new Client()
-    .setEndpoint(endpoint)
-    .setProject(projectId);
+  const client = new Client().setEndpoint(endpoint).setProject(projectId);
 
   const account = new Account(client);
 
@@ -47,7 +46,8 @@ async function testConnection() {
     console.log('\n👤 Testing account endpoint...');
     const accountData = await account.get();
     console.log('   ✅ Account data retrieved:', accountData);
-  } catch (error : unknown {
+  } catch (err: unknown) {
+    const error = err as AppwriteError;
     // Expected to fail if not logged in
     if (error.code === 401) {
       console.log('   ℹ️  No active session (expected for fresh setup)');

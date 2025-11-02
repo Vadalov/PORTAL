@@ -7,9 +7,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Edit, DollarSign, Utensils, Package, Stethoscope, CheckCircle, Clock } from 'lucide-react';
+import {
+  ArrowLeft,
+  Edit,
+  DollarSign,
+  Utensils,
+  Package,
+  Stethoscope,
+  CheckCircle,
+  Clock,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { AidApplicationDocument } from '@/types/collections';
@@ -65,9 +80,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
         </Button>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-center text-red-600 py-8">
-              Başvuru bulunamadı
-            </div>
+            <div className="text-center text-red-600 py-8">Başvuru bulunamadı</div>
           </CardContent>
         </Card>
       </div>
@@ -119,7 +132,9 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Mevcut Aşama</Label>
-                <div className={`p-3 rounded-md ${STAGE_LABELS[application.stage].color} font-medium flex items-center gap-2`}>
+                <div
+                  className={`p-3 rounded-md ${STAGE_LABELS[application.stage].color} font-medium flex items-center gap-2`}
+                >
                   <StageIcon className="h-4 w-4" />
                   {STAGE_LABELS[application.stage].label}
                 </div>
@@ -198,9 +213,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
                   <Package className="h-5 w-5 text-purple-600" />
                   <h4 className="font-medium text-purple-900">Ayni Yardım</h4>
                 </div>
-                <p className="text-2xl font-bold text-purple-600">
-                  {application.in_kind_aid} Adet
-                </p>
+                <p className="text-2xl font-bold text-purple-600">{application.in_kind_aid} Adet</p>
               </div>
             )}
 
@@ -247,24 +260,28 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium text-gray-500">Kayıt Tarihi</p>
-                <p className="text-base">{new Date(application.$createdAt).toLocaleDateString('tr-TR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}</p>
+                <p className="text-base">
+                  {new Date(application.$createdAt).toLocaleDateString('tr-TR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
               </div>
 
               <div>
                 <p className="text-sm font-medium text-gray-500">Son Güncelleme</p>
-                <p className="text-base">{new Date(application.$updatedAt).toLocaleDateString('tr-TR', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}</p>
+                <p className="text-base">
+                  {new Date(application.$updatedAt).toLocaleDateString('tr-TR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
               </div>
 
               {application.approved_by && (
@@ -277,7 +294,9 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
               {application.approved_at && (
                 <div>
                   <p className="text-sm font-medium text-gray-500">Onay Tarihi</p>
-                  <p className="text-base">{new Date(application.approved_at).toLocaleDateString('tr-TR')}</p>
+                  <p className="text-base">
+                    {new Date(application.approved_at).toLocaleDateString('tr-TR')}
+                  </p>
                 </div>
               )}
             </div>
@@ -287,4 +306,3 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
     </div>
   );
 }
-

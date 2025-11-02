@@ -3,13 +3,10 @@ import {
   getApplications,
   createApplication,
   getScholarships,
-  getStudents
+  getStudents,
 } from '@/lib/api/mock-api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import {
-  ApplicationStatus,
-  StudentStatus
-} from '@/types/scholarship';
+import { ApplicationStatus, StudentStatus } from '@/types/scholarship';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -42,7 +39,7 @@ function parseQueryParams(request: NextRequest) {
     search: searchParams.get('search') || undefined,
     scholarshipId: searchParams.get('scholarshipId') || undefined,
     studentId: searchParams.get('studentId') || undefined,
-    status: searchParams.get('status') as ApplicationStatus || undefined,
+    status: (searchParams.get('status') as ApplicationStatus) || undefined,
     assignedReviewer: searchParams.get('assignedReviewer') || undefined,
     page: parseInt(searchParams.get('page') || '1'),
     limit: Math.min(parseInt(searchParams.get('limit') || '20'), 100),
@@ -66,12 +63,12 @@ function validateApplicationData(data: ApplicationData): { isValid: boolean; err
 
   // Priority validation
   if (data.priority !== undefined && data.priority < 0) {
-    errors.push('Öncelik 0\'dan küçük olamaz');
+    errors.push("Öncelik 0'dan küçük olamaz");
   }
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -96,7 +93,7 @@ async function getApplicationsHandler(request: NextRequest) {
       success: true,
       data: result.data?.data || [],
       total: result.data?.total || 0,
-      message: `${result.data?.total || 0} başvuru bulundu`
+      message: `${result.data?.total || 0} başvuru bulundu`,
     };
 
     return NextResponse.json(response);
@@ -120,20 +117,17 @@ async function createApplicationHandler(request: NextRequest) {
 
     // Validate input
     if (!body) {
-      return NextResponse.json(
-        { success: false, error: 'Veri bulunamadı' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Veri bulunamadı' }, { status: 400 });
     }
 
     // Validate application data
     const validation = validateApplicationData(body);
     if (!validation.isValid) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Doğrulama hatası', 
-          details: validation.errors 
+        {
+          success: false,
+          error: 'Doğrulama hatası',
+          details: validation.errors,
         },
         { status: 400 }
       );
@@ -143,7 +137,7 @@ async function createApplicationHandler(request: NextRequest) {
     const applicationData: Partial<ApplicationData> = {
       ...body,
       status: body.status || ApplicationStatus.DRAFT,
-      priority: body.priority || 0
+      priority: body.priority || 0,
     };
 
     const result = await createApplication(applicationData);
@@ -191,15 +185,12 @@ async function getAvailableScholarshipsHandler(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: result.data?.data || [],
-      message: 'Mevcut burslar başarıyla getirildi'
+      message: 'Mevcut burslar başarıyla getirildi',
     });
   } catch (error: unknown) {
     console.error('Available scholarships error:', error);
 
-    return NextResponse.json(
-      { success: false, error: 'Burs listesi alınamadı' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Burs listesi alınamadı' }, { status: 500 });
   }
 }
 
@@ -212,7 +203,7 @@ async function getEligibleStudentsHandler(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const scholarshipId = searchParams.get('scholarshipId');
 
-  const result = await getStudents({ status: StudentStatus.ACTIVE });
+    const result = await getStudents({ status: StudentStatus.ACTIVE });
 
     if (!result.success) {
       return NextResponse.json(
@@ -232,7 +223,7 @@ async function getEligibleStudentsHandler(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: students,
-      message: 'Uygun öğrenciler başarıyla getirildi'
+      message: 'Uygun öğrenciler başarıyla getirildi',
     });
   } catch (error: unknown) {
     console.error('Eligible students error:', error);

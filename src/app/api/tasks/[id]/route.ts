@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     logger.error('Task operation error', error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
-      taskId: id
+      taskId: id,
     });
     throw error;
   }
@@ -45,7 +45,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PUT /api/tasks/[id]
  */
-async function updateTaskHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function updateTaskHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { id } = await extractParams(params);
   try {
     const body = await request.json();
@@ -54,7 +57,7 @@ async function updateTaskHandler(request: NextRequest, { params }: { params: Pro
     logger.error('Task operation error', error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
-      taskId: id
+      taskId: id,
     });
     throw error;
   }
@@ -63,7 +66,10 @@ async function updateTaskHandler(request: NextRequest, { params }: { params: Pro
 /**
  * DELETE /api/tasks/[id]
  */
-async function deleteTaskHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function deleteTaskHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { id } = await extractParams(params);
   try {
     return handleDelete(id, api.tasks.deleteTask, 'Görev');
@@ -71,7 +77,7 @@ async function deleteTaskHandler(request: NextRequest, { params }: { params: Pro
     logger.error('Task operation error', error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
-      taskId: id
+      taskId: id,
     });
     throw error;
   }

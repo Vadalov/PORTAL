@@ -5,13 +5,10 @@ import {
   createScholarship,
   updateScholarship,
   deleteScholarship,
-  getScholarshipStats
+  getScholarshipStats,
 } from '@/lib/api/mock-api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import {
-  ScholarshipType,
-  ScholarshipSearchParams
-} from '@/types/scholarship';
+import { ScholarshipType, ScholarshipSearchParams } from '@/types/scholarship';
 
 // TypeScript interfaces
 interface ApiResponse<T> {
@@ -44,9 +41,13 @@ function parseQueryParams(request: NextRequest): ScholarshipSearchParams {
 
   return {
     search: searchParams.get('search') || undefined,
-    type: searchParams.get('type') as ScholarshipType || undefined,
-    isActive: searchParams.get('isActive') === 'true' ? true : 
-              searchParams.get('isActive') === 'false' ? false : undefined,
+    type: (searchParams.get('type') as ScholarshipType) || undefined,
+    isActive:
+      searchParams.get('isActive') === 'true'
+        ? true
+        : searchParams.get('isActive') === 'false'
+          ? false
+          : undefined,
     page: parseInt(searchParams.get('page') || '1'),
     limit: Math.min(parseInt(searchParams.get('limit') || '20'), 100), // Max 100
   };
@@ -68,15 +69,15 @@ function validateScholarshipData(data: ScholarshipData): { isValid: boolean; err
   }
 
   if (!data.amount || data.amount <= 0) {
-    errors.push('Burs tutarı 0\'dan büyük olmalıdır');
+    errors.push("Burs tutarı 0'dan büyük olmalıdır");
   }
 
   if (!data.duration || data.duration <= 0) {
-    errors.push('Süre 0\'dan büyük olmalıdır');
+    errors.push("Süre 0'dan büyük olmalıdır");
   }
 
   if (!data.maxRecipients || data.maxRecipients <= 0) {
-    errors.push('Maksimum alıcı sayısı 0\'dan büyük olmalıdır');
+    errors.push("Maksimum alıcı sayısı 0'dan büyük olmalıdır");
   }
 
   // Type validation
@@ -91,7 +92,7 @@ function validateScholarshipData(data: ScholarshipData): { isValid: boolean; err
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -116,7 +117,7 @@ async function getScholarshipsHandler(request: NextRequest) {
       success: true,
       data: result.data?.data || [],
       total: result.data?.total || 0,
-      message: `${result.data?.total || 0} burs bulundu`
+      message: `${result.data?.total || 0} burs bulundu`,
     };
 
     return NextResponse.json(response);
@@ -140,20 +141,17 @@ async function createScholarshipHandler(request: NextRequest) {
 
     // Validate input
     if (!body) {
-      return NextResponse.json(
-        { success: false, error: 'Veri bulunamadı' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Veri bulunamadı' }, { status: 400 });
     }
 
     // Validate scholarship data
     const validation = validateScholarshipData(body);
     if (!validation.isValid) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Doğrulama hatası', 
-          details: validation.errors 
+        {
+          success: false,
+          error: 'Doğrulama hatası',
+          details: validation.errors,
         },
         { status: 400 }
       );
@@ -166,16 +164,13 @@ async function createScholarshipHandler(request: NextRequest) {
       requirements: body.requirements || [],
       eligibilityCriteria: body.eligibilityCriteria || [],
       isActive: body.isActive ?? true,
-      applicationDeadline: body.applicationDeadline || new Date()
+      applicationDeadline: body.applicationDeadline || new Date(),
     };
 
     const result = await createScholarship(scholarshipData);
 
     if (!result.success) {
-      return NextResponse.json(
-        { success: false, error: 'Burs oluşturulamadı' },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: false, error: 'Burs oluşturulamadı' }, { status: 500 });
     }
 
     return NextResponse.json(
@@ -214,15 +209,12 @@ async function getScholarshipStatsHandler(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: result.data,
-      message: 'İstatistikler başarıyla getirildi'
+      message: 'İstatistikler başarıyla getirildi',
     });
   } catch (error: unknown) {
     console.error('Scholarship stats error:', error);
 
-    return NextResponse.json(
-      { success: false, error: 'İstatistikler alınamadı' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'İstatistikler alınamadı' }, { status: 500 });
   }
 }
 

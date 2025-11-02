@@ -4,14 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Invoice,
-  CreateInvoiceInput,
-  InvoiceStatus
-} from '@/types/financial';
+import { Invoice, CreateInvoiceInput, InvoiceStatus } from '@/types/financial';
 import { Loader2, CheckCircle, FileText, Plus, Trash2 } from 'lucide-react';
 
 const STATUS_OPTIONS = [
@@ -19,7 +21,7 @@ const STATUS_OPTIONS = [
   { value: 'sent', label: 'Gönderildi' },
   { value: 'paid', label: 'Ödendi' },
   { value: 'overdue', label: 'Gecikmiş' },
-  { value: 'cancelled', label: 'İptal' }
+  { value: 'cancelled', label: 'İptal' },
 ];
 
 interface InvoiceFormProps {
@@ -39,13 +41,13 @@ interface InvoiceItem {
   total: number;
 }
 
-export default function InvoiceForm({ 
-  invoice, 
-  onSubmit, 
-  onCancel, 
+export default function InvoiceForm({
+  invoice,
+  onSubmit,
+  onCancel,
   loading = false,
   className = '',
-  mode = 'create'
+  mode = 'create',
 }: InvoiceFormProps) {
   const [formData, setFormData] = useState<{
     clientName: string;
@@ -69,11 +71,11 @@ export default function InvoiceForm({
     issueDate: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
     status: 'draft',
-    notes: ''
+    notes: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [items, setItems] = useState<InvoiceItem[]>([
-    { id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 }
+    { id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 },
   ]);
 
   // Initialize form data when invoice changes
@@ -83,22 +85,24 @@ export default function InvoiceForm({
         clientName: invoice.clientName,
         clientEmail: invoice.clientEmail,
         clientAddress: invoice.clientAddress || '',
-        items: invoice.items.map(item => ({
+        items: invoice.items.map((item) => ({
           description: item.description,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
-          total: item.total
+          total: item.total,
         })),
         issueDate: invoice.issueDate.toISOString().split('T')[0],
         dueDate: invoice.dueDate.toISOString().split('T')[0],
         status: invoice.status,
-        notes: invoice.notes || ''
+        notes: invoice.notes || '',
       });
-      
-      setItems(invoice.items.map((item, index) => ({
-        id: (index + 1).toString(),
-        ...item
-      })));
+
+      setItems(
+        invoice.items.map((item, index) => ({
+          id: (index + 1).toString(),
+          ...item,
+        }))
+      );
     }
   }, [invoice, mode]);
 
@@ -116,7 +120,10 @@ export default function InvoiceForm({
       newErrors.clientEmail = 'Geçerli bir e-posta adresi giriniz';
     }
 
-    if (items.length === 0 || !items.some(item => item.description.trim() && item.quantity > 0 && item.unitPrice > 0)) {
+    if (
+      items.length === 0 ||
+      !items.some((item) => item.description.trim() && item.quantity > 0 && item.unitPrice > 0)
+    ) {
       newErrors.items = 'En az bir geçerli kalem ekleyiniz';
     }
 
@@ -135,7 +142,7 @@ export default function InvoiceForm({
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -145,12 +152,12 @@ export default function InvoiceForm({
       ...formData,
       issueDate: new Date(formData.issueDate),
       dueDate: new Date(formData.dueDate),
-      items: items.map(item => ({
+      items: items.map((item) => ({
         description: item.description,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        total: item.total
-      }))
+        total: item.total,
+      })),
     };
 
     try {
@@ -161,16 +168,19 @@ export default function InvoiceForm({
   };
 
   // Handle field changes
-  const handleFieldChange = (field: keyof CreateInvoiceInput, value: CreateInvoiceInput[keyof CreateInvoiceInput]) => {
-    setFormData(prev => ({
+  const handleFieldChange = (
+    field: keyof CreateInvoiceInput,
+    value: CreateInvoiceInput[keyof CreateInvoiceInput]
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ''
+        [field]: '',
       }));
     }
   };
@@ -182,31 +192,37 @@ export default function InvoiceForm({
       description: '',
       quantity: 1,
       unitPrice: 0,
-      total: 0
+      total: 0,
     };
-    setItems(prev => [...prev, newItem]);
+    setItems((prev) => [...prev, newItem]);
   };
 
   // Remove item
   const removeItem = (id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id));
+    setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   // Update item
-  const updateItem = (id: string, field: keyof InvoiceItem, value: InvoiceItem[keyof InvoiceItem]) => {
-    setItems(prev => prev.map(item => {
-      if (item.id === id) {
-        const updated = { ...item, [field]: value };
-        
-        // Recalculate total when quantity or unitPrice changes
-        if (field === 'quantity' || field === 'unitPrice') {
-          updated.total = updated.quantity * updated.unitPrice;
+  const updateItem = (
+    id: string,
+    field: keyof InvoiceItem,
+    value: InvoiceItem[keyof InvoiceItem]
+  ) => {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id === id) {
+          const updated = { ...item, [field]: value };
+
+          // Recalculate total when quantity or unitPrice changes
+          if (field === 'quantity' || field === 'unitPrice') {
+            updated.total = updated.quantity * updated.unitPrice;
+          }
+
+          return updated;
         }
-        
-        return updated;
-      }
-      return item;
-    }));
+        return item;
+      })
+    );
   };
 
   // Calculate totals
@@ -222,10 +238,7 @@ export default function InvoiceForm({
           {mode === 'create' ? 'Yeni Fatura' : 'Faturayı Düzenle'}
         </CardTitle>
         <CardDescription>
-          {mode === 'create' 
-            ? 'Yeni bir fatura oluşturun'
-            : 'Mevcut fatura bilgilerini düzenleyin'
-          }
+          {mode === 'create' ? 'Yeni bir fatura oluşturun' : 'Mevcut fatura bilgilerini düzenleyin'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -300,7 +313,9 @@ export default function InvoiceForm({
                       placeholder="Adet"
                       min="1"
                       value={item.quantity}
-                      onChange={(e) => updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)}
+                      onChange={(e) =>
+                        updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)
+                      }
                     />
                   </div>
                   <div className="col-span-3">
@@ -310,7 +325,9 @@ export default function InvoiceForm({
                       placeholder="Birim Fiyat"
                       min="0"
                       value={item.unitPrice}
-                      onChange={(e) => updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)
+                      }
                     />
                   </div>
                   <div className="col-span-2 flex items-center">
@@ -334,20 +351,22 @@ export default function InvoiceForm({
               ))}
             </div>
 
-            {errors.items && (
-              <p className="text-sm text-red-500">{errors.items}</p>
-            )}
+            {errors.items && <p className="text-sm text-red-500">{errors.items}</p>}
           </div>
 
           {/* Invoice Summary */}
           <div className="bg-muted p-4 rounded-lg space-y-2">
             <div className="flex justify-between">
               <span>Ara Toplam:</span>
-              <span className="font-medium">{subtotal.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</span>
+              <span className="font-medium">
+                {subtotal.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>KDV (%18):</span>
-              <span className="font-medium">{tax.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}</span>
+              <span className="font-medium">
+                {tax.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}
+              </span>
             </div>
             <div className="flex justify-between text-lg font-bold border-t pt-2">
               <span>Toplam:</span>
@@ -365,9 +384,7 @@ export default function InvoiceForm({
                 value={formData.issueDate || ''}
                 onChange={(e) => handleFieldChange('issueDate', e.target.value)}
               />
-              {errors.issueDate && (
-                <p className="text-sm text-red-500 mt-1">{errors.issueDate}</p>
-              )}
+              {errors.issueDate && <p className="text-sm text-red-500 mt-1">{errors.issueDate}</p>}
             </div>
 
             <div>
@@ -378,16 +395,14 @@ export default function InvoiceForm({
                 value={formData.dueDate || ''}
                 onChange={(e) => handleFieldChange('dueDate', e.target.value)}
               />
-              {errors.dueDate && (
-                <p className="text-sm text-red-500 mt-1">{errors.dueDate}</p>
-              )}
+              {errors.dueDate && <p className="text-sm text-red-500 mt-1">{errors.dueDate}</p>}
             </div>
           </div>
 
           <div>
             <Label htmlFor="status">Durum</Label>
-            <Select 
-              value={formData.status} 
+            <Select
+              value={formData.status}
               onValueChange={(value) => handleFieldChange('status', value as InvoiceStatus)}
             >
               <SelectTrigger>
@@ -395,7 +410,9 @@ export default function InvoiceForm({
               </SelectTrigger>
               <SelectContent>
                 {STATUS_OPTIONS.map(({ value, label }) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -415,19 +432,10 @@ export default function InvoiceForm({
 
           {/* Form Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onCancel}
-              disabled={loading}
-            >
+            <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
               İptal
             </Button>
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="min-w-24"
-            >
+            <Button type="submit" disabled={loading} className="min-w-24">
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

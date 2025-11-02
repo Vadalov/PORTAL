@@ -62,7 +62,9 @@ class LoadingStateTester {
   }
 
   // Test specific variant renders
-  async testLoadingOverlayRender(variant: 'spinner' | 'dots' | 'pulse' | 'bars' | 'ripple'): Promise<TestResult> {
+  async testLoadingOverlayRender(
+    variant: 'spinner' | 'dots' | 'pulse' | 'bars' | 'ripple'
+  ): Promise<TestResult> {
     this.startTest(`LoadingOverlay Render - ${variant}`);
 
     try {
@@ -82,7 +84,7 @@ class LoadingStateTester {
       );
 
       // Wait for render
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Check if element exists
       const overlay = container.querySelector('[role="status"]');
@@ -92,15 +94,26 @@ class LoadingStateTester {
       root.unmount();
       document.body.removeChild(container);
 
-      return this.endTest(`LoadingOverlay Render - ${variant}`, passed, passed ? undefined : 'Overlay did not render');
-    } catch (error: unknown) {
+      return this.endTest(
+        `LoadingOverlay Render - ${variant}`,
+        passed,
+        passed ? undefined : 'Overlay did not render'
+      );
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest(`LoadingOverlay Render - ${variant}`, false, error.message);
     }
   }
 
   // Test all 5 variants render correctly
   async testAllVariants(): Promise<TestResult[]> {
-    const variants: ('spinner' | 'dots' | 'pulse' | 'bars' | 'ripple')[] = ['spinner', 'dots', 'pulse', 'bars', 'ripple'];
+    const variants: ('spinner' | 'dots' | 'pulse' | 'bars' | 'ripple')[] = [
+      'spinner',
+      'dots',
+      'pulse',
+      'bars',
+      'ripple',
+    ];
     const results: TestResult[] = [];
 
     for (const variant of variants) {
@@ -127,19 +140,28 @@ class LoadingStateTester {
         })
       );
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const overlay = container.querySelector('[role="status"]');
       const ariaLive = overlay?.getAttribute('aria-live');
       const screenReaderText = container.querySelector('.sr-only');
 
-      const passed = !!(overlay && ariaLive === 'polite' && screenReaderText?.textContent?.includes('Yükleniyor'));
+      const passed = !!(
+        overlay &&
+        ariaLive === 'polite' &&
+        screenReaderText?.textContent?.includes('Yükleniyor')
+      );
 
       root.unmount();
       document.body.removeChild(container);
 
-      return this.endTest('Accessibility Test', !!passed, passed ? undefined : 'Missing ARIA attributes or screen reader text');
-    } catch (error: unknown) {
+      return this.endTest(
+        'Accessibility Test',
+        !!passed,
+        passed ? undefined : 'Missing ARIA attributes or screen reader text'
+      );
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Accessibility Test', false, error.message);
     }
   }
@@ -178,7 +200,7 @@ class LoadingStateTester {
         })
       );
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Check if motion-reduce class is applied
       const spinner = container.querySelector('.animate-spin');
@@ -193,8 +215,13 @@ class LoadingStateTester {
         value: () => mediaQuery,
       });
 
-      return this.endTest('Motion Reduce Test', !!hasMotionReduce, hasMotionReduce ? undefined : 'Motion reduce not applied');
-    } catch (error: unknown) {
+      return this.endTest(
+        'Motion Reduce Test',
+        !!hasMotionReduce,
+        hasMotionReduce ? undefined : 'Motion reduce not applied'
+      );
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Motion Reduce Test', false, error.message);
     }
   }
@@ -215,7 +242,7 @@ class LoadingStateTester {
         })
       );
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const overlay = container.querySelector('.fixed.inset-0');
       const passed = !!overlay;
@@ -223,8 +250,13 @@ class LoadingStateTester {
       root.unmount();
       document.body.removeChild(container);
 
-      return this.endTest('Fullscreen Mode Test', passed, passed ? undefined : 'Fullscreen overlay not applied');
-    } catch (error: unknown) {
+      return this.endTest(
+        'Fullscreen Mode Test',
+        passed,
+        passed ? undefined : 'Fullscreen overlay not applied'
+      );
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Fullscreen Mode Test', false, error.message);
     }
   }
@@ -239,7 +271,8 @@ class LoadingStateTester {
       const passed = true; // Placeholder - would check actual rendering
 
       return this.endTest('Auth Initialization Loading Test', passed);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Auth Initialization Loading Test', false, error.message);
     }
   }
@@ -253,7 +286,8 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Auth Redirect Flow Test', passed);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Auth Redirect Flow Test', false, error.message);
     }
   }
@@ -266,8 +300,13 @@ class LoadingStateTester {
       const hasHydrated = useAuthStore.getState()._hasHydrated;
       const passed = typeof hasHydrated === 'boolean';
 
-      return this.endTest('Hydration Wait Test', passed, passed ? undefined : '_hasHydrated not properly set');
-    } catch (error: unknown) {
+      return this.endTest(
+        'Hydration Wait Test',
+        passed,
+        passed ? undefined : '_hasHydrated not properly set'
+      );
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Hydration Wait Test', false, error.message);
     }
   }
@@ -281,13 +320,16 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Provider Loading Test', passed);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Provider Loading Test', false, error.message);
     }
   }
 
   // Measure render performance
-  async measureRenderTime(variant: 'spinner' | 'dots' | 'pulse' | 'bars' | 'ripple'): Promise<TestResult> {
+  async measureRenderTime(
+    variant: 'spinner' | 'dots' | 'pulse' | 'bars' | 'ripple'
+  ): Promise<TestResult> {
     this.startTest(`Render Time Measurement - ${variant}`);
 
     try {
@@ -296,19 +338,20 @@ class LoadingStateTester {
 
       const renderStart = performance.now();
       const root = createRoot(container);
-      root.render(
-        React.createElement(LoadingOverlay, { variant })
-      );
+      root.render(React.createElement(LoadingOverlay, { variant }));
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
 
       const renderTime = performance.now() - renderStart;
 
       root.unmount();
       document.body.removeChild(container);
 
-      return this.endTest(`Render Time Measurement - ${variant}`, renderTime < 100, undefined, { renderTime });
-    } catch (error: unknown) {
+      return this.endTest(`Render Time Measurement - ${variant}`, renderTime < 100, undefined, {
+        renderTime,
+      });
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest(`Render Time Measurement - ${variant}`, false, error.message);
     }
   }
@@ -339,7 +382,8 @@ class LoadingStateTester {
       const passed = fps >= 50; // 50+ FPS considered smooth
 
       return this.endTest('Animation Frame Rate Test', passed, undefined, { fps });
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Animation Frame Rate Test', false, error.message);
     }
   }
@@ -361,7 +405,7 @@ class LoadingStateTester {
         })
       );
 
-      await new Promise(resolve => setTimeout(resolve, duration));
+      await new Promise((resolve) => setTimeout(resolve, duration));
 
       const actualDuration = performance.now() - startTime;
       const passed = Math.abs(actualDuration - duration) < 50; // Allow 50ms tolerance
@@ -369,8 +413,12 @@ class LoadingStateTester {
       root.unmount();
       document.body.removeChild(container);
 
-      return this.endTest(`Loading Duration Test - ${duration}ms`, passed, undefined, { actualDuration, expectedDuration: duration });
-    } catch (error: unknown) {
+      return this.endTest(`Loading Duration Test - ${duration}ms`, passed, undefined, {
+        actualDuration,
+        expectedDuration: duration,
+      });
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest(`Loading Duration Test - ${duration}ms`, false, error.message);
     }
   }
@@ -385,7 +433,8 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest(`Delayed Show Test - ${delay}ms`, passed);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest(`Delayed Show Test - ${delay}ms`, false, error.message);
     }
   }
@@ -399,8 +448,11 @@ class LoadingStateTester {
       // For now, just check if component renders
       const passed = true;
 
-      return this.endTest(`Visual Snapshot - ${variant}`, passed, undefined, { snapshot: `snapshot-${variant}` });
-    } catch (error: unknown) {
+      return this.endTest(`Visual Snapshot - ${variant}`, passed, undefined, {
+        snapshot: `snapshot-${variant}`,
+      });
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest(`Visual Snapshot - ${variant}`, false, error.message);
     }
   }
@@ -414,7 +466,8 @@ class LoadingStateTester {
       const passed = true;
 
       return this.endTest('Snapshot Comparison', passed);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Snapshot Comparison', false, error.message);
     }
   }
@@ -429,7 +482,8 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Responsive Layout Test', passed, undefined, { testedSizes: sizes });
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Responsive Layout Test', false, error.message);
     }
   }
@@ -443,7 +497,8 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Loading + Error Boundary Test', passed);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Loading + Error Boundary Test', false, error.message);
     }
   }
@@ -457,7 +512,8 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Loading + Suspense Test', passed);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Loading + Suspense Test', false, error.message);
     }
   }
@@ -471,7 +527,8 @@ class LoadingStateTester {
       const passed = true; // Placeholder
 
       return this.endTest('Complete Auth Loading Flow Test', passed);
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as Error;
       return this.endTest('Complete Auth Loading Flow Test', false, error.message);
     }
   }
@@ -479,19 +536,23 @@ class LoadingStateTester {
   // Generate comprehensive test report
   getLoadingStateReport(): LoadingStateReport {
     const variantsTested = ['spinner', 'dots', 'pulse', 'bars', 'ripple'];
-    const accessibilityScore = this.results
-      .filter(r => r.name.includes('Accessibility'))
-      .reduce((score, r) => score + (r.passed ? 100 : 0), 0) / Math.max(1, this.results.filter(r => r.name.includes('Accessibility')).length);
+    const accessibilityScore =
+      this.results
+        .filter((r) => r.name.includes('Accessibility'))
+        .reduce((score, r) => score + (r.passed ? 100 : 0), 0) /
+      Math.max(1, this.results.filter((r) => r.name.includes('Accessibility')).length);
 
-    const renderTimeResults = this.results.filter(r => r.name.includes('Render Time'));
-    const averageRenderTime = renderTimeResults.length > 0
-      ? renderTimeResults.reduce((sum, r) => sum + (r.details?.renderTime || 0), 0) / renderTimeResults.length
-      : 0;
+    const renderTimeResults = this.results.filter((r) => r.name.includes('Render Time'));
+    const averageRenderTime =
+      renderTimeResults.length > 0
+        ? renderTimeResults.reduce((sum, r) => sum + (r.details?.renderTime || 0), 0) /
+          renderTimeResults.length
+        : 0;
 
-    const fpsResult = this.results.find(r => r.name.includes('Frame Rate'));
+    const fpsResult = this.results.find((r) => r.name.includes('Frame Rate'));
     const animationFrameRate = fpsResult?.details?.fps || 0;
 
-    const overallPassed = this.results.every(r => r.passed);
+    const overallPassed = this.results.every((r) => r.passed);
 
     return {
       timestamp: new Date().toISOString(),

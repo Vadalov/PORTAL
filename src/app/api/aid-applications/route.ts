@@ -4,11 +4,19 @@ import logger from '@/lib/logger';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { AidApplicationDocument, CreateDocumentData } from '@/types/collections';
 
-function validateApplication(data: Partial<AidApplicationDocument>): { isValid: boolean; errors: string[] } {
+function validateApplication(data: Partial<AidApplicationDocument>): {
+  isValid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
-  if (!data.applicant_name || data.applicant_name.trim().length < 2) errors.push('Başvuru sahibi adı zorunludur');
+  if (!data.applicant_name || data.applicant_name.trim().length < 2)
+    errors.push('Başvuru sahibi adı zorunludur');
   if (!data.application_date) errors.push('Başvuru tarihi zorunludur');
-  if (!data.stage || !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage)) errors.push('Geçersiz aşama');
+  if (
+    !data.stage ||
+    !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage)
+  )
+    errors.push('Geçersiz aşama');
   if (!data.status || !['open', 'closed'].includes(data.status)) errors.push('Geçersiz durum');
   return { isValid: errors.length === 0, errors };
 }
@@ -37,7 +45,7 @@ export async function GET(request: NextRequest) {
       method: 'GET',
       page,
       limit,
-      filters
+      filters,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -55,7 +63,10 @@ async function createApplicationHandler(request: NextRequest) {
     }
     const validation = validateApplication(body);
     if (!validation.isValid) {
-      return NextResponse.json({ success: false, error: 'Doğrulama hatası', details: validation.errors }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
     }
 
     // After validation, ensure all required fields are present with proper types
@@ -71,18 +82,27 @@ async function createApplicationHandler(request: NextRequest) {
 
     const response = await api.createAidApplication(applicationData);
     if (response.error || !response.data) {
-      return NextResponse.json({ success: false, error: response.error || 'Oluşturma başarısız' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: response.error || 'Oluşturma başarısız' },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ success: true, data: response.data, message: 'Başvuru oluşturuldu' }, { status: 201 });
+    return NextResponse.json(
+      { success: true, data: response.data, message: 'Başvuru oluşturuldu' },
+      { status: 201 }
+    );
   } catch (error: unknown) {
     logger.error('Create aid application error', error, {
       endpoint: '/api/aid-applications',
       method: 'POST',
       applicantName: body?.applicant_name,
-      stage: body?.stage
+      stage: body?.stage,
     });
-    return NextResponse.json({ success: false, error: 'Oluşturma işlemi başarısız' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Oluşturma işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

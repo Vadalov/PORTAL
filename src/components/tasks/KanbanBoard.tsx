@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Calendar, AlertCircle, Clock } from 'lucide-react';
 import type { TaskDocument } from '@/types/collections';
-import { getPriorityColor, getStatusColor, getPriorityLabel, getStatusLabel, isTaskOverdue, isTaskDueSoon } from '@/lib/validations/task';
+import {
+  getPriorityColor,
+  getStatusColor,
+  getPriorityLabel,
+  getStatusLabel,
+  isTaskOverdue,
+  isTaskDueSoon,
+} from '@/lib/validations/task';
 
 interface KanbanBoardProps {
   tasks: TaskDocument[];
@@ -32,23 +39,23 @@ const COLUMNS = [
   {
     status: 'pending' as const,
     title: 'Beklemede',
-    color: 'border-yellow-200 bg-yellow-50'
+    color: 'border-yellow-200 bg-yellow-50',
   },
   {
     status: 'in_progress' as const,
     title: 'Devam Ediyor',
-    color: 'border-blue-200 bg-blue-50'
+    color: 'border-blue-200 bg-blue-50',
   },
   {
     status: 'completed' as const,
     title: 'Tamamlandı',
-    color: 'border-green-200 bg-green-50'
+    color: 'border-green-200 bg-green-50',
   },
   {
     status: 'cancelled' as const,
     title: 'İptal Edildi',
-    color: 'border-gray-200 bg-gray-50'
-  }
+    color: 'border-gray-200 bg-gray-50',
+  },
 ];
 
 function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
@@ -79,15 +86,11 @@ function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
     >
       <CardContent className="p-4">
         {/* Title */}
-        <h3 className="font-semibold text-sm mb-2 line-clamp-2">
-          {task.title}
-        </h3>
+        <h3 className="font-semibold text-sm mb-2 line-clamp-2">{task.title}</h3>
 
         {/* Description */}
         {task.description && (
-          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-            {task.description}
-          </p>
+          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{task.description}</p>
         )}
 
         {/* Assigned User */}
@@ -111,11 +114,15 @@ function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
         {task.due_date && (
           <div className="flex items-center gap-1 mb-2">
             <Calendar className="h-3 w-3 text-muted-foreground" />
-            <span className={`text-xs ${
-              isOverdue ? 'text-destructive font-medium' : 
-              isDueSoon ? 'text-warning font-medium' : 
-              'text-muted-foreground'
-            }`}>
+            <span
+              className={`text-xs ${
+                isOverdue
+                  ? 'text-destructive font-medium'
+                  : isDueSoon
+                    ? 'text-warning font-medium'
+                    : 'text-muted-foreground'
+              }`}
+            >
               {new Date(task.due_date).toLocaleDateString('tr-TR')}
             </span>
             {isOverdue && <AlertCircle className="h-3 w-3 text-destructive" />}
@@ -159,14 +166,14 @@ function KanbanColumn({ title, status, tasks, onTaskMove, onTaskClick, color }: 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    
+
     const taskId = e.dataTransfer.getData('text/plain');
     if (taskId) {
       onTaskMove(taskId, status);
     }
   };
 
-  const columnTasks = tasks.filter(task => task.status === status);
+  const columnTasks = tasks.filter((task) => task.status === status);
 
   return (
     <div className="flex flex-col h-full">

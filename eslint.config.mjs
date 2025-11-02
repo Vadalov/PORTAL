@@ -1,11 +1,11 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  
+
   // Custom rules
   {
     rules: {
@@ -19,7 +19,7 @@ const eslintConfig = defineConfig([
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      
+
       // Console rules (allow warn/error, disallow log in production)
       'no-console': [
         'warn',
@@ -27,7 +27,7 @@ const eslintConfig = defineConfig([
           allow: ['warn', 'error'],
         },
       ],
-      
+
       // Code quality rules
       'prefer-const': 'error',
       'no-var': 'error',
@@ -35,7 +35,7 @@ const eslintConfig = defineConfig([
       'prefer-template': 'warn',
     },
   },
-  
+
   // Test files için özel kurallar
   {
     files: ['**/__tests__/**/*.ts', '**/__tests__/**/*.tsx', '**/*.test.ts', '**/*.test.tsx'],
@@ -46,10 +46,16 @@ const eslintConfig = defineConfig([
       '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
-  
+
   // Scripts and tools için özel kurallar
   {
-    files: ['scripts/**/*.ts', 'scripts/**/*.js', 'scripts/**/*.mts', 'src/scripts/**/*.ts', 'src/scripts/**/*.js'],
+    files: [
+      'scripts/**/*.ts',
+      'scripts/**/*.js',
+      'scripts/**/*.mts',
+      'src/scripts/**/*.ts',
+      'src/scripts/**/*.js',
+    ],
     rules: {
       // Scripts'te console kullanımına izin ver (debugging/diagnostic scripts)
       'no-console': 'off',
@@ -59,7 +65,7 @@ const eslintConfig = defineConfig([
       '@typescript-eslint/no-unused-vars': 'warn',
     },
   },
-  
+
   // Override default ignores
   globalIgnores([
     '.next/**',

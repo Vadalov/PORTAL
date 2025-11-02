@@ -14,10 +14,11 @@ export function withRateLimit(
 ) {
   return async (req: NextRequest): Promise<NextResponse> => {
     // Get client identifier (IP address)
-    const clientIP = req.headers.get('x-forwarded-for') ||
-                    req.headers.get('x-real-ip') ||
-                    req.headers.get('x-client-ip') ||
-                    'unknown';
+    const clientIP =
+      req.headers.get('x-forwarded-for') ||
+      req.headers.get('x-real-ip') ||
+      req.headers.get('x-client-ip') ||
+      'unknown';
 
     // Extract user info if available (for authenticated requests)
     const authHeader = req.headers.get('authorization');
@@ -44,7 +45,7 @@ export function withRateLimit(
         JSON.stringify({
           error: 'Çok fazla istek gönderdiniz. Lütfen biraz bekleyin.',
           retryAfter: remainingTime,
-          code: 'RATE_LIMIT_EXCEEDED'
+          code: 'RATE_LIMIT_EXCEEDED',
         }),
         {
           status: 429,
@@ -88,7 +89,9 @@ export function withRateLimit(
 }
 
 // Pre-configured rate limiters for different endpoints
-export const authRateLimit = (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) =>
+export const authRateLimit = (
+  handler: (req: NextRequest) => Promise<NextResponse> | NextResponse
+) =>
   withRateLimit(handler, {
     maxRequests: parseInt(process.env.RATE_LIMIT_AUTH_MAX || '10'),
     windowMs: parseInt(process.env.RATE_LIMIT_AUTH_WINDOW || '600000'), // 10 attempts per 10 minutes
@@ -96,31 +99,41 @@ export const authRateLimit = (handler: (req: NextRequest) => Promise<NextRespons
     skipFailedRequests: true, // Don't count failed login attempts
   });
 
-export const dataModificationRateLimit = (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) =>
+export const dataModificationRateLimit = (
+  handler: (req: NextRequest) => Promise<NextResponse> | NextResponse
+) =>
   withRateLimit(handler, {
     maxRequests: parseInt(process.env.RATE_LIMIT_DATA_MODIFY_MAX || '50'),
     windowMs: parseInt(process.env.RATE_LIMIT_DATA_MODIFY_WINDOW || '900000'), // 50 requests per 15 minutes
   });
 
-export const readOnlyRateLimit = (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) =>
+export const readOnlyRateLimit = (
+  handler: (req: NextRequest) => Promise<NextResponse> | NextResponse
+) =>
   withRateLimit(handler, {
     maxRequests: parseInt(process.env.RATE_LIMIT_READ_MAX || '200'),
     windowMs: parseInt(process.env.RATE_LIMIT_READ_WINDOW || '900000'), // 200 requests per 15 minutes
   });
 
-export const uploadRateLimit = (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) =>
+export const uploadRateLimit = (
+  handler: (req: NextRequest) => Promise<NextResponse> | NextResponse
+) =>
   withRateLimit(handler, {
     maxRequests: parseInt(process.env.RATE_LIMIT_UPLOAD_MAX || '10'),
     windowMs: parseInt(process.env.RATE_LIMIT_UPLOAD_WINDOW || '60000'), // 10 uploads per minute
   });
 
-export const searchRateLimit = (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) =>
+export const searchRateLimit = (
+  handler: (req: NextRequest) => Promise<NextResponse> | NextResponse
+) =>
   withRateLimit(handler, {
     maxRequests: parseInt(process.env.RATE_LIMIT_SEARCH_MAX || '30'),
     windowMs: parseInt(process.env.RATE_LIMIT_SEARCH_WINDOW || '60000'), // 30 searches per minute
   });
 
-export const dashboardRateLimit = (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) =>
+export const dashboardRateLimit = (
+  handler: (req: NextRequest) => Promise<NextResponse> | NextResponse
+) =>
   withRateLimit(handler, {
     maxRequests: parseInt(process.env.RATE_LIMIT_DASHBOARD_MAX || '60'),
     windowMs: parseInt(process.env.RATE_LIMIT_DASHBOARD_WINDOW || '60000'), // 60 requests per minute

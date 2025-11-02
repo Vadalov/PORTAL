@@ -27,10 +27,7 @@ class StoreDebuggerClass {
   /**
    * Initialize the store debugger (development only)
    */
-  init<T extends StoreState>(
-    store: UseBoundStore<StoreApi<T>>,
-    storeName: string = 'authStore'
-  ) {
+  init<T extends StoreState>(store: UseBoundStore<StoreApi<T>>, storeName: string = 'authStore') {
     if (process.env.NODE_ENV !== 'development') {
       return;
     }
@@ -56,8 +53,18 @@ class StoreDebuggerClass {
 
     // Expose to window for manual debugging
     if (typeof window !== 'undefined') {
-      (window as { __STORE_DEBUGGER__?: StoreDebuggerClass; __AUTH_STORE__?: UseBoundStore<StoreApi<T>> }).__STORE_DEBUGGER__ = this;
-      (window as { __STORE_DEBUGGER__?: StoreDebuggerClass; __AUTH_STORE__?: UseBoundStore<StoreApi<T>> }).__AUTH_STORE__ = store;
+      (
+        window as {
+          __STORE_DEBUGGER__?: StoreDebuggerClass;
+          __AUTH_STORE__?: UseBoundStore<StoreApi<T>>;
+        }
+      ).__STORE_DEBUGGER__ = this;
+      (
+        window as {
+          __STORE_DEBUGGER__?: StoreDebuggerClass;
+          __AUTH_STORE__?: UseBoundStore<StoreApi<T>>;
+        }
+      ).__AUTH_STORE__ = store;
     }
   }
 
@@ -85,9 +92,7 @@ class StoreDebuggerClass {
     if (persistApi.hasHydrated && persistApi.hasHydrated()) {
       timing.endTime = performance.now();
       timing.duration = timing.endTime - timing.startTime;
-      console.log(
-        `⚡ ${storeName} already hydrated (${timing.duration.toFixed(2)}ms)`
-      );
+      console.log(`⚡ ${storeName} already hydrated (${timing.duration.toFixed(2)}ms)`);
       return;
     }
 
@@ -96,9 +101,7 @@ class StoreDebuggerClass {
       if (persistApi.hasHydrated && persistApi.hasHydrated()) {
         timing.endTime = performance.now();
         timing.duration = timing.endTime - timing.startTime;
-        console.log(
-          `⚡ ${storeName} hydration completed (${timing.duration.toFixed(2)}ms)`
-        );
+        console.log(`⚡ ${storeName} hydration completed (${timing.duration.toFixed(2)}ms)`);
         clearInterval(checkHydration);
       }
     }, 10);
@@ -217,10 +220,7 @@ class StoreDebuggerClass {
     const mismatches: string[] = [];
 
     Object.keys(currentState).forEach((key) => {
-      if (
-        defaultState[key] !== undefined &&
-        currentState[key] !== defaultState[key]
-      ) {
+      if (defaultState[key] !== undefined && currentState[key] !== defaultState[key]) {
         mismatches.push(key);
       }
     });

@@ -29,7 +29,8 @@ export default function Error({
       console.error('User Agent:', navigator.userAgent);
 
       // Check for browser extensions
-      const hasExtensions = document.documentElement.getAttribute('cz-shortcut-listen') ||
+      const hasExtensions =
+        document.documentElement.getAttribute('cz-shortcut-listen') ||
         document.documentElement.getAttribute('data-gr-ext') ||
         document.documentElement.getAttribute('data-loom-ext');
       if (hasExtensions) {
@@ -98,14 +99,10 @@ export default function Error({
               : 'Üzgünüz, sayfa yüklenirken bir hata oluştu. Lütfen tekrar deneyin.'}
           </p>
           {isNetworkError && (
-            <p className="text-sm text-blue-600">
-              Ağ bağlantınızı kontrol edin ve tekrar deneyin.
-            </p>
+            <p className="text-sm text-blue-600">Ağ bağlantınızı kontrol edin ve tekrar deneyin.</p>
           )}
           {isStoreError && (
-            <p className="text-sm text-purple-600">
-              Uygulama durumu hatası. Sayfayı yenileyin.
-            </p>
+            <p className="text-sm text-purple-600">Uygulama durumu hatası. Sayfayı yenileyin.</p>
           )}
           {isTestError && (
             <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -122,24 +119,18 @@ export default function Error({
             <div className="mt-2 space-y-2">
               <div>
                 <strong>Error:</strong>
-                <pre className="mt-1 overflow-auto text-xs text-red-600">
-                  {error.message}
-                </pre>
+                <pre className="mt-1 overflow-auto text-xs text-red-600">{error.message}</pre>
               </div>
               {error.digest && (
                 <div>
                   <strong>Digest:</strong>
-                  <pre className="mt-1 overflow-auto text-xs text-gray-600">
-                    {error.digest}
-                  </pre>
+                  <pre className="mt-1 overflow-auto text-xs text-gray-600">{error.digest}</pre>
                 </div>
               )}
               {error.stack && (
                 <div>
                   <strong>Stack:</strong>
-                  <pre className="mt-1 overflow-auto text-xs text-gray-600">
-                    {error.stack}
-                  </pre>
+                  <pre className="mt-1 overflow-auto text-xs text-gray-600">{error.stack}</pre>
                 </div>
               )}
               <div>
@@ -151,7 +142,10 @@ export default function Error({
 
         <div className="flex flex-col gap-3">
           <Button
-            onClick={() => { setResetCount(c => c + 1); reset(); }}
+            onClick={() => {
+              setResetCount((c) => c + 1);
+              reset();
+            }}
             className="w-full"
             variant="default"
           >
@@ -180,11 +174,7 @@ export default function Error({
             </Button>
           )}
           {process.env.NODE_ENV === 'development' && (
-            <Button
-              onClick={copyErrorDetails}
-              className="w-full"
-              variant="secondary"
-            >
+            <Button onClick={copyErrorDetails} className="w-full" variant="secondary">
               📋 Copy Error Details
             </Button>
           )}
@@ -200,9 +190,7 @@ export default function Error({
         </div>
 
         {error.digest && (
-          <p className="text-center text-xs text-gray-500">
-            Hata Kodu: {error.digest}
-          </p>
+          <p className="text-center text-xs text-gray-500">Hata Kodu: {error.digest}</p>
         )}
       </div>
     </div>

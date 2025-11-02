@@ -5,7 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,25 +19,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery } from '@tanstack/react-query';
 import { appwriteApi } from '@/lib/api/appwrite-api';
 import { toast } from 'sonner';
-import { 
-  Search, 
-  Users, 
-  Heart, 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin, 
+import {
+  Search,
+  Users,
+  Heart,
+  User,
+  Phone,
+  Mail,
+  MapPin,
   Calendar,
   CheckSquare,
   Square,
   X,
   Download,
-  Upload
+  Upload,
 } from 'lucide-react';
-import { 
-  validateRecipients,
-  formatPhoneNumber
-} from '@/lib/validations/message';
+import { validateRecipients, formatPhoneNumber } from '@/lib/validations/message';
 import type { BeneficiaryDocument, DonationDocument, UserDocument } from '@/types/collections';
 
 interface RecipientSelectorProps {
@@ -51,41 +54,46 @@ interface RecipientItem {
   email?: string;
 }
 
-export function RecipientSelector({ 
-  messageType, 
-  selectedRecipients, 
-  onRecipientsChange, 
-  maxRecipients = 100 
+export function RecipientSelector({
+  messageType,
+  selectedRecipients,
+  onRecipientsChange,
+  maxRecipients = 100,
 }: RecipientSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [recipientSource, setRecipientSource] = useState<'beneficiaries' | 'donors' | 'users' | 'custom'>('beneficiaries');
+  const [recipientSource, setRecipientSource] = useState<
+    'beneficiaries' | 'donors' | 'users' | 'custom'
+  >('beneficiaries');
   const [selectAll, setSelectAll] = useState(false);
   const [customRecipients, setCustomRecipients] = useState('');
 
   // Fetch beneficiaries
   const { data: beneficiariesResponse, isLoading: isLoadingBeneficiaries } = useQuery({
     queryKey: ['beneficiaries', searchQuery],
-    queryFn: () => appwriteApi.beneficiaries.getBeneficiaries({ 
-      search: searchQuery,
-      limit: 100 
-    }),
+    queryFn: () =>
+      appwriteApi.beneficiaries.getBeneficiaries({
+        search: searchQuery,
+        limit: 100,
+      }),
   });
 
   // Fetch donations (for unique donors)
   const { data: donationsResponse, isLoading: isLoadingDonations } = useQuery({
     queryKey: ['donations', searchQuery],
-    queryFn: () => appwriteApi.donations.getDonations({ 
-      search: searchQuery,
-      limit: 100 
-    }),
+    queryFn: () =>
+      appwriteApi.donations.getDonations({
+        search: searchQuery,
+        limit: 100,
+      }),
   });
 
   // Fetch users (for internal messages)
   const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['users', searchQuery],
-    queryFn: () => appwriteApi.users.getUsers({ 
-      limit: 100 
-    }),
+    queryFn: () =>
+      appwriteApi.users.getUsers({
+        limit: 100,
+      }),
   });
 
   const beneficiaries = beneficiariesResponse?.data || [];
@@ -126,13 +134,12 @@ export function RecipientSelector({
             }
           }
         });
-        return Array.from(uniqueDonors.values())
-          .filter((donor: any) => {
-            if (messageType === 'sms' && !donor.contact) return false;
-            if (messageType === 'email') return false; // Donations don't have email
-            if (messageType === 'internal') return false;
-            return true;
-          });
+        return Array.from(uniqueDonors.values()).filter((donor: any) => {
+          if (messageType === 'sms' && !donor.contact) return false;
+          if (messageType === 'email') return false; // Donations don't have email
+          if (messageType === 'internal') return false;
+          return true;
+        });
 
       case 'users':
         return users
@@ -162,22 +169,22 @@ export function RecipientSelector({
   const handleSelectAll = () => {
     if (selectAll) {
       // Deselect all from current source
-      const currentSourceRecipients = recipients.map(r => r.contact).filter(Boolean);
+      const currentSourceRecipients = recipients.map((r) => r.contact).filter(Boolean);
       const updatedRecipients = selectedRecipients.filter(
-        recipient => !currentSourceRecipients.includes(recipient)
+        (recipient) => !currentSourceRecipients.includes(recipient)
       );
       onRecipientsChange(updatedRecipients);
     } else {
       // Select all from current source
-      const currentSourceRecipients = recipients.map(r => r.contact).filter(Boolean);
+      const currentSourceRecipients = recipients.map((r) => r.contact).filter(Boolean);
       const newRecipients = [...selectedRecipients];
-      
-      currentSourceRecipients.forEach(recipient => {
+
+      currentSourceRecipients.forEach((recipient) => {
         if (!newRecipients.includes(recipient) && newRecipients.length < maxRecipients) {
           newRecipients.push(recipient);
         }
       });
-      
+
       onRecipientsChange(newRecipients);
     }
     setSelectAll(!selectAll);
@@ -186,7 +193,7 @@ export function RecipientSelector({
   // Handle individual selection
   const handleRecipientToggle = (contact: string) => {
     if (selectedRecipients.includes(contact)) {
-      onRecipientsChange(selectedRecipients.filter(r => r !== contact));
+      onRecipientsChange(selectedRecipients.filter((r) => r !== contact));
     } else {
       if (selectedRecipients.length < maxRecipients) {
         onRecipientsChange([...selectedRecipients, contact]);
@@ -199,12 +206,12 @@ export function RecipientSelector({
   // Handle custom recipients
   const handleCustomRecipientsChange = (value: string) => {
     setCustomRecipients(value);
-    
+
     // Parse comma-separated values
     const recipients = value
       .split(',')
-      .map(r => r.trim())
-      .filter(r => r.length > 0);
+      .map((r) => r.trim())
+      .filter((r) => r.length > 0);
 
     // Validate recipients
     const validationErrors = validateRecipients(recipients, messageType);
@@ -214,7 +221,7 @@ export function RecipientSelector({
     }
 
     // Update selected recipients
-    const validRecipients = recipients.filter(r => {
+    const validRecipients = recipients.filter((r) => {
       const errors = validateRecipients([r], messageType);
       return errors.length === 0;
     });
@@ -224,7 +231,7 @@ export function RecipientSelector({
 
   // Remove recipient
   const handleRemoveRecipient = (recipient: string) => {
-    onRecipientsChange(selectedRecipients.filter(r => r !== recipient));
+    onRecipientsChange(selectedRecipients.filter((r) => r !== recipient));
   };
 
   // Export selected recipients
@@ -249,8 +256,8 @@ export function RecipientSelector({
       const content = event.target?.result as string;
       const recipients = content
         .split('\n')
-        .map(r => r.trim())
-        .filter(r => r.length > 0);
+        .map((r) => r.trim())
+        .filter((r) => r.length > 0);
 
       const validationErrors = validateRecipients(recipients, messageType);
       if (validationErrors.length > 0) {
@@ -266,19 +273,27 @@ export function RecipientSelector({
 
   const getContactIcon = () => {
     switch (messageType) {
-      case 'sms': return <Phone className="h-4 w-4" />;
-      case 'email': return <Mail className="h-4 w-4" />;
-      case 'internal': return <User className="h-4 w-4" />;
-      default: return <Users className="h-4 w-4" />;
+      case 'sms':
+        return <Phone className="h-4 w-4" />;
+      case 'email':
+        return <Mail className="h-4 w-4" />;
+      case 'internal':
+        return <User className="h-4 w-4" />;
+      default:
+        return <Users className="h-4 w-4" />;
     }
   };
 
   const getContactLabel = () => {
     switch (messageType) {
-      case 'sms': return 'Telefon';
-      case 'email': return 'E-posta';
-      case 'internal': return 'Kullanıcı';
-      default: return 'İletişim';
+      case 'sms':
+        return 'Telefon';
+      case 'email':
+        return 'E-posta';
+      case 'internal':
+        return 'Kullanıcı';
+      default:
+        return 'İletişim';
     }
   };
 
@@ -295,11 +310,7 @@ export function RecipientSelector({
             {selectedRecipients.length}/{maxRecipients} seçildi
           </span>
           {selectedRecipients.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportRecipients}
-            >
+            <Button variant="outline" size="sm" onClick={handleExportRecipients}>
               <Download className="h-4 w-4 mr-1" />
               Dışa Aktar
             </Button>
@@ -325,7 +336,10 @@ export function RecipientSelector({
             <Heart className="h-4 w-4 mr-1" />
             İhtiyaç Sahipleri
           </TabsTrigger>
-          <TabsTrigger value="donors" disabled={messageType === 'internal' || messageType === 'email'}>
+          <TabsTrigger
+            value="donors"
+            disabled={messageType === 'internal' || messageType === 'email'}
+          >
             <Users className="h-4 w-4 mr-1" />
             Bağışçılar
           </TabsTrigger>
@@ -348,31 +362,26 @@ export function RecipientSelector({
                 checked={selectAll}
                 onCheckedChange={handleSelectAll}
               />
-              <Label htmlFor="select-all-beneficiaries">
-                Tümünü Seç ({recipients.length})
-              </Label>
+              <Label htmlFor="select-all-beneficiaries">Tümünü Seç ({recipients.length})</Label>
             </div>
           </div>
 
           <div className="max-h-96 overflow-y-auto space-y-2">
             {isLoadingBeneficiaries ? (
-              <div className="text-center py-8 text-gray-500">
-                Yükleniyor...
-              </div>
+              <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
             ) : recipients.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                {messageType === 'internal' 
+                {messageType === 'internal'
                   ? 'Kurum içi mesajlar için ihtiyaç sahipleri kullanılamaz'
-                  : 'Bu tür için uygun ihtiyaç sahibi bulunmuyor'
-                }
+                  : 'Bu tür için uygun ihtiyaç sahibi bulunmuyor'}
               </div>
             ) : (
               recipients.map((recipient) => (
-                <Card 
-                  key={recipient.id} 
+                <Card
+                  key={recipient.id}
                   className={`cursor-pointer transition-colors ${
-                    selectedRecipients.includes(recipient.contact) 
-                      ? 'bg-blue-50 border-blue-200' 
+                    selectedRecipients.includes(recipient.contact)
+                      ? 'bg-blue-50 border-blue-200'
                       : 'hover:bg-gray-50'
                   }`}
                   onClick={() => handleRecipientToggle(recipient.contact)}
@@ -387,7 +396,9 @@ export function RecipientSelector({
                         <div className="font-medium">{recipient.name}</div>
                         <div className="text-sm text-gray-600 flex items-center gap-1">
                           {getContactIcon()}
-                          {messageType === 'sms' ? formatPhoneNumber(recipient.contact) : recipient.contact}
+                          {messageType === 'sms'
+                            ? formatPhoneNumber(recipient.contact)
+                            : recipient.contact}
                         </div>
                         {recipient.city && (
                           <div className="text-sm text-gray-500 flex items-center gap-1">
@@ -413,31 +424,26 @@ export function RecipientSelector({
                 checked={selectAll}
                 onCheckedChange={handleSelectAll}
               />
-              <Label htmlFor="select-all-donors">
-                Tümünü Seç ({recipients.length})
-              </Label>
+              <Label htmlFor="select-all-donors">Tümünü Seç ({recipients.length})</Label>
             </div>
           </div>
 
           <div className="max-h-96 overflow-y-auto space-y-2">
             {isLoadingDonations ? (
-              <div className="text-center py-8 text-gray-500">
-                Yükleniyor...
-              </div>
+              <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
             ) : recipients.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                {messageType === 'internal' 
+                {messageType === 'internal'
                   ? 'Kurum içi mesajlar için bağışçılar kullanılamaz'
-                  : 'Bu tür için uygun bağışçı bulunmuyor'
-                }
+                  : 'Bu tür için uygun bağışçı bulunmuyor'}
               </div>
             ) : (
               recipients.map((recipient) => (
-                <Card 
-                  key={recipient.id} 
+                <Card
+                  key={recipient.id}
                   className={`cursor-pointer transition-colors ${
-                    selectedRecipients.includes(recipient.contact) 
-                      ? 'bg-blue-50 border-blue-200' 
+                    selectedRecipients.includes(recipient.contact)
+                      ? 'bg-blue-50 border-blue-200'
                       : 'hover:bg-gray-50'
                   }`}
                   onClick={() => handleRecipientToggle(recipient.contact)}
@@ -452,12 +458,15 @@ export function RecipientSelector({
                         <div className="font-medium">{recipient.name}</div>
                         <div className="text-sm text-gray-600 flex items-center gap-1">
                           {getContactIcon()}
-                          {messageType === 'sms' ? formatPhoneNumber(recipient.contact) : recipient.contact}
+                          {messageType === 'sms'
+                            ? formatPhoneNumber(recipient.contact)
+                            : recipient.contact}
                         </div>
                         {recipient.lastDonation && (
                           <div className="text-sm text-gray-500 flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            Son bağış: {new Date(recipient.lastDonation).toLocaleDateString('tr-TR')}
+                            Son bağış:{' '}
+                            {new Date(recipient.lastDonation).toLocaleDateString('tr-TR')}
                           </div>
                         )}
                       </div>
@@ -478,31 +487,26 @@ export function RecipientSelector({
                 checked={selectAll}
                 onCheckedChange={handleSelectAll}
               />
-              <Label htmlFor="select-all-users">
-                Tümünü Seç ({recipients.length})
-              </Label>
+              <Label htmlFor="select-all-users">Tümünü Seç ({recipients.length})</Label>
             </div>
           </div>
 
           <div className="max-h-96 overflow-y-auto space-y-2">
             {isLoadingUsers ? (
-              <div className="text-center py-8 text-gray-500">
-                Yükleniyor...
-              </div>
+              <div className="text-center py-8 text-gray-500">Yükleniyor...</div>
             ) : recipients.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                {messageType !== 'internal' 
+                {messageType !== 'internal'
                   ? 'Kullanıcılar sadece kurum içi mesajlar için kullanılabilir'
-                  : 'Kullanıcı bulunmuyor'
-                }
+                  : 'Kullanıcı bulunmuyor'}
               </div>
             ) : (
               recipients.map((recipient) => (
-                <Card 
-                  key={recipient.id} 
+                <Card
+                  key={recipient.id}
                   className={`cursor-pointer transition-colors ${
-                    selectedRecipients.includes(recipient.contact) 
-                      ? 'bg-blue-50 border-blue-200' 
+                    selectedRecipients.includes(recipient.contact)
+                      ? 'bg-blue-50 border-blue-200'
                       : 'hover:bg-gray-50'
                   }`}
                   onClick={() => handleRecipientToggle(recipient.contact)}
@@ -520,9 +524,7 @@ export function RecipientSelector({
                           {recipient.email}
                         </div>
                         {recipient.role && (
-                          <div className="text-sm text-gray-500">
-                            Rol: {recipient.role}
-                          </div>
+                          <div className="text-sm text-gray-500">Rol: {recipient.role}</div>
                         )}
                       </div>
                     </div>
@@ -536,9 +538,7 @@ export function RecipientSelector({
         {/* Custom Tab */}
         <TabsContent value="custom" className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="custom-recipients">
-              Manuel Giriş ({getContactLabel()})
-            </Label>
+            <Label htmlFor="custom-recipients">Manuel Giriş ({getContactLabel()})</Label>
             <Textarea
               id="custom-recipients"
               value={customRecipients}
@@ -547,7 +547,8 @@ export function RecipientSelector({
               rows={6}
             />
             <div className="text-sm text-gray-500">
-              Örnek: {messageType === 'sms' ? '5551234567, 5559876543' : 'ornek@email.com, test@email.com'}
+              Örnek:{' '}
+              {messageType === 'sms' ? '5551234567, 5559876543' : 'ornek@email.com, test@email.com'}
             </div>
           </div>
 
@@ -575,23 +576,23 @@ export function RecipientSelector({
       {selectedRecipients.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Seçilen Alıcılar ({selectedRecipients.length})</CardTitle>
+            <CardTitle className="text-base">
+              Seçilen Alıcılar ({selectedRecipients.length})
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {selectedRecipients.slice(0, 10).map((recipient, index) => (
                 <Badge key={index} variant="secondary" className="flex items-center gap-1">
                   {messageType === 'sms' ? formatPhoneNumber(recipient) : recipient}
-                  <X 
-                    className="h-3 w-3 cursor-pointer" 
+                  <X
+                    className="h-3 w-3 cursor-pointer"
                     onClick={() => handleRemoveRecipient(recipient)}
                   />
                 </Badge>
               ))}
               {selectedRecipients.length > 10 && (
-                <Badge variant="outline">
-                  +{selectedRecipients.length - 10} daha
-                </Badge>
+                <Badge variant="outline">+{selectedRecipients.length - 10} daha</Badge>
               )}
             </div>
           </CardContent>

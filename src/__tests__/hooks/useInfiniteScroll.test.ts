@@ -26,16 +26,20 @@ describe('useInfiniteScroll Hook', () => {
       isLoading: false,
     } as unknown as UseInfiniteQueryResult);
 
-    renderHook(() => useInfiniteScroll({
-      queryKey: ['test'],
-      queryFn: vi.fn(),
-    }));
+    renderHook(() =>
+      useInfiniteScroll({
+        queryKey: ['test'],
+        queryFn: vi.fn(),
+      })
+    );
 
-    expect(mockUseInfiniteQuery).toHaveBeenCalledWith(expect.objectContaining({
-      queryKey: ['test'],
-      initialPageParam: 1,
-      getNextPageParam: expect.any(Function),
-    }));
+    expect(mockUseInfiniteQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ['test'],
+        initialPageParam: 1,
+        getNextPageParam: expect.any(Function),
+      })
+    );
   });
 
   it('should handle custom limit and initial page param', () => {
@@ -49,17 +53,21 @@ describe('useInfiniteScroll Hook', () => {
       isLoading: false,
     } as unknown as UseInfiniteQueryResult);
 
-    renderHook(() => useInfiniteScroll({
-      limit: 50,
-      initialPageParam: 5,
-      queryKey: ['test'],
-      queryFn: vi.fn(),
-    }));
+    renderHook(() =>
+      useInfiniteScroll({
+        limit: 50,
+        initialPageParam: 5,
+        queryKey: ['test'],
+        queryFn: vi.fn(),
+      })
+    );
 
-    expect(mockUseInfiniteQuery).toHaveBeenCalledWith(expect.objectContaining({
-      queryKey: ['test'],
-      initialPageParam: 5,
-    }));
+    expect(mockUseInfiniteQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ['test'],
+        initialPageParam: 5,
+      })
+    );
   });
 
   it('should return flat data from pages', () => {
@@ -68,8 +76,8 @@ describe('useInfiniteScroll Hook', () => {
       data: {
         pages: [
           { items: ['item1', 'item2'], total: 10 },
-          { items: ['item3', 'item4'], total: 10 }
-        ]
+          { items: ['item3', 'item4'], total: 10 },
+        ],
       },
       fetchNextPage: vi.fn(),
       hasNextPage: true,
@@ -78,10 +86,12 @@ describe('useInfiniteScroll Hook', () => {
       isLoading: false,
     } as unknown as UseInfiniteQueryResult);
 
-    const { result } = renderHook(() => useInfiniteScroll({
-      queryKey: ['test'],
-      queryFn: vi.fn(),
-    }));
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        queryKey: ['test'],
+        queryFn: vi.fn(),
+      })
+    );
 
     expect(result.current.data).toEqual(['item1', 'item2', 'item3', 'item4']);
     expect(result.current.total).toBe(10);
@@ -98,10 +108,12 @@ describe('useInfiniteScroll Hook', () => {
       isLoading: false,
     } as unknown as UseInfiniteQueryResult);
 
-    const { result } = renderHook(() => useInfiniteScroll({
-      queryKey: ['test'],
-      queryFn: vi.fn(),
-    }));
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        queryKey: ['test'],
+        queryFn: vi.fn(),
+      })
+    );
 
     expect(result.current.data).toEqual([]);
     expect(result.current.total).toBe(0);
@@ -118,10 +130,12 @@ describe('useInfiniteScroll Hook', () => {
       isLoading: false,
     } as unknown as UseInfiniteQueryResult);
 
-    const { result } = renderHook(() => useInfiniteScroll({
-      queryKey: ['test'],
-      queryFn: vi.fn(),
-    }));
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        queryKey: ['test'],
+        queryFn: vi.fn(),
+      })
+    );
 
     expect(result.current.ref).toBeDefined();
     expect(result.current.ref.current).toBe(null); // Will be set after mount
@@ -138,10 +152,12 @@ describe('useInfiniteScroll Hook', () => {
       isLoading: true,
     } as unknown as UseInfiniteQueryResult);
 
-    const { result } = renderHook(() => useInfiniteScroll({
-      queryKey: ['test'],
-      queryFn: vi.fn(),
-    }));
+    const { result } = renderHook(() =>
+      useInfiniteScroll({
+        queryKey: ['test'],
+        queryFn: vi.fn(),
+      })
+    );
 
     expect(result.current.hasMore).toBe(false);
     expect(result.current.isLoading).toBe(true);
@@ -165,39 +181,31 @@ describe('usePaginatedQuery Hook', () => {
     } as unknown as UseInfiniteQueryResult);
 
     const queryFn = vi.fn();
-    
-    renderHook(() => usePaginatedQuery(
-      ['test'],
-      queryFn,
-      25
-    ));
 
-    expect(mockUseInfiniteQuery).toHaveBeenCalledWith(expect.objectContaining({
-      queryKey: ['test'],
-      queryFn: expect.any(Function),
-      initialPageParam: 1,
-      getNextPageParam: expect.any(Function),
-    }));
+    renderHook(() => usePaginatedQuery(['test'], queryFn, 25));
+
+    expect(mockUseInfiniteQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ['test'],
+        queryFn: expect.any(Function),
+        initialPageParam: 1,
+        getNextPageParam: expect.any(Function),
+      })
+    );
   });
 
   it('should return flattened items and pagination data', () => {
     const mockUseInfiniteQuery = vi.mocked(useInfiniteQuery);
     mockUseInfiniteQuery.mockReturnValue({
       data: {
-        pages: [
-          { items: ['item1', 'item2'], total: 50, nextPage: 2 }
-        ]
+        pages: [{ items: ['item1', 'item2'], total: 50, nextPage: 2 }],
       },
       isLoading: false,
       error: null,
       refetch: vi.fn(),
     } as unknown as UseInfiniteQueryResult);
 
-    const { result } = renderHook(() => usePaginatedQuery(
-      ['test'],
-      vi.fn(),
-      20
-    ));
+    const { result } = renderHook(() => usePaginatedQuery(['test'], vi.fn(), 20));
 
     expect(result.current.items).toEqual(['item1', 'item2']);
     expect(result.current.total).toBe(50);
@@ -213,10 +221,7 @@ describe('usePaginatedQuery Hook', () => {
       refetch: vi.fn(),
     } as unknown as UseInfiniteQueryResult);
 
-    const { result } = renderHook(() => usePaginatedQuery(
-      ['test'],
-      vi.fn()
-    ));
+    const { result } = renderHook(() => usePaginatedQuery(['test'], vi.fn()));
 
     expect(result.current.isLoading).toBe(true);
   });
@@ -230,10 +235,7 @@ describe('usePaginatedQuery Hook', () => {
       refetch: vi.fn(),
     } as unknown as UseInfiniteQueryResult);
 
-    const { result } = renderHook(() => usePaginatedQuery(
-      ['test'],
-      vi.fn()
-    ));
+    const { result } = renderHook(() => usePaginatedQuery(['test'], vi.fn()));
 
     expect(result.current.error).toEqual(new Error('Query failed'));
   });
@@ -241,7 +243,7 @@ describe('usePaginatedQuery Hook', () => {
   it('should provide refetch function', () => {
     const mockUseInfiniteQuery = vi.mocked(useInfiniteQuery);
     const mockRefetch = vi.fn();
-    
+
     mockUseInfiniteQuery.mockReturnValue({
       data: { pages: [{ items: [], total: 0 }] },
       isLoading: false,
@@ -249,10 +251,7 @@ describe('usePaginatedQuery Hook', () => {
       refetch: mockRefetch,
     } as unknown as UseInfiniteQueryResult);
 
-    const { result } = renderHook(() => usePaginatedQuery(
-      ['test'],
-      vi.fn()
-    ));
+    const { result } = renderHook(() => usePaginatedQuery(['test'], vi.fn()));
 
     expect(result.current.refetch).toBeDefined();
     expect(result.current.refetch).toBe(mockRefetch);

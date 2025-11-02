@@ -1,5 +1,7 @@
 'use client';
 
+import type { AppwriteError } from './types';
+
 /**
  * Appwrite Client Instances
  * Provides client-side Appwrite SDK instances for browser/React components
@@ -58,7 +60,7 @@ validateClientSDKUsage();
 /**
  * Client-side Appwrite client
  * Used in browser/React components
- * 
+ *
  * Note: Configuration is validated lazily to prevent import-time crashes.
  * Call initializeClient() explicitly if you need strict validation.
  */
@@ -87,11 +89,11 @@ export const storage = new Storage(client);
 /**
  * Export Query for convenience
  * Allows importing Query from this module instead of 'appwrite' package
- * 
+ *
  * @example
  * ```typescript
  * import { databases, Query } from '@/lib/appwrite/client';
- * 
+ *
  * const users = await databases.listDocuments(
  *   DATABASE_ID,
  *   COLLECTION_ID,
@@ -110,7 +112,9 @@ export function isClientInitialized(): boolean {
     // Check if running in browser environment
     const isBrowser = typeof window !== 'undefined';
     if (!isBrowser) {
-      console.warn('⚠️ isClientInitialized called from server context. Client SDK should only be used in browser.');
+      console.warn(
+        '⚠️ isClientInitialized called from server context. Client SDK should only be used in browser.'
+      );
       return false;
     }
 
@@ -156,9 +160,10 @@ export async function handleAppwriteError<T>(
 ): Promise<T> {
   try {
     return await operation();
-  } catch (error: unknown) {
+  } catch (err: unknown) {
+    const error = err as AppwriteError;
     console.error('Appwrite Error:', error);
-    
+
     // Handle specific error types
     if (error.code === 401) {
       throw new Error('Yetkisiz erişim. Lütfen tekrar giriş yapın.');
@@ -169,7 +174,7 @@ export async function handleAppwriteError<T>(
     } else if (error.code >= 500) {
       throw new Error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
     }
-    
+
     throw new Error(error.message || 'Beklenmeyen bir hata oluştu.');
   }
 }
@@ -182,24 +187,25 @@ export async function withRetry<T>(
   maxRetries: number = 3,
   delay: number = 1000
 ): Promise<T> {
-  let lastError: Error;
-  
+  let lastError: AppwriteError;
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await operation();
-    } catch (error: unknown) {
+    } catch (err: unknown) {
+      const error = err as AppwriteError;
       lastError = error;
-      
+
       // Don't retry on authentication errors
       if (error.code === 401 || error.code === 403) {
         throw error;
       }
-      
+
       if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+        await new Promise((resolve) => setTimeout(resolve, delay * Math.pow(2, i)));
       }
     }
   }
-  
+
   throw lastError!;
 }

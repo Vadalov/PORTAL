@@ -5,9 +5,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Search, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
@@ -29,7 +49,7 @@ export default function UserManagementPage() {
       email: 'admin@test.com',
       role: 'ADMIN',
       status: 'active',
-      createdAt: '2024-01-01'
+      createdAt: '2024-01-01',
     },
     {
       id: '2',
@@ -37,7 +57,7 @@ export default function UserManagementPage() {
       email: 'manager@test.com',
       role: 'MANAGER',
       status: 'active',
-      createdAt: '2024-01-02'
+      createdAt: '2024-01-02',
     },
     {
       id: '3',
@@ -45,8 +65,8 @@ export default function UserManagementPage() {
       email: 'member@test.com',
       role: 'MEMBER',
       status: 'inactive',
-      createdAt: '2024-01-03'
-    }
+      createdAt: '2024-01-03',
+    },
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,15 +78,16 @@ export default function UserManagementPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'MEMBER'
+    role: 'MEMBER',
   });
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -82,10 +103,10 @@ export default function UserManagementPage() {
       email: formData.email,
       role: formData.role,
       status: 'active',
-      createdAt: new Date().toISOString().split('T')[0]
+      createdAt: new Date().toISOString().split('T')[0],
     };
 
-    setUsers(prev => [...prev, newUser]);
+    setUsers((prev) => [...prev, newUser]);
     setFormData({ name: '', email: '', role: 'MEMBER' });
     setIsCreateModalOpen(false);
     toast.success('Kullanıcı başarıyla oluşturuldu');
@@ -96,7 +117,7 @@ export default function UserManagementPage() {
     setFormData({
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
     });
     setIsEditModalOpen(true);
   };
@@ -107,48 +128,60 @@ export default function UserManagementPage() {
       return;
     }
 
-    setUsers(prev => prev.map(user => 
-      user.id === editingUser.id 
-        ? { ...user, name: formData.name, role: formData.role }
-        : user
-    ));
-    
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === editingUser.id ? { ...user, name: formData.name, role: formData.role } : user
+      )
+    );
+
     setIsEditModalOpen(false);
     setEditingUser(null);
     toast.success('Kullanıcı başarıyla güncellendi');
   };
 
   const handleToggleStatus = (userId: string) => {
-    setUsers(prev => prev.map(user => 
-      user.id === userId 
-        ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
-        : user
-    ));
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === userId
+          ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
+          : user
+      )
+    );
     toast.success('Kullanıcı durumu güncellendi');
   };
 
   const handleDeleteUser = (userId: string) => {
-    setUsers(prev => prev.filter(user => user.id !== userId));
+    setUsers((prev) => prev.filter((user) => user.id !== userId));
     toast.success('Kullanıcı başarıyla silindi');
   };
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
-      case 'ADMIN': return 'destructive';
-      case 'MANAGER': return 'default';
-      case 'MEMBER': return 'secondary';
-      default: return 'outline';
+      case 'ADMIN':
+        return 'destructive';
+      case 'MANAGER':
+        return 'default';
+      case 'MEMBER':
+        return 'secondary';
+      default:
+        return 'outline';
     }
   };
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'ADMIN': return 'Yönetici';
-      case 'MANAGER': return 'Müdür';
-      case 'MEMBER': return 'Üye';
-      case 'VIEWER': return 'Görüntüleyici';
-      case 'VOLUNTEER': return 'Gönüllü';
-      default: return role;
+      case 'ADMIN':
+        return 'Yönetici';
+      case 'MANAGER':
+        return 'Müdür';
+      case 'MEMBER':
+        return 'Üye';
+      case 'VIEWER':
+        return 'Görüntüleyici';
+      case 'VOLUNTEER':
+        return 'Gönüllü';
+      default:
+        return role;
     }
   };
 
@@ -164,9 +197,7 @@ export default function UserManagementPage() {
           <div className="flex justify-between items-center">
             <div>
               <CardTitle>Kullanıcılar</CardTitle>
-              <CardDescription>
-                Toplam {filteredUsers.length} kullanıcı
-              </CardDescription>
+              <CardDescription>Toplam {filteredUsers.length} kullanıcı</CardDescription>
             </div>
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>
@@ -178,9 +209,7 @@ export default function UserManagementPage() {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Yeni Kullanıcı Oluştur</DialogTitle>
-                  <DialogDescription>
-                    Yeni kullanıcı bilgilerini girin
-                  </DialogDescription>
+                  <DialogDescription>Yeni kullanıcı bilgilerini girin</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
@@ -189,7 +218,7 @@ export default function UserManagementPage() {
                       id="create-name"
                       data-testid="user-form-name"
                       value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                     />
                   </div>
                   <div>
@@ -199,12 +228,15 @@ export default function UserManagementPage() {
                       data-testid="user-form-email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                     />
                   </div>
                   <div>
                     <Label htmlFor="create-role">Rol</Label>
-                    <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}>
+                    <Select
+                      value={formData.role}
+                      onValueChange={(value) => setFormData((prev) => ({ ...prev, role: value }))}
+                    >
                       <SelectTrigger data-testid="user-form-role">
                         <SelectValue />
                       </SelectTrigger>
@@ -350,9 +382,7 @@ export default function UserManagementPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Kullanıcı Düzenle</DialogTitle>
-            <DialogDescription>
-              Kullanıcı bilgilerini güncelleyin
-            </DialogDescription>
+            <DialogDescription>Kullanıcı bilgilerini güncelleyin</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
@@ -361,7 +391,7 @@ export default function UserManagementPage() {
                 id="edit-name"
                 data-testid="user-form-name"
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               />
             </div>
             <div>
@@ -376,7 +406,10 @@ export default function UserManagementPage() {
             </div>
             <div>
               <Label htmlFor="edit-role">Rol</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}>
+              <Select
+                value={formData.role}
+                onValueChange={(value) => setFormData((prev) => ({ ...prev, role: value }))}
+              >
                 <SelectTrigger data-testid="user-form-role">
                   <SelectValue />
                 </SelectTrigger>

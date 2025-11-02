@@ -24,10 +24,10 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { 
-  Heart, 
-  User, 
-  Phone, 
+import {
+  Heart,
+  User,
+  Phone,
   Calendar,
   DollarSign,
   FileText,
@@ -38,7 +38,7 @@ import {
   Filter,
   AlertCircle,
   CheckCircle,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { SimplePagination } from '@/components/ui/pagination';
 import { ORPHAN_TYPE_OPTIONS } from '@/lib/constants/orphan-types';
@@ -79,7 +79,7 @@ const mockOrphanData: OrphanAssistance[] = [
     caseManager: 'admin@test.com',
     nextCheckupDate: '2024-12-01',
     notes: 'Düzenli takip gerekli',
-    studentName: 'Ahmet Yılmaz'
+    studentName: 'Ahmet Yılmaz',
   },
   {
     id: 'orphan-002',
@@ -96,8 +96,8 @@ const mockOrphanData: OrphanAssistance[] = [
     status: 'ACTIVE',
     caseManager: 'manager@test.com',
     nextCheckupDate: '2024-11-15',
-    studentName: 'Ayşe Demir'
-  }
+    studentName: 'Ayşe Demir',
+  },
 ];
 
 export default function YetimPage() {
@@ -120,26 +120,27 @@ export default function YetimPage() {
     startDate: '',
     endDate: '',
     caseManager: '',
-    notes: ''
+    notes: '',
   });
 
   const filterData = React.useCallback(() => {
     let filtered = [...orphanData];
 
     if (searchTerm) {
-      filtered = filtered.filter(item => 
-        item.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.guardianName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.guardianPhone.includes(searchTerm)
+      filtered = filtered.filter(
+        (item) =>
+          item.studentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.guardianName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.guardianPhone.includes(searchTerm)
       );
     }
 
     if (statusFilter) {
-      filtered = filtered.filter(item => item.status === statusFilter);
+      filtered = filtered.filter((item) => item.status === statusFilter);
     }
 
     if (typeFilter) {
-      filtered = filtered.filter(item => item.orphanType === typeFilter);
+      filtered = filtered.filter((item) => item.orphanType === typeFilter);
     }
 
     setFilteredData(filtered);
@@ -154,7 +155,7 @@ export default function YetimPage() {
       ACTIVE: { variant: 'default' as const, icon: CheckCircle, text: 'Aktif' },
       SUSPENDED: { variant: 'destructive' as const, icon: AlertCircle, text: 'Askıya Alındı' },
       COMPLETED: { variant: 'secondary' as const, icon: CheckCircle, text: 'Tamamlandı' },
-      CANCELLED: { variant: 'destructive' as const, icon: AlertCircle, text: 'İptal Edildi' }
+      CANCELLED: { variant: 'destructive' as const, icon: AlertCircle, text: 'İptal Edildi' },
     };
 
     const config = statusConfig[status as keyof typeof statusConfig];
@@ -173,14 +174,10 @@ export default function YetimPage() {
       FULL_ORPHAN: 'Tam Yetim',
       PARTIAL_ORPHAN: 'Kısmi Yetim',
       ABANDONED: ' Terk Edilmiş',
-      PROTECTED: 'Koruma Altında'
+      PROTECTED: 'Koruma Altında',
     };
 
-    return (
-      <Badge variant="outline">
-        {typeNames[type] || type}
-      </Badge>
-    );
+    return <Badge variant="outline">{typeNames[type] || type}</Badge>;
   };
 
   const getAssistanceTypeBadge = (type: string) => {
@@ -188,21 +185,17 @@ export default function YetimPage() {
       SCHOLARSHIP: 'Burs',
       MONTHLY_AID: 'Aylık Yardım',
       EMERGENCY: 'Acil Yardım',
-      EDUCATIONAL_SUPPORT: 'Eğitim Desteği'
+      EDUCATIONAL_SUPPORT: 'Eğitim Desteği',
     };
 
-    return (
-      <Badge variant="secondary">
-        {typeNames[type] || type}
-      </Badge>
-    );
+    return <Badge variant="secondary">{typeNames[type] || type}</Badge>;
   };
 
   const formatCurrency = (amount: number, currency: string = 'TRY') => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
       currency,
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -231,12 +224,12 @@ export default function YetimPage() {
         caseManager: newOrphan.caseManager || 'current-user',
         nextCheckupDate: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         notes: newOrphan.notes,
-        studentName: newOrphan.studentName
+        studentName: newOrphan.studentName,
       };
 
-      setOrphanData(prev => [mockOrphan, ...prev]);
+      setOrphanData((prev) => [mockOrphan, ...prev]);
       toast.success('Yetim yardımı başarıyla oluşturuldu');
-      
+
       setShowCreateDialog(false);
       setNewOrphan({
         studentName: '',
@@ -249,7 +242,7 @@ export default function YetimPage() {
         startDate: '',
         endDate: '',
         caseManager: '',
-        notes: ''
+        notes: '',
       });
     } catch (error) {
       console.error('Error creating orphan assistance:', error);
@@ -282,9 +275,7 @@ export default function YetimPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{orphanData.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Aktif yardım sayısı
-            </p>
+            <p className="text-xs text-muted-foreground">Aktif yardım sayısı</p>
           </CardContent>
         </Card>
         <Card>
@@ -294,11 +285,9 @@ export default function YetimPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {orphanData.filter(item => item.status === 'ACTIVE').length}
+              {orphanData.filter((item) => item.status === 'ACTIVE').length}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Devam eden yardımlar
-            </p>
+            <p className="text-xs text-muted-foreground">Devam eden yardımlar</p>
           </CardContent>
         </Card>
         <Card>
@@ -310,9 +299,7 @@ export default function YetimPage() {
             <div className="text-2xl font-bold">
               {formatCurrency(orphanData.reduce((sum, item) => sum + item.amount, 0))}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Aylık toplam yardım
-            </p>
+            <p className="text-xs text-muted-foreground">Aylık toplam yardım</p>
           </CardContent>
         </Card>
         <Card>
@@ -322,17 +309,19 @@ export default function YetimPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {orphanData.filter(item => {
-                if (!item.nextCheckupDate) return false;
-                const nextCheckup = new Date(item.nextCheckupDate);
-                const today = new Date();
-                const diffDays = Math.ceil((nextCheckup.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-                return diffDays <= 7 && diffDays >= 0;
-              }).length}
+              {
+                orphanData.filter((item) => {
+                  if (!item.nextCheckupDate) return false;
+                  const nextCheckup = new Date(item.nextCheckupDate);
+                  const today = new Date();
+                  const diffDays = Math.ceil(
+                    (nextCheckup.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+                  );
+                  return diffDays <= 7 && diffDays >= 0;
+                }).length
+              }
             </div>
-            <p className="text-xs text-muted-foreground">
-              7 gün içinde takip
-            </p>
+            <p className="text-xs text-muted-foreground">7 gün içinde takip</p>
           </CardContent>
         </Card>
       </div>
@@ -399,18 +388,14 @@ export default function YetimPage() {
       <Card>
         <CardHeader>
           <CardTitle>Yetim Yardımları ({filteredData.length})</CardTitle>
-          <CardDescription>
-            Toplam {filteredData.length} yardım kaydı bulundu
-          </CardDescription>
+          <CardDescription>Toplam {filteredData.length} yardım kaydı bulundu</CardDescription>
         </CardHeader>
         <CardContent>
           {filteredData.length === 0 ? (
             <div className="text-center py-8">
               <Heart className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-semibold">Yardım kaydı bulunamadı</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Yeni bir yetim yardımı oluşturun
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">Yeni bir yetim yardımı oluşturun</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -420,9 +405,7 @@ export default function YetimPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold">
-                            {orphan.studentName}
-                          </h3>
+                          <h3 className="font-semibold">{orphan.studentName}</h3>
                           {getStatusBadge(orphan.status)}
                           {getOrphanTypeBadge(orphan.orphanType)}
                           {getAssistanceTypeBadge(orphan.assistanceType)}
@@ -430,7 +413,9 @@ export default function YetimPage() {
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-2">
                             <User className="h-4 w-4" />
-                            <span>{orphan.guardianName} ({orphan.guardianRelation})</span>
+                            <span>
+                              {orphan.guardianName} ({orphan.guardianRelation})
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Phone className="h-4 w-4" />
@@ -442,14 +427,17 @@ export default function YetimPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
-                            <span>Başlangıç: {new Date(orphan.startDate).toLocaleDateString('tr-TR')}</span>
+                            <span>
+                              Başlangıç: {new Date(orphan.startDate).toLocaleDateString('tr-TR')}
+                            </span>
                           </div>
                         </div>
                         {orphan.nextCheckupDate && (
                           <div className="mt-2 flex items-center gap-2 text-sm">
                             <Clock className="h-3 w-3 text-orange-500" />
                             <span className="text-orange-600">
-                              Sonraki takip: {new Date(orphan.nextCheckupDate).toLocaleDateString('tr-TR')}
+                              Sonraki takip:{' '}
+                              {new Date(orphan.nextCheckupDate).toLocaleDateString('tr-TR')}
                             </span>
                           </div>
                         )}
@@ -522,9 +510,7 @@ export default function YetimPage() {
                                 )}
                                 <div>
                                   <Label className="text-sm font-medium">Durum</Label>
-                                  <div className="mt-1">
-                                    {getStatusBadge(orphan.status)}
-                                  </div>
+                                  <div className="mt-1">{getStatusBadge(orphan.status)}</div>
                                 </div>
                                 <div>
                                   <Label className="text-sm font-medium">Vaka Yöneticisi</Label>
@@ -570,9 +556,7 @@ export default function YetimPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Yeni Yetim Yardımı</DialogTitle>
-            <DialogDescription>
-              Yeni bir yetim öğrenci yardımı oluşturun
-            </DialogDescription>
+            <DialogDescription>Yeni bir yetim öğrenci yardımı oluşturun</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -581,7 +565,9 @@ export default function YetimPage() {
                 <Input
                   id="studentName"
                   value={newOrphan.studentName}
-                  onChange={(e) => setNewOrphan(prev => ({ ...prev, studentName: e.target.value }))}
+                  onChange={(e) =>
+                    setNewOrphan((prev) => ({ ...prev, studentName: e.target.value }))
+                  }
                   placeholder="Öğrenci adı soyadı"
                 />
               </div>
@@ -589,7 +575,9 @@ export default function YetimPage() {
                 <Label htmlFor="orphanType">Yetim Türü</Label>
                 <Select
                   value={newOrphan.orphanType}
-                  onValueChange={(value) => setNewOrphan(prev => ({ ...prev, orphanType: value }))}
+                  onValueChange={(value) =>
+                    setNewOrphan((prev) => ({ ...prev, orphanType: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -603,14 +591,16 @@ export default function YetimPage() {
                 </Select>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="guardianName">Veli Adı *</Label>
                 <Input
                   id="guardianName"
                   value={newOrphan.guardianName}
-                  onChange={(e) => setNewOrphan(prev => ({ ...prev, guardianName: e.target.value }))}
+                  onChange={(e) =>
+                    setNewOrphan((prev) => ({ ...prev, guardianName: e.target.value }))
+                  }
                   placeholder="Veli adı"
                 />
               </div>
@@ -619,7 +609,9 @@ export default function YetimPage() {
                 <Input
                   id="guardianPhone"
                   value={newOrphan.guardianPhone}
-                  onChange={(e) => setNewOrphan(prev => ({ ...prev, guardianPhone: e.target.value }))}
+                  onChange={(e) =>
+                    setNewOrphan((prev) => ({ ...prev, guardianPhone: e.target.value }))
+                  }
                   placeholder="5551234567"
                 />
               </div>
@@ -631,7 +623,9 @@ export default function YetimPage() {
                 <Input
                   id="guardianRelation"
                   value={newOrphan.guardianRelation}
-                  onChange={(e) => setNewOrphan(prev => ({ ...prev, guardianRelation: e.target.value }))}
+                  onChange={(e) =>
+                    setNewOrphan((prev) => ({ ...prev, guardianRelation: e.target.value }))
+                  }
                   placeholder="Anne, baba, teyze..."
                 />
               </div>
@@ -639,7 +633,9 @@ export default function YetimPage() {
                 <Label htmlFor="assistanceType">Yardım Türü *</Label>
                 <Select
                   value={newOrphan.assistanceType}
-                  onValueChange={(value) => setNewOrphan(prev => ({ ...prev, assistanceType: value }))}
+                  onValueChange={(value) =>
+                    setNewOrphan((prev) => ({ ...prev, assistanceType: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -661,7 +657,7 @@ export default function YetimPage() {
                   id="amount"
                   type="number"
                   value={newOrphan.amount}
-                  onChange={(e) => setNewOrphan(prev => ({ ...prev, amount: e.target.value }))}
+                  onChange={(e) => setNewOrphan((prev) => ({ ...prev, amount: e.target.value }))}
                   placeholder="3000"
                 />
               </div>
@@ -670,7 +666,9 @@ export default function YetimPage() {
                 <Input
                   id="caseManager"
                   value={newOrphan.caseManager}
-                  onChange={(e) => setNewOrphan(prev => ({ ...prev, caseManager: e.target.value }))}
+                  onChange={(e) =>
+                    setNewOrphan((prev) => ({ ...prev, caseManager: e.target.value }))
+                  }
                   placeholder="admin@test.com"
                 />
               </div>
@@ -683,7 +681,7 @@ export default function YetimPage() {
                   id="startDate"
                   type="date"
                   value={newOrphan.startDate}
-                  onChange={(e) => setNewOrphan(prev => ({ ...prev, startDate: e.target.value }))}
+                  onChange={(e) => setNewOrphan((prev) => ({ ...prev, startDate: e.target.value }))}
                 />
               </div>
               <div>
@@ -692,7 +690,7 @@ export default function YetimPage() {
                   id="endDate"
                   type="date"
                   value={newOrphan.endDate}
-                  onChange={(e) => setNewOrphan(prev => ({ ...prev, endDate: e.target.value }))}
+                  onChange={(e) => setNewOrphan((prev) => ({ ...prev, endDate: e.target.value }))}
                 />
               </div>
             </div>
@@ -702,7 +700,7 @@ export default function YetimPage() {
               <Textarea
                 id="notes"
                 value={newOrphan.notes}
-                onChange={(e) => setNewOrphan(prev => ({ ...prev, notes: e.target.value }))}
+                onChange={(e) => setNewOrphan((prev) => ({ ...prev, notes: e.target.value }))}
                 placeholder="Ek bilgiler..."
                 rows={3}
               />
@@ -712,9 +710,7 @@ export default function YetimPage() {
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
               İptal
             </Button>
-            <Button onClick={handleCreateOrphan}>
-              Yardım Oluştur
-            </Button>
+            <Button onClick={handleCreateOrphan}>Yardım Oluştur</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

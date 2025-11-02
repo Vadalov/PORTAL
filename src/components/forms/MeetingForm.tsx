@@ -67,7 +67,7 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
   //   queryFn: () => api.users.getUsers({ limit: 100 }),
   // });
 
-  const users: unknown[] = []; // Empty for now
+  const users: Array<{ $id: string; name: string }> = []; // Empty for now
 
   // Form setup
   const {

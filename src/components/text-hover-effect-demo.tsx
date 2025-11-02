@@ -1,6 +1,6 @@
-"use client";
-import React from "react";
-import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+'use client';
+import React from 'react';
+import { TextHoverEffect } from '@/components/ui/text-hover-effect';
 
 export default function TextHoverEffectDemo() {
   return (
@@ -9,4 +9,3 @@ export default function TextHoverEffectDemo() {
     </div>
   );
 }
-

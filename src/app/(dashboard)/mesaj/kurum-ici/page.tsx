@@ -25,11 +25,7 @@ import {
   Mail,
 } from 'lucide-react';
 import { MessageForm } from '@/components/forms/MessageForm';
-import {
-  getStatusLabel,
-  getStatusColor,
-  getMessageTypeLabel
-} from '@/lib/validations/message';
+import { getStatusLabel, getStatusColor, getMessageTypeLabel } from '@/lib/validations/message';
 import type { MessageDocument, UserDocument } from '@/types/collections';
 
 type ActiveTab = 'inbox' | 'sent' | 'drafts';
@@ -121,7 +117,7 @@ export default function InternalMessagingPage() {
   const handleMessageClick = (message: MessageDocument) => {
     setSelectedMessage(message);
     setShowMessageDetail(true);
-    
+
     // Mark as read if it's an inbox message
     if (activeTab === 'inbox') {
       markAsReadMutation.mutate(message.$id);
@@ -136,9 +132,9 @@ export default function InternalMessagingPage() {
 
   const handleBulkDelete = () => {
     if (selectedMessages.length === 0) return;
-    
+
     if (window.confirm(`${selectedMessages.length} mesajı silmek istediğinizden emin misiniz?`)) {
-      selectedMessages.forEach(messageId => {
+      selectedMessages.forEach((messageId) => {
         deleteMessageMutation.mutate(messageId);
       });
       setSelectedMessages([]);
@@ -149,13 +145,13 @@ export default function InternalMessagingPage() {
     if (selectedMessages.length === messages.length) {
       setSelectedMessages([]);
     } else {
-      setSelectedMessages(messages.map(m => m.$id));
+      setSelectedMessages(messages.map((m) => m.$id));
     }
   };
 
   const handleMessageSelect = (messageId: string) => {
     if (selectedMessages.includes(messageId)) {
-      setSelectedMessages(selectedMessages.filter(id => id !== messageId));
+      setSelectedMessages(selectedMessages.filter((id) => id !== messageId));
     } else {
       setSelectedMessages([...selectedMessages, messageId]);
     }
@@ -198,11 +194,9 @@ export default function InternalMessagingPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Kurum İçi Mesajlar</h2>
-          <p className="text-gray-600 mt-2">
-            Ekip üyeleriyle mesajlaşın ve bildirimler alın
-          </p>
+          <p className="text-gray-600 mt-2">Ekip üyeleriyle mesajlaşın ve bildirimler alın</p>
         </div>
-        
+
         <Dialog open={showComposeModal} onOpenChange={setShowComposeModal}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -337,11 +331,7 @@ export default function InternalMessagingPage() {
                       <span className="text-sm text-blue-700">
                         {selectedMessages.length} mesaj seçildi
                       </span>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleBulkDelete}
-                      >
+                      <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
                         <Trash2 className="h-4 w-4 mr-1" />
                         Sil
                       </Button>
@@ -542,7 +532,8 @@ export default function InternalMessagingPage() {
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 <span>
-                                  Son değişiklik: {new Date(message.$updatedAt).toLocaleDateString('tr-TR')}
+                                  Son değişiklik:{' '}
+                                  {new Date(message.$updatedAt).toLocaleDateString('tr-TR')}
                                 </span>
                               </div>
                             </div>
@@ -628,14 +619,16 @@ export default function InternalMessagingPage() {
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Calendar className="h-4 w-4" />
                   <span>
-                    <strong>Tarih:</strong> {new Date(selectedMessage.$createdAt).toLocaleString('tr-TR')}
+                    <strong>Tarih:</strong>{' '}
+                    {new Date(selectedMessage.$createdAt).toLocaleString('tr-TR')}
                   </span>
                 </div>
                 {selectedMessage.sent_at && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Send className="h-4 w-4" />
                     <span>
-                      <strong>Gönderim:</strong> {new Date(selectedMessage.sent_at).toLocaleString('tr-TR')}
+                      <strong>Gönderim:</strong>{' '}
+                      {new Date(selectedMessage.sent_at).toLocaleString('tr-TR')}
                     </span>
                   </div>
                 )}

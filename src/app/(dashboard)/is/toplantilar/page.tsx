@@ -2,7 +2,17 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Calendar as CalendarIcon, List, Filter, X, Edit, Trash2, Users, MapPin } from 'lucide-react';
+import {
+  Plus,
+  Calendar as CalendarIcon,
+  List,
+  Filter,
+  X,
+  Edit,
+  Trash2,
+  Users,
+  MapPin,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -18,12 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,12 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { appwriteApi } from '@/lib/api/appwrite-api';
 import { useAuthStore } from '@/stores/authStore';
@@ -62,7 +62,9 @@ export default function MeetingsPage() {
   const [meetingTypeFilter, setMeetingTypeFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState<'invited' | 'attended' | 'informed' | 'open'>('invited');
+  const [activeTab, setActiveTab] = useState<'invited' | 'attended' | 'informed' | 'open'>(
+    'invited'
+  );
 
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -414,7 +416,9 @@ export default function MeetingsPage() {
                             <div className="flex-1 space-y-1">
                               <div className="flex items-center gap-3">
                                 <span className="text-sm text-gray-500">
-                                  {format(new Date(meeting.meeting_date), 'dd MMM yyyy HH:mm', { locale: tr })}
+                                  {format(new Date(meeting.meeting_date), 'dd MMM yyyy HH:mm', {
+                                    locale: tr,
+                                  })}
                                 </span>
                                 <h4 className="font-semibold">{meeting.title}</h4>
                                 <Badge className={getMeetingTypeColor(meeting.meeting_type)}>
@@ -490,7 +494,9 @@ export default function MeetingsPage() {
                             <div className="flex-1 space-y-1">
                               <div className="flex items-center gap-3">
                                 <span className="text-sm text-gray-500">
-                                  {format(new Date(meeting.meeting_date), 'dd MMM yyyy HH:mm', { locale: tr })}
+                                  {format(new Date(meeting.meeting_date), 'dd MMM yyyy HH:mm', {
+                                    locale: tr,
+                                  })}
                                 </span>
                                 <h4 className="font-semibold">{meeting.title}</h4>
                                 <Badge className={getMeetingTypeColor(meeting.meeting_type)}>
@@ -566,7 +572,9 @@ export default function MeetingsPage() {
                             <div className="flex-1 space-y-1">
                               <div className="flex items-center gap-3">
                                 <span className="text-sm text-gray-500">
-                                  {format(new Date(meeting.meeting_date), 'dd MMM yyyy HH:mm', { locale: tr })}
+                                  {format(new Date(meeting.meeting_date), 'dd MMM yyyy HH:mm', {
+                                    locale: tr,
+                                  })}
                                 </span>
                                 <h4 className="font-semibold">{meeting.title}</h4>
                                 <Badge className={getMeetingTypeColor(meeting.meeting_type)}>
@@ -620,7 +628,9 @@ export default function MeetingsPage() {
                             <div className="flex-1 space-y-1">
                               <div className="flex items-center gap-3">
                                 <span className="text-sm text-gray-500">
-                                  {format(new Date(meeting.meeting_date), 'dd MMM yyyy HH:mm', { locale: tr })}
+                                  {format(new Date(meeting.meeting_date), 'dd MMM yyyy HH:mm', {
+                                    locale: tr,
+                                  })}
                                 </span>
                                 <h4 className="font-semibold">{meeting.title}</h4>
                                 <Badge className={getMeetingTypeColor(meeting.meeting_type)}>
@@ -716,7 +726,7 @@ export default function MeetingsPage() {
                 participants: selectedMeeting.participants,
                 status: selectedMeeting.status,
                 agenda: selectedMeeting.agenda,
-                notes: selectedMeeting.notes
+                notes: selectedMeeting.notes,
               }}
               onSuccess={() => {
                 setSelectedMeeting(null);
@@ -733,7 +743,10 @@ export default function MeetingsPage() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!meetingToDelete} onOpenChange={(open) => !open && setMeetingToDelete(null)}>
+      <AlertDialog
+        open={!!meetingToDelete}
+        onOpenChange={(open) => !open && setMeetingToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Toplantıyı Sil</AlertDialogTitle>

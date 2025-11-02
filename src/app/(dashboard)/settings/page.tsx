@@ -15,7 +15,7 @@ export default function SettingsPage() {
       name: 'Dernek Yönetim Sistemi',
       address: '',
       phone: '',
-      email: ''
+      email: '',
     },
     email: {
       enabled: false,
@@ -23,23 +23,23 @@ export default function SettingsPage() {
       smtpPort: 587,
       smtpUser: '',
       smtpPassword: '',
-      fromEmail: ''
+      fromEmail: '',
     },
     notifications: {
       emailNotifications: true,
       pushNotifications: false,
-      smsNotifications: false
+      smsNotifications: false,
     },
     system: {
       sessionTimeout: 30,
       maxLoginAttempts: 5,
-      maintenanceMode: false
+      maintenanceMode: false,
     },
     security: {
       requireTwoFactor: false,
       passwordMinLength: 8,
-      sessionTimeout: 30
-    }
+      sessionTimeout: 30,
+    },
   });
 
   const [activeTab, setActiveTab] = useState('organization');
@@ -71,10 +71,7 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              data-testid="settings-initialize-button"
-              onClick={handleInitialize}
-            >
+            <Button data-testid="settings-initialize-button" onClick={handleInitialize}>
               Ayarları Oluştur
             </Button>
           </CardContent>
@@ -82,34 +79,19 @@ export default function SettingsPage() {
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList data-testid="settings-tabs-list">
-            <TabsTrigger 
-              data-testid="settings-tab-organization"
-              value="organization"
-            >
+            <TabsTrigger data-testid="settings-tab-organization" value="organization">
               Organizasyon
             </TabsTrigger>
-            <TabsTrigger 
-              data-testid="settings-tab-email"
-              value="email"
-            >
+            <TabsTrigger data-testid="settings-tab-email" value="email">
               E-posta
             </TabsTrigger>
-            <TabsTrigger 
-              data-testid="settings-tab-notifications"
-              value="notifications"
-            >
+            <TabsTrigger data-testid="settings-tab-notifications" value="notifications">
               Bildirimler
             </TabsTrigger>
-            <TabsTrigger 
-              data-testid="settings-tab-system"
-              value="system"
-            >
+            <TabsTrigger data-testid="settings-tab-system" value="system">
               Sistem
             </TabsTrigger>
-            <TabsTrigger 
-              data-testid="settings-tab-security"
-              value="security"
-            >
+            <TabsTrigger data-testid="settings-tab-security" value="security">
               Güvenlik
             </TabsTrigger>
           </TabsList>
@@ -118,9 +100,7 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Organizasyon Bilgileri</CardTitle>
-                <CardDescription>
-                  Dernek organizasyon bilgilerini güncelleyin
-                </CardDescription>
+                <CardDescription>Dernek organizasyon bilgilerini güncelleyin</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -130,9 +110,9 @@ export default function SettingsPage() {
                     data-testid="settings-org-name"
                     value={settings.organization.name}
                     onChange={(e) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        organization: { ...prev.organization, name: e.target.value }
+                        organization: { ...prev.organization, name: e.target.value },
                       }));
                       setHasChanges(true);
                     }}
@@ -145,9 +125,9 @@ export default function SettingsPage() {
                     data-testid="settings-org-address"
                     value={settings.organization.address}
                     onChange={(e) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        organization: { ...prev.organization, address: e.target.value }
+                        organization: { ...prev.organization, address: e.target.value },
                       }));
                       setHasChanges(true);
                     }}
@@ -160,9 +140,9 @@ export default function SettingsPage() {
                     data-testid="settings-org-phone"
                     value={settings.organization.phone}
                     onChange={(e) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        organization: { ...prev.organization, phone: e.target.value }
+                        organization: { ...prev.organization, phone: e.target.value },
                       }));
                       setHasChanges(true);
                     }}
@@ -176,9 +156,9 @@ export default function SettingsPage() {
                     type="email"
                     value={settings.organization.email}
                     onChange={(e) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        organization: { ...prev.organization, email: e.target.value }
+                        organization: { ...prev.organization, email: e.target.value },
                       }));
                       setHasChanges(true);
                     }}
@@ -192,9 +172,7 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>E-posta Ayarları</CardTitle>
-                <CardDescription>
-                  SMTP sunucu ayarlarını yapılandırın
-                </CardDescription>
+                <CardDescription>SMTP sunucu ayarlarını yapılandırın</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-2">
@@ -202,16 +180,16 @@ export default function SettingsPage() {
                     data-testid="settings-smtp-enabled"
                     checked={settings.email.enabled}
                     onCheckedChange={(checked) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        email: { ...prev.email, enabled: checked }
+                        email: { ...prev.email, enabled: checked },
                       }));
                       setHasChanges(true);
                     }}
                   />
                   <Label htmlFor="smtp-enabled">SMTP Etkin</Label>
                 </div>
-                
+
                 {settings.email.enabled && (
                   <>
                     <div>
@@ -221,9 +199,9 @@ export default function SettingsPage() {
                         data-testid="settings-smtp-host"
                         value={settings.email.smtpHost}
                         onChange={(e) => {
-                          setSettings(prev => ({
+                          setSettings((prev) => ({
                             ...prev,
-                            email: { ...prev.email, smtpHost: e.target.value }
+                            email: { ...prev.email, smtpHost: e.target.value },
                           }));
                           setHasChanges(true);
                         }}
@@ -237,9 +215,9 @@ export default function SettingsPage() {
                         type="number"
                         value={settings.email.smtpPort}
                         onChange={(e) => {
-                          setSettings(prev => ({
+                          setSettings((prev) => ({
                             ...prev,
-                            email: { ...prev.email, smtpPort: parseInt(e.target.value) }
+                            email: { ...prev.email, smtpPort: parseInt(e.target.value) },
                           }));
                           setHasChanges(true);
                         }}
@@ -252,9 +230,9 @@ export default function SettingsPage() {
                         data-testid="settings-smtp-user"
                         value={settings.email.smtpUser}
                         onChange={(e) => {
-                          setSettings(prev => ({
+                          setSettings((prev) => ({
                             ...prev,
-                            email: { ...prev.email, smtpUser: e.target.value }
+                            email: { ...prev.email, smtpUser: e.target.value },
                           }));
                           setHasChanges(true);
                         }}
@@ -268,9 +246,9 @@ export default function SettingsPage() {
                         type="password"
                         value={settings.email.smtpPassword}
                         onChange={(e) => {
-                          setSettings(prev => ({
+                          setSettings((prev) => ({
                             ...prev,
-                            email: { ...prev.email, smtpPassword: e.target.value }
+                            email: { ...prev.email, smtpPassword: e.target.value },
                           }));
                           setHasChanges(true);
                         }}
@@ -284,9 +262,9 @@ export default function SettingsPage() {
                         type="email"
                         value={settings.email.fromEmail}
                         onChange={(e) => {
-                          setSettings(prev => ({
+                          setSettings((prev) => ({
                             ...prev,
-                            email: { ...prev.email, fromEmail: e.target.value }
+                            email: { ...prev.email, fromEmail: e.target.value },
                           }));
                           setHasChanges(true);
                         }}
@@ -302,9 +280,7 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Bildirim Ayarları</CardTitle>
-                <CardDescription>
-                  Bildirim tercihlerini yapılandırın
-                </CardDescription>
+                <CardDescription>Bildirim tercihlerini yapılandırın</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center space-x-2">
@@ -312,9 +288,9 @@ export default function SettingsPage() {
                     data-testid="settings-email-notifications"
                     checked={settings.notifications.emailNotifications}
                     onCheckedChange={(checked) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        notifications: { ...prev.notifications, emailNotifications: checked }
+                        notifications: { ...prev.notifications, emailNotifications: checked },
                       }));
                       setHasChanges(true);
                     }}
@@ -326,9 +302,9 @@ export default function SettingsPage() {
                     data-testid="settings-push-notifications"
                     checked={settings.notifications.pushNotifications}
                     onCheckedChange={(checked) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        notifications: { ...prev.notifications, pushNotifications: checked }
+                        notifications: { ...prev.notifications, pushNotifications: checked },
                       }));
                       setHasChanges(true);
                     }}
@@ -340,9 +316,9 @@ export default function SettingsPage() {
                     data-testid="settings-sms-notifications"
                     checked={settings.notifications.smsNotifications}
                     onCheckedChange={(checked) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        notifications: { ...prev.notifications, smsNotifications: checked }
+                        notifications: { ...prev.notifications, smsNotifications: checked },
                       }));
                       setHasChanges(true);
                     }}
@@ -357,9 +333,7 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Sistem Ayarları</CardTitle>
-                <CardDescription>
-                  Sistem genel ayarlarını yapılandırın
-                </CardDescription>
+                <CardDescription>Sistem genel ayarlarını yapılandırın</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -372,9 +346,9 @@ export default function SettingsPage() {
                     max="1440"
                     value={settings.system.sessionTimeout}
                     onChange={(e) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        system: { ...prev.system, sessionTimeout: parseInt(e.target.value) }
+                        system: { ...prev.system, sessionTimeout: parseInt(e.target.value) },
                       }));
                       setHasChanges(true);
                     }}
@@ -390,9 +364,9 @@ export default function SettingsPage() {
                     max="10"
                     value={settings.system.maxLoginAttempts}
                     onChange={(e) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        system: { ...prev.system, maxLoginAttempts: parseInt(e.target.value) }
+                        system: { ...prev.system, maxLoginAttempts: parseInt(e.target.value) },
                       }));
                       setHasChanges(true);
                     }}
@@ -403,9 +377,9 @@ export default function SettingsPage() {
                     data-testid="settings-maintenance-mode"
                     checked={settings.system.maintenanceMode}
                     onCheckedChange={(checked) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        system: { ...prev.system, maintenanceMode: checked }
+                        system: { ...prev.system, maintenanceMode: checked },
                       }));
                       setHasChanges(true);
                     }}
@@ -430,9 +404,9 @@ export default function SettingsPage() {
                     data-testid="settings-require-two-factor"
                     checked={settings.security.requireTwoFactor}
                     onCheckedChange={(checked) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        security: { ...prev.security, requireTwoFactor: checked }
+                        security: { ...prev.security, requireTwoFactor: checked },
                       }));
                       setHasChanges(true);
                     }}
@@ -449,16 +423,18 @@ export default function SettingsPage() {
                     max="20"
                     value={settings.security.passwordMinLength}
                     onChange={(e) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        security: { ...prev.security, passwordMinLength: parseInt(e.target.value) }
+                        security: { ...prev.security, passwordMinLength: parseInt(e.target.value) },
                       }));
                       setHasChanges(true);
                     }}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="security-session-timeout">Güvenlik Oturum Zaman Aşımı (dakika)</Label>
+                  <Label htmlFor="security-session-timeout">
+                    Güvenlik Oturum Zaman Aşımı (dakika)
+                  </Label>
                   <Input
                     id="security-session-timeout"
                     data-testid="settings-security-session-timeout"
@@ -467,9 +443,9 @@ export default function SettingsPage() {
                     max="1440"
                     value={settings.security.sessionTimeout}
                     onChange={(e) => {
-                      setSettings(prev => ({
+                      setSettings((prev) => ({
                         ...prev,
-                        security: { ...prev.security, sessionTimeout: parseInt(e.target.value) }
+                        security: { ...prev.security, sessionTimeout: parseInt(e.target.value) },
                       }));
                       setHasChanges(true);
                     }}
@@ -480,11 +456,7 @@ export default function SettingsPage() {
           </TabsContent>
 
           <div className="mt-6 flex justify-end">
-            <Button
-              data-testid="settings-save-button"
-              onClick={handleSave}
-              disabled={!hasChanges}
-            >
+            <Button data-testid="settings-save-button" onClick={handleSave} disabled={!hasChanges}>
               Kaydet
             </Button>
           </div>

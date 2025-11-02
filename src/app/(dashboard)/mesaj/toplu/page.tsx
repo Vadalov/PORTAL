@@ -5,7 +5,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
@@ -28,11 +34,11 @@ import {
 import { MessageForm } from '@/components/forms/MessageForm';
 import { RecipientSelector } from '@/components/messages/RecipientSelector';
 import { MessageTemplateSelector } from '@/components/messages/MessageTemplateSelector';
-import { 
+import {
   getMessageTypeLabel,
   estimateSmsCost,
   getSmsMessageCount,
-  formatPhoneNumber
+  formatPhoneNumber,
 } from '@/lib/validations/message';
 import type { MessageDocument } from '@/types/collections';
 
@@ -60,7 +66,7 @@ export default function BulkMessagingPage() {
   const [sendingResults, setSendingResults] = useState<SendingResult>({
     success: 0,
     failed: 0,
-    errors: []
+    errors: [],
   });
   const [isSending, setIsSending] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -80,7 +86,7 @@ export default function BulkMessagingPage() {
     totalSms: 0,
     totalEmails: 0,
     failedMessages: 0,
-    draftMessages: 0
+    draftMessages: 0,
   };
 
   // Fetch bulk message history
@@ -165,7 +171,7 @@ export default function BulkMessagingPage() {
       };
 
       const result = await createMessageMutation.mutateAsync(bulkMessageData);
-      
+
       if (result.data) {
         // Simulate batch sending (in real implementation, this would be handled by backend)
         const batchSize = 50;
@@ -180,15 +186,15 @@ export default function BulkMessagingPage() {
           const batch = selectedRecipients.slice(batchStart, batchEnd);
 
           // Simulate sending delay
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
 
           // Simulate some failures (10% failure rate)
-          batch.forEach(recipient => {
+          batch.forEach((recipient) => {
             if (Math.random() < 0.1) {
               failedCount++;
               errors.push({
                 recipient,
-                error: 'Alıcı bulunamadı'
+                error: 'Alıcı bulunamadı',
               });
             } else {
               successCount++;
@@ -199,7 +205,7 @@ export default function BulkMessagingPage() {
           setSendingResults({
             success: successCount,
             failed: failedCount,
-            errors
+            errors,
           });
         }
 
@@ -207,7 +213,9 @@ export default function BulkMessagingPage() {
         // await sendMessageMutation.mutateAsync(result.data.$id);
         await sendMessageMutation.mutateAsync('dummy-id');
 
-        toast.success(`Toplu mesaj gönderildi! ${successCount} başarılı, ${failedCount} başarısız.`);
+        toast.success(
+          `Toplu mesaj gönderildi! ${successCount} başarılı, ${failedCount} başarısız.`
+        );
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen hata';
@@ -228,7 +236,7 @@ export default function BulkMessagingPage() {
   };
 
   const handleRetryFailed = () => {
-    const failedRecipients = sendingResults.errors.map(e => e.recipient);
+    const failedRecipients = sendingResults.errors.map((e) => e.recipient);
     setSelectedRecipients(failedRecipients);
     setStep('preview');
     setConfirmed(false);
@@ -243,7 +251,7 @@ export default function BulkMessagingPage() {
       errors: sendingResults.errors,
       timestamp: new Date().toISOString(),
       content: messageData.content,
-      subject: messageData.subject
+      subject: messageData.subject,
     };
 
     const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
@@ -257,25 +265,36 @@ export default function BulkMessagingPage() {
 
   const getStepTitle = () => {
     switch (step) {
-      case 'compose': return 'Mesaj Oluştur';
-      case 'recipients': return 'Alıcı Seçimi';
-      case 'preview': return 'Önizleme ve Onay';
-      case 'sending': return 'Gönderiliyor';
-      default: return '';
+      case 'compose':
+        return 'Mesaj Oluştur';
+      case 'recipients':
+        return 'Alıcı Seçimi';
+      case 'preview':
+        return 'Önizleme ve Onay';
+      case 'sending':
+        return 'Gönderiliyor';
+      default:
+        return '';
     }
   };
 
   const getStepDescription = () => {
     switch (step) {
-      case 'compose': return 'Mesajınızı yazın ve şablon seçin';
-      case 'recipients': return 'Mesajı göndereceğiniz alıcıları seçin';
-      case 'preview': return 'Mesajı kontrol edin ve gönderimi onaylayın';
-      case 'sending': return 'Mesajlar gönderiliyor...';
-      default: return '';
+      case 'compose':
+        return 'Mesajınızı yazın ve şablon seçin';
+      case 'recipients':
+        return 'Mesajı göndereceğiniz alıcıları seçin';
+      case 'preview':
+        return 'Mesajı kontrol edin ve gönderimi onaylayın';
+      case 'sending':
+        return 'Mesajlar gönderiliyor...';
+      default:
+        return '';
     }
   };
 
-  const estimatedCost = messageType === 'sms' ? estimateSmsCost(selectedRecipients.length, messageData.content) : 0;
+  const estimatedCost =
+    messageType === 'sms' ? estimateSmsCost(selectedRecipients.length, messageData.content) : 0;
   const smsMessageCount = messageType === 'sms' ? getSmsMessageCount(messageData.content) : 1;
 
   return (
@@ -284,11 +303,9 @@ export default function BulkMessagingPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Toplu Mesaj Gönderimi</h2>
-          <p className="text-gray-600 mt-2">
-            SMS veya E-posta ile toplu mesaj gönderin
-          </p>
+          <p className="text-gray-600 mt-2">SMS veya E-posta ile toplu mesaj gönderin</p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Dialog open={showHistoryModal} onOpenChange={setShowHistoryModal}>
             <DialogTrigger asChild>
@@ -413,13 +430,31 @@ export default function BulkMessagingPage() {
           {/* Progress Indicator */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Adım {step === 'compose' ? '1' : step === 'recipients' ? '2' : step === 'preview' ? '3' : '4'} / 4</span>
               <span className="text-sm text-gray-600">
-                {step === 'compose' ? '25%' : step === 'recipients' ? '50%' : step === 'preview' ? '75%' : '100%'}
+                Adım{' '}
+                {step === 'compose'
+                  ? '1'
+                  : step === 'recipients'
+                    ? '2'
+                    : step === 'preview'
+                      ? '3'
+                      : '4'}{' '}
+                / 4
+              </span>
+              <span className="text-sm text-gray-600">
+                {step === 'compose'
+                  ? '25%'
+                  : step === 'recipients'
+                    ? '50%'
+                    : step === 'preview'
+                      ? '75%'
+                      : '100%'}
               </span>
             </div>
-            <Progress 
-              value={step === 'compose' ? 25 : step === 'recipients' ? 50 : step === 'preview' ? 75 : 100} 
+            <Progress
+              value={
+                step === 'compose' ? 25 : step === 'recipients' ? 50 : step === 'preview' ? 75 : 100
+              }
               className="h-2"
             />
           </div>
@@ -431,10 +466,10 @@ export default function BulkMessagingPage() {
                 <div className="lg:col-span-2">
                   <MessageForm
                     defaultMessageType={messageType}
-                    initialData={{ 
-                      message_type: messageType, 
-                      subject: messageData.subject, 
-                      content: messageData.content 
+                    initialData={{
+                      message_type: messageType,
+                      subject: messageData.subject,
+                      content: messageData.content,
                     }}
                     onSuccess={() => {
                       // Update message data state when form is saved
@@ -453,7 +488,7 @@ export default function BulkMessagingPage() {
                     onSelect={(template) => {
                       setMessageData({
                         subject: template.subject,
-                        content: template.content
+                        content: template.content,
                       });
                     }}
                   />
@@ -484,18 +519,22 @@ export default function BulkMessagingPage() {
                         <div>
                           <Label className="text-sm text-gray-600">Tür</Label>
                           <div className="flex items-center gap-2 mt-1">
-                            {messageType === 'sms' ? <Phone className="h-4 w-4" /> : <Mail className="h-4 w-4" />}
+                            {messageType === 'sms' ? (
+                              <Phone className="h-4 w-4" />
+                            ) : (
+                              <Mail className="h-4 w-4" />
+                            )}
                             <span>{getMessageTypeLabel(messageType)}</span>
                           </div>
                         </div>
-                        
+
                         {messageData.subject && (
                           <div>
                             <Label className="text-sm text-gray-600">Konu</Label>
                             <p className="mt-1 font-medium">{messageData.subject}</p>
                           </div>
                         )}
-                        
+
                         <div>
                           <Label className="text-sm text-gray-600">İçerik</Label>
                           <div className="mt-1 bg-gray-50 p-3 rounded text-sm">
@@ -516,7 +555,7 @@ export default function BulkMessagingPage() {
                           <span className="text-sm text-gray-600">Alıcı Sayısı</span>
                           <span className="font-semibold">{selectedRecipients.length}</span>
                         </div>
-                        
+
                         {messageType === 'sms' && (
                           <>
                             <div className="flex items-center justify-between">
@@ -531,7 +570,7 @@ export default function BulkMessagingPage() {
                             </div>
                           </>
                         )}
-                        
+
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-gray-600">Tahmini Süre</span>
                           <span className="font-semibold">
@@ -561,16 +600,16 @@ export default function BulkMessagingPage() {
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Alıcı Listesi</h3>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPreview(!showPreview)}
-                  >
-                    {showPreview ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
+                  <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
+                    {showPreview ? (
+                      <EyeOff className="h-4 w-4 mr-1" />
+                    ) : (
+                      <Eye className="h-4 w-4 mr-1" />
+                    )}
                     {showPreview ? 'Gizle' : 'Göster'}
                   </Button>
                 </div>
-                
+
                 {showPreview && (
                   <Card>
                     <CardContent className="pt-4">
@@ -596,11 +635,10 @@ export default function BulkMessagingPage() {
                 <div className="mb-4">
                   <Progress value={sendingProgress} className="h-3" />
                 </div>
-                <p className="text-lg font-semibold">
-                  {sendingProgress}% tamamlandı
-                </p>
+                <p className="text-lg font-semibold">{sendingProgress}% tamamlandı</p>
                 <p className="text-sm text-gray-600">
-                  {sendingResults.success + sendingResults.failed} / {selectedRecipients.length} gönderildi
+                  {sendingResults.success + sendingResults.failed} / {selectedRecipients.length}{' '}
+                  gönderildi
                 </p>
               </div>
 
@@ -623,9 +661,7 @@ export default function BulkMessagingPage() {
                       <XCircle className="h-5 w-5 text-red-600" />
                       <span className="font-semibold">Başarısız</span>
                     </div>
-                    <p className="text-2xl font-bold text-red-600 mt-2">
-                      {sendingResults.failed}
-                    </p>
+                    <p className="text-2xl font-bold text-red-600 mt-2">{sendingResults.failed}</p>
                   </CardContent>
                 </Card>
               </div>
@@ -639,7 +675,11 @@ export default function BulkMessagingPage() {
                     <div className="space-y-2 max-h-40 overflow-y-auto">
                       {sendingResults.errors.map((error, index) => (
                         <div key={index} className="flex items-center justify-between text-sm">
-                          <span>{messageType === 'sms' ? formatPhoneNumber(error.recipient) : error.recipient}</span>
+                          <span>
+                            {messageType === 'sms'
+                              ? formatPhoneNumber(error.recipient)
+                              : error.recipient}
+                          </span>
                           <span className="text-red-600">{error.error}</span>
                         </div>
                       ))}
@@ -670,11 +710,7 @@ export default function BulkMessagingPage() {
           {/* Navigation Buttons */}
           {step !== 'sending' && (
             <div className="flex justify-between pt-6">
-              <Button
-                variant="outline"
-                onClick={handlePrevStep}
-                disabled={step === 'compose'}
-              >
+              <Button variant="outline" onClick={handlePrevStep} disabled={step === 'compose'}>
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 Geri
               </Button>
@@ -725,21 +761,13 @@ function BulkMessageHistory({ messages }: { messages: MessageDocument[] }) {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold">
-                        {message.subject || 'Konusuz Mesaj'}
-                      </h3>
-                      <Badge variant="outline">
-                        {getMessageTypeLabel(message.message_type)}
-                      </Badge>
+                      <h3 className="font-semibold">{message.subject || 'Konusuz Mesaj'}</h3>
+                      <Badge variant="outline">{getMessageTypeLabel(message.message_type)}</Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                      {message.content}
-                    </p>
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{message.content}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span>{message.recipients.length} alıcı</span>
-                      <span>
-                        {new Date(message.$createdAt).toLocaleDateString('tr-TR')}
-                      </span>
+                      <span>{new Date(message.$createdAt).toLocaleDateString('tr-TR')}</span>
                     </div>
                   </div>
                 </div>

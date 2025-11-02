@@ -62,17 +62,11 @@ export const meetingSchema = z
       .min(3, 'Başlık en az 3 karakter olmalıdır')
       .max(200, 'Başlık en fazla 200 karakter olabilir'),
 
-    description: z
-      .string()
-      .max(2000, 'Açıklama en fazla 2000 karakter olabilir')
-      .optional(),
+    description: z.string().max(2000, 'Açıklama en fazla 2000 karakter olabilir').optional(),
 
     meeting_date: futureWithBufferSchema,
 
-    location: z
-      .string()
-      .max(200, 'Konum en fazla 200 karakter olabilir')
-      .optional(),
+    location: z.string().max(200, 'Konum en fazla 200 karakter olabilir').optional(),
 
     organizer: z.string().min(1, 'Düzenleyen gereklidir'),
 
@@ -84,15 +78,9 @@ export const meetingSchema = z
       message: 'Toplantı türü seçilmelidir',
     }),
 
-    agenda: z
-      .string()
-      .max(2000, 'Gündem en fazla 2000 karakter olabilir')
-      .optional(),
+    agenda: z.string().max(2000, 'Gündem en fazla 2000 karakter olabilir').optional(),
 
-    notes: z
-      .string()
-      .max(2000, 'Notlar en fazla 2000 karakter olabilir')
-      .optional(),
+    notes: z.string().max(2000, 'Notlar en fazla 2000 karakter olabilir').optional(),
   })
   .refine(
     (data) => {
@@ -115,17 +103,11 @@ export const meetingEditSchema = z
       .min(3, 'Başlık en az 3 karakter olmalıdır')
       .max(200, 'Başlık en fazla 200 karakter olabilir'),
 
-    description: z
-      .string()
-      .max(2000, 'Açıklama en fazla 2000 karakter olabilir')
-      .optional(),
+    description: z.string().max(2000, 'Açıklama en fazla 2000 karakter olabilir').optional(),
 
     meeting_date: z.string(), // Allow any date for editing
 
-    location: z
-      .string()
-      .max(200, 'Konum en fazla 200 karakter olabilir')
-      .optional(),
+    location: z.string().max(200, 'Konum en fazla 200 karakter olabilir').optional(),
 
     organizer: z.string().min(1, 'Düzenleyen gereklidir'),
 
@@ -137,15 +119,9 @@ export const meetingEditSchema = z
       message: 'Toplantı türü seçilmelidir',
     }),
 
-    agenda: z
-      .string()
-      .max(2000, 'Gündem en fazla 2000 karakter olabilir')
-      .optional(),
+    agenda: z.string().max(2000, 'Gündem en fazla 2000 karakter olabilir').optional(),
 
-    notes: z
-      .string()
-      .max(2000, 'Notlar en fazla 2000 karakter olabilir')
-      .optional(),
+    notes: z.string().max(2000, 'Notlar en fazla 2000 karakter olabilir').optional(),
   })
   .refine(
     (data) => {

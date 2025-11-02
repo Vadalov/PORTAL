@@ -19,26 +19,26 @@ const testUsers: TestUser[] = [
     email: 'admin@test.com',
     password: 'admin123',
     name: 'Admin User',
-    role: UserRole.ADMIN
+    role: UserRole.ADMIN,
   },
   {
     email: 'manager@test.com',
     password: 'manager123',
     name: 'Manager User',
-    role: UserRole.MANAGER
+    role: UserRole.MANAGER,
   },
   {
     email: 'member@test.com',
     password: 'member123',
     name: 'Member User',
-    role: UserRole.MEMBER
+    role: UserRole.MEMBER,
   },
   {
     email: 'viewer@test.com',
     password: 'viewer123',
     name: 'Viewer User',
-    role: UserRole.VIEWER
-  }
+    role: UserRole.VIEWER,
+  },
 ];
 
 export async function createTestUsers() {
@@ -59,7 +59,6 @@ export async function createTestUsers() {
       await serverUsers.updateLabels(newUser.$id, [user.role.toLowerCase()]);
 
       console.log(`✅ Created user: ${user.name} (${user.role})`);
-
     } catch (error: unknown) {
       // Check if it's a duplicate user error
       const err = error as { code?: number; message?: string };

@@ -7,7 +7,7 @@ import { tr } from 'date-fns/locale';
 export function formatCurrency(amount: number, currency: string = 'TRY'): string {
   return new Intl.NumberFormat('tr-TR', {
     style: 'currency',
-    currency
+    currency,
   }).format(amount);
 }
 
@@ -32,4 +32,3 @@ export function formatDateShort(date: Date | string): string {
 export function formatDateLong(date: Date | string): string {
   return formatDate(date, 'dd MMMM yyyy');
 }
-

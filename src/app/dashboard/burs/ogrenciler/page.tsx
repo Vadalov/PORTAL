@@ -2,17 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import {
-  getStudents,
-  getStudent,
-  createStudent
-} from '@/lib/api/mock-api';
-import {
-  Student,
-  StudentStatus,
-  EducationLevel,
-  OrphanStatus
-} from '@/types/scholarship';
+import { getStudents, getStudent, createStudent } from '@/lib/api/mock-api';
+import { Student, StudentStatus, EducationLevel, OrphanStatus } from '@/types/scholarship';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,12 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  FileText
-} from 'lucide-react';
+import { Plus, Search, Filter, FileText } from 'lucide-react';
 import { StudentCard } from '@/components/scholarships/StudentCard';
 import { SimplePagination } from '@/components/ui/pagination';
 
@@ -94,15 +80,16 @@ export default function OgrencilerPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       const result = await getStudents({
         search: searchTerm,
-        status: filters.status as StudentStatus || undefined,
-        educationLevel: filters.educationLevel as EducationLevel || undefined,
-        isOrphan: filters.isOrphan === 'true' ? true : filters.isOrphan === 'false' ? false : undefined,
+        status: (filters.status as StudentStatus) || undefined,
+        educationLevel: (filters.educationLevel as EducationLevel) || undefined,
+        isOrphan:
+          filters.isOrphan === 'true' ? true : filters.isOrphan === 'false' ? false : undefined,
         city: filters.city || undefined,
         page: currentPage,
-        limit: itemsPerPage
+        limit: itemsPerPage,
       });
 
       if (result.success) {
@@ -116,7 +103,6 @@ export default function OgrencilerPage() {
       setLoading(false);
     }
   };
-
 
   const handleCreateStudent = async () => {
     try {
@@ -197,7 +183,7 @@ export default function OgrencilerPage() {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
     setCurrentPage(1);
   };
 
@@ -209,9 +195,7 @@ export default function OgrencilerPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Öğrenciler</h1>
-          <p className="text-muted-foreground">
-            Öğrenci bilgilerini yönetin ve düzenleyin
-          </p>
+          <p className="text-muted-foreground">Öğrenci bilgilerini yönetin ve düzenleyin</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -306,9 +290,7 @@ export default function OgrencilerPage() {
       <Card>
         <CardHeader>
           <CardTitle>Öğrenciler ({totalCount})</CardTitle>
-          <CardDescription>
-            Toplam {totalCount} öğrenci bulundu
-          </CardDescription>
+          <CardDescription>Toplam {totalCount} öğrenci bulundu</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -319,9 +301,7 @@ export default function OgrencilerPage() {
             <div className="text-center py-8">
               <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-semibold">Öğrenci bulunamadı</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Yeni bir öğrenci kaydı oluşturun
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">Yeni bir öğrenci kaydı oluşturun</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -355,9 +335,7 @@ export default function OgrencilerPage() {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Yeni Öğrenci</DialogTitle>
-            <DialogDescription>
-              Yeni bir öğrenci kaydı oluşturun
-            </DialogDescription>
+            <DialogDescription>Yeni bir öğrenci kaydı oluşturun</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {/* Kişisel Bilgiler */}
@@ -369,7 +347,9 @@ export default function OgrencilerPage() {
                   <Input
                     id="firstName"
                     value={newStudent.firstName}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, firstName: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, firstName: e.target.value }))
+                    }
                     placeholder="Ad"
                   />
                 </div>
@@ -378,7 +358,9 @@ export default function OgrencilerPage() {
                   <Input
                     id="lastName"
                     value={newStudent.lastName}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, lastName: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, lastName: e.target.value }))
+                    }
                     placeholder="Soyad"
                   />
                 </div>
@@ -387,7 +369,9 @@ export default function OgrencilerPage() {
                   <Input
                     id="nationalId"
                     value={newStudent.nationalId}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, nationalId: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, nationalId: e.target.value }))
+                    }
                     placeholder="12345678901"
                   />
                 </div>
@@ -397,14 +381,18 @@ export default function OgrencilerPage() {
                     id="birthDate"
                     type="date"
                     value={newStudent.birthDate}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, birthDate: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, birthDate: e.target.value }))
+                    }
                   />
                 </div>
                 <div>
                   <Label htmlFor="gender">Cinsiyet</Label>
                   <Select
                     value={newStudent.gender}
-                    onValueChange={(value) => setNewStudent(prev => ({ ...prev, gender: value as 'MALE' | 'FEMALE' }))}
+                    onValueChange={(value) =>
+                      setNewStudent((prev) => ({ ...prev, gender: value as 'MALE' | 'FEMALE' }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -421,7 +409,7 @@ export default function OgrencilerPage() {
                     id="email"
                     type="email"
                     value={newStudent.email}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, email: e.target.value }))}
+                    onChange={(e) => setNewStudent((prev) => ({ ...prev, email: e.target.value }))}
                     placeholder="email@example.com"
                   />
                 </div>
@@ -430,7 +418,7 @@ export default function OgrencilerPage() {
                   <Input
                     id="phone"
                     value={newStudent.phone}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) => setNewStudent((prev) => ({ ...prev, phone: e.target.value }))}
                     placeholder="5551234567"
                   />
                 </div>
@@ -439,7 +427,7 @@ export default function OgrencilerPage() {
                   <Input
                     id="city"
                     value={newStudent.city}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, city: e.target.value }))}
+                    onChange={(e) => setNewStudent((prev) => ({ ...prev, city: e.target.value }))}
                     placeholder="İstanbul"
                   />
                 </div>
@@ -449,7 +437,7 @@ export default function OgrencilerPage() {
                 <Textarea
                   id="address"
                   value={newStudent.address}
-                  onChange={(e) => setNewStudent(prev => ({ ...prev, address: e.target.value }))}
+                  onChange={(e) => setNewStudent((prev) => ({ ...prev, address: e.target.value }))}
                   placeholder="Adres bilgisi..."
                   rows={2}
                 />
@@ -464,7 +452,12 @@ export default function OgrencilerPage() {
                   <Label htmlFor="educationLevel">Eğitim Seviyesi *</Label>
                   <Select
                     value={newStudent.educationLevel}
-                    onValueChange={(value) => setNewStudent(prev => ({ ...prev, educationLevel: value as EducationLevel }))}
+                    onValueChange={(value) =>
+                      setNewStudent((prev) => ({
+                        ...prev,
+                        educationLevel: value as EducationLevel,
+                      }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -485,7 +478,9 @@ export default function OgrencilerPage() {
                   <Input
                     id="institution"
                     value={newStudent.institution}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, institution: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, institution: e.target.value }))
+                    }
                     placeholder="Üniversite/Kurum adı"
                   />
                 </div>
@@ -494,7 +489,9 @@ export default function OgrencilerPage() {
                   <Input
                     id="department"
                     value={newStudent.department}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, department: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, department: e.target.value }))
+                    }
                     placeholder="Bölüm adı"
                   />
                 </div>
@@ -503,7 +500,7 @@ export default function OgrencilerPage() {
                   <Input
                     id="grade"
                     value={newStudent.grade}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, grade: e.target.value }))}
+                    onChange={(e) => setNewStudent((prev) => ({ ...prev, grade: e.target.value }))}
                     placeholder="1. sınıf, 2. sınıf..."
                   />
                 </div>
@@ -516,7 +513,7 @@ export default function OgrencilerPage() {
                     min="0"
                     max="4"
                     value={newStudent.gpa}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, gpa: e.target.value }))}
+                    onChange={(e) => setNewStudent((prev) => ({ ...prev, gpa: e.target.value }))}
                     placeholder="3.50"
                   />
                 </div>
@@ -525,7 +522,9 @@ export default function OgrencilerPage() {
                   <Input
                     id="academicYear"
                     value={newStudent.academicYear}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, academicYear: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, academicYear: e.target.value }))
+                    }
                     placeholder="2024-2025"
                   />
                 </div>
@@ -542,7 +541,9 @@ export default function OgrencilerPage() {
                     id="familyIncome"
                     type="number"
                     value={newStudent.familyIncome}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, familyIncome: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, familyIncome: e.target.value }))
+                    }
                     placeholder="5000"
                   />
                 </div>
@@ -553,7 +554,9 @@ export default function OgrencilerPage() {
                     type="number"
                     min="1"
                     value={newStudent.familySize}
-                    onChange={(e) => setNewStudent(prev => ({ ...prev, familySize: e.target.value }))}
+                    onChange={(e) =>
+                      setNewStudent((prev) => ({ ...prev, familySize: e.target.value }))
+                    }
                     placeholder="4"
                   />
                 </div>
@@ -563,10 +566,15 @@ export default function OgrencilerPage() {
                   type="checkbox"
                   id="isOrphan"
                   checked={newStudent.isOrphan}
-                  onChange={(e) => setNewStudent(prev => ({ ...prev, isOrphan: e.target.checked }))}
+                  onChange={(e) =>
+                    setNewStudent((prev) => ({ ...prev, isOrphan: e.target.checked }))
+                  }
                   className="rounded border-gray-300"
                 />
-                <Label htmlFor="isOrphan" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <Label
+                  htmlFor="isOrphan"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   Yetim öğrenci
                 </Label>
               </div>
@@ -577,7 +585,9 @@ export default function OgrencilerPage() {
                     <Input
                       id="guardianName"
                       value={newStudent.guardianName}
-                      onChange={(e) => setNewStudent(prev => ({ ...prev, guardianName: e.target.value }))}
+                      onChange={(e) =>
+                        setNewStudent((prev) => ({ ...prev, guardianName: e.target.value }))
+                      }
                       placeholder="Veli adı"
                     />
                   </div>
@@ -586,7 +596,9 @@ export default function OgrencilerPage() {
                     <Input
                       id="guardianPhone"
                       value={newStudent.guardianPhone}
-                      onChange={(e) => setNewStudent(prev => ({ ...prev, guardianPhone: e.target.value }))}
+                      onChange={(e) =>
+                        setNewStudent((prev) => ({ ...prev, guardianPhone: e.target.value }))
+                      }
                       placeholder="5551234567"
                     />
                   </div>
@@ -595,7 +607,9 @@ export default function OgrencilerPage() {
                     <Input
                       id="guardianRelation"
                       value={newStudent.guardianRelation}
-                      onChange={(e) => setNewStudent(prev => ({ ...prev, guardianRelation: e.target.value }))}
+                      onChange={(e) =>
+                        setNewStudent((prev) => ({ ...prev, guardianRelation: e.target.value }))
+                      }
                       placeholder="Anne, baba..."
                     />
                   </div>
@@ -609,7 +623,7 @@ export default function OgrencilerPage() {
               <Textarea
                 id="notes"
                 value={newStudent.notes}
-                onChange={(e) => setNewStudent(prev => ({ ...prev, notes: e.target.value }))}
+                onChange={(e) => setNewStudent((prev) => ({ ...prev, notes: e.target.value }))}
                 placeholder="Ek bilgiler..."
                 rows={3}
               />
@@ -619,9 +633,7 @@ export default function OgrencilerPage() {
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
               İptal
             </Button>
-            <Button onClick={handleCreateStudent}>
-              Öğrenci Oluştur
-            </Button>
+            <Button onClick={handleCreateStudent}>Öğrenci Oluştur</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

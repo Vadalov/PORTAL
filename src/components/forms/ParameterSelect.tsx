@@ -2,7 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { parametersApi } from '@/lib/api';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import type { ParameterCategory } from '@/types/collections';
 
@@ -25,7 +31,7 @@ export function ParameterSelect({
   required = false,
   placeholder,
   error,
-  disabled = false
+  disabled = false,
 }: ParameterSelectProps) {
   const { data, isLoading } = useQuery({
     queryKey: ['parameters', category],
@@ -40,11 +46,7 @@ export function ParameterSelect({
       <Label htmlFor={category}>
         {label} {required && <span className="text-red-600">*</span>}
       </Label>
-      <Select 
-        value={value} 
-        onValueChange={onChange}
-        disabled={disabled || isLoading}
-      >
+      <Select value={value} onValueChange={onChange} disabled={disabled || isLoading}>
         <SelectTrigger id={category}>
           <SelectValue placeholder={placeholder || `${label} seçin`} />
         </SelectTrigger>
@@ -66,10 +68,7 @@ export function ParameterSelect({
           )}
         </SelectContent>
       </Select>
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   );
 }
-

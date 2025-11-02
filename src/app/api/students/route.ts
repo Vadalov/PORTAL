@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  getStudents,
-  getStudent,
-  createStudent
-} from '@/lib/api/mock-api';
+import { getStudents, getStudent, createStudent } from '@/lib/api/mock-api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import {
-  StudentStatus,
-  EducationLevel
-} from '@/types/scholarship';
+import { StudentStatus, EducationLevel } from '@/types/scholarship';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -53,10 +46,14 @@ function parseQueryParams(request: NextRequest) {
 
   return {
     search: searchParams.get('search') || undefined,
-    status: searchParams.get('status') as StudentStatus || undefined,
-    educationLevel: searchParams.get('educationLevel') as EducationLevel || undefined,
-    isOrphan: searchParams.get('isOrphan') === 'true' ? true : 
-              searchParams.get('isOrphan') === 'false' ? false : undefined,
+    status: (searchParams.get('status') as StudentStatus) || undefined,
+    educationLevel: (searchParams.get('educationLevel') as EducationLevel) || undefined,
+    isOrphan:
+      searchParams.get('isOrphan') === 'true'
+        ? true
+        : searchParams.get('isOrphan') === 'false'
+          ? false
+          : undefined,
     city: searchParams.get('city') || undefined,
     page: parseInt(searchParams.get('page') || '1'),
     limit: Math.min(parseInt(searchParams.get('limit') || '20'), 100),
@@ -89,17 +86,17 @@ function validateStudentData(data: StudentData): { isValid: boolean; errors: str
 
   // Family income validation
   if (data.familyIncome !== undefined && data.familyIncome < 0) {
-    errors.push('Aile geliri 0\'dan küçük olamaz');
+    errors.push("Aile geliri 0'dan küçük olamaz");
   }
 
   // Family size validation
   if (data.familySize !== undefined && data.familySize <= 0) {
-    errors.push('Aile büyüklüğü 0\'dan büyük olmalıdır');
+    errors.push("Aile büyüklüğü 0'dan büyük olmalıdır");
   }
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 }
 
@@ -124,7 +121,7 @@ async function getStudentsHandler(request: NextRequest) {
       success: true,
       data: result.data?.data || [],
       total: result.data?.total || 0,
-      message: `${result.data?.total || 0} öğrenci bulundu`
+      message: `${result.data?.total || 0} öğrenci bulundu`,
     };
 
     return NextResponse.json(response);
@@ -148,20 +145,17 @@ async function createStudentHandler(request: NextRequest) {
 
     // Validate input
     if (!body) {
-      return NextResponse.json(
-        { success: false, error: 'Veri bulunamadı' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Veri bulunamadı' }, { status: 400 });
     }
 
     // Validate student data
     const validation = validateStudentData(body);
     if (!validation.isValid) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Doğrulama hatası', 
-          details: validation.errors 
+        {
+          success: false,
+          error: 'Doğrulama hatası',
+          details: validation.errors,
         },
         { status: 400 }
       );
@@ -174,7 +168,7 @@ async function createStudentHandler(request: NextRequest) {
       educationLevel: body.educationLevel || EducationLevel.BACHELOR,
       academicYear: body.academicYear || '2024-2025',
       status: body.status || StudentStatus.ACTIVE,
-      isOrphan: body.isOrphan || false
+      isOrphan: body.isOrphan || false,
     };
 
     const result = await createStudent(studentData);

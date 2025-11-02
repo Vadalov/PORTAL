@@ -13,14 +13,14 @@ const PASSWORD = 'vadalov95';
 async function testLogin() {
   console.log('🔐 Login Test\n');
   console.log('='.repeat(60));
-  
+
   try {
     // CSRF Token al
     console.log('1. CSRF Token alınıyor...');
     const csrfRes = await fetch(`${BASE_URL}/api/csrf`);
     const csrfData = await csrfRes.json();
-    console.log('✅ CSRF Token:', `${csrfData.token?.substring(0, 20)  }...`);
-    
+    console.log('✅ CSRF Token:', `${csrfData.token?.substring(0, 20)}...`);
+
     // Login yap
     console.log('\n2. Login yapılıyor...');
     const loginRes = await fetch(`${BASE_URL}/api/auth/login`, {
@@ -31,9 +31,9 @@ async function testLogin() {
       },
       body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
     });
-    
+
     const result = await loginRes.json();
-    
+
     if (result.success) {
       console.log('✅ Login BAŞARILI!');
       console.log('\n📊 Kullanıcı Bilgileri:');
@@ -52,4 +52,3 @@ async function testLogin() {
 }
 
 testLogin();
-

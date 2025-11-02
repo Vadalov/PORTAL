@@ -1,11 +1,11 @@
 /**
  * SDK Usage Validation Guard
  * Prevents common mistakes of using client SDK on server or vice versa
- * 
+ *
  * This utility provides runtime checks to ensure Appwrite SDKs are used
  * in the correct environment (browser vs server). It helps catch development
  * errors early and provides warnings for production debugging.
- * 
+ *
  * @packageDocumentation
  */
 
@@ -49,11 +49,11 @@ class SDKGuard {
       const violation: SDKViolation = {
         type: 'client',
         message,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       this.violations.push(violation);
 
-      console.warn(`⚠️ ${  message}`);
+      console.warn(`⚠️ ${message}`);
 
       if (strictMode) {
         throw new Error(message);
@@ -80,11 +80,11 @@ class SDKGuard {
       const violation: SDKViolation = {
         type: 'server',
         message,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       this.violations.push(violation);
 
-      console.warn(`⚠️ ${  message}`);
+      console.warn(`⚠️ ${message}`);
 
       if (strictMode) {
         throw new Error(message);
@@ -111,20 +111,20 @@ class SDKGuard {
         type: 'client',
         location: importPath,
         message,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       this.violations.push(violation);
-      console.warn(`⚠️ ${  message}`);
+      console.warn(`⚠️ ${message}`);
     } else if (sdkType === 'server' && isBrowser) {
       const message = `Server SDK imported in browser${importPath ? ` from ${importPath}` : ''}. Use client SDK instead.`;
       const violation: SDKViolation = {
         type: 'server',
         location: importPath,
         message,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       this.violations.push(violation);
-      console.warn(`⚠️ ${  message}`);
+      console.warn(`⚠️ ${message}`);
     }
   }
 
@@ -133,7 +133,7 @@ class SDKGuard {
    * @returns Report with violations and suggestions
    */
   getSDKUsageReport(): SDKUsageReport {
-    const suggestions = this.violations.map(violation =>
+    const suggestions = this.violations.map((violation) =>
       violation.type === 'client'
         ? 'Use @/lib/appwrite/server instead of client SDK'
         : 'Use @/lib/appwrite/client instead of server SDK'
@@ -142,7 +142,7 @@ class SDKGuard {
     return {
       violations: this.violations,
       count: this.violations.length,
-      suggestions
+      suggestions,
     };
   }
 
@@ -160,7 +160,8 @@ const sdkGuard = new SDKGuard();
 // Export guard functions for easy use
 export const validateClientSDKUsage = (strict?: boolean) => sdkGuard.validateClientSDKUsage(strict);
 export const validateServerSDKUsage = (strict?: boolean) => sdkGuard.validateServerSDKUsage(strict);
-export const warnIfWrongSDK = (sdkType: 'client' | 'server', importPath?: string) => sdkGuard.warnIfWrongSDK(sdkType, importPath);
+export const warnIfWrongSDK = (sdkType: 'client' | 'server', importPath?: string) =>
+  sdkGuard.warnIfWrongSDK(sdkType, importPath);
 export const getSDKUsageReport = () => sdkGuard.getSDKUsageReport();
 
 // Export types for external use

@@ -104,7 +104,9 @@ async function main() {
   saveReports(report);
 
   console.log('📊 Compatibility testing completed!');
-  console.log(`📈 Results: ${report.summary.passedTests}/${report.summary.totalTests} tests passed`);
+  console.log(
+    `📈 Results: ${report.summary.passedTests}/${report.summary.totalTests} tests passed`
+  );
 }
 
 // Test a specific browser
@@ -161,7 +163,12 @@ async function testBrowser(browserKey: string): Promise<BrowserTestResults> {
             result = perfResult.testResult;
             break;
           default:
-            result = { name: scenario, status: 'fail', duration: 0, message: 'Unknown test scenario' };
+            result = {
+              name: scenario,
+              status: 'fail',
+              duration: 0,
+              message: 'Unknown test scenario',
+            };
         }
       } catch (error) {
         result = {
@@ -176,10 +183,10 @@ async function testBrowser(browserKey: string): Promise<BrowserTestResults> {
       result.duration = Date.now() - startTime;
       testResults.push(result);
 
-      const statusEmoji = result.status === 'pass' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
+      const statusEmoji =
+        result.status === 'pass' ? '✅' : result.status === 'warning' ? '⚠️' : '❌';
       console.log(`  ${statusEmoji} ${scenario}: ${result.status} (${result.duration}ms)`);
     }
-
   } catch (error) {
     console.error(`❌ Browser ${browserKey} failed: ${error.message}`);
     testResults.push({
@@ -195,9 +202,9 @@ async function testBrowser(browserKey: string): Promise<BrowserTestResults> {
   }
 
   const summary = {
-    passed: testResults.filter(t => t.status === 'pass').length,
-    failed: testResults.filter(t => t.status === 'fail').length,
-    warnings: testResults.filter(t => t.status === 'warning').length,
+    passed: testResults.filter((t) => t.status === 'pass').length,
+    failed: testResults.filter((t) => t.status === 'fail').length,
+    warnings: testResults.filter((t) => t.status === 'warning').length,
     total: testResults.length,
   };
 
@@ -217,7 +224,7 @@ async function testInitialLoad(page: Page): Promise<TestResult> {
 
     // Check for console errors
     const errors: string[] = [];
-    page.on('console', msg => {
+    page.on('console', (msg) => {
       if (msg.type() === 'error') {
         errors.push(msg.text());
       }
@@ -231,16 +238,24 @@ async function testInitialLoad(page: Page): Promise<TestResult> {
     const hasContent = await page.locator('body').isVisible();
 
     if (!hasContent) {
-      return { name: 'initialLoad', status: 'fail', duration: 0, message: 'Page content not visible' };
+      return {
+        name: 'initialLoad',
+        status: 'fail',
+        duration: 0,
+        message: 'Page content not visible',
+      };
     }
 
-    const screenshot = options.screenshot ? await captureScreenshot(page, 'initial-load') : undefined;
+    const screenshot = options.screenshot
+      ? await captureScreenshot(page, 'initial-load')
+      : undefined;
 
     return {
       name: 'initialLoad',
       status: errors.length > 0 ? 'warning' : 'pass',
       duration: 0,
-      message: errors.length > 0 ? `Console errors: ${errors.join(', ')}` : 'Page loaded successfully',
+      message:
+        errors.length > 0 ? `Console errors: ${errors.join(', ')}` : 'Page loaded successfully',
       screenshot,
       errors: errors.length > 0 ? errors : undefined,
     };
@@ -273,16 +288,28 @@ async function testAuthFlow(page: Page): Promise<TestResult> {
     const isDashboard = url.includes('/dashboard') || url.includes('/genel');
 
     if (!isDashboard) {
-      return { name: 'authFlow', status: 'fail', duration: 0, message: 'Not redirected to dashboard' };
+      return {
+        name: 'authFlow',
+        status: 'fail',
+        duration: 0,
+        message: 'Not redirected to dashboard',
+      };
     }
 
     // Check localStorage persistence
     const authSession = await page.evaluate(() => localStorage.getItem('auth-session'));
     if (!authSession) {
-      return { name: 'authFlow', status: 'warning', duration: 0, message: 'Auth session not persisted in localStorage' };
+      return {
+        name: 'authFlow',
+        status: 'warning',
+        duration: 0,
+        message: 'Auth session not persisted in localStorage',
+      };
     }
 
-    const screenshot = options.screenshot ? await captureScreenshot(page, 'auth-success') : undefined;
+    const screenshot = options.screenshot
+      ? await captureScreenshot(page, 'auth-success')
+      : undefined;
 
     return {
       name: 'authFlow',
@@ -302,7 +329,9 @@ async function testErrorBoundary(page: Page): Promise<TestResult> {
     await page.waitForLoadState('networkidle');
 
     // Trigger error (assuming there's a button to trigger error)
-    const errorButton = page.locator('button:has-text("Trigger Error")').or(page.locator('[data-trigger-error]'));
+    const errorButton = page
+      .locator('button:has-text("Trigger Error")')
+      .or(page.locator('[data-trigger-error]'));
     if (await errorButton.isVisible()) {
       await errorButton.click();
     } else {
@@ -320,14 +349,21 @@ async function testErrorBoundary(page: Page): Promise<TestResult> {
     const resetButton = await page.locator('button:has-text("Tekrar Dene")').isVisible();
 
     if (!errorMessage || !resetButton) {
-      return { name: 'errorBoundary', status: 'fail', duration: 0, message: 'Error boundary not displayed correctly' };
+      return {
+        name: 'errorBoundary',
+        status: 'fail',
+        duration: 0,
+        message: 'Error boundary not displayed correctly',
+      };
     }
 
     // Test recovery
     await page.click('button:has-text("Tekrar Dene")');
     await page.waitForTimeout(1000);
 
-    const screenshot = options.screenshot ? await captureScreenshot(page, 'error-boundary') : undefined;
+    const screenshot = options.screenshot
+      ? await captureScreenshot(page, 'error-boundary')
+      : undefined;
 
     return {
       name: 'errorBoundary',
@@ -351,24 +387,38 @@ async function testLoadingState(page: Page): Promise<TestResult> {
     let foundVariants = 0;
 
     for (const variant of variants) {
-      const variantElement = page.locator(`[data-variant="${variant}"]`).or(page.locator(`.${variant}`));
+      const variantElement = page
+        .locator(`[data-variant="${variant}"]`)
+        .or(page.locator(`.${variant}`));
       if (await variantElement.isVisible()) {
         foundVariants++;
       }
     }
 
     if (foundVariants < 5) {
-      return { name: 'loadingState', status: 'fail', duration: 0, message: `Only ${foundVariants}/5 variants found` };
+      return {
+        name: 'loadingState',
+        status: 'fail',
+        duration: 0,
+        message: `Only ${foundVariants}/5 variants found`,
+      };
     }
 
     // Test fullscreen mode
-    const fullscreenButton = page.locator('button:has-text("Fullscreen")').or(page.locator('[data-fullscreen]'));
+    const fullscreenButton = page
+      .locator('button:has-text("Fullscreen")')
+      .or(page.locator('[data-fullscreen]'));
     if (await fullscreenButton.isVisible()) {
       await fullscreenButton.click();
       const fullscreenOverlay = page.locator('[role="status"]').locator('..').locator('fixed');
       const isFullscreen = await fullscreenOverlay.isVisible();
       if (!isFullscreen) {
-        return { name: 'loadingState', status: 'warning', duration: 0, message: 'Fullscreen mode not working' };
+        return {
+          name: 'loadingState',
+          status: 'warning',
+          duration: 0,
+          message: 'Fullscreen mode not working',
+        };
       }
     }
 
@@ -376,7 +426,9 @@ async function testLoadingState(page: Page): Promise<TestResult> {
     const ariaLive = await page.locator('[aria-live="polite"]').count();
     const srOnly = await page.locator('.sr-only:has-text("Yükleniyor")').count();
 
-    const screenshot = options.screenshot ? await captureScreenshot(page, 'loading-states') : undefined;
+    const screenshot = options.screenshot
+      ? await captureScreenshot(page, 'loading-states')
+      : undefined;
 
     return {
       name: 'loadingState',
@@ -403,12 +455,13 @@ async function testHydration(page: Page): Promise<TestResult> {
 
     // Check for hydration errors in console
     const errors: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error' && (
-        msg.text().includes('Hydration') ||
-        msg.text().includes('hydration') ||
-        msg.text().includes('mismatch')
-      )) {
+    page.on('console', (msg) => {
+      if (
+        msg.type() === 'error' &&
+        (msg.text().includes('Hydration') ||
+          msg.text().includes('hydration') ||
+          msg.text().includes('mismatch'))
+      ) {
         errors.push(msg.text());
       }
     });
@@ -426,7 +479,9 @@ async function testHydration(page: Page): Promise<TestResult> {
     // Wait a bit more for any errors
     await page.waitForTimeout(1000);
 
-    const screenshot = options.screenshot ? await captureScreenshot(page, 'hydration-test') : undefined;
+    const screenshot = options.screenshot
+      ? await captureScreenshot(page, 'hydration-test')
+      : undefined;
 
     if (errors.length > 0) {
       return {
@@ -461,7 +516,12 @@ async function testNavigation(page: Page): Promise<TestResult> {
     const links = await navLinks;
 
     if (links.length === 0) {
-      return { name: 'navigation', status: 'warning', duration: 0, message: 'No navigation links found' };
+      return {
+        name: 'navigation',
+        status: 'warning',
+        duration: 0,
+        message: 'No navigation links found',
+      };
     }
 
     // Click first navigation link
@@ -501,29 +561,29 @@ async function testPerformance(page: Page): Promise<TestResult> {
     const metrics = await page.evaluate(() => {
       const perf = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
       const paint = performance.getEntriesByType('paint');
-      
+
       // Calculate FCP
-      const fcp = paint.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0;
-      
+      const fcp = paint.find((entry) => entry.name === 'first-contentful-paint')?.startTime || 0;
+
       // Calculate LCP (simplified)
       let lcp = 0;
       const lcpEntries = performance.getEntriesByType('largest-contentful-paint');
       if (lcpEntries.length > 0) {
         lcp = lcpEntries[lcpEntries.length - 1].startTime;
       }
-      
+
       // Calculate TTI (simplified - when DOM is interactive)
       const tti = perf.domInteractive - perf.fetchStart;
-      
+
       // Calculate CLS (simplified - check for layout shifts)
       let cls = 0;
       const layoutShifts = performance.getEntriesByType('layout-shift');
-      layoutShifts.forEach(entry => {
+      layoutShifts.forEach((entry) => {
         if (!(entry as any).hadRecentInput) {
           cls += (entry as any).value;
         }
       });
-      
+
       return {
         fcp,
         lcp,
@@ -543,9 +603,12 @@ async function testPerformance(page: Page): Promise<TestResult> {
 
     // Evaluate against targets
     const issues: string[] = [];
-    if (performanceMetrics.fcp > 1800) issues.push(`FCP too slow: ${performanceMetrics.fcp}ms > 1800ms`);
-    if (performanceMetrics.lcp > 2500) issues.push(`LCP too slow: ${performanceMetrics.lcp}ms > 2500ms`);
-    if (performanceMetrics.tti > 3800) issues.push(`TTI too slow: ${performanceMetrics.tti}ms > 3800ms`);
+    if (performanceMetrics.fcp > 1800)
+      issues.push(`FCP too slow: ${performanceMetrics.fcp}ms > 1800ms`);
+    if (performanceMetrics.lcp > 2500)
+      issues.push(`LCP too slow: ${performanceMetrics.lcp}ms > 2500ms`);
+    if (performanceMetrics.tti > 3800)
+      issues.push(`TTI too slow: ${performanceMetrics.tti}ms > 3800ms`);
     if (performanceMetrics.cls > 0.1) issues.push(`CLS too high: ${performanceMetrics.cls} > 0.1`);
 
     return {
@@ -566,10 +629,10 @@ async function captureScreenshot(page: Page, name: string): Promise<string> {
   if (!fs.existsSync(screenshotDir)) {
     fs.mkdirSync(screenshotDir, { recursive: true });
   }
-  
+
   const filename = `${name}-${Date.now()}.png`;
   const filepath = path.join(screenshotDir, filename);
-  
+
   await page.screenshot({ path: filepath, fullPage: true });
   return filepath;
 }
@@ -582,12 +645,12 @@ function generateReport(results: BrowserTestResults[]): CompatibilityReport {
 
   // Collect browser-specific issues
   const browserSpecificIssues: Record<string, string[]> = {};
-  
-  results.forEach(result => {
+
+  results.forEach((result) => {
     const issues: string[] = [];
-    
+
     // Check for browser-specific patterns in failed tests
-    result.tests.forEach(test => {
+    result.tests.forEach((test) => {
       if (test.status === 'fail' || test.status === 'warning') {
         if (test.message?.includes('CSP') || test.message?.includes('Content Security Policy')) {
           issues.push('CSP violations detected');
@@ -606,7 +669,7 @@ function generateReport(results: BrowserTestResults[]): CompatibilityReport {
         }
       }
     });
-    
+
     if (issues.length > 0) {
       browserSpecificIssues[result.browser] = [...new Set(issues)];
     }
@@ -644,26 +707,33 @@ function saveReports(report: CompatibilityReport) {
 }
 
 function generateHtmlReport(report: CompatibilityReport): string {
-  const browserRows = report.browsers.map(browser => {
-    const testRows = browser.tests.map(test => `
+  const browserRows = report.browsers
+    .map((browser) => {
+      const testRows = browser.tests
+        .map(
+          (test) => `
       <tr>
         <td>${test.name}</td>
         <td class="status-${test.status}">${test.status.toUpperCase()}</td>
         <td>${test.duration}ms</td>
         <td>${test.message || ''}</td>
       </tr>
-    `).join('');
+    `
+        )
+        .join('');
 
-    const perfRow = browser.performance ? `
+      const perfRow = browser.performance
+        ? `
       <tr>
         <td>Performance</td>
         <td class="status-info">METRICS</td>
         <td>-</td>
         <td>FCP: ${browser.performance.fcp}ms, LCP: ${browser.performance.lcp}ms, TTI: ${browser.performance.tti}ms, CLS: ${browser.performance.cls}</td>
       </tr>
-    ` : '';
+    `
+        : '';
 
-    return `
+      return `
       <h3>${browser.browser}</h3>
       <table>
         <thead>
@@ -681,17 +751,25 @@ function generateHtmlReport(report: CompatibilityReport): string {
       </table>
       <p><strong>Summary:</strong> ${browser.summary.passed}/${browser.summary.total} passed</p>
     `;
-  }).join('');
+    })
+    .join('');
 
-  const issuesSection = Object.keys(report.browserSpecificIssues).length > 0 ? `
+  const issuesSection =
+    Object.keys(report.browserSpecificIssues).length > 0
+      ? `
     <h2>Browser-Specific Issues</h2>
-    ${Object.entries(report.browserSpecificIssues).map(([browser, issues]) => `
+    ${Object.entries(report.browserSpecificIssues)
+      .map(
+        ([browser, issues]) => `
       <h3>${browser}</h3>
       <ul>
-        ${issues.map(issue => `<li>${issue}</li>`).join('')}
+        ${issues.map((issue) => `<li>${issue}</li>`).join('')}
       </ul>
-    `).join('')}
-  ` : '';
+    `
+      )
+      .join('')}
+  `
+      : '';
 
   return `
 <!DOCTYPE html>
@@ -735,7 +813,7 @@ function generateHtmlReport(report: CompatibilityReport): string {
 }
 
 // Run the tests
-main().catch(error => {
+main().catch((error) => {
   console.error('❌ Test execution failed:', error);
   process.exit(1);
 });

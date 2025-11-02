@@ -19,11 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserRole } from '@/types/auth';
 import Link from 'next/link';
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { isAuthenticated, isInitialized, user, logout, initializeAuth } = useAuthStore();
@@ -117,7 +113,7 @@ export default function DashboardLayout({
     const handleScroll = () => {
       rafId = requestAnimationFrame(() => {
         const scrolled = window.scrollY > 20;
-        setIsScrolled((prev) => prev !== scrolled ? scrolled : prev);
+        setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
       });
     };
 
@@ -145,16 +141,8 @@ export default function DashboardLayout({
   return (
     <div className="relative min-h-screen">
       {/* Background Layers */}
-      <BackgroundPattern
-        variant="dots"
-        opacity={0.08}
-        className="text-muted-foreground"
-      />
-      <AnimatedGradient
-        variant="subtle"
-        speed="slow"
-        className="opacity-25 dark:opacity-20"
-      />
+      <BackgroundPattern variant="dots" opacity={0.08} className="text-muted-foreground" />
+      <AnimatedGradient variant="subtle" speed="slow" className="opacity-25 dark:opacity-20" />
 
       {/* Header - Premium Top Bar */}
       <header
@@ -198,10 +186,12 @@ export default function DashboardLayout({
                       {user?.name ? getInitials(user.name) : 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <ChevronDown className={cn(
-                    "h-4 w-4 text-muted-foreground hidden sm:block transition-transform duration-200",
-                    isUserMenuOpen && "rotate-180"
-                  )} />
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 text-muted-foreground hidden sm:block transition-transform duration-200',
+                      isUserMenuOpen && 'rotate-180'
+                    )}
+                  />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-0" align="end" sideOffset={8}>
@@ -217,9 +207,7 @@ export default function DashboardLayout({
                       <p className="font-semibold text-sm text-foreground truncate">
                         {user?.name || 'Kullanıcı'}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {user?.email || ''}
-                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{user?.email || ''}</p>
                       <Badge
                         variant={getRoleBadgeVariant(user?.role || UserRole.VIEWER)}
                         className="text-xs mt-1"

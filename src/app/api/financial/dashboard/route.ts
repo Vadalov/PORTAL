@@ -7,7 +7,6 @@ import { dashboardRateLimit } from '@/lib/rate-limit';
  * Get dashboard metrics and KPIs
  */
 async function getDashboardHandler(request: NextRequest) {
-   
   try {
     // Mock data - in real app, these would come from actual calculations
     const currentMonthData = {

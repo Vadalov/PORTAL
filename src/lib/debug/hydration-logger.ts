@@ -77,9 +77,7 @@ class HydrationLoggerClass {
    */
   private handleHydrationError(args: any[]) {
     const errorMessage = args[0]?.toString() || '';
-    const componentStack = args.find((arg: any) =>
-      typeof arg === 'string' && arg.includes('at ')
-    );
+    const componentStack = args.find((arg: any) => typeof arg === 'string' && arg.includes('at '));
 
     const error: HydrationError = {
       timestamp: new Date(),
@@ -125,10 +123,7 @@ class HydrationLoggerClass {
             const element = node as Element;
 
             // Check for React hydration attributes
-            if (
-              element.hasAttribute('data-reactroot') ||
-              element.hasAttribute('data-reactid')
-            ) {
+            if (element.hasAttribute('data-reactroot') || element.hasAttribute('data-reactid')) {
               console.log('🔄 React hydration detected on:', element.tagName);
             }
           }
@@ -165,7 +160,9 @@ class HydrationLoggerClass {
     }
 
     console.warn('💡 Debugging Tips:');
-    console.warn('  1. Check if you are using Date.now(), Math.random(), or localStorage in render');
+    console.warn(
+      '  1. Check if you are using Date.now(), Math.random(), or localStorage in render'
+    );
     console.warn('  2. Use useEffect() for client-only code');
     console.warn('  3. Add suppressHydrationWarning to the problematic element');
     console.warn('  4. Test in incognito mode to rule out browser extensions');

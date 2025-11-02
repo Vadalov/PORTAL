@@ -54,7 +54,7 @@ export async function uploadPhoto(file: File): Promise<UploadedFile> {
 export async function uploadReport(file: File): Promise<UploadedFile> {
   return await uploadFile(file, STORAGE_BUCKETS.REPORTS, [
     Permission.read(Role.team('members')),
-    Permission.create(Role.team('admins'))
+    Permission.create(Role.team('admins')),
   ]);
 }
 
@@ -125,7 +125,7 @@ export async function listFiles(
     const response = await storage.listFiles(bucketId, queries);
     return {
       files: response.files as UploadedFile[],
-      total: response.total
+      total: response.total,
     };
   });
 }
@@ -133,17 +133,20 @@ export async function listFiles(
 /**
  * Validate file type and size
  */
-export function validateFile(file: File, options?: {
-  maxSize?: number; // in bytes
-  allowedTypes?: string[];
-}): { valid: boolean; error?: string } {
+export function validateFile(
+  file: File,
+  options?: {
+    maxSize?: number; // in bytes
+    allowedTypes?: string[];
+  }
+): { valid: boolean; error?: string } {
   const { maxSize = 10 * 1024 * 1024, allowedTypes } = options || {}; // 10MB default
 
   // Check file size
   if (file.size > maxSize) {
     return {
       valid: false,
-      error: `Dosya boyutu ${Math.round(maxSize / 1024 / 1024)}MB'dan büyük olamaz`
+      error: `Dosya boyutu ${Math.round(maxSize / 1024 / 1024)}MB'dan büyük olamaz`,
     };
   }
 
@@ -151,7 +154,7 @@ export function validateFile(file: File, options?: {
   if (allowedTypes && !allowedTypes.includes(file.type)) {
     return {
       valid: false,
-      error: `Desteklenmeyen dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`
+      error: `Desteklenmeyen dosya türü. İzin verilen türler: ${allowedTypes.join(', ')}`,
     };
   }
 
@@ -163,12 +166,12 @@ export function validateFile(file: File, options?: {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
+
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
 
 /**
@@ -201,7 +204,7 @@ export function isDocumentFile(file: File): boolean {
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   ];
   return documentTypes.includes(file.type);
 }
@@ -225,5 +228,5 @@ export const storageUtils = {
   getFileExtension,
   isImageFile,
   isPdfFile,
-  isDocumentFile
+  isDocumentFile,
 };

@@ -117,11 +117,11 @@ export const typography = {
 
   // Font sizes (desktop)
   sizes: {
-    'xs': { size: '11px', lineHeight: '16px' },
-    'sm': { size: '12px', lineHeight: '18px' },
-    'base': { size: '14px', lineHeight: '21px' },
-    'lg': { size: '16px', lineHeight: '24px' },
-    'xl': { size: '20px', lineHeight: '28px' },
+    xs: { size: '11px', lineHeight: '16px' },
+    sm: { size: '12px', lineHeight: '18px' },
+    base: { size: '14px', lineHeight: '21px' },
+    lg: { size: '16px', lineHeight: '24px' },
+    xl: { size: '20px', lineHeight: '28px' },
     '2xl': { size: '24px', lineHeight: '32px' },
     '3xl': { size: '28px', lineHeight: '36px' },
     '4xl': { size: '36px', lineHeight: '44px' },

@@ -35,14 +35,12 @@ export default function DonationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Bağışlar</h1>
-          <p className="text-gray-600 mt-2">
-            Bağış kayıtlarını görüntüleyin ve yönetin
-          </p>
+          <p className="text-gray-600 mt-2">Bağış kayıtlarını görüntüleyin ve yönetin</p>
         </div>
 
         <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-        <DialogTrigger asChild>
-          <Button className="gap-2 sm:w-auto w-full">
+          <DialogTrigger asChild>
+            <Button className="gap-2 sm:w-auto w-full">
               <Plus className="h-4 w-4" />
               Yeni Bağış
             </Button>
@@ -74,9 +72,7 @@ export default function DonationsPage() {
             <DollarSign className="h-4 w-4 text-gray-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {totalAmount.toLocaleString('tr-TR')} ₺
-            </div>
+            <div className="text-2xl font-bold">{totalAmount.toLocaleString('tr-TR')} ₺</div>
           </CardContent>
         </GlassCard>
 
@@ -142,7 +138,7 @@ export default function DonationsPage() {
                           <Skeleton className="h-3 w-12" />
                         </div>
                       </div>
-                      
+
                       {/* Details skeleton */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="space-y-1">
@@ -162,7 +158,7 @@ export default function DonationsPage() {
                           <Skeleton className="h-4 w-20" />
                         </div>
                       </div>
-                      
+
                       {/* Footer skeleton */}
                       <div className="flex items-center justify-between pt-2 border-t">
                         <div className="flex items-center gap-2">
@@ -236,11 +232,13 @@ export default function DonationsPage() {
                           <span className="font-medium">Fiş No:</span>
                           <span className="text-gray-600">{donation.receipt_number}</span>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          donation.status === 'completed'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            donation.status === 'completed'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                          }`}
+                        >
                           {donation.status === 'completed' ? 'Tamamlandı' : 'Beklemede'}
                         </span>
                       </div>

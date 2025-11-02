@@ -122,7 +122,9 @@ async function getBeneficiariesHandler(request: NextRequest) {
       filters: Object.keys(filters).length > 0 ? filters : undefined,
     };
 
-    const response = (await api.beneficiaries.getBeneficiaries(queryParams as QueryParams)) as ApiResponse;
+    const response = (await api.beneficiaries.getBeneficiaries(
+      queryParams as QueryParams
+    )) as ApiResponse;
 
     if (response.error) {
       return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
@@ -147,7 +149,7 @@ async function getBeneficiariesHandler(request: NextRequest) {
       method: 'GET',
       page: params.page,
       limit: params.limit,
-      filters: params.filters
+      filters: params.filters,
     });
 
     return NextResponse.json(
@@ -212,7 +214,7 @@ async function createBeneficiaryHandler(request: NextRequest) {
     logger.error('Beneficiary creation error', error, {
       endpoint: '/api/beneficiaries',
       method: 'POST',
-      tcNo: `${body?.tc_no?.substring(0, 3)  }***` // Mask TC number for privacy
+      tcNo: `${body?.tc_no?.substring(0, 3)}***`, // Mask TC number for privacy
     });
 
     // Handle duplicate TC number

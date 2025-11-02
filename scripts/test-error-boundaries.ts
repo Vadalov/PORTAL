@@ -46,16 +46,19 @@ async function main() {
     }
   }
 
-  const browserType = browserName === 'firefox' ? firefox : browserName === 'webkit' ? webkit : chromium;
+  const browserType =
+    browserName === 'firefox' ? firefox : browserName === 'webkit' ? webkit : chromium;
 
-  console.log(`🚀 Starting error boundary tests with ${browserName} (${headless ? 'headless' : 'headed'})`);
+  console.log(
+    `🚀 Starting error boundary tests with ${browserName} (${headless ? 'headless' : 'headed'})`
+  );
 
   const browser = await browserType.launch({ headless });
   const context = await browser.newContext();
   const page = await context.newPage();
 
   const consoleLogs: string[] = [];
-  page.on('console', msg => {
+  page.on('console', (msg) => {
     const log = `[${msg.type()}] ${msg.text()}`;
     consoleLogs.push(log);
     if (verbose) console.log(log);
@@ -91,7 +94,6 @@ async function main() {
 
     // Test 8: Sentry Integration
     results.push(await testSentryIntegration(page, takeScreenshots, consoleLogs.slice()));
-
   } catch (error) {
     console.error('❌ Test setup failed:', error);
   } finally {
@@ -107,9 +109,9 @@ async function main() {
     results,
     summary: {
       total: results.length,
-      passed: results.filter(r => r.passed).length,
-      failed: results.filter(r => !r.passed).length,
-    }
+      passed: results.filter((r) => r.passed).length,
+      failed: results.filter((r) => !r.passed).length,
+    },
   };
 
   writeFileSync(REPORT_FILE, JSON.stringify(report, null, 2));
@@ -121,7 +123,11 @@ async function main() {
   process.exit(failed > 0 ? 1 : 0);
 }
 
-async function testRenderError(page: Page, takeScreenshot: boolean, logs: string[]): Promise<TestResult> {
+async function testRenderError(
+  page: Page,
+  takeScreenshot: boolean,
+  logs: string[]
+): Promise<TestResult> {
   const name = 'Render Error';
   const start = Date.now();
 
@@ -139,7 +145,9 @@ async function testRenderError(page: Page, takeScreenshot: boolean, logs: string
     await page.click('text=Tekrar Dene');
     await page.waitForSelector('text=Error Boundary Test Page', { timeout: 5000 });
 
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'render-error-recovery') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'render-error-recovery')
+      : undefined;
 
     return {
       name,
@@ -147,22 +155,28 @@ async function testRenderError(page: Page, takeScreenshot: boolean, logs: string
       message: 'Error caught by boundary and recovery successful',
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   } catch (error) {
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'render-error-fail') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'render-error-fail')
+      : undefined;
     return {
       name,
       passed: false,
       message: (error as Error).message,
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   }
 }
 
-async function testAsyncError(page: Page, takeScreenshot: boolean, logs: string[]): Promise<TestResult> {
+async function testAsyncError(
+  page: Page,
+  takeScreenshot: boolean,
+  logs: string[]
+): Promise<TestResult> {
   const name = 'Async Error';
   const start = Date.now();
 
@@ -180,7 +194,9 @@ async function testAsyncError(page: Page, takeScreenshot: boolean, logs: string[
     await page.click('text=Tekrar Dene');
     await page.waitForSelector('text=Error Boundary Test Page', { timeout: 5000 });
 
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'async-error-recovery') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'async-error-recovery')
+      : undefined;
 
     return {
       name,
@@ -188,22 +204,28 @@ async function testAsyncError(page: Page, takeScreenshot: boolean, logs: string[
       message: 'Async error caught by boundary and recovery successful',
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   } catch (error) {
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'async-error-fail') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'async-error-fail')
+      : undefined;
     return {
       name,
       passed: false,
       message: (error as Error).message,
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   }
 }
 
-async function testEventHandlerError(page: Page, takeScreenshot: boolean, logs: string[]): Promise<TestResult> {
+async function testEventHandlerError(
+  page: Page,
+  takeScreenshot: boolean,
+  logs: string[]
+): Promise<TestResult> {
   const name = 'Event Handler Error';
   const start = Date.now();
 
@@ -221,7 +243,9 @@ async function testEventHandlerError(page: Page, takeScreenshot: boolean, logs: 
       throw new Error('Event handler error was unexpectedly caught by boundary');
     }
 
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'event-handler-error') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'event-handler-error')
+      : undefined;
 
     return {
       name,
@@ -229,22 +253,28 @@ async function testEventHandlerError(page: Page, takeScreenshot: boolean, logs: 
       message: 'Event handler error correctly not caught by boundary (as expected)',
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   } catch (error) {
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'event-handler-error-fail') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'event-handler-error-fail')
+      : undefined;
     return {
       name,
       passed: false,
       message: (error as Error).message,
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   }
 }
 
-async function testHydrationError(page: Page, takeScreenshot: boolean, logs: string[]): Promise<TestResult> {
+async function testHydrationError(
+  page: Page,
+  takeScreenshot: boolean,
+  logs: string[]
+): Promise<TestResult> {
   const name = 'Hydration Error';
   const start = Date.now();
 
@@ -270,7 +300,9 @@ async function testHydrationError(page: Page, takeScreenshot: boolean, logs: str
       throw new Error('Clear storage button not found');
     }
 
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'hydration-error') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'hydration-error')
+      : undefined;
 
     return {
       name,
@@ -278,22 +310,28 @@ async function testHydrationError(page: Page, takeScreenshot: boolean, logs: str
       message: 'Hydration error detected and clear storage option provided',
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   } catch (error) {
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'hydration-error-fail') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'hydration-error-fail')
+      : undefined;
     return {
       name,
       passed: false,
       message: (error as Error).message,
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   }
 }
 
-async function testNetworkError(page: Page, takeScreenshot: boolean, logs: string[]): Promise<TestResult> {
+async function testNetworkError(
+  page: Page,
+  takeScreenshot: boolean,
+  logs: string[]
+): Promise<TestResult> {
   const name = 'Network Error';
   const start = Date.now();
 
@@ -311,7 +349,9 @@ async function testNetworkError(page: Page, takeScreenshot: boolean, logs: strin
     await page.click('text=Tekrar Dene');
     await page.waitForSelector('text=Error Boundary Test Page', { timeout: 5000 });
 
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'network-error-recovery') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'network-error-recovery')
+      : undefined;
 
     return {
       name,
@@ -319,22 +359,28 @@ async function testNetworkError(page: Page, takeScreenshot: boolean, logs: strin
       message: 'Network error caught by boundary and recovery successful',
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   } catch (error) {
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'network-error-fail') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'network-error-fail')
+      : undefined;
     return {
       name,
       passed: false,
       message: (error as Error).message,
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   }
 }
 
-async function testZustandError(page: Page, takeScreenshot: boolean, logs: string[]): Promise<TestResult> {
+async function testZustandError(
+  page: Page,
+  takeScreenshot: boolean,
+  logs: string[]
+): Promise<TestResult> {
   const name = 'Zustand Error';
   const start = Date.now();
 
@@ -352,7 +398,9 @@ async function testZustandError(page: Page, takeScreenshot: boolean, logs: strin
     await page.click('text=Tekrar Dene');
     await page.waitForSelector('text=Error Boundary Test Page', { timeout: 5000 });
 
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'zustand-error-recovery') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'zustand-error-recovery')
+      : undefined;
 
     return {
       name,
@@ -360,22 +408,28 @@ async function testZustandError(page: Page, takeScreenshot: boolean, logs: strin
       message: 'Zustand error caught by boundary and recovery successful',
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   } catch (error) {
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'zustand-error-fail') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'zustand-error-fail')
+      : undefined;
     return {
       name,
       passed: false,
       message: (error as Error).message,
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   }
 }
 
-async function testErrorWithDigest(page: Page, takeScreenshot: boolean, logs: string[]): Promise<TestResult> {
+async function testErrorWithDigest(
+  page: Page,
+  takeScreenshot: boolean,
+  logs: string[]
+): Promise<TestResult> {
   const name = 'Error with Digest';
   const start = Date.now();
 
@@ -399,7 +453,9 @@ async function testErrorWithDigest(page: Page, takeScreenshot: boolean, logs: st
     await page.click('text=Tekrar Dene');
     await page.waitForSelector('text=Error Boundary Test Page', { timeout: 5000 });
 
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'digest-error-recovery') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'digest-error-recovery')
+      : undefined;
 
     return {
       name,
@@ -407,22 +463,28 @@ async function testErrorWithDigest(page: Page, takeScreenshot: boolean, logs: st
       message: 'Error with digest caught and displayed correctly',
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   } catch (error) {
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'digest-error-fail') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'digest-error-fail')
+      : undefined;
     return {
       name,
       passed: false,
       message: (error as Error).message,
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   }
 }
 
-async function testSentryIntegration(page: Page, takeScreenshot: boolean, logs: string[]): Promise<TestResult> {
+async function testSentryIntegration(
+  page: Page,
+  takeScreenshot: boolean,
+  logs: string[]
+): Promise<TestResult> {
   const name = 'Sentry Integration';
   const start = Date.now();
 
@@ -430,14 +492,14 @@ async function testSentryIntegration(page: Page, takeScreenshot: boolean, logs: 
     console.log(`🧪 Running ${name} test...`);
     // Check if Sentry is available
     const sentryAvailable = await page.evaluate(() => !!(window as any).Sentry);
-    
+
     if (!sentryAvailable) {
       return {
         name,
         passed: false,
         message: 'Sentry not available in test environment',
         duration: Date.now() - start,
-        consoleLogs: logs
+        consoleLogs: logs,
       };
     }
 
@@ -450,12 +512,14 @@ async function testSentryIntegration(page: Page, takeScreenshot: boolean, logs: 
 
     // Check if error was tracked in window.__LAST_ERROR__
     const lastError = await page.evaluate(() => (window as any).__LAST_ERROR__);
-    
+
     if (!lastError) {
       throw new Error('Error not tracked in window.__LAST_ERROR__');
     }
 
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'sentry-integration') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'sentry-integration')
+      : undefined;
 
     return {
       name,
@@ -463,17 +527,19 @@ async function testSentryIntegration(page: Page, takeScreenshot: boolean, logs: 
       message: 'Sentry integration working - error tracked',
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   } catch (error) {
-    const screenshot = takeScreenshot ? await captureScreenshot(page, 'sentry-integration-fail') : undefined;
+    const screenshot = takeScreenshot
+      ? await captureScreenshot(page, 'sentry-integration-fail')
+      : undefined;
     return {
       name,
       passed: false,
       message: (error as Error).message,
       duration: Date.now() - start,
       screenshot,
-      consoleLogs: logs
+      consoleLogs: logs,
     };
   }
 }

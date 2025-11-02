@@ -85,19 +85,12 @@ export function StatCard({
         )}
       >
         {/* Gradient Background */}
-        <div
-          className={cn(
-            'absolute inset-0 bg-gradient-to-br opacity-50',
-            styles.gradient
-          )}
-        />
+        <div className={cn('absolute inset-0 bg-gradient-to-br opacity-50', styles.gradient)} />
 
         {/* Content */}
         <div className="relative">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {title}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
             <div
               className={cn(
                 'p-2.5 rounded-xl transition-transform duration-300 hover:scale-110',
@@ -116,8 +109,8 @@ export function StatCard({
                     trend.direction === 'up'
                       ? 'default'
                       : trend.direction === 'down'
-                      ? 'destructive'
-                      : 'secondary'
+                        ? 'destructive'
+                        : 'secondary'
                   }
                   className="gap-1 text-xs"
                 >
@@ -127,9 +120,7 @@ export function StatCard({
                 </Badge>
               )}
             </div>
-            {description && (
-              <p className="text-xs text-muted-foreground mt-2">{description}</p>
-            )}
+            {description && <p className="text-xs text-muted-foreground mt-2">{description}</p>}
           </CardContent>
         </div>
       </Card>

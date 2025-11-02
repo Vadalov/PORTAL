@@ -32,7 +32,6 @@ export async function migrateDonationsCollection() {
     );
 
     console.log('Migration completed successfully!');
-
   } catch (error: unknown) {
     const err = error as { message?: string };
     console.error('Migration failed:', err.message);

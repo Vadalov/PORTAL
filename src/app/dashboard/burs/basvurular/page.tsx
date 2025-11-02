@@ -6,7 +6,7 @@ import {
   getApplications,
   getScholarships,
   getStudents,
-  createApplication
+  createApplication,
 } from '@/lib/api/mock-api';
 import {
   Scholarship,
@@ -14,7 +14,7 @@ import {
   ScholarshipApplication,
   ApplicationStatus,
   ScholarshipType,
-  StudentStatus
+  StudentStatus,
 } from '@/types/scholarship';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,12 +37,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  FileText
-} from 'lucide-react';
+import { Plus, Search, Filter, FileText } from 'lucide-react';
 import { ApplicationCard } from '@/components/scholarships/ApplicationCard';
 import { SimplePagination } from '@/components/ui/pagination';
 
@@ -68,7 +63,9 @@ export default function BursBasvurularPage() {
   const [filters, setFilters] = useState<ApplicationFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [selectedApplication, setSelectedApplication] = useState<ApplicationWithDetails | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<ApplicationWithDetails | null>(
+    null
+  );
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [newApplication, setNewApplication] = useState({
     scholarshipId: '',
@@ -87,21 +84,21 @@ export default function BursBasvurularPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       // Load applications
       const applicationsResult = await getApplications({
         search: searchTerm,
         ...filters,
         page: currentPage,
-        limit: itemsPerPage
+        limit: itemsPerPage,
       });
 
       if (applicationsResult.success) {
         // Enrich applications with scholarship and student data
-        const enrichedApplications = (applicationsResult.data?.data || []).map(app => ({
+        const enrichedApplications = (applicationsResult.data?.data || []).map((app) => ({
           ...app,
-          scholarship: scholarships.find(s => s.id === app.scholarshipId),
-          student: students.find(st => st.id === app.studentId)
+          scholarship: scholarships.find((s) => s.id === app.scholarshipId),
+          student: students.find((st) => st.id === app.studentId),
         }));
         setApplications(enrichedApplications);
         setTotalCount(applicationsResult.data?.total || 0);
@@ -129,7 +126,6 @@ export default function BursBasvurularPage() {
     }
   };
 
-
   const handleCreateApplication = async () => {
     try {
       if (!newApplication.scholarshipId || !newApplication.studentId) {
@@ -142,7 +138,7 @@ export default function BursBasvurularPage() {
         studentId: newApplication.studentId,
         personalStatement: newApplication.personalStatement,
         familySituation: newApplication.familySituation,
-        financialNeed: newApplication.financialNeed
+        financialNeed: newApplication.financialNeed,
       });
 
       if (result.success) {
@@ -171,7 +167,7 @@ export default function BursBasvurularPage() {
   };
 
   const handleFilterChange = (key: keyof ApplicationFilters, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value || undefined }));
+    setFilters((prev) => ({ ...prev, [key]: value || undefined }));
     setCurrentPage(1);
   };
 
@@ -183,9 +179,7 @@ export default function BursBasvurularPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Burs Başvuruları</h1>
-          <p className="text-muted-foreground">
-            Burs başvurularını yönetin ve değerlendirin
-          </p>
+          <p className="text-muted-foreground">Burs başvurularını yönetin ve değerlendirin</p>
         </div>
         <Button onClick={() => setShowCreateDialog(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -263,9 +257,7 @@ export default function BursBasvurularPage() {
       <Card>
         <CardHeader>
           <CardTitle>Başvurular ({totalCount})</CardTitle>
-          <CardDescription>
-            Toplam {totalCount} başvuru bulundu
-          </CardDescription>
+          <CardDescription>Toplam {totalCount} başvuru bulundu</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -312,9 +304,7 @@ export default function BursBasvurularPage() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Yeni Burs Başvurusu</DialogTitle>
-            <DialogDescription>
-              Yeni bir burs başvurusu oluşturun
-            </DialogDescription>
+            <DialogDescription>Yeni bir burs başvurusu oluşturun</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -322,7 +312,9 @@ export default function BursBasvurularPage() {
                 <Label htmlFor="scholarship">Burs *</Label>
                 <Select
                   value={newApplication.scholarshipId}
-                  onValueChange={(value) => setNewApplication(prev => ({ ...prev, scholarshipId: value }))}
+                  onValueChange={(value) =>
+                    setNewApplication((prev) => ({ ...prev, scholarshipId: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Burs seçin" />
@@ -340,7 +332,9 @@ export default function BursBasvurularPage() {
                 <Label htmlFor="student">Öğrenci *</Label>
                 <Select
                   value={newApplication.studentId}
-                  onValueChange={(value) => setNewApplication(prev => ({ ...prev, studentId: value }))}
+                  onValueChange={(value) =>
+                    setNewApplication((prev) => ({ ...prev, studentId: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Öğrenci seçin" />
@@ -361,7 +355,9 @@ export default function BursBasvurularPage() {
                 id="personalStatement"
                 placeholder="Kendiniz hakkında kısa bilgi..."
                 value={newApplication.personalStatement}
-                onChange={(e) => setNewApplication(prev => ({ ...prev, personalStatement: e.target.value }))}
+                onChange={(e) =>
+                  setNewApplication((prev) => ({ ...prev, personalStatement: e.target.value }))
+                }
                 rows={3}
               />
             </div>
@@ -371,7 +367,9 @@ export default function BursBasvurularPage() {
                 id="familySituation"
                 placeholder="Aile durumunuz hakkında bilgi..."
                 value={newApplication.familySituation}
-                onChange={(e) => setNewApplication(prev => ({ ...prev, familySituation: e.target.value }))}
+                onChange={(e) =>
+                  setNewApplication((prev) => ({ ...prev, familySituation: e.target.value }))
+                }
                 rows={2}
               />
             </div>
@@ -381,7 +379,9 @@ export default function BursBasvurularPage() {
                 id="financialNeed"
                 placeholder="Mali durumunuz hakkında bilgi..."
                 value={newApplication.financialNeed}
-                onChange={(e) => setNewApplication(prev => ({ ...prev, financialNeed: e.target.value }))}
+                onChange={(e) =>
+                  setNewApplication((prev) => ({ ...prev, financialNeed: e.target.value }))
+                }
                 rows={2}
               />
             </div>
@@ -390,9 +390,7 @@ export default function BursBasvurularPage() {
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
               İptal
             </Button>
-            <Button onClick={handleCreateApplication}>
-              Başvuru Oluştur
-            </Button>
+            <Button onClick={handleCreateApplication}>Başvuru Oluştur</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

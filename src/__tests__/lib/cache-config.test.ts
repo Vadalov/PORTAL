@@ -119,7 +119,6 @@ describe('Cache Configuration', () => {
       expect(getCacheStrategy([CACHE_KEYS.TASKS])).toEqual(CACHE_STRATEGIES.TASKS);
     });
 
-
     it('should return standard strategy for unknown keys', () => {
       const strategy = getCacheStrategy(['unknown-key']);
       expect(strategy.staleTime).toBe(CACHE_TIMES.STANDARD);

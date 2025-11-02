@@ -25,7 +25,7 @@ const options = {
   json: args.includes('--json'),
   verbose: args.includes('--verbose'),
   skipConnectivity: args.includes('--skip-connectivity'),
-  phase: args.find(arg => arg.startsWith('--phase='))?.split('=')[1],
+  phase: args.find((arg) => arg.startsWith('--phase='))?.split('=')[1],
 };
 
 // Test result interface
@@ -78,7 +78,7 @@ function readFileContent(filePath: string): string | null {
 
 function checkContent(content: string | null, patterns: string[]): boolean {
   if (!content) return false;
-  return patterns.every(pattern => content.includes(pattern));
+  return patterns.every((pattern) => content.includes(pattern));
 }
 
 // Phase implementations
@@ -103,7 +103,7 @@ async function phase1(): Promise<PhaseResult> {
   tests.push({
     name: 'NEXT_PUBLIC_BACKEND_PROVIDER',
     status: providerValid ? 'pass' : 'fail',
-    message: providerValid 
+    message: providerValid
       ? `NEXT_PUBLIC_BACKEND_PROVIDER set to ${backendProvider}`
       : `NEXT_PUBLIC_BACKEND_PROVIDER not set or invalid (should be 'mock' or 'appwrite')`,
   });
@@ -134,10 +134,16 @@ async function phase1(): Promise<PhaseResult> {
     tests.push({
       name: 'getValidationReport()',
       status: hasErrors ? 'fail' : 'pass',
-      message: hasErrors 
+      message: hasErrors
         ? `${report.summary.errors} validation errors found`
         : 'All environment variables valid',
-      details: hasErrors ? JSON.stringify(report.results.filter(r => !r.isValid), null, 2) : undefined,
+      details: hasErrors
+        ? JSON.stringify(
+            report.results.filter((r) => !r.isValid),
+            null,
+            2
+          )
+        : undefined,
     });
   } catch (error) {
     tests.push({
@@ -149,7 +155,7 @@ async function phase1(): Promise<PhaseResult> {
   }
 
   const duration = performance.now() - start;
-  const failed = tests.filter(t => t.status === 'fail').length;
+  const failed = tests.filter((t) => t.status === 'fail').length;
   const status = failed > 0 ? 'fail' : 'pass';
 
   return { name: 'Environment & Configuration', status, duration, tests };
@@ -164,7 +170,7 @@ async function phase2(): Promise<PhaseResult> {
   // Check authStore.ts exists and has required content
   const authStorePath = 'src/stores/authStore.ts';
   const authStoreContent = readFileContent(authStorePath);
-  
+
   if (!authStoreContent) {
     tests.push({
       name: 'authStore.ts exists',
@@ -177,7 +183,7 @@ async function phase2(): Promise<PhaseResult> {
     tests.push({
       name: 'skipHydration configured',
       status: hasSkipHydration ? 'pass' : 'fail',
-      message: hasSkipHydration 
+      message: hasSkipHydration
         ? 'skipHydration: true found in persist config'
         : 'skipHydration: true not found in persist config',
     });
@@ -187,17 +193,20 @@ async function phase2(): Promise<PhaseResult> {
     tests.push({
       name: '_hasHydrated field exists',
       status: hasHydratedField ? 'pass' : 'fail',
-      message: hasHydratedField 
+      message: hasHydratedField
         ? '_hasHydrated field found in AuthState interface'
         : '_hasHydrated field not found in AuthState interface',
     });
 
     // Check onRehydrateStorage callback
-    const hasRehydrateCallback = checkContent(authStoreContent, ['onRehydrateStorage', '_hasHydrated = true']);
+    const hasRehydrateCallback = checkContent(authStoreContent, [
+      'onRehydrateStorage',
+      '_hasHydrated = true',
+    ]);
     tests.push({
       name: 'onRehydrateStorage callback',
       status: hasRehydrateCallback ? 'pass' : 'fail',
-      message: hasRehydrateCallback 
+      message: hasRehydrateCallback
         ? 'onRehydrateStorage sets _hasHydrated = true'
         : 'onRehydrateStorage callback not properly configured',
     });
@@ -212,7 +221,7 @@ async function phase2(): Promise<PhaseResult> {
   }
 
   const duration = performance.now() - start;
-  const failed = tests.filter(t => t.status === 'fail').length;
+  const failed = tests.filter((t) => t.status === 'fail').length;
   const status = failed > 0 ? 'fail' : 'pass';
 
   return { name: 'Hydration & Store', status, duration, tests };
@@ -238,7 +247,7 @@ async function phase3(): Promise<PhaseResult> {
     tests.push({
       name: 'error.tsx default export',
       status: hasDefaultExport ? 'pass' : 'fail',
-      message: hasDefaultExport 
+      message: hasDefaultExport
         ? 'error.tsx exports default error component'
         : 'error.tsx does not export default component',
     });
@@ -247,7 +256,7 @@ async function phase3(): Promise<PhaseResult> {
     tests.push({
       name: 'Hydration error detection',
       status: hasHydrationError ? 'pass' : 'fail',
-      message: hasHydrationError 
+      message: hasHydrationError
         ? 'Hydration error detection logic found'
         : 'Hydration error detection logic not found',
     });
@@ -256,16 +265,14 @@ async function phase3(): Promise<PhaseResult> {
     tests.push({
       name: 'Sentry integration',
       status: hasSentry ? 'pass' : 'warning',
-      message: hasSentry 
-        ? 'Sentry integration found'
-        : 'Sentry integration not found (optional)',
+      message: hasSentry ? 'Sentry integration found' : 'Sentry integration not found (optional)',
     });
 
     const hasRecovery = checkContent(errorTsxContent, ['reset()', 'localStorage.clear']);
     tests.push({
       name: 'Recovery mechanisms',
       status: hasRecovery ? 'pass' : 'fail',
-      message: hasRecovery 
+      message: hasRecovery
         ? 'Recovery mechanisms (reset, clear storage) found'
         : 'Recovery mechanisms not found',
     });
@@ -276,7 +283,7 @@ async function phase3(): Promise<PhaseResult> {
   tests.push({
     name: 'src/app/global-error.tsx exists',
     status: globalErrorExists ? 'pass' : 'fail',
-    message: globalErrorExists 
+    message: globalErrorExists
       ? 'src/app/global-error.tsx found'
       : 'src/app/global-error.tsx not found',
   });
@@ -286,13 +293,13 @@ async function phase3(): Promise<PhaseResult> {
   tests.push({
     name: 'src/components/error-boundary.tsx exists',
     status: errorBoundaryExists ? 'pass' : 'fail',
-    message: errorBoundaryExists 
+    message: errorBoundaryExists
       ? 'src/components/error-boundary.tsx found'
       : 'src/components/error-boundary.tsx not found',
   });
 
   const duration = performance.now() - start;
-  const failed = tests.filter(t => t.status === 'fail').length;
+  const failed = tests.filter((t) => t.status === 'fail').length;
   const status = failed > 0 ? 'fail' : 'pass';
 
   return { name: 'Error Boundaries', status, duration, tests };
@@ -315,22 +322,25 @@ async function phase4(): Promise<PhaseResult> {
     });
   } else {
     const variants = ['spinner', 'dots', 'pulse', 'bars', 'ripple'];
-    const hasAllVariants = variants.every(variant => 
+    const hasAllVariants = variants.every((variant) =>
       checkContent(loadingOverlayContent, [`variant="${variant}"`, `variant === '${variant}'`])
     );
     tests.push({
       name: 'All 5 variants implemented',
       status: hasAllVariants ? 'pass' : 'fail',
-      message: hasAllVariants 
+      message: hasAllVariants
         ? 'All 5 loading variants (spinner, dots, pulse, bars, ripple) found'
         : 'Some loading variants missing',
     });
 
-    const hasAccessibility = checkContent(loadingOverlayContent, ['role="status"', 'aria-live="polite"']);
+    const hasAccessibility = checkContent(loadingOverlayContent, [
+      'role="status"',
+      'aria-live="polite"',
+    ]);
     tests.push({
       name: 'Accessibility attributes',
       status: hasAccessibility ? 'pass' : 'fail',
-      message: hasAccessibility 
+      message: hasAccessibility
         ? 'Accessibility attributes (role, aria-live) found'
         : 'Accessibility attributes missing',
     });
@@ -339,35 +349,35 @@ async function phase4(): Promise<PhaseResult> {
     tests.push({
       name: 'Motion reduce support',
       status: hasMotionReduce ? 'pass' : 'fail',
-      message: hasMotionReduce 
-        ? 'Motion reduce support found'
-        : 'Motion reduce support missing',
+      message: hasMotionReduce ? 'Motion reduce support found' : 'Motion reduce support missing',
     });
   }
 
   // Check usage in layouts
   const dashboardLayoutContent = readFileContent('src/app/(dashboard)/layout.tsx');
-  const hasAuthLoading = dashboardLayoutContent && checkContent(dashboardLayoutContent, ['LoadingOverlay']);
+  const hasAuthLoading =
+    dashboardLayoutContent && checkContent(dashboardLayoutContent, ['LoadingOverlay']);
   tests.push({
     name: 'Auth loading in dashboard layout',
     status: hasAuthLoading ? 'pass' : 'fail',
-    message: hasAuthLoading 
+    message: hasAuthLoading
       ? 'LoadingOverlay used in dashboard layout for auth'
       : 'LoadingOverlay not found in dashboard layout',
   });
 
   const providersContent = readFileContent('src/app/providers.tsx');
-  const hasHydrationLoading = providersContent && checkContent(providersContent, ['LoadingOverlay']);
+  const hasHydrationLoading =
+    providersContent && checkContent(providersContent, ['LoadingOverlay']);
   tests.push({
     name: 'Hydration loading in providers',
     status: hasHydrationLoading ? 'pass' : 'fail',
-    message: hasHydrationLoading 
+    message: hasHydrationLoading
       ? 'LoadingOverlay used in providers for hydration'
       : 'LoadingOverlay not found in providers',
   });
 
   const duration = performance.now() - start;
-  const failed = tests.filter(t => t.status === 'fail').length;
+  const failed = tests.filter((t) => t.status === 'fail').length;
   const status = failed > 0 ? 'fail' : 'pass';
 
   return { name: 'Loading States', status, duration, tests };
@@ -393,7 +403,7 @@ async function phase5(): Promise<PhaseResult> {
     tests.push({
       name: 'React.Suspense wrapper',
       status: hasSuspense ? 'pass' : 'fail',
-      message: hasSuspense 
+      message: hasSuspense
         ? 'React.Suspense wrapper implemented'
         : 'React.Suspense wrapper not found',
     });
@@ -402,7 +412,7 @@ async function phase5(): Promise<PhaseResult> {
     tests.push({
       name: 'ErrorBoundary integration',
       status: hasErrorBoundary ? 'pass' : 'fail',
-      message: hasErrorBoundary 
+      message: hasErrorBoundary
         ? 'ErrorBoundary integration found'
         : 'ErrorBoundary integration not found',
     });
@@ -411,7 +421,7 @@ async function phase5(): Promise<PhaseResult> {
     tests.push({
       name: 'LoadingOverlay fallback',
       status: hasLoadingOverlay ? 'pass' : 'fail',
-      message: hasLoadingOverlay 
+      message: hasLoadingOverlay
         ? 'LoadingOverlay used as fallback'
         : 'LoadingOverlay not used as fallback',
     });
@@ -423,24 +433,25 @@ async function phase5(): Promise<PhaseResult> {
   tests.push({
     name: 'SuspenseBoundary in providers (root)',
     status: hasRootSuspense ? 'pass' : 'fail',
-    message: hasRootSuspense 
+    message: hasRootSuspense
       ? 'SuspenseBoundary used in providers at root level'
       : 'SuspenseBoundary not found in providers',
   });
 
   // Check usage in dashboard layout
   const dashboardLayoutContent = readFileContent('src/app/(dashboard)/layout.tsx');
-  const hasDashboardSuspense = dashboardLayoutContent && checkContent(dashboardLayoutContent, ['SuspenseBoundary']);
+  const hasDashboardSuspense =
+    dashboardLayoutContent && checkContent(dashboardLayoutContent, ['SuspenseBoundary']);
   tests.push({
     name: 'SuspenseBoundary in dashboard layout',
     status: hasDashboardSuspense ? 'pass' : 'fail',
-    message: hasDashboardSuspense 
+    message: hasDashboardSuspense
       ? 'SuspenseBoundary used in dashboard layout'
       : 'SuspenseBoundary not found in dashboard layout',
   });
 
   const duration = performance.now() - start;
-  const failed = tests.filter(t => t.status === 'fail').length;
+  const failed = tests.filter((t) => t.status === 'fail').length;
   const status = failed > 0 ? 'fail' : 'pass';
 
   return { name: 'Suspense Boundaries', status, duration, tests };
@@ -452,11 +463,13 @@ async function phase6(): Promise<PhaseResult> {
       name: 'Appwrite Configuration',
       status: 'pass',
       duration: 0,
-      tests: [{
-        name: 'Connectivity tests skipped',
-        status: 'pass',
-        message: '--skip-connectivity flag used',
-      }],
+      tests: [
+        {
+          name: 'Connectivity tests skipped',
+          status: 'pass',
+          message: '--skip-connectivity flag used',
+        },
+      ],
     };
   }
 
@@ -558,8 +571,8 @@ async function phase6(): Promise<PhaseResult> {
   }
 
   const duration = performance.now() - start;
-  const failed = tests.filter(t => t.status === 'fail').length;
-  const warnings = tests.filter(t => t.status === 'warning').length;
+  const failed = tests.filter((t) => t.status === 'fail').length;
+  const warnings = tests.filter((t) => t.status === 'warning').length;
   const status = failed > 0 ? 'fail' : warnings > 0 ? 'warning' : 'pass';
 
   return { name: 'Appwrite Configuration', status, duration, tests };
@@ -579,7 +592,7 @@ async function phase7(): Promise<PhaseResult> {
     tests.push({
       name: 'src/lib/debug/hydration-logger.ts',
       status: hasExport ? 'pass' : 'fail',
-      message: hasExport 
+      message: hasExport
         ? 'HydrationLogger exists and exports correctly'
         : 'HydrationLogger export not found',
     });
@@ -599,7 +612,7 @@ async function phase7(): Promise<PhaseResult> {
     tests.push({
       name: 'src/lib/debug/store-debugger.ts',
       status: hasExport ? 'pass' : 'fail',
-      message: hasExport 
+      message: hasExport
         ? 'StoreDebugger exists and exports correctly'
         : 'StoreDebugger export not found',
     });
@@ -619,7 +632,7 @@ async function phase7(): Promise<PhaseResult> {
     tests.push({
       name: 'src/lib/debug/network-monitor.ts',
       status: hasExport ? 'pass' : 'fail',
-      message: hasExport 
+      message: hasExport
         ? 'NetworkMonitor exists and exports correctly'
         : 'NetworkMonitor export not found',
     });
@@ -633,17 +646,23 @@ async function phase7(): Promise<PhaseResult> {
 
   // Check integration in providers
   const providersContent = readFileContent('src/app/providers.tsx');
-  const hasDebugIntegration = providersContent && checkContent(providersContent, ['HydrationLogger.init', 'StoreDebugger.init', 'NetworkMonitor.init']);
+  const hasDebugIntegration =
+    providersContent &&
+    checkContent(providersContent, [
+      'HydrationLogger.init',
+      'StoreDebugger.init',
+      'NetworkMonitor.init',
+    ]);
   tests.push({
     name: 'Debug utilities in providers',
     status: hasDebugIntegration ? 'pass' : 'fail',
-    message: hasDebugIntegration 
+    message: hasDebugIntegration
       ? 'Debug utilities initialized in providers (development-only)'
       : 'Debug utilities not found in providers',
   });
 
   const duration = performance.now() - start;
-  const failed = tests.filter(t => t.status === 'fail').length;
+  const failed = tests.filter((t) => t.status === 'fail').length;
   const status = failed > 0 ? 'fail' : 'pass';
 
   return { name: 'Debug Utilities', status, duration, tests };
@@ -673,10 +692,11 @@ async function phase8(): Promise<PhaseResult> {
       const hasImports = content && content.includes('import ');
       tests.push({
         name: script,
-        status: (hasShebang && hasImports) ? 'pass' : 'warning',
-        message: hasShebang && hasImports 
-          ? `${script} exists and appears valid`
-          : `${script} exists but may have issues (missing shebang or imports)`,
+        status: hasShebang && hasImports ? 'pass' : 'warning',
+        message:
+          hasShebang && hasImports
+            ? `${script} exists and appears valid`
+            : `${script} exists but may have issues (missing shebang or imports)`,
       });
     } else {
       tests.push({
@@ -688,8 +708,8 @@ async function phase8(): Promise<PhaseResult> {
   }
 
   const duration = performance.now() - start;
-  const failed = tests.filter(t => t.status === 'fail').length;
-  const warnings = tests.filter(t => t.status === 'warning').length;
+  const failed = tests.filter((t) => t.status === 'fail').length;
+  const warnings = tests.filter((t) => t.status === 'warning').length;
   const status = failed > 0 ? 'fail' : warnings > 0 ? 'warning' : 'pass';
 
   return { name: 'Test Scripts', status, duration, tests };
@@ -712,13 +732,13 @@ async function runTests(): Promise<void> {
   ];
 
   // Filter phases if specific phase requested
-  const phasesToRun = options.phase 
-    ? allPhases.filter(p => p.key === options.phase)
-    : allPhases;
+  const phasesToRun = options.phase ? allPhases.filter((p) => p.key === options.phase) : allPhases;
 
   if (options.phase && phasesToRun.length === 0) {
     console.error(`❌ Unknown phase: ${options.phase}`);
-    console.error('Available phases: env, hydration, error-boundaries, loading-states, suspense-boundaries, appwrite, debug-utilities, test-scripts');
+    console.error(
+      'Available phases: env, hydration, error-boundaries, loading-states, suspense-boundaries, appwrite, debug-utilities, test-scripts'
+    );
     process.exit(1);
   }
 
@@ -732,11 +752,13 @@ async function runTests(): Promise<void> {
         name: 'Unknown',
         status: 'fail',
         duration: 0,
-        tests: [{
-          name: 'Phase execution',
-          status: 'fail',
-          message: `Phase failed: ${error.message}`,
-        }],
+        tests: [
+          {
+            name: 'Phase execution',
+            status: 'fail',
+            message: `Phase failed: ${error.message}`,
+          },
+        ],
       });
     }
   }
@@ -744,12 +766,12 @@ async function runTests(): Promise<void> {
   const totalDuration = performance.now() - startTime;
 
   // Calculate summary
-  const allTests = phases.flatMap(p => p.tests);
+  const allTests = phases.flatMap((p) => p.tests);
   const summary = {
     total: allTests.length,
-    passed: allTests.filter(t => t.status === 'pass').length,
-    failed: allTests.filter(t => t.status === 'fail').length,
-    warnings: allTests.filter(t => t.status === 'warning').length,
+    passed: allTests.filter((t) => t.status === 'pass').length,
+    failed: allTests.filter((t) => t.status === 'fail').length,
+    warnings: allTests.filter((t) => t.status === 'warning').length,
   };
 
   // Generate recommendations
@@ -760,7 +782,7 @@ async function runTests(): Promise<void> {
   if (summary.warnings > 0) {
     recommendations.push('Review warning tests for potential issues');
   }
-  if (phases.some(p => p.name === 'Appwrite Configuration' && p.status === 'fail')) {
+  if (phases.some((p) => p.name === 'Appwrite Configuration' && p.status === 'fail')) {
     recommendations.push('Configure Appwrite properly or use mock backend');
   }
 
@@ -779,13 +801,25 @@ async function runTests(): Promise<void> {
 
     for (const phase of phases) {
       const icon = phase.status === 'pass' ? '✅' : phase.status === 'warning' ? '⚠️' : '❌';
-      const color = phase.status === 'pass' ? colors.green : phase.status === 'warning' ? colors.yellow : colors.red;
-      console.log(`${color}${icon} ${phase.name} - ${phase.status.toUpperCase()} (${phase.duration.toFixed(1)}ms)${colors.reset}`);
-      
+      const color =
+        phase.status === 'pass'
+          ? colors.green
+          : phase.status === 'warning'
+            ? colors.yellow
+            : colors.red;
+      console.log(
+        `${color}${icon} ${phase.name} - ${phase.status.toUpperCase()} (${phase.duration.toFixed(1)}ms)${colors.reset}`
+      );
+
       if (options.verbose) {
         for (const test of phase.tests) {
           const testIcon = test.status === 'pass' ? '✅' : test.status === 'warning' ? '⚠️' : '❌';
-          const testColor = test.status === 'pass' ? colors.green : test.status === 'warning' ? colors.yellow : colors.red;
+          const testColor =
+            test.status === 'pass'
+              ? colors.green
+              : test.status === 'warning'
+                ? colors.yellow
+                : colors.red;
           console.log(`  ${testColor}${testIcon} ${test.name}${colors.reset}`);
           if (test.message) console.log(`    ${test.message}`);
           if (test.details && options.verbose) console.log(`    ${test.details}`);
@@ -802,11 +836,13 @@ async function runTests(): Promise<void> {
 
     if (recommendations.length > 0) {
       console.log('\n💡 Recommendations:');
-      recommendations.forEach(rec => console.log(`  • ${rec}`));
+      recommendations.forEach((rec) => console.log(`  • ${rec}`));
     }
 
-    const overallStatus = summary.failed > 0 ? 'FAILED' : summary.warnings > 0 ? 'PASSED WITH WARNINGS' : 'PASSED';
-    const statusColor = summary.failed > 0 ? colors.red : summary.warnings > 0 ? colors.yellow : colors.green;
+    const overallStatus =
+      summary.failed > 0 ? 'FAILED' : summary.warnings > 0 ? 'PASSED WITH WARNINGS' : 'PASSED';
+    const statusColor =
+      summary.failed > 0 ? colors.red : summary.warnings > 0 ? colors.yellow : colors.green;
     console.log(`\n🎉 Overall: ${statusColor}${overallStatus}${colors.reset}`);
   }
 
@@ -825,7 +861,7 @@ async function runTests(): Promise<void> {
 }
 
 // Run the tests
-runTests().catch(error => {
+runTests().catch((error) => {
   console.error('❌ Test execution failed:', error);
   process.exit(1);
 });

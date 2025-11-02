@@ -41,32 +41,32 @@ export async function migrateDonations() {
  */
 export async function createTestUsers() {
   console.log('Creating test users...');
-  
+
   const testUsers = [
     {
       email: 'admin@test.com',
       password: 'admin123',
       name: 'Admin User',
-      role: UserRole.ADMIN
+      role: UserRole.ADMIN,
     },
     {
       email: 'manager@test.com',
       password: 'manager123',
       name: 'Manager User',
-      role: UserRole.MANAGER
+      role: UserRole.MANAGER,
     },
     {
       email: 'member@test.com',
       password: 'member123',
       name: 'Member User',
-      role: UserRole.MEMBER
+      role: UserRole.MEMBER,
     },
     {
       email: 'viewer@test.com',
       password: 'viewer123',
       name: 'Viewer User',
-      role: UserRole.VIEWER
-    }
+      role: UserRole.VIEWER,
+    },
   ];
 
   for (const user of testUsers) {
@@ -80,18 +80,13 @@ export async function createTestUsers() {
       );
 
       // Create user document in database
-      await serverDatabases.createDocument(
-        DATABASE_ID,
-        COLLECTIONS.USERS,
-        appwriteUser.$id,
-        {
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          isActive: true,
-          labels: createUserLabels(user.role)
-        }
-      );
+      await serverDatabases.createDocument(DATABASE_ID, COLLECTIONS.USERS, appwriteUser.$id, {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: true,
+        labels: createUserLabels(user.role),
+      });
 
       console.log(`Created test user: ${user.name} (${user.email})`);
     } catch (error: unknown) {
@@ -103,7 +98,7 @@ export async function createTestUsers() {
       }
     }
   }
-  
+
   console.log('Test users creation completed!');
 }
 
@@ -112,13 +107,13 @@ export async function createTestUsers() {
  */
 export async function runMigration() {
   console.log('Starting Appwrite migration...');
-  
+
   try {
     await migrateUsers();
     await migrateBeneficiaries();
     await migrateDonations();
     await createTestUsers();
-    
+
     console.log('Migration completed successfully!');
     console.log('\nTest credentials:');
     console.log('Admin: admin@test.com / admin123');

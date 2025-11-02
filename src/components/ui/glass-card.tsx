@@ -12,15 +12,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   (
-    {
-      blur = 'md',
-      opacity = 0.8,
-      border = true,
-      shadow = true,
-      children,
-      className,
-      ...props
-    },
+    { blur = 'md', opacity = 0.8, border = true, shadow = true, children, className, ...props },
     ref
   ) => {
     const getBlurClass = () => {
@@ -64,4 +56,3 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
 );
 
 GlassCard.displayName = 'GlassCard';
-

@@ -38,12 +38,7 @@ export function ExportButtons({
   if (compact) {
     return (
       <div className="relative">
-        <Button
-          variant={variant}
-          size={size}
-          onClick={() => setIsOpen(!isOpen)}
-          className="gap-1"
-        >
+        <Button variant={variant} size={size} onClick={() => setIsOpen(!isOpen)} className="gap-1">
           <Download className="h-4 w-4" />
           {showLabel && 'İndir'}
         </Button>
@@ -187,12 +182,7 @@ export function SimpleExportButton({
   }
 
   return (
-    <Button
-      variant={variant}
-      size={size}
-      onClick={handleExport}
-      className="gap-1"
-    >
+    <Button variant={variant} size={size} onClick={handleExport} className="gap-1">
       <Download className="h-4 w-4" />
       {label}
     </Button>

@@ -13,7 +13,7 @@ export default function FinancialDashboardPage() {
         'Gelir-gider grafikleri',
         'Bütçe karşılaştırmaları',
         'Trend analizleri',
-        'Özelleştirilebilir widget\'lar',
+        "Özelleştirilebilir widget'lar",
       ]}
     />
   );

@@ -89,11 +89,15 @@ class ProductionBuildTester {
     }
   }
 
-  private async runCommand(cmd: string, args: string[], options: {
-    cwd?: string;
-    timeout?: number;
-    captureOutput?: boolean;
-  } = {}): Promise<{ code: number; stdout: string; stderr: string }> {
+  private async runCommand(
+    cmd: string,
+    args: string[],
+    options: {
+      cwd?: string;
+      timeout?: number;
+      captureOutput?: boolean;
+    } = {}
+  ): Promise<{ code: number; stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
       const child = spawn(cmd, args, {
         cwd: options.cwd || process.cwd(),
@@ -106,14 +110,20 @@ class ProductionBuildTester {
       let stderr = '';
 
       if (options.captureOutput) {
-        child.stdout?.on('data', (data) => { stdout += data.toString(); });
-        child.stderr?.on('data', (data) => { stderr += data.toString(); });
+        child.stdout?.on('data', (data) => {
+          stdout += data.toString();
+        });
+        child.stderr?.on('data', (data) => {
+          stderr += data.toString();
+        });
       }
 
-      const timer = options.timeout ? setTimeout(() => {
-        child.kill('SIGKILL');
-        reject(new Error(`Command timed out: ${cmd} ${args.join(' ')}`));
-      }, options.timeout) : null;
+      const timer = options.timeout
+        ? setTimeout(() => {
+            child.kill('SIGKILL');
+            reject(new Error(`Command timed out: ${cmd} ${args.join(' ')}`));
+          }, options.timeout)
+        : null;
 
       child.on('exit', (code) => {
         if (timer) clearTimeout(timer);
@@ -238,7 +248,7 @@ class ProductionBuildTester {
 
   async phase4_ProductionServerStart(): Promise<void> {
     this.log(`Starting production server on port ${this.port}...`);
-    
+
     this.serverProcess = spawn('npm', ['start'], {
       env: { ...process.env, PORT: this.port.toString() },
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -278,11 +288,15 @@ class ProductionBuildTester {
     // This would require running dev server and comparing
     // For now, just check that console.log is removed
     this.log('Checking production optimizations...');
-    
+
     const response = await fetch(`http://localhost:${this.port}`);
     const html = await response.text();
-    
-    if (html.includes('console.log') && !html.includes('console.error') && !html.includes('console.warn')) {
+
+    if (
+      html.includes('console.log') &&
+      !html.includes('console.error') &&
+      !html.includes('console.warn')
+    ) {
       throw new Error('console.log statements found in production build');
     }
   }
@@ -315,10 +329,10 @@ class ProductionBuildTester {
     if (this.serverProcess) {
       this.log('Stopping server...');
       this.serverProcess.kill('SIGINT');
-      
+
       // Wait for graceful shutdown
       await delay(5000);
-      
+
       if (!this.serverProcess.killed) {
         this.serverProcess.kill('SIGKILL');
       }
@@ -382,7 +396,7 @@ class ProductionBuildTester {
     // Test a static asset
     const assetUrl = `${baseUrl}/_next/static/css/app/layout.css`;
     const response = await fetch(assetUrl);
-    
+
     if (!response.ok) {
       throw new Error('Static asset not accessible');
     }
@@ -395,10 +409,11 @@ class ProductionBuildTester {
 
   private async testApiEndpoints(baseUrl: string): Promise<void> {
     const endpoints = ['/api/health', '/api/csrf', '/api/auth/session'];
-    
+
     for (const endpoint of endpoints) {
       const response = await fetch(`${baseUrl}${endpoint}`);
-      if (!response.ok && response.status !== 401) { // 401 is ok for auth endpoints
+      if (!response.ok && response.status !== 401) {
+        // 401 is ok for auth endpoints
         throw new Error(`API endpoint ${endpoint} failed with status ${response.status}`);
       }
     }
@@ -415,13 +430,13 @@ class ProductionBuildTester {
     // Use Playwright for performance measurement
     const browser = await chromium.launch();
     const page = await browser.newPage();
-    
+
     try {
       await page.goto(baseUrl);
-      
+
       // Wait for load
       await page.waitForLoadState('networkidle');
-      
+
       // Measure basic metrics
       const metrics = await page.evaluate(() => {
         const perf = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
@@ -445,7 +460,6 @@ class ProductionBuildTester {
       }
 
       this.results[this.results.length - 1].details = metrics;
-      
     } finally {
       await browser.close();
     }
@@ -468,14 +482,17 @@ class ProductionBuildTester {
       recommendations: this.generateRecommendations(),
       summary: {
         total: this.results.length,
-        passed: this.results.filter(r => r.status === 'passed').length,
-        failed: this.results.filter(r => r.status === 'failed').length,
-        warnings: this.results.filter(r => r.status === 'warning').length,
+        passed: this.results.filter((r) => r.status === 'passed').length,
+        failed: this.results.filter((r) => r.status === 'failed').length,
+        warnings: this.results.filter((r) => r.status === 'warning').length,
       },
     };
 
     // JSON report
-    writeFileSync(join(reportDir, 'production-build-report.json'), JSON.stringify(reportData, null, 2));
+    writeFileSync(
+      join(reportDir, 'production-build-report.json'),
+      JSON.stringify(reportData, null, 2)
+    );
 
     // HTML report
     const htmlReport = this.generateHtmlReport(reportData);
@@ -486,20 +503,24 @@ class ProductionBuildTester {
 
   private generateRecommendations(): string[] {
     const recommendations: string[] = [];
-    
-    const failedPhases = this.results.filter(r => r.status === 'failed');
-    const warningPhases = this.results.filter(r => r.status === 'warning');
+
+    const failedPhases = this.results.filter((r) => r.status === 'failed');
+    const warningPhases = this.results.filter((r) => r.status === 'warning');
 
     if (failedPhases.length > 0) {
       recommendations.push('Fix all failed test phases before deploying to production');
     }
 
-    if (warningPhases.some(r => r.phase.includes('Build Time'))) {
-      recommendations.push('Consider optimizing build time by reducing bundle size or using build cache');
+    if (warningPhases.some((r) => r.phase.includes('Build Time'))) {
+      recommendations.push(
+        'Consider optimizing build time by reducing bundle size or using build cache'
+      );
     }
 
-    if (warningPhases.some(r => r.phase.includes('FCP') || r.phase.includes('LCP'))) {
-      recommendations.push('Optimize Core Web Vitals by implementing code splitting and optimizing images');
+    if (warningPhases.some((r) => r.phase.includes('FCP') || r.phase.includes('LCP'))) {
+      recommendations.push(
+        'Optimize Core Web Vitals by implementing code splitting and optimizing images'
+      );
     }
 
     return recommendations;
@@ -535,22 +556,30 @@ class ProductionBuildTester {
   <h2>Test Results</h2>
   <table>
     <tr><th>Phase</th><th>Status</th><th>Duration</th><th>Message</th></tr>
-    ${data.results.map(r => `
+    ${data.results
+      .map(
+        (r) => `
       <tr>
         <td>${r.phase}</td>
         <td class="${r.status}">${r.status.toUpperCase()}</td>
         <td>${r.duration}ms</td>
         <td>${r.message || ''}</td>
       </tr>
-    `).join('')}
+    `
+      )
+      .join('')}
   </table>
 
-  ${data.recommendations.length > 0 ? `
+  ${
+    data.recommendations.length > 0
+      ? `
     <h2>Recommendations</h2>
     <ul>
-      ${data.recommendations.map(r => `<li>${r}</li>`).join('')}
+      ${data.recommendations.map((r) => `<li>${r}</li>`).join('')}
     </ul>
-  ` : ''}
+  `
+      : ''
+  }
 </body>
 </html>`;
   }
@@ -562,14 +591,19 @@ class ProductionBuildTester {
       await this.runPhase('Bundle Analysis', () => this.phase3_BundleAnalysis());
       await this.runPhase('Production Server Start', () => this.phase4_ProductionServerStart());
       await this.runPhase('Production Runtime Tests', () => this.phase5_ProductionRuntimeTests());
-      await this.runPhase('Production vs Development Comparison', () => this.phase6_ProductionVsDevelopmentComparison());
+      await this.runPhase('Production vs Development Comparison', () =>
+        this.phase6_ProductionVsDevelopmentComparison()
+      );
       await this.runPhase('Security Validation', () => this.phase7_SecurityValidation());
       await this.runPhase('Cleanup', () => this.phase8_Cleanup());
 
-      const summary = this.results.reduce((acc, r) => {
-        acc[r.status]++;
-        return acc;
-      }, { passed: 0, failed: 0, warning: 0 });
+      const summary = this.results.reduce(
+        (acc, r) => {
+          acc[r.status]++;
+          return acc;
+        },
+        { passed: 0, failed: 0, warning: 0 }
+      );
 
       console.log(`\n🎉 Test completed!`);
       console.log(`✅ Passed: ${summary.passed}`);
@@ -579,7 +613,6 @@ class ProductionBuildTester {
       if (summary.failed > 0) {
         process.exit(1);
       }
-
     } catch (error) {
       console.error('Test suite failed:', error);
       await this.phase8_Cleanup().catch(() => {});
@@ -624,7 +657,7 @@ function parseArgs() {
 // Main execution
 const options = parseArgs();
 const tester = new ProductionBuildTester(options);
-tester.run().catch(error => {
+tester.run().catch((error) => {
   console.error('Unexpected error:', error);
   process.exit(1);
 });

@@ -229,8 +229,8 @@ export function MessageForm({
       await sendMessageMutation.mutateAsync(messageId);
     } else {
       const result = await createMessageMutation.mutateAsync(submissionData);
-      if (result.data) {
-        await sendMessageMutation.mutateAsync(result.data.$id);
+      if (result && typeof result === 'object' && 'data' in result && result.data) {
+        await sendMessageMutation.mutateAsync((result.data as { $id: string }).$id);
       }
     }
   };

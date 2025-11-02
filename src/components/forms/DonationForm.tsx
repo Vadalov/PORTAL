@@ -8,7 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -21,7 +27,7 @@ const donationSchema = z.object({
   donor_name: z.string().min(2, 'Donör adı en az 2 karakter olmalıdır'),
   donor_phone: z.string().min(10, 'Geçerli bir telefon numarası girin'),
   donor_email: z.string().email('Geçerli bir email adresi girin').optional().or(z.literal('')),
-  amount: z.number().min(1, 'Tutar 0\'dan büyük olmalıdır'),
+  amount: z.number().min(1, "Tutar 0'dan büyük olmalıdır"),
   currency: z.enum(['TRY', 'USD', 'EUR']),
   donation_type: z.string().min(2, 'Bağış türü belirtin'),
   payment_method: z.string().min(2, 'Ödeme yöntemi belirtin'),
@@ -60,16 +66,16 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
   });
 
   const createDonationMutation = useMutation({
-    mutationFn: (data: DonationFormData) =>
-      api.donations.createDonation(data),
+    mutationFn: (data: DonationFormData) => api.donations.createDonation(data),
     onSuccess: () => {
       toast.success('Bağış başarıyla kaydedildi');
       queryClient.invalidateQueries({ queryKey: ['donations'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       onSuccess?.();
     },
-    onError: (error: unknown) => {
-      toast.error(`Bağış kaydedilirken hata oluştu: ${  error.message}`);
+    onError: (err: unknown) => {
+      const error = err as Error;
+      toast.error(`Bağış kaydedilirken hata oluştu: ${error.message}`);
     },
   });
 
@@ -83,7 +89,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
         const uploadResult = await api.storage.uploadFile({
           file: receiptFile,
           bucketId: 'receipts',
-          permissions: []
+          permissions: [],
         });
         uploadedFileId = uploadResult.data?.$id;
       }
@@ -104,9 +110,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Yeni Bağış Ekle</CardTitle>
-        <CardDescription>
-          Bağış bilgilerini girerek yeni kayıt oluşturun
-        </CardDescription>
+        <CardDescription>Bağış bilgilerini girerek yeni kayıt oluşturun</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -117,11 +121,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="donor_name">Donör Adı *</Label>
-                <Input
-                  id="donor_name"
-                  {...register('donor_name')}
-                  placeholder="Ahmet Yılmaz"
-                />
+                <Input id="donor_name" {...register('donor_name')} placeholder="Ahmet Yılmaz" />
                 {errors.donor_name && (
                   <p className="text-sm text-red-600">{errors.donor_name.message}</p>
                 )}
@@ -129,11 +129,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="donor_phone">Telefon *</Label>
-                <Input
-                  id="donor_phone"
-                  {...register('donor_phone')}
-                  placeholder="0555 123 45 67"
-                />
+                <Input id="donor_phone" {...register('donor_phone')} placeholder="0555 123 45 67" />
                 {errors.donor_phone && (
                   <p className="text-sm text-red-600">{errors.donor_phone.message}</p>
                 )}
@@ -169,16 +165,14 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
                   {...register('amount', { valueAsNumber: true })}
                   placeholder="1000.00"
                 />
-                {errors.amount && (
-                  <p className="text-sm text-red-600">{errors.amount.message}</p>
-                )}
+                {errors.amount && <p className="text-sm text-red-600">{errors.amount.message}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="currency">Para Birimi *</Label>
                 <Select
                   value={watch('currency')}
-                  onValueChange={(value) => setValue('currency', value)}
+                  onValueChange={(value) => setValue('currency', value as 'TRY' | 'USD' | 'EUR')}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Para birimi seçin" />
@@ -269,9 +263,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
                 placeholder="Ek açıklamalar, özel notlar..."
                 rows={3}
               />
-              {errors.notes && (
-                <p className="text-sm text-red-600">{errors.notes.message}</p>
-              )}
+              {errors.notes && <p className="text-sm text-red-600">{errors.notes.message}</p>}
             </div>
 
             <FileUpload
@@ -285,11 +277,7 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
 
           {/* Form Actions */}
           <div className="flex flex-col sm:flex-row gap-4 pt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 sm:flex-none"
-            >
+            <Button type="submit" disabled={isSubmitting} className="flex-1 sm:flex-none">
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

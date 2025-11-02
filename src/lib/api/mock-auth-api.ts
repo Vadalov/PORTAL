@@ -19,42 +19,42 @@ const mockUsers: MockUser[] = [
     email: 'admin@test.com',
     password: 'admin123',
     name: 'Admin User',
-    role: UserRole.ADMIN
+    role: UserRole.ADMIN,
   },
   {
     id: 'mock-manager-1',
     email: 'manager@test.com',
     password: 'manager123',
     name: 'Manager User',
-    role: UserRole.MANAGER
+    role: UserRole.MANAGER,
   },
   {
     id: 'mock-member-1',
     email: 'member@test.com',
     password: 'member123',
     name: 'Member User',
-    role: UserRole.MEMBER
+    role: UserRole.MEMBER,
   },
   {
     id: 'mock-viewer-1',
     email: 'viewer@test.com',
     password: 'viewer123',
     name: 'Viewer User',
-    role: UserRole.VIEWER
-  }
+    role: UserRole.VIEWER,
+  },
 ];
 
 export const mockAuthApi = {
   async login(email: string, password: string) {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const user = mockUsers.find(u => u.email === email && u.password === password);
-    
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const user = mockUsers.find((u) => u.email === email && u.password === password);
+
     if (!user) {
       throw new Error('Invalid credentials. Please check the email and password.');
     }
-    
+
     // Convert to store user format
     const storeUser: User = {
       id: user.id,
@@ -67,7 +67,7 @@ export const mockAuthApi = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    
+
     // Create mock session
     const session = {
       $id: `mock-session-${user.id}`,
@@ -97,41 +97,41 @@ export const mockAuthApi = {
       $createdAt: new Date().toISOString(),
       $updatedAt: new Date().toISOString(),
     };
-    
+
     return { session, user: storeUser };
   },
-  
+
   async logout() {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     return { success: true };
   },
-  
+
   async getCurrentUser() {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     throw new Error('No active session');
   },
-  
+
   async createAccount(email: string, password: string, name: string) {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const existingUser = mockUsers.find(u => u.email === email);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const existingUser = mockUsers.find((u) => u.email === email);
     if (existingUser) {
       throw new Error('User already exists');
     }
-    
+
     const newUser: MockUser = {
       id: `mock-user-${Date.now()}`,
       email,
       password,
       name,
-      role: UserRole.MEMBER
+      role: UserRole.MEMBER,
     };
-    
+
     mockUsers.push(newUser);
-    
+
     return {
       $id: newUser.id,
       email: newUser.email,
@@ -143,23 +143,23 @@ export const mockAuthApi = {
 
   async getDashboardMetrics() {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     return {
       data: {
         totalBeneficiaries: 45,
         totalDonations: 128,
         totalDonationAmount: 125000,
-        activeUsers: 12
+        activeUsers: 12,
       },
-      error: null
+      error: null,
     };
   },
 
-  async getBeneficiaries(params? : unknown {
+  async getBeneficiaries(_params?: unknown) {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     const mockBeneficiaries = [
       {
         $id: 'ben-1',
@@ -214,20 +214,20 @@ export const mockAuthApi = {
         status: 'active' as const,
         $createdAt: new Date().toISOString(),
         $updatedAt: new Date().toISOString(),
-      }
+      },
     ];
-    
+
     return {
       data: mockBeneficiaries,
       total: mockBeneficiaries.length,
-      error: null
+      error: null,
     };
   },
 
-  async getDonations(params? : unknown {
+  async getDonations(_params?: unknown) {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     const mockDonations = [
       {
         $id: 'don-1',
@@ -278,13 +278,13 @@ export const mockAuthApi = {
         status: 'pending' as const,
         $createdAt: new Date().toISOString(),
         $updatedAt: new Date().toISOString(),
-      }
+      },
     ];
-    
+
     return {
       data: mockDonations,
       total: mockDonations.length,
-      error: null
+      error: null,
     };
-  }
+  },
 };

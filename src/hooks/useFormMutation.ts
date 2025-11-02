@@ -77,11 +77,12 @@ export function useFormMutation<TData = unknown, TVariables = unknown>({
     },
     onError: (error: unknown) => {
       // Get error message
-      const message = error instanceof Error
-        ? error.message
-        : typeof error === 'string'
-        ? error
-        : 'Bilinmeyen hata';
+      const message =
+        error instanceof Error
+          ? error.message
+          : typeof error === 'string'
+            ? error
+            : 'Bilinmeyen hata';
 
       // Show error toast
       if (showErrorToast) {

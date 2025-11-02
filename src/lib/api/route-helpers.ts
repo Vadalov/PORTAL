@@ -87,7 +87,7 @@ export async function handleGetById<T>(
     }
 
     const response = await getOperation(id);
-    
+
     if (response.error || !response.data) {
       return errorResponse(`${resourceName} bulunamadı`, 404);
     }
@@ -125,18 +125,12 @@ export async function handleUpdate<T, U = unknown>(
     }
 
     const response = await updateOperation(id, body);
-    
+
     if (response.error || !response.data) {
-      return errorResponse(
-        response.error || 'Güncelleme başarısız',
-        400
-      );
+      return errorResponse(response.error || 'Güncelleme başarısız', 400);
     }
 
-    return successResponse(
-      response.data as T,
-      `${resourceName} güncellendi`
-    );
+    return successResponse(response.data as T, `${resourceName} güncellendi`);
   } catch (error: unknown) {
     console.error(`Update ${resourceName} error:`, error);
     return errorResponse('Güncelleme işlemi başarısız', 500);
@@ -160,15 +154,12 @@ export async function handleDelete(
     }
 
     const response = await deleteOperation(id);
-    
+
     if (response.error) {
       return errorResponse(response.error, 400);
     }
 
-    return successResponse(
-      null,
-      `${resourceName} silindi`
-    );
+    return successResponse(null, `${resourceName} silindi`);
   } catch (error: unknown) {
     console.error(`Delete ${resourceName} error:`, error);
     return errorResponse('Silme işlemi başarısız', 500);
@@ -207,14 +198,14 @@ export function handleDuplicateError(
   defaultMessage: string = 'Bu kayıt zaten mevcut'
 ): { isDuplicate: boolean; message: string } {
   const errorMessage = error instanceof Error ? error.message : String(error);
-  const isDuplicate = 
+  const isDuplicate =
     errorMessage?.toLowerCase().includes('duplicate') ||
     errorMessage?.toLowerCase().includes('unique') ||
     errorMessage?.toLowerCase().includes('already exists');
 
   return {
     isDuplicate,
-    message: isDuplicate ? `${duplicateKey} zaten kayıtlı` : defaultMessage
+    message: isDuplicate ? `${duplicateKey} zaten kayıtlı` : defaultMessage,
   };
 }
 
@@ -232,7 +223,7 @@ export async function handleApiError<T>(
   defaultMessage: string = 'İşlem başarısız'
 ): Promise<NextResponse<ApiResponse<T>>> {
   logger.error('API error', error, context);
-  
+
   // Handle duplicate errors
   const duplicateCheck = handleDuplicateError(error);
   if (duplicateCheck.isDuplicate) {

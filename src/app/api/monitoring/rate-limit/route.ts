@@ -4,7 +4,7 @@ import { RateLimitMonitor, RateLimitViolation } from '@/lib/rate-limit-monitor';
 /**
  * GET /api/monitoring/rate-limit
  * Rate limit monitoring endpoint
- * 
+ *
  * Query Parameters:
  * - action: stats|violations|ip-stats|export|reset
  * - timeRange: 1h|24h|7d|30d (for stats and ip-stats)
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           success: true,
           data: stats,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
       case 'violations':
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
           success: true,
           data: violations,
           count: violations.length,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
       case 'ip-stats':
@@ -43,22 +43,24 @@ export async function GET(request: NextRequest) {
             {
               success: false,
               error: 'IP address required for ip-stats action',
-              example: '/api/monitoring/rate-limit?action=ip-stats&ip=192.168.1.1'
+              example: '/api/monitoring/rate-limit?action=ip-stats&ip=192.168.1.1',
             },
             { status: 400 }
           );
         }
         // IP stats için sadece 1h, 24h, 7d destekleniyor
-        const ipTimeRange = ['1h', '24h', '7d'].includes(timeRange) ? timeRange as '1h' | '24h' | '7d' : '24h';
+        const ipTimeRange = ['1h', '24h', '7d'].includes(timeRange)
+          ? (timeRange as '1h' | '24h' | '7d')
+          : '24h';
         const ipStats = RateLimitMonitor.getIPStats(ip, ipTimeRange);
         return NextResponse.json({
           success: true,
           data: {
             ip,
             stats: ipStats,
-            timeRange: ipTimeRange
+            timeRange: ipTimeRange,
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
       case 'export':
@@ -66,8 +68,8 @@ export async function GET(request: NextRequest) {
         return new NextResponse(exportData, {
           headers: {
             'Content-Type': 'application/json',
-            'Content-Disposition': `attachment; filename="rate-limit-export-${new Date().toISOString().split('T')[0]}.json"`
-          }
+            'Content-Disposition': `attachment; filename="rate-limit-export-${new Date().toISOString().split('T')[0]}.json"`,
+          },
         });
 
       case 'reset':
@@ -79,12 +81,12 @@ export async function GET(request: NextRequest) {
             { status: 401 }
           );
         }
-        
+
         RateLimitMonitor.reset();
         return NextResponse.json({
           success: true,
           message: 'Rate limit monitoring data reset successfully',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
 
       default:
@@ -97,25 +99,25 @@ export async function GET(request: NextRequest) {
             'violations - Get recent violations',
             'ip-stats - Get IP-specific statistics',
             'export - Export all monitoring data',
-            'reset - Reset monitoring data (admin only)'
+            'reset - Reset monitoring data (admin only)',
           ],
-          example: '/api/monitoring/rate-limit?action=stats&timeRange=24h'
+          example: '/api/monitoring/rate-limit?action=stats&timeRange=24h',
         };
 
         return NextResponse.json({
           success: true,
           data: overview,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
     }
   } catch (error: unknown) {
     console.error('Rate limit monitoring API error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to process monitoring request',
-        details: errorMessage 
+        details: errorMessage,
       },
       { status: 500 }
     );
@@ -136,10 +138,10 @@ export async function POST(request: NextRequest) {
         // Manuel violation kaydetme (test amaçlı)
         const violationData = data as Omit<RateLimitViolation, 'id' | 'timestamp'>;
         RateLimitMonitor.recordViolation(violationData);
-        
+
         return NextResponse.json({
           success: true,
-          message: 'Violation recorded successfully'
+          message: 'Violation recorded successfully',
         });
 
       case 'bulk-export':
@@ -148,16 +150,16 @@ export async function POST(request: NextRequest) {
         return new NextResponse(exportData, {
           headers: {
             'Content-Type': 'application/json',
-            'Content-Disposition': `attachment; filename="bulk-rate-limit-data-${new Date().toISOString()}.json"`
-          }
+            'Content-Disposition': `attachment; filename="bulk-rate-limit-data-${new Date().toISOString()}.json"`,
+          },
         });
 
       default:
         return NextResponse.json(
-          { 
-            success: false, 
+          {
+            success: false,
             error: 'Invalid POST action',
-            availableActions: ['record-violation', 'bulk-export']
+            availableActions: ['record-violation', 'bulk-export'],
           },
           { status: 400 }
         );
@@ -166,10 +168,10 @@ export async function POST(request: NextRequest) {
     console.error('Rate limit monitoring POST error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to process POST request',
-        details: errorMessage 
+        details: errorMessage,
       },
       { status: 500 }
     );

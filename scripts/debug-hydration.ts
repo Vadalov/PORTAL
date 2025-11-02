@@ -32,9 +32,9 @@ const log = {
   debug: (msg: string) => console.log(`${colors.cyan}🔍 ${msg}${colors.reset}`),
 };
 
-console.log(`\n${  colors.magenta  }${'='.repeat(60)  }${colors.reset}`);
-console.log(`${colors.magenta  }  HYDRATION DEBUG SCRIPT${  colors.reset}`);
-console.log(`${colors.magenta + '='.repeat(60) + colors.reset  }\n`);
+console.log(`\n${colors.magenta}${'='.repeat(60)}${colors.reset}`);
+console.log(`${colors.magenta}  HYDRATION DEBUG SCRIPT${colors.reset}`);
+console.log(`${colors.magenta + '='.repeat(60) + colors.reset}\n`);
 
 // Step 1: Check environment files
 log.info('Step 1: Checking environment configuration...');
@@ -58,11 +58,7 @@ const requiredEnvVars = [
   'NEXT_PUBLIC_DATABASE_ID',
 ];
 
-const optionalEnvVars = [
-  'APPWRITE_API_KEY',
-  'CSRF_SECRET',
-  'SESSION_SECRET',
-];
+const optionalEnvVars = ['APPWRITE_API_KEY', 'CSRF_SECRET', 'SESSION_SECRET'];
 
 let hasAllRequired = true;
 
@@ -181,7 +177,7 @@ checks.forEach((check) => {
 });
 
 // Step 6: Generate report
-log.info(`\n${  colors.magenta  }${'='.repeat(60)  }${colors.reset}`);
+log.info(`\n${colors.magenta}${'='.repeat(60)}${colors.reset}`);
 log.info('SUMMARY');
 log.info(colors.magenta + '='.repeat(60) + colors.reset);
 

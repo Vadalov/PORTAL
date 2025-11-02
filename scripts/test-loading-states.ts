@@ -84,7 +84,6 @@ class LoadingStatesTester {
         // Additional performance tests
         await this.testPerformanceMetrics();
       }
-
     } catch (error) {
       console.error('Test execution failed:', error);
     } finally {
@@ -98,8 +97,8 @@ class LoadingStatesTester {
       results: this.results,
       summary: {
         total: this.results.length,
-        passed: this.results.filter(r => r.passed).length,
-        failed: this.results.filter(r => !r.passed).length,
+        passed: this.results.filter((r) => r.passed).length,
+        failed: this.results.filter((r) => !r.passed).length,
       },
     };
 
@@ -181,10 +180,11 @@ class LoadingStatesTester {
       const viewport = this.page!.viewportSize()!;
       const boundingBox = await overlay.boundingBox();
 
-      const coversViewport = boundingBox?.width === viewport.width && boundingBox?.height === viewport.height;
+      const coversViewport =
+        boundingBox?.width === viewport.width && boundingBox?.height === viewport.height;
 
       // Check backdrop blur
-      const hasBackdropBlur = await overlay.evaluate(el => 
+      const hasBackdropBlur = await overlay.evaluate((el) =>
         window.getComputedStyle(el).backdropFilter.includes('blur')
       );
 
@@ -241,8 +241,10 @@ class LoadingStatesTester {
       // Check if animations are disabled
       const hasMotionReduce = await this.page!.evaluate(() => {
         const overlay = document.querySelector('.loading-overlay');
-        return window.getComputedStyle(overlay!).animationName === 'none' ||
-               overlay!.classList.contains('motion-reduce');
+        return (
+          window.getComputedStyle(overlay!).animationName === 'none' ||
+          overlay!.classList.contains('motion-reduce')
+        );
       });
 
       this.results.push({
@@ -302,10 +304,13 @@ class LoadingStatesTester {
 
       // Check hydration loading
       const startTime = Date.now();
-      await this.page!.waitForFunction(() => {
-        const store = (window as any).__AUTH_STORE__;
-        return store?.getState()._hasHydrated === true;
-      }, { timeout: 10000 });
+      await this.page!.waitForFunction(
+        () => {
+          const store = (window as any).__AUTH_STORE__;
+          return store?.getState()._hasHydrated === true;
+        },
+        { timeout: 10000 }
+      );
       const endTime = Date.now();
       const hydrationTime = endTime - startTime;
 
@@ -406,7 +411,9 @@ async function main() {
     argv.performance
   );
 
-  console.log(`Running loading states tests with ${argv.browser} (${argv.headless ? 'headless' : 'headed'})`);
+  console.log(
+    `Running loading states tests with ${argv.browser} (${argv.headless ? 'headless' : 'headed'})`
+  );
 
   const report = await tester.runTests();
 
@@ -414,10 +421,7 @@ async function main() {
   mkdirSync('test-results', { recursive: true });
 
   // Write report
-  writeFileSync(
-    'test-results/loading-states-report.json',
-    JSON.stringify(report, null, 2)
-  );
+  writeFileSync('test-results/loading-states-report.json', JSON.stringify(report, null, 2));
 
   console.log(`Tests completed. ${report.summary.passed}/${report.summary.total} passed.`);
   console.log('Report saved to test-results/loading-states-report.json');

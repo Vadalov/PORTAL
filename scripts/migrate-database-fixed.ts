@@ -13,23 +13,35 @@ dotenv.config();
 
 // Logger utility
 class MigrationLogger {
-  private static log(prefix: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') {
+  private static log(
+    prefix: string,
+    message: string,
+    type: 'info' | 'success' | 'warning' | 'error' = 'info'
+  ) {
     const timestamp = new Date().toISOString();
     const color = {
       info: '\x1b[36m',
       success: '\x1b[32m',
       warning: '\x1b[33m',
-      error: '\x1b[31m'
+      error: '\x1b[31m',
     }[type];
-    
+
     const reset = '\x1b[0m';
     console.log(`${color}[${timestamp}] ${prefix}: ${message}${reset}`);
   }
 
-  static info(message: string) { this.log('INFO', message, 'info'); }
-  static success(message: string) { this.log('SUCCESS', message, 'success'); }
-  static warning(message: string) { this.log('WARNING', message, 'warning'); }
-  static error(message: string) { this.log('ERROR', message, 'error'); }
+  static info(message: string) {
+    this.log('INFO', message, 'info');
+  }
+  static success(message: string) {
+    this.log('SUCCESS', message, 'success');
+  }
+  static warning(message: string) {
+    this.log('WARNING', message, 'warning');
+  }
+  static error(message: string) {
+    this.log('ERROR', message, 'error');
+  }
 }
 
 // Main migration function
@@ -44,10 +56,7 @@ async function runMigration() {
     process.exit(1);
   }
 
-  const client = new Client()
-    .setEndpoint(endpoint)
-    .setProject(projectId)
-    .setKey(apiKey);
+  const client = new Client().setEndpoint(endpoint).setProject(projectId).setKey(apiKey);
 
   const databases = new Databases(client);
 
@@ -58,86 +67,86 @@ async function runMigration() {
       id: 'users',
       name: 'users',
       description: ['Kullanıcılar - Sistem kullanıcıları ve roller'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'beneficiaries',
-      name: 'beneficiaries', 
+      name: 'beneficiaries',
       description: ['İhtiyaç Sahipleri - 40+ alan ile genişletilmiş'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'donations',
       name: 'donations',
       description: ['Bağışlar - Bağış kayıtları ve makbuz yönetimi'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'aid_requests',
       name: 'aid_requests',
       description: ['Yardım Talepleri - İhtiyaç sahiplerinden gelen yardım talepleri'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'aid_applications',
       name: 'aid_applications',
       description: ['Yardım Başvuruları - Portal Plus stil başvurular'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'scholarships',
       name: 'scholarships',
       description: ['Burslar - Öğrenci burs yönetimi'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'parameters',
       name: 'parameters',
       description: ['Parametreler - 107 parametre, 26 kategori'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'tasks',
       name: 'tasks',
       description: ['Görevler - Portal Plus stil görev yönetimi (188 bekleyen iş)'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'meetings',
       name: 'meetings',
       description: ['Toplantılar - Portal Plus stil toplantı yönetimi'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'messages',
       name: 'messages',
       description: ['Mesajlar - SMS ve E-posta mesaj yönetimi'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'finance_records',
       name: 'finance_records',
       description: ['Finans Kayıtları - Gelir-Gider yönetimi'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'orphans',
       name: 'orphans',
       description: ['Yetimler - Portal Plus stil yetim/öğrenci yönetimi (35+ alan)'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'sponsors',
       name: 'sponsors',
       description: ['Sponsorlar - Sponsorluk yönetimi'],
-      permissions: ['*']
+      permissions: ['*'],
     },
     {
       id: 'campaigns',
       name: 'campaigns',
       description: ['Kampanyalar - Kampanya yönetimi'],
-      permissions: ['*']
-    }
+      permissions: ['*'],
+    },
   ];
 
   try {
@@ -177,8 +186,9 @@ async function runMigration() {
 
     MigrationLogger.success('🎉 Migration completed successfully!');
     MigrationLogger.success('All 13 collections created with basic structure');
-    MigrationLogger.info('Note: Detailed attributes and indexes can be added manually via Appwrite Console');
-
+    MigrationLogger.info(
+      'Note: Detailed attributes and indexes can be added manually via Appwrite Console'
+    );
   } catch (error: any) {
     MigrationLogger.error(`💥 Migration failed: ${error.message}`);
     process.exit(1);

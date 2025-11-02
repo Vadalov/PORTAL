@@ -15,7 +15,11 @@ interface PageLoaderProps {
  * Page Loader Component
  * Shows loading state for pages
  */
-export function PageLoader({ variant = 'overlay', text = 'Yükleniyor...', className }: PageLoaderProps) {
+export function PageLoader({
+  variant = 'overlay',
+  text = 'Yükleniyor...',
+  className,
+}: PageLoaderProps) {
   if (variant === 'overlay') {
     return (
       <div className={cn('min-h-[400px] relative', className)}>

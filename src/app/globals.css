@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -188,34 +188,34 @@
   --sidebar-ring: #475569; /* slate-600 */
 
   /* Brand Colors - Premium Corporate Blue */
-  --brand-primary: #3b82f6;  /* blue-500 - Modern, professional */
-  --brand-primary-light: #60a5fa;  /* blue-400 */
-  --brand-primary-dark: #2563eb;  /* blue-600 */
-  --brand-secondary: #10b981;  /* emerald-500 - Success green */
-  --brand-accent: #f59e0b;  /* amber-500 - Attention orange */
+  --brand-primary: #3b82f6; /* blue-500 - Modern, professional */
+  --brand-primary-light: #60a5fa; /* blue-400 */
+  --brand-primary-dark: #2563eb; /* blue-600 */
+  --brand-secondary: #10b981; /* emerald-500 - Success green */
+  --brand-accent: #f59e0b; /* amber-500 - Attention orange */
 
   /* Semantic Colors - Success */
-  --success: oklch(0.60 0.17 145);
+  --success: oklch(0.6 0.17 145);
   --success-light: oklch(0.75 0.12 145);
-  --success-dark: oklch(0.45 0.20 145);
+  --success-dark: oklch(0.45 0.2 145);
   --success-foreground: oklch(0.98 0 0);
 
   /* Semantic Colors - Warning */
   --warning: oklch(0.75 0.15 85);
   --warning-light: oklch(0.85 0.12 85);
-  --warning-dark: oklch(0.60 0.18 85);
-  --warning-foreground: oklch(0.20 0 0);
+  --warning-dark: oklch(0.6 0.18 85);
+  --warning-foreground: oklch(0.2 0 0);
 
   /* Semantic Colors - Error */
-  --error: oklch(0.60 0.22 25);
+  --error: oklch(0.6 0.22 25);
   --error-light: oklch(0.75 0.18 25);
   --error-dark: oklch(0.45 0.25 25);
   --error-foreground: oklch(0.98 0 0);
 
   /* Semantic Colors - Info */
-  --info: oklch(0.60 0.18 230);
+  --info: oklch(0.6 0.18 230);
   --info-light: oklch(0.75 0.14 230);
-  --info-dark: oklch(0.45 0.20 230);
+  --info-dark: oklch(0.45 0.2 230);
   --info-foreground: oklch(0.98 0 0);
 }
 
@@ -279,14 +279,14 @@
   --sidebar-ring: #475569; /* slate-600 */
 
   /* Brand Colors - Dark Mode Adjustments */
-  --brand-primary: #60a5fa;  /* blue-400 - brighter */
-  --brand-primary-light: #93c5fd;  /* blue-300 */
-  --brand-primary-dark: #3b82f6;  /* blue-500 */
-  --brand-secondary: #34d399;  /* emerald-400 */
-  --brand-accent: #fbbf24;  /* amber-400 */
+  --brand-primary: #60a5fa; /* blue-400 - brighter */
+  --brand-primary-light: #93c5fd; /* blue-300 */
+  --brand-primary-dark: #3b82f6; /* blue-500 */
+  --brand-secondary: #34d399; /* emerald-400 */
+  --brand-accent: #fbbf24; /* amber-400 */
 
   /* Semantic Colors - Success - Dark Mode */
-  --success: oklch(0.50 0.19 145);
+  --success: oklch(0.5 0.19 145);
   --success-light: oklch(0.65 0.15 145);
   --success-dark: oklch(0.35 0.22 145);
   --success-foreground: oklch(0.98 0 0);
@@ -294,17 +294,17 @@
   /* Semantic Colors - Warning - Dark Mode */
   --warning: oklch(0.65 0.17 85);
   --warning-light: oklch(0.75 0.14 85);
-  --warning-dark: oklch(0.50 0.20 85);
-  --warning-foreground: oklch(0.10 0 0);
+  --warning-dark: oklch(0.5 0.2 85);
+  --warning-foreground: oklch(0.1 0 0);
 
   /* Semantic Colors - Error - Dark Mode */
-  --error: oklch(0.50 0.24 25);
-  --error-light: oklch(0.65 0.20 25);
+  --error: oklch(0.5 0.24 25);
+  --error-light: oklch(0.65 0.2 25);
   --error-dark: oklch(0.35 0.27 25);
   --error-foreground: oklch(0.98 0 0);
 
   /* Semantic Colors - Info - Dark Mode */
-  --info: oklch(0.50 0.20 230);
+  --info: oklch(0.5 0.2 230);
   --info-light: oklch(0.65 0.16 230);
   --info-dark: oklch(0.35 0.22 230);
   --info-foreground: oklch(0.98 0 0);
@@ -594,11 +594,15 @@
 
   /* Enhanced Card Shadows - Premium Style */
   .shadow-card {
-    box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.04), 0 1px 2px -1px rgb(15 23 42 / 0.04);
+    box-shadow:
+      0 1px 3px 0 rgb(15 23 42 / 0.04),
+      0 1px 2px -1px rgb(15 23 42 / 0.04);
   }
 
   .shadow-card-hover {
-    box-shadow: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.08);
+    box-shadow:
+      0 4px 12px -2px rgb(15 23 42 / 0.08),
+      0 2px 4px -2px rgb(15 23 42 / 0.08);
     transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
@@ -698,7 +702,8 @@
   }
 
   .bg-gradient-mesh {
-    background: radial-gradient(at 0% 0%, var(--color-brand-primary-light) 0px, transparent 50%),
+    background:
+      radial-gradient(at 0% 0%, var(--color-brand-primary-light) 0px, transparent 50%),
       radial-gradient(at 100% 0%, var(--color-brand-secondary) 0px, transparent 50%),
       radial-gradient(at 100% 100%, var(--color-brand-accent) 0px, transparent 50%),
       radial-gradient(at 0% 100%, var(--color-info-light) 0px, transparent 50%);
@@ -805,8 +810,13 @@
   }
 
   @keyframes bar-bounce {
-    0%, 100% { height: 20%; }
-    50% { height: 100%; }
+    0%,
+    100% {
+      height: 20%;
+    }
+    50% {
+      height: 100%;
+    }
   }
 
   /* Accessibility - Reduced Motion */

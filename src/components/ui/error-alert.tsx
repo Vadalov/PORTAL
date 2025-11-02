@@ -37,4 +37,3 @@ export function ErrorAlert({ error, onDismiss, title = 'Hata' }: ErrorAlertProps
     </AlertDialog>
   );
 }
-

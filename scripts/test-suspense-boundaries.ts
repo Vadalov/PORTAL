@@ -45,19 +45,19 @@ class SuspenseBoundaryTester {
   async init() {
     this.browser = await chromium.launch({ headless: this.headless });
     this.context = await this.browser.newContext();
-    
+
     if (this.throttle) {
       await this.context.route('**/*', async (route) => {
         await route.fulfill({
           status: 200,
-          body: await route.fetch().then(r => r.body()),
-          delay: this.getThrottleDelay()
+          body: await route.fetch().then((r) => r.body()),
+          delay: this.getThrottleDelay(),
         });
       });
     }
 
     this.page = await this.context.newPage();
-    
+
     if (this.takeScreenshots) {
       mkdirSync(this.screenshotsDir, { recursive: true });
     }
@@ -65,9 +65,12 @@ class SuspenseBoundaryTester {
 
   private getThrottleDelay(): number {
     switch (this.throttle) {
-      case '3g': return 300;
-      case '4g': return 100;
-      default: return 0;
+      case '3g':
+        return 300;
+      case '4g':
+        return 100;
+      default:
+        return 0;
     }
   }
 
@@ -79,7 +82,7 @@ class SuspenseBoundaryTester {
 
   private async takeScreenshot(name: string): Promise<string | undefined> {
     if (!this.takeScreenshots || !this.page) return undefined;
-    
+
     const filename = `${name}-${Date.now()}.png`;
     const filepath = join(this.screenshotsDir, filename);
     await this.page.screenshot({ path: filepath, fullPage: true });
@@ -108,7 +111,7 @@ class SuspenseBoundaryTester {
       const startTime = performance.now();
       await this.page!.goto(`${this.baseUrl}/dashboard/members`);
       await this.page!.waitForLoadState('networkidle');
-      
+
       // Check if LoadingOverlay appears
       const loadingVisible = await this.page!.$('[data-testid="loading-overlay"]');
       const duration = performance.now() - startTime;
@@ -120,7 +123,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: !!loadingVisible,
         duration,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
 
       console.log(`✅ ${testName} completed in ${duration.toFixed(2)}ms`);
@@ -129,7 +132,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: false,
         error: error.message,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
       console.log(`❌ ${testName} failed: ${error.message}`);
     }
@@ -147,7 +150,7 @@ class SuspenseBoundaryTester {
       const startTime = performance.now();
       await this.page!.goto(`${this.baseUrl}/dashboard/settings/profile`);
       await this.page!.waitForLoadState('networkidle');
-      
+
       const duration = performance.now() - startTime;
 
       // Check for nested loading states
@@ -161,7 +164,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: !!(sidebarLoading && contentLoading),
         duration,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
 
       console.log(`✅ ${testName} completed in ${duration.toFixed(2)}ms`);
@@ -170,7 +173,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: false,
         error: error.message,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
       console.log(`❌ ${testName} failed: ${error.message}`);
     }
@@ -186,22 +189,24 @@ class SuspenseBoundaryTester {
       await this.page!.waitForLoadState('networkidle');
 
       // Simulate network error for lazy chunk
-      await this.context!.route('**/chunks/*.js', route => route.abort());
+      await this.context!.route('**/chunks/*.js', (route) => route.abort());
 
       const startTime = performance.now();
       await this.page!.goto(`${this.baseUrl}/dashboard/error-test`);
       await this.page!.waitForLoadState('networkidle');
-      
+
       const duration = performance.now() - startTime;
 
       // Check if error boundary catches the error
-      const errorBoundary = await this.page!.waitForSelector('[data-testid="error-boundary"]', { timeout: 5000 });
+      const errorBoundary = await this.page!.waitForSelector('[data-testid="error-boundary"]', {
+        timeout: 5000,
+      });
 
       this.results.push({
         name: testName,
         passed: !!errorBoundary,
         duration,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
 
       console.log(`✅ ${testName} completed in ${duration.toFixed(2)}ms`);
@@ -210,7 +215,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: false,
         error: error.message,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
       console.log(`❌ ${testName} failed: ${error.message}`);
     }
@@ -227,16 +232,21 @@ class SuspenseBoundaryTester {
       const navigationTimes: number[] = [];
 
       // Navigate between multiple pages
-      const pages = ['/dashboard', '/dashboard/members', '/dashboard/events', '/dashboard/settings'];
-      
+      const pages = [
+        '/dashboard',
+        '/dashboard/members',
+        '/dashboard/events',
+        '/dashboard/settings',
+      ];
+
       for (const pageUrl of pages) {
         const startTime = performance.now();
         await this.page!.goto(`${this.baseUrl}${pageUrl}`);
         await this.page!.waitForLoadState('networkidle');
-        
+
         // Wait for content to load
         await this.page!.waitForSelector('[data-testid="page-content"]', { timeout: 10000 });
-        
+
         const duration = performance.now() - startTime;
         navigationTimes.push(duration);
       }
@@ -256,7 +266,7 @@ class SuspenseBoundaryTester {
         passed: layoutShift,
         duration: avgDuration,
         metrics: { navigationTimes, avgDuration },
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
 
       console.log(`✅ ${testName} completed with avg ${avgDuration.toFixed(2)}ms navigation`);
@@ -265,7 +275,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: false,
         error: error.message,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
       console.log(`❌ ${testName} failed: ${error.message}`);
     }
@@ -277,16 +287,16 @@ class SuspenseBoundaryTester {
 
     try {
       const startTime = performance.now();
-      
+
       // Navigate to root (triggers providers Suspense)
       await this.page!.goto(`${this.baseUrl}/`);
       await this.page!.waitForLoadState('networkidle');
-      
+
       const duration = performance.now() - startTime;
 
       // Check for app-level loading
       const appLoading = await this.page!.$('[data-testid="app-loading"]');
-      
+
       // Verify app loads
       await this.page!.waitForSelector('[data-testid="app-content"]', { timeout: 15000 });
 
@@ -294,7 +304,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: !!appLoading,
         duration,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
 
       console.log(`✅ ${testName} completed in ${duration.toFixed(2)}ms`);
@@ -303,7 +313,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: false,
         error: error.message,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
       console.log(`❌ ${testName} failed: ${error.message}`);
     }
@@ -317,16 +327,16 @@ class SuspenseBoundaryTester {
       // Enable slow network
       const slowContext = await this.browser!.newContext();
       await slowContext.route('**/*', async (route) => {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // 1s delay
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // 1s delay
         await route.continue();
       });
 
       const slowPage = await slowContext.newPage();
-      
+
       const startTime = performance.now();
       await slowPage.goto(`${this.baseUrl}/dashboard`);
       await slowPage.waitForLoadState('networkidle');
-      
+
       const duration = performance.now() - startTime;
 
       // Check console for timeout warnings
@@ -345,7 +355,7 @@ class SuspenseBoundaryTester {
         passed: hasTimeoutWarning, // Expect warning for slow loads
         duration,
         metrics: { duration, expectedWarning: duration > 5000 },
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
 
       console.log(`✅ ${testName} completed in ${duration.toFixed(2)}ms`);
@@ -354,7 +364,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: false,
         error: error.message,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
       console.log(`❌ ${testName} failed: ${error.message}`);
     }
@@ -370,7 +380,7 @@ class SuspenseBoundaryTester {
 
       // Monitor network requests for chunks
       const chunkRequests: string[] = [];
-      this.page!.on('request', request => {
+      this.page!.on('request', (request) => {
         if (request.url().includes('chunks') || request.url().includes('.js')) {
           chunkRequests.push(request.url());
         }
@@ -387,7 +397,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: chunkRequests.length > 0,
         metrics: { chunkRequests: chunkRequests.length },
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
 
       console.log(`✅ ${testName} completed with ${chunkRequests.length} chunk requests`);
@@ -396,7 +406,7 @@ class SuspenseBoundaryTester {
         name: testName,
         passed: false,
         error: error.message,
-        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-'))
+        screenshot: await this.takeScreenshot(testName.toLowerCase().replace(' ', '-')),
       });
       console.log(`❌ ${testName} failed: ${error.message}`);
     }
@@ -412,7 +422,7 @@ class SuspenseBoundaryTester {
       this.testDashboardLayoutSuspense.bind(this),
       this.testProvidersSuspense.bind(this),
       this.testSuspenseTiming.bind(this),
-      this.testLazyLoading.bind(this)
+      this.testLazyLoading.bind(this),
     ];
 
     for (const test of tests) {
@@ -424,9 +434,10 @@ class SuspenseBoundaryTester {
   }
 
   private generateReport(): void {
-    const passed = this.results.filter(r => r.passed).length;
+    const passed = this.results.filter((r) => r.passed).length;
     const failed = this.results.length - passed;
-    const avgDuration = this.results.reduce((sum, r) => sum + (r.duration || 0), 0) / this.results.length;
+    const avgDuration =
+      this.results.reduce((sum, r) => sum + (r.duration || 0), 0) / this.results.length;
 
     const report: TestReport = {
       timestamp: new Date().toISOString(),
@@ -438,13 +449,13 @@ class SuspenseBoundaryTester {
         total: this.results.length,
         passed,
         failed,
-        averageDuration: avgDuration
-      }
+        averageDuration: avgDuration,
+      },
     };
 
     const reportDir = join(process.cwd(), 'test-results');
     mkdirSync(reportDir, { recursive: true });
-    
+
     const reportPath = join(reportDir, 'suspense-boundaries-report.json');
     writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
@@ -463,13 +474,13 @@ const { values } = parseArgs({
     headless: { type: 'boolean', default: true },
     browser: { type: 'string', default: 'chromium' },
     throttle: { type: 'string' },
-    screenshot: { type: 'boolean', default: false }
-  }
+    screenshot: { type: 'boolean', default: false },
+  },
 });
 
 async function main() {
   console.log('🚀 Starting Suspense Boundary Tests...');
-  
+
   const tester = new SuspenseBoundaryTester(
     values.headless,
     values.browser,

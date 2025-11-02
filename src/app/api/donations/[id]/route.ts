@@ -43,7 +43,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     logger.error('Donation operation error', error, {
       endpoint: '/api/donations/[id]',
       method: 'GET',
-      donationId: id || 'unknown'
+      donationId: id || 'unknown',
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -52,7 +52,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PUT /api/donations/[id]
  */
-async function updateDonationHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function updateDonationHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   let id: string | undefined;
   try {
     id = (await extractParams(params)).id;
@@ -62,7 +65,7 @@ async function updateDonationHandler(request: NextRequest, { params }: { params:
     logger.error('Donation operation error', error, {
       endpoint: '/api/donations/[id]',
       method: 'PUT',
-      donationId: id || 'unknown'
+      donationId: id || 'unknown',
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -71,7 +74,10 @@ async function updateDonationHandler(request: NextRequest, { params }: { params:
 /**
  * DELETE /api/donations/[id]
  */
-async function deleteDonationHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function deleteDonationHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   let id: string | undefined;
   try {
     id = (await extractParams(params)).id;
@@ -80,7 +86,7 @@ async function deleteDonationHandler(request: NextRequest, { params }: { params:
     logger.error('Donation operation error', error, {
       endpoint: '/api/donations/[id]',
       method: 'DELETE',
-      donationId: id || 'unknown'
+      donationId: id || 'unknown',
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

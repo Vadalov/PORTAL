@@ -57,13 +57,7 @@ const FallbackWrapper: React.FC<{
     return <>{fallback}</>;
   }
 
-  return (
-    <LoadingOverlay
-      variant={loadingVariant}
-      text={loadingText}
-      fullscreen={fullscreen}
-    />
-  );
+  return <LoadingOverlay variant={loadingVariant} text={loadingText} fullscreen={fullscreen} />;
 };
 
 export const SuspenseBoundary: React.FC<SuspenseBoundaryProps> = ({
@@ -96,13 +90,13 @@ export const SuspenseBoundary: React.FC<SuspenseBoundaryProps> = ({
 };
 
 // Convenience wrappers
-export const SuspenseWithSpinner: React.FC<Omit<SuspenseBoundaryProps, 'loadingVariant'>> = (props) => (
-  <SuspenseBoundary loadingVariant="spinner" {...props} />
-);
+export const SuspenseWithSpinner: React.FC<Omit<SuspenseBoundaryProps, 'loadingVariant'>> = (
+  props
+) => <SuspenseBoundary loadingVariant="spinner" {...props} />;
 
-export const SuspenseWithDots: React.FC<Omit<SuspenseBoundaryProps, 'loadingVariant'>> = (props) => (
-  <SuspenseBoundary loadingVariant="dots" {...props} />
-);
+export const SuspenseWithDots: React.FC<Omit<SuspenseBoundaryProps, 'loadingVariant'>> = (
+  props
+) => <SuspenseBoundary loadingVariant="dots" {...props} />;
 
 export const SuspenseFullscreen: React.FC<Omit<SuspenseBoundaryProps, 'fullscreen'>> = (props) => (
   <SuspenseBoundary fullscreen={true} {...props} />

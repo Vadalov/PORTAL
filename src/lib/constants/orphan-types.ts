@@ -20,4 +20,3 @@ export const ORPHAN_TYPE_OPTIONS = Object.entries(ORPHAN_TYPE_LABELS).map(([valu
   value,
   label,
 }));
-

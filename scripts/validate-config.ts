@@ -23,7 +23,9 @@ function loadEnvironment() {
   try {
     dotenv.config({ path: '.env.local' });
   } catch (error) {
-    console.warn(`${colors.yellow}⚠️  Warning: Could not load .env.local file. Using existing environment variables.${colors.reset}`);
+    console.warn(
+      `${colors.yellow}⚠️  Warning: Could not load .env.local file. Using existing environment variables.${colors.reset}`
+    );
   }
 }
 
@@ -40,14 +42,20 @@ function parseArgs() {
 // Print config status to console
 function printConfigStatus(status: any) {
   console.log('\n📋 Configuration Status:');
-  console.log(`  Valid: ${status.isValid ? `${colors.green}✅ Yes${colors.reset}` : `${colors.red}❌ No${colors.reset}`}`);
+  console.log(
+    `  Valid: ${status.isValid ? `${colors.green}✅ Yes${colors.reset}` : `${colors.red}❌ No${colors.reset}`}`
+  );
   if (status.warnings && status.warnings.length > 0) {
     console.log(`  Warnings: ${status.warnings.length}`);
-    status.warnings.forEach((warning: string) => console.log(`    ${colors.yellow}⚠️  ${warning}${colors.reset}`));
+    status.warnings.forEach((warning: string) =>
+      console.log(`    ${colors.yellow}⚠️  ${warning}${colors.reset}`)
+    );
   }
   if (status.errors && status.errors.length > 0) {
     console.log(`  Errors: ${status.errors.length}`);
-    status.errors.forEach((error: string) => console.log(`    ${colors.red}❌ ${error}${colors.reset}`));
+    status.errors.forEach((error: string) =>
+      console.log(`    ${colors.red}❌ ${error}${colors.reset}`)
+    );
   }
   if (status.suggestions && status.suggestions.length > 0) {
     console.log('  Suggestions:');

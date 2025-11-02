@@ -5,29 +5,41 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { 
-  FileText, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Star, 
-  StarOff, 
-  MessageSquare, 
-  Mail, 
+import {
+  FileText,
+  Plus,
+  Edit,
+  Trash2,
+  Star,
+  StarOff,
+  MessageSquare,
+  Mail,
   Users,
   Phone,
-  AtSign
+  AtSign,
 } from 'lucide-react';
-import { 
-  getMessageTypeLabel, 
+import {
+  getMessageTypeLabel,
   extractTemplateVariables,
-  type MessageTemplateFormData 
+  type MessageTemplateFormData,
 } from '@/lib/validations/message';
 
 interface MessageTemplate {
@@ -55,7 +67,8 @@ const predefinedTemplates: MessageTemplate[] = [
     id: 'sms-thanks',
     name: 'Bağış Teşekkürü',
     message_type: 'sms',
-    content: 'Merhaba {name}, {amount} TL bağışınız için teşekkür ederiz. Hayırseverliğiniz için minnettarız.',
+    content:
+      'Merhaba {name}, {amount} TL bağışınız için teşekkür ederiz. Hayırseverliğiniz için minnettarız.',
     variables: ['name', 'amount'],
     is_favorite: true,
     created_at: new Date().toISOString(),
@@ -64,7 +77,8 @@ const predefinedTemplates: MessageTemplate[] = [
     id: 'sms-aid-approval',
     name: 'Yardım Onayı',
     message_type: 'sms',
-    content: 'Merhaba {name}, yardım talebiniz onaylanmıştır. Detaylar için lütfen bizimle iletişime geçin.',
+    content:
+      'Merhaba {name}, yardım talebiniz onaylanmıştır. Detaylar için lütfen bizimle iletişime geçin.',
     variables: ['name'],
     is_favorite: true,
     created_at: new Date().toISOString(),
@@ -73,7 +87,8 @@ const predefinedTemplates: MessageTemplate[] = [
     id: 'sms-meeting-reminder',
     name: 'Toplantı Hatırlatması',
     message_type: 'sms',
-    content: 'Merhaba {name}, {date} tarihinde saat {time}\'da toplantımız var. Katılımınızı bekliyoruz.',
+    content:
+      "Merhaba {name}, {date} tarihinde saat {time}'da toplantımız var. Katılımınızı bekliyoruz.",
     variables: ['name', 'date', 'time'],
     is_favorite: false,
     created_at: new Date().toISOString(),
@@ -120,7 +135,14 @@ Detaylı raporu ekte bulabilirsiniz.
 
 Saygılarımızla,
 {organization_name} Ekibi`,
-    variables: ['name', 'year', 'total_donations', 'beneficiaries_count', 'project_count', 'organization_name'],
+    variables: [
+      'name',
+      'year',
+      'total_donations',
+      'beneficiaries_count',
+      'project_count',
+      'organization_name',
+    ],
     is_favorite: true,
     created_at: new Date().toISOString(),
   },
@@ -143,7 +165,15 @@ Katılımınızı bekliyoruz.
 
 Saygılarımızla,
 {organization_name} Ekibi`,
-    variables: ['name', 'event_name', 'event_date', 'event_time', 'event_location', 'event_description', 'organization_name'],
+    variables: [
+      'name',
+      'event_name',
+      'event_date',
+      'event_time',
+      'event_location',
+      'event_description',
+      'organization_name',
+    ],
     is_favorite: false,
     created_at: new Date().toISOString(),
   },
@@ -168,7 +198,14 @@ Görevle ilgili sorularınız için lütfen bizimle iletişime geçin.
 
 Saygılarımızla,
 {assigner_name}`,
-    variables: ['name', 'task_title', 'task_description', 'task_priority', 'task_due_date', 'assigner_name'],
+    variables: [
+      'name',
+      'task_title',
+      'task_description',
+      'task_priority',
+      'task_due_date',
+      'assigner_name',
+    ],
     is_favorite: true,
     created_at: new Date().toISOString(),
   },
@@ -213,19 +250,29 @@ Bu bilgiyi dikkate almanızı rica ederiz.
 
 Saygılarımızla,
 {organization_name} Ekibi`,
-    variables: ['name', 'notification_title', 'notification_description', 'notification_date', 'organization_name'],
+    variables: [
+      'name',
+      'notification_title',
+      'notification_description',
+      'notification_date',
+      'organization_name',
+    ],
     is_favorite: false,
     created_at: new Date().toISOString(),
   },
 ];
 
-export function MessageTemplateSelector({ messageType, onSelect, onSaveAsTemplate }: MessageTemplateSelectorProps) {
+export function MessageTemplateSelector({
+  messageType,
+  onSelect,
+  onSaveAsTemplate,
+}: MessageTemplateSelectorProps) {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<MessageTemplate | null>(null);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   // Filter templates by message type
-  const filteredTemplates = predefinedTemplates.filter(template => {
+  const filteredTemplates = predefinedTemplates.filter((template) => {
     const typeMatch = template.message_type === messageType;
     const favoriteMatch = !showFavoritesOnly || template.is_favorite;
     return typeMatch && favoriteMatch;
@@ -246,10 +293,14 @@ export function MessageTemplateSelector({ messageType, onSelect, onSaveAsTemplat
 
   const getMessageTypeIcon = (type: 'sms' | 'email' | 'internal') => {
     switch (type) {
-      case 'sms': return <Phone className="h-4 w-4" />;
-      case 'email': return <Mail className="h-4 w-4" />;
-      case 'internal': return <Users className="h-4 w-4" />;
-      default: return <MessageSquare className="h-4 w-4" />;
+      case 'sms':
+        return <Phone className="h-4 w-4" />;
+      case 'email':
+        return <Mail className="h-4 w-4" />;
+      case 'internal':
+        return <Users className="h-4 w-4" />;
+      default:
+        return <MessageSquare className="h-4 w-4" />;
     }
   };
 
@@ -259,11 +310,9 @@ export function MessageTemplateSelector({ messageType, onSelect, onSaveAsTemplat
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {getMessageTypeIcon(messageType)}
-          <h3 className="text-lg font-semibold">
-            {getMessageTypeLabel(messageType)} Şablonları
-          </h3>
+          <h3 className="text-lg font-semibold">{getMessageTypeLabel(messageType)} Şablonları</h3>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Checkbox
             id="favorites-only"
@@ -289,8 +338,8 @@ export function MessageTemplateSelector({ messageType, onSelect, onSaveAsTemplat
           </Card>
         ) : (
           filteredTemplates.map((template) => (
-            <Card 
-              key={template.id} 
+            <Card
+              key={template.id}
               className={`cursor-pointer transition-colors hover:bg-blue-50 ${
                 selectedTemplate?.id === template.id ? 'ring-2 ring-blue-500 bg-blue-50' : ''
               }`}
@@ -328,7 +377,7 @@ export function MessageTemplateSelector({ messageType, onSelect, onSaveAsTemplat
                   <div className="bg-gray-50 p-3 rounded text-sm line-clamp-3">
                     {template.content}
                   </div>
-                  
+
                   {template.variables && template.variables.length > 0 && (
                     <div className="space-y-1">
                       <div className="text-sm text-gray-600">
@@ -374,11 +423,11 @@ export function MessageTemplateSelector({ messageType, onSelect, onSaveAsTemplat
 }
 
 // Save Template Form Component
-function SaveTemplateForm({ 
-  messageType, 
-  onSave, 
-  onCancel 
-}: { 
+function SaveTemplateForm({
+  messageType,
+  onSave,
+  onCancel,
+}: {
   messageType: 'sms' | 'email' | 'internal';
   onSave: (data: MessageTemplateFormData) => void;
   onCancel: () => void;
@@ -388,17 +437,17 @@ function SaveTemplateForm({
     message_type: messageType,
     subject: '',
     content: '',
-    variables: []
+    variables: [],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim()) {
       toast.error('Şablon adı zorunludur.');
       return;
     }
-    
+
     if (!formData.content.trim()) {
       toast.error('Şablon içeriği zorunludur.');
       return;
@@ -407,15 +456,15 @@ function SaveTemplateForm({
     // Extract variables from content
     const variables = extractTemplateVariables(formData.content);
     const finalData = { ...formData, variables };
-    
+
     onSave(finalData);
   };
 
   const handleContentChange = (content: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       content,
-      variables: extractTemplateVariables(content)
+      variables: extractTemplateVariables(content),
     }));
   };
 
@@ -426,7 +475,7 @@ function SaveTemplateForm({
         <Input
           id="template-name"
           value={formData.name}
-          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
           placeholder="Şablon adını girin"
           className="h-9"
         />
@@ -438,7 +487,7 @@ function SaveTemplateForm({
           <Input
             id="template-subject"
             value={formData.subject}
-            onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+            onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
             placeholder="Şablon konusu"
             className="h-9"
           />

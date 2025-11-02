@@ -13,11 +13,15 @@ import { AidApplicationDocument } from '@/types/collections';
 
 function validateApplicationUpdate(data: Partial<AidApplicationDocument>): ValidationResult {
   const errors: string[] = [];
-  if (data.stage && !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage)) errors.push('Geçersiz aşama');
+  if (
+    data.stage &&
+    !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage)
+  )
+    errors.push('Geçersiz aşama');
   if (data.status && !['open', 'closed'].includes(data.status)) errors.push('Geçersiz durum');
   return { isValid: errors.length === 0, errors };
 }
-  
+
 /**
  * GET /api/aid-applications/[id]
  */
@@ -29,16 +33,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     logger.error('Aid application operation error', error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'GET',
-      applicationId: id
+      applicationId: id,
     });
     throw error;
   }
 }
-  
+
 /**
  * PATCH /api/aid-applications/[id]
  */
-async function updateApplicationHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function updateApplicationHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { id } = await extractParams(params);
   try {
     const body = await request.json();
@@ -47,16 +54,19 @@ async function updateApplicationHandler(request: NextRequest, { params }: { para
     logger.error('Aid application operation error', error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'PATCH',
-      applicationId: id
+      applicationId: id,
     });
     throw error;
   }
 }
-  
+
 /**
  * DELETE /api/aid-applications/[id]
  */
-async function deleteApplicationHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function deleteApplicationHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { id } = await extractParams(params);
   try {
     return handleDelete(id, api.deleteAidApplication, 'Başvuru');
@@ -64,11 +74,11 @@ async function deleteApplicationHandler(request: NextRequest, { params }: { para
     logger.error('Aid application operation error', error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'DELETE',
-      applicationId: id
+      applicationId: id,
     });
     throw error;
   }
 }
-  
+
 export const PATCH = withCsrfProtection(updateApplicationHandler);
 export const DELETE = withCsrfProtection(deleteApplicationHandler);

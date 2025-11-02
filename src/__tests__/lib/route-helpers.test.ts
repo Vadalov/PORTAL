@@ -14,7 +14,7 @@ describe('Route Helpers', () => {
     it('should create a success response with data', () => {
       const response = successResponse({ id: '123', name: 'Test' });
       expect(response.status).toBe(200);
-      
+
       // Get the JSON body
       const body = response.json();
       expect(body).resolves.toMatchObject({
@@ -37,7 +37,7 @@ describe('Route Helpers', () => {
     it('should create an error response', () => {
       const response = errorResponse('Error occurred', 400);
       expect(response.status).toBe(400);
-      
+
       const body = response.json();
       expect(body).resolves.toMatchObject({
         success: false,
@@ -46,7 +46,10 @@ describe('Route Helpers', () => {
     });
 
     it('should include optional details', () => {
-      const response = errorResponse('Validation error', 400, ['Field 1 invalid', 'Field 2 required']);
+      const response = errorResponse('Validation error', 400, [
+        'Field 1 invalid',
+        'Field 2 required',
+      ]);
       const body = response.json();
       expect(body).resolves.toMatchObject({
         success: false,
@@ -60,7 +63,7 @@ describe('Route Helpers', () => {
     it('should return error if id is undefined', async () => {
       const mockGetOperation = vi.fn();
       const response = await handleGetById(undefined, mockGetOperation, 'User');
-      
+
       expect(response.status).toBe(400);
       const body = await response.json();
       expect(body.error).toBe('ID parametresi gerekli');
@@ -74,7 +77,7 @@ describe('Route Helpers', () => {
       });
 
       const response = await handleGetById('123', mockGetOperation, 'User');
-      
+
       expect(response.status).toBe(200);
       const body = await response.json();
       expect(body.success).toBe(true);
@@ -89,7 +92,7 @@ describe('Route Helpers', () => {
       });
 
       const response = await handleGetById('123', mockGetOperation, 'User');
-      
+
       expect(response.status).toBe(404);
       const body = await response.json();
       expect(body.success).toBe(false);
@@ -100,7 +103,7 @@ describe('Route Helpers', () => {
       const mockGetOperation = vi.fn().mockRejectedValue(new Error('Database error'));
 
       const response = await handleGetById('123', mockGetOperation, 'User');
-      
+
       expect(response.status).toBe(500);
       const body = await response.json();
       expect(body.success).toBe(false);
@@ -113,14 +116,21 @@ describe('Route Helpers', () => {
       const record = data as Record<string, unknown>;
       return {
         isValid: typeof record.name === 'string' && record.name.length > 0,
-        errors: typeof record.name === 'string' && record.name.length > 0 ? [] : ['Name is required'],
+        errors:
+          typeof record.name === 'string' && record.name.length > 0 ? [] : ['Name is required'],
       };
     };
 
     it('should return error if id is undefined', async () => {
       const mockUpdateOperation = vi.fn();
-      const response = await handleUpdate(undefined, { name: 'Test' }, mockValidate, mockUpdateOperation, 'User');
-      
+      const response = await handleUpdate(
+        undefined,
+        { name: 'Test' },
+        mockValidate,
+        mockUpdateOperation,
+        'User'
+      );
+
       expect(response.status).toBe(400);
       const body = await response.json();
       expect(body.error).toBe('ID parametresi gerekli');
@@ -129,8 +139,14 @@ describe('Route Helpers', () => {
 
     it('should return validation error for invalid data', async () => {
       const mockUpdateOperation = vi.fn();
-      const response = await handleUpdate('123', { name: '' }, mockValidate, mockUpdateOperation, 'User');
-      
+      const response = await handleUpdate(
+        '123',
+        { name: '' },
+        mockValidate,
+        mockUpdateOperation,
+        'User'
+      );
+
       expect(response.status).toBe(400);
       const body = await response.json();
       expect(body.error).toBe('Doğrulama hatası');
@@ -144,8 +160,14 @@ describe('Route Helpers', () => {
         error: null,
       });
 
-      const response = await handleUpdate('123', { name: 'Updated Name' }, mockValidate, mockUpdateOperation, 'User');
-      
+      const response = await handleUpdate(
+        '123',
+        { name: 'Updated Name' },
+        mockValidate,
+        mockUpdateOperation,
+        'User'
+      );
+
       expect(response.status).toBe(200);
       const body = await response.json();
       expect(body.success).toBe(true);
@@ -159,7 +181,7 @@ describe('Route Helpers', () => {
     it('should return error if id is undefined', async () => {
       const mockDeleteOperation = vi.fn();
       const response = await handleDelete(undefined, mockDeleteOperation, 'User');
-      
+
       expect(response.status).toBe(400);
       const body = await response.json();
       expect(body.error).toBe('ID parametresi gerekli');
@@ -173,7 +195,7 @@ describe('Route Helpers', () => {
       });
 
       const response = await handleDelete('123', mockDeleteOperation, 'User');
-      
+
       expect(response.status).toBe(200);
       const body = await response.json();
       expect(body.success).toBe(true);
@@ -188,7 +210,7 @@ describe('Route Helpers', () => {
       });
 
       const response = await handleDelete('123', mockDeleteOperation, 'User');
-      
+
       expect(response.status).toBe(400);
       const body = await response.json();
       expect(body.success).toBe(false);
@@ -200,7 +222,7 @@ describe('Route Helpers', () => {
     it('should extract params from promise', async () => {
       const params = Promise.resolve({ id: '123', slug: 'test' });
       const result = await extractParams(params);
-      
+
       expect(result).toEqual({ id: '123', slug: 'test' });
     });
   });

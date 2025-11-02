@@ -38,7 +38,9 @@ export function FilterPanel({
   onToggle,
 }: FilterPanelProps) {
   const [filters, setFilters] = useState<Record<string, string | string[]>>({});
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(fields.map(f => f.key)));
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(fields.map((f) => f.key))
+  );
 
   const handleFilterChange = (key: string, value: string | string[]) => {
     const newFilters = { ...filters, [key]: value };
@@ -136,10 +138,7 @@ export function FilterPanel({
                 {field.type === 'checkbox' && (
                   <div className="space-y-2">
                     {field.options?.map((option) => (
-                      <label
-                        key={option.value}
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
+                      <label key={option.value} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={
@@ -149,7 +148,7 @@ export function FilterPanel({
                           }
                           onChange={(e) => {
                             const current = Array.isArray(filters[field.key])
-                              ? filters[field.key] as string[]
+                              ? (filters[field.key] as string[])
                               : [];
                             const updated = e.target.checked
                               ? [...current, option.value]
@@ -166,16 +165,8 @@ export function FilterPanel({
 
                 {field.type === 'daterange' && (
                   <div className="space-y-2">
-                    <Input
-                      type="date"
-                      placeholder="Başlangıç tarihi"
-                      className="h-8 text-sm"
-                    />
-                    <Input
-                      type="date"
-                      placeholder="Bitiş tarihi"
-                      className="h-8 text-sm"
-                    />
+                    <Input type="date" placeholder="Başlangıç tarihi" className="h-8 text-sm" />
+                    <Input type="date" placeholder="Bitiş tarihi" className="h-8 text-sm" />
                   </div>
                 )}
               </div>
@@ -238,11 +229,7 @@ interface ActiveFiltersProps {
   onRemove: (key: string, value?: string) => void;
 }
 
-export function ActiveFilters({
-  filters,
-  filterLabels,
-  onRemove,
-}: ActiveFiltersProps) {
+export function ActiveFilters({ filters, filterLabels, onRemove }: ActiveFiltersProps) {
   if (Object.keys(filters).length === 0) return null;
 
   return (
@@ -256,10 +243,7 @@ export function ActiveFilters({
               className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
             >
               <span>{value}</span>
-              <button
-                onClick={() => onRemove(key, v)}
-                className="hover:text-blue-900"
-              >
+              <button onClick={() => onRemove(key, v)} className="hover:text-blue-900">
                 <X className="h-3 w-3" />
               </button>
             </div>
@@ -273,10 +257,7 @@ export function ActiveFilters({
             <span>
               {label}: {value}
             </span>
-            <button
-              onClick={() => onRemove(key)}
-              className="hover:text-blue-900"
-            >
+            <button onClick={() => onRemove(key)} className="hover:text-blue-900">
               <X className="h-3 w-3" />
             </button>
           </div>

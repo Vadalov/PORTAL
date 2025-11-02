@@ -29,7 +29,7 @@ test.describe('Donations Module', () => {
 
     if (await dateFilter.isVisible()) {
       // Interact with date filter if available
-      if (await dateFilter.getAttribute('type') === 'date') {
+      if ((await dateFilter.getAttribute('type')) === 'date') {
         await dateFilter.fill('2024-01-01');
       }
       await page.waitForTimeout(500);
@@ -62,7 +62,10 @@ test.describe('Donations Module', () => {
     await page.goto('/bagis/liste');
 
     // Click add button
-    const addButton = page.locator('button').filter({ hasText: /Ekle|Yeni|Add/i }).first();
+    const addButton = page
+      .locator('button')
+      .filter({ hasText: /Ekle|Yeni|Add/i })
+      .first();
 
     if (await addButton.isVisible()) {
       await addButton.click();
@@ -80,7 +83,10 @@ test.describe('Donations Module', () => {
     await page.goto('/bagis/liste');
 
     // Open add form
-    const addButton = page.locator('button').filter({ hasText: /Ekle|Yeni|Add/i }).first();
+    const addButton = page
+      .locator('button')
+      .filter({ hasText: /Ekle|Yeni|Add/i })
+      .first();
 
     if (await addButton.isVisible()) {
       await addButton.click();
@@ -123,7 +129,7 @@ test.describe('Donations Module', () => {
     } else {
       // Page might be placeholder
       const placeholderText = page.locator('text=/Yakında|Coming soon|placeholder/i');
-      expect(await placeholderText.isVisible() || true).toBeTruthy();
+      expect((await placeholderText.isVisible()) || true).toBeTruthy();
     }
   });
 
@@ -131,7 +137,10 @@ test.describe('Donations Module', () => {
     await page.goto('/bagis/liste');
 
     // Open add form
-    const addButton = page.locator('button').filter({ hasText: /Ekle|Yeni|Add/i }).first();
+    const addButton = page
+      .locator('button')
+      .filter({ hasText: /Ekle|Yeni|Add/i })
+      .first();
 
     if (await addButton.isVisible()) {
       await addButton.click();
@@ -152,7 +161,7 @@ test.describe('Donations Module', () => {
 
         // File should be selected
         const fileName = await page.locator('text=/receipt\.pdf|Dosya seçildi/i').first();
-        expect(await fileName.isVisible() || true).toBeTruthy();
+        expect((await fileName.isVisible()) || true).toBeTruthy();
       }
     }
   });
@@ -161,7 +170,10 @@ test.describe('Donations Module', () => {
     await page.goto('/bagis/raporlar');
 
     // Look for export button
-    const exportButton = page.locator('button').filter({ hasText: /Dışa Aktar|Export|İndir|Download/i }).first();
+    const exportButton = page
+      .locator('button')
+      .filter({ hasText: /Dışa Aktar|Export|İndir|Download/i })
+      .first();
 
     if (await exportButton.isVisible()) {
       await exportButton.click();
@@ -191,14 +203,19 @@ test.describe('Donation Types', () => {
   test('should handle different payment methods', async ({ page }) => {
     await page.goto('/bagis/liste');
 
-    const addButton = page.locator('button').filter({ hasText: /Ekle|Yeni/i }).first();
+    const addButton = page
+      .locator('button')
+      .filter({ hasText: /Ekle|Yeni/i })
+      .first();
 
     if (await addButton.isVisible()) {
       await addButton.click();
       await page.waitForTimeout(500);
 
       // Look for payment method selector
-      const paymentSelect = page.locator('select[name*="payment"], button:has-text("Ödeme Yöntemi")').first();
+      const paymentSelect = page
+        .locator('select[name*="payment"], button:has-text("Ödeme Yöntemi")')
+        .first();
 
       if (await paymentSelect.isVisible()) {
         // Check if payment methods are available
@@ -223,14 +240,19 @@ test.describe('Donation Types', () => {
   test('should handle donation purposes', async ({ page }) => {
     await page.goto('/bagis/liste');
 
-    const addButton = page.locator('button').filter({ hasText: /Ekle|Yeni/i }).first();
+    const addButton = page
+      .locator('button')
+      .filter({ hasText: /Ekle|Yeni/i })
+      .first();
 
     if (await addButton.isVisible()) {
       await addButton.click();
       await page.waitForTimeout(500);
 
       // Look for purpose/category selector
-      const purposeSelect = page.locator('select[name*="purpose"], select[name*="category"], button:has-text("Amaç")').first();
+      const purposeSelect = page
+        .locator('select[name*="purpose"], select[name*="category"], button:has-text("Amaç")')
+        .first();
 
       if (await purposeSelect.isVisible()) {
         await purposeSelect.click();

@@ -21,9 +21,9 @@ interface FileUploadProps {
 
 export function FileUpload({
   onFileSelect,
-  accept = "*",
+  accept = '*',
   maxSize = 10,
-  placeholder = "Dosya seçin veya sürükleyin",
+  placeholder = 'Dosya seçin veya sürükleyin',
   className,
   disabled = false,
   allowedTypes,
@@ -82,9 +82,9 @@ export function FileUpload({
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
+    if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
-    } else if (e.type === "dragleave") {
+    } else if (e.type === 'dragleave') {
       setDragActive(false);
     }
   };
@@ -114,7 +114,7 @@ export function FileUpload({
     onFileSelect(null);
     setError(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = '';
     }
   };
 
@@ -133,11 +133,11 @@ export function FileUpload({
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn('space-y-2', className)}>
       <Label>Dosya Yükleme</Label>
 
       {/* File Input */}
@@ -153,12 +153,10 @@ export function FileUpload({
       {/* Upload Area */}
       <div
         className={cn(
-          "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-          dragActive
-            ? "border-primary bg-primary/10"
-            : "border-border hover:border-primary/50",
-          disabled && "opacity-50 cursor-not-allowed",
-          error && "border-destructive bg-destructive/10"
+          'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
+          dragActive ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50',
+          disabled && 'opacity-50 cursor-not-allowed',
+          error && 'border-destructive bg-destructive/10'
         )}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -202,9 +200,7 @@ export function FileUpload({
       </div>
 
       {/* Error Message */}
-      {error && (
-        <p className="text-sm text-destructive">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 }

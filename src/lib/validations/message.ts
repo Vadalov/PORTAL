@@ -2,143 +2,146 @@ import { z } from 'zod';
 import { MessageDocument } from '@/types/collections';
 
 // Helper for Turkish phone numbers (10 digits, starts with 5)
-export const phoneNumberSchema = z.string()
+export const phoneNumberSchema = z
+  .string()
   .regex(/^5\d{9}$/, 'Geçerli bir Türk telefon numarası girin (5XXXXXXXXX)')
   .length(10, 'Telefon numarası 10 haneli olmalıdır');
 
 // Helper for email validation
-export const emailSchema = z.string()
+export const emailSchema = z
+  .string()
   .email('Geçerli bir e-posta adresi girin')
   .max(100, 'E-posta adresi en fazla 100 karakter olmalıdır');
 
 // Helper for recipient validation based on message type
-export const recipientSchema = z.string()
+export const recipientSchema = z
+  .string()
   .min(1, 'Alıcı boş olamaz')
   .max(100, 'Alıcı en fazla 100 karakter olmalıdır');
 
 // Message type enum
 export const messageTypeEnum = z.enum(['sms', 'email', 'internal'], {
-  message: 'Mesaj türü seçiniz'
+  message: 'Mesaj türü seçiniz',
 });
 
 // Status enum
 export const statusEnum = z.enum(['draft', 'sent', 'failed'], {
-  message: 'Durum seçiniz'
+  message: 'Durum seçiniz',
 });
 
 // Main message schema
-export const messageSchema = z.object({
-  message_type: messageTypeEnum,
-  sender: z.string().min(1, 'Gönderen kullanıcı ID\'si zorunludur'),
-  recipients: z.array(recipientSchema)
-    .min(1, 'En az bir alıcı seçmelisiniz')
-    .max(100, 'En fazla 100 alıcı seçebilirsiniz'),
-  subject: z.string()
-    .max(200, 'Konu en fazla 200 karakter olmalıdır')
-    .optional(),
-  content: z.string()
-    .min(1, 'Mesaj içeriği zorunludur')
-    .max(5000, 'Mesaj içeriği en fazla 5000 karakter olmalıdır'),
-  status: statusEnum.default('draft'),
-  is_bulk: z.boolean().default(false),
-  template_id: z.string().optional(),
-  sent_at: z.string().optional(),
-}).superRefine((data, ctx) => {
-  // SMS specific validations
-  if (data.message_type === 'sms') {
-    // Content must be max 160 chars for SMS
-    if (data.content.length > 160) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'SMS mesajı en fazla 160 karakter olmalıdır',
-        path: ['content'],
+export const messageSchema = z
+  .object({
+    message_type: messageTypeEnum,
+    sender: z.string().min(1, "Gönderen kullanıcı ID'si zorunludur"),
+    recipients: z
+      .array(recipientSchema)
+      .min(1, 'En az bir alıcı seçmelisiniz')
+      .max(100, 'En fazla 100 alıcı seçebilirsiniz'),
+    subject: z.string().max(200, 'Konu en fazla 200 karakter olmalıdır').optional(),
+    content: z
+      .string()
+      .min(1, 'Mesaj içeriği zorunludur')
+      .max(5000, 'Mesaj içeriği en fazla 5000 karakter olmalıdır'),
+    status: statusEnum.default('draft'),
+    is_bulk: z.boolean().default(false),
+    template_id: z.string().optional(),
+    sent_at: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // SMS specific validations
+    if (data.message_type === 'sms') {
+      // Content must be max 160 chars for SMS
+      if (data.content.length > 160) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'SMS mesajı en fazla 160 karakter olmalıdır',
+          path: ['content'],
+        });
+      }
+
+      // Recipients must be valid phone numbers for SMS
+      data.recipients.forEach((recipient, index) => {
+        if (!/^5\d{9}$/.test(recipient)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'SMS için geçerli telefon numarası girin (5XXXXXXXXX)',
+            path: ['recipients', index],
+          });
+        }
       });
     }
 
-    // Recipients must be valid phone numbers for SMS
-    data.recipients.forEach((recipient, index) => {
-      if (!/^5\d{9}$/.test(recipient)) {
+    // Email specific validations
+    if (data.message_type === 'email') {
+      // Subject is required for email
+      if (!data.subject || data.subject.trim() === '') {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'SMS için geçerli telefon numarası girin (5XXXXXXXXX)',
-          path: ['recipients', index],
+          message: 'E-posta için konu zorunludur',
+          path: ['subject'],
         });
       }
-    });
-  }
 
-  // Email specific validations
-  if (data.message_type === 'email') {
-    // Subject is required for email
-    if (!data.subject || data.subject.trim() === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'E-posta için konu zorunludur',
-        path: ['subject'],
+      // Recipients must be valid email addresses for email
+      data.recipients.forEach((recipient, index) => {
+        if (!z.string().email().safeParse(recipient).success) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'E-posta için geçerli e-posta adresi girin',
+            path: ['recipients', index],
+          });
+        }
       });
     }
 
-    // Recipients must be valid email addresses for email
-    data.recipients.forEach((recipient, index) => {
-      if (!z.string().email().safeParse(recipient).success) {
+    // Internal message specific validations
+    if (data.message_type === 'internal') {
+      // Subject is required for internal messages
+      if (!data.subject || data.subject.trim() === '') {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'E-posta için geçerli e-posta adresi girin',
-          path: ['recipients', index],
+          message: 'Kurum içi mesaj için konu zorunludur',
+          path: ['subject'],
         });
       }
-    });
-  }
 
-  // Internal message specific validations
-  if (data.message_type === 'internal') {
-    // Subject is required for internal messages
-    if (!data.subject || data.subject.trim() === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Kurum içi mesaj için konu zorunludur',
-        path: ['subject'],
+      // Recipients must be valid user IDs for internal messages
+      data.recipients.forEach((recipient, index) => {
+        if (!recipient || recipient.trim() === '') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Kurum içi mesaj için geçerli kullanıcı ID'si girin",
+            path: ['recipients', index],
+          });
+        }
       });
     }
 
-    // Recipients must be valid user IDs for internal messages
-    data.recipients.forEach((recipient, index) => {
-      if (!recipient || recipient.trim() === '') {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Kurum içi mesaj için geçerli kullanıcı ID\'si girin',
-          path: ['recipients', index],
-        });
-      }
-    });
-  }
+    // Auto-set is_bulk if recipients > 1
+    if (data.recipients.length > 1 && !data.is_bulk) {
+      data.is_bulk = true;
+    }
 
-  // Auto-set is_bulk if recipients > 1
-  if (data.recipients.length > 1 && !data.is_bulk) {
-    data.is_bulk = true;
-  }
-
-  // Auto-set sent_at if status is 'sent'
-  if (data.status === 'sent' && !data.sent_at) {
-    data.sent_at = new Date().toISOString();
-  }
-});
+    // Auto-set sent_at if status is 'sent'
+    if (data.status === 'sent' && !data.sent_at) {
+      data.sent_at = new Date().toISOString();
+    }
+  });
 
 // Template schema for reusable message templates
 export const messageTemplateSchema = z.object({
-  name: z.string()
+  name: z
+    .string()
     .min(3, 'Şablon adı en az 3 karakter olmalıdır')
     .max(100, 'Şablon adı en fazla 100 karakter olmalıdır'),
   message_type: messageTypeEnum,
-  subject: z.string()
-    .max(200, 'Konu en fazla 200 karakter olmalıdır')
-    .optional(),
-  content: z.string()
+  subject: z.string().max(200, 'Konu en fazla 200 karakter olmalıdır').optional(),
+  content: z
+    .string()
     .min(1, 'Şablon içeriği zorunludur')
     .max(5000, 'Şablon içeriği en fazla 5000 karakter olmalıdır'),
-  variables: z.array(z.string())
-    .max(20, 'En fazla 20 değişken tanımlayabilirsiniz')
-    .optional(),
+  variables: z.array(z.string()).max(20, 'En fazla 20 değişken tanımlayabilirsiniz').optional(),
 });
 
 // Export types
@@ -148,32 +151,47 @@ export type MessageTemplateFormData = z.infer<typeof messageTemplateSchema>;
 // Utility functions for UI
 export const getMessageTypeLabel = (type: MessageDocument['message_type']) => {
   switch (type) {
-    case 'sms': return 'SMS';
-    case 'email': return 'E-posta';
-    case 'internal': return 'Kurum İçi';
-    default: return 'Bilinmiyor';
+    case 'sms':
+      return 'SMS';
+    case 'email':
+      return 'E-posta';
+    case 'internal':
+      return 'Kurum İçi';
+    default:
+      return 'Bilinmiyor';
   }
 };
 
 export const getStatusLabel = (status: MessageDocument['status']) => {
   switch (status) {
-    case 'draft': return 'Taslak';
-    case 'sent': return 'Gönderildi';
-    case 'failed': return 'Başarısız';
-    default: return 'Bilinmiyor';
+    case 'draft':
+      return 'Taslak';
+    case 'sent':
+      return 'Gönderildi';
+    case 'failed':
+      return 'Başarısız';
+    default:
+      return 'Bilinmiyor';
   }
 };
 
 export const getStatusColor = (status: MessageDocument['status']) => {
   switch (status) {
-    case 'draft': return 'bg-gray-100 text-gray-800';
-    case 'sent': return 'bg-green-100 text-green-800';
-    case 'failed': return 'bg-red-100 text-red-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'draft':
+      return 'bg-gray-100 text-gray-800';
+    case 'sent':
+      return 'bg-green-100 text-green-800';
+    case 'failed':
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
   }
 };
 
-export const validateRecipients = (recipients: string[], messageType: MessageDocument['message_type']) => {
+export const validateRecipients = (
+  recipients: string[],
+  messageType: MessageDocument['message_type']
+) => {
   const errors: string[] = [];
 
   recipients.forEach((recipient, index) => {
@@ -223,24 +241,24 @@ export const extractTemplateVariables = (content: string) => {
   const variableRegex = /\{([^}]+)\}/g;
   const variables: string[] = [];
   let match;
-  
+
   while ((match = variableRegex.exec(content)) !== null) {
     if (!variables.includes(match[1])) {
       variables.push(match[1]);
     }
   }
-  
+
   return variables;
 };
 
 // Helper function to replace variables in content
 export const replaceTemplateVariables = (content: string, variables: Record<string, string>) => {
   let result = content;
-  
+
   Object.entries(variables).forEach(([key, value]) => {
     const regex = new RegExp(`\\{${key}\\}`, 'g');
     result = result.replace(regex, value);
   });
-  
+
   return result;
 };

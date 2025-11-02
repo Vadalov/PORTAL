@@ -6,7 +6,7 @@ import type { ApiResponse } from './route-helpers';
 
 // Standard delay for all mock operations (moved from mock-api.ts)
 export const delay = (ms: number = 300): Promise<void> =>
-  new Promise(resolve => setTimeout(resolve, ms));
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 // Generate unique IDs (moved from mock-api.ts)
 export const generateId = (): string =>
@@ -85,7 +85,7 @@ export async function updateEntity<T>(
   }
 ): Promise<ApiResponse<T>> {
   try {
-    const index = store.data.findIndex(item => (item as any).id === id);
+    const index = store.data.findIndex((item) => (item as any).id === id);
 
     if (index === -1) {
       return {
@@ -125,7 +125,7 @@ export async function getEntityById<T>(
   notFoundMessage: string
 ): Promise<ApiResponse<T>> {
   try {
-    const entity = store.data.find(item => (item as any).id === id);
+    const entity = store.data.find((item) => (item as any).id === id);
 
     if (!entity) {
       return {
@@ -156,7 +156,7 @@ export async function deleteEntity(
   successMessage: string
 ): Promise<ApiResponse<void>> {
   try {
-    const index = store.data.findIndex(item => item.id === id);
+    const index = store.data.findIndex((item) => item.id === id);
 
     if (index === -1) {
       return {
@@ -202,8 +202,8 @@ export function applySearchAndPagination<T>(
   // Apply search filter
   let filtered = data;
   if (search) {
-    filtered = data.filter(item =>
-      searchFields.some(field => {
+    filtered = data.filter((item) =>
+      searchFields.some((field) => {
         const value = item[field];
         if (typeof value === 'string') {
           return value.toLowerCase().includes(search);

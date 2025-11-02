@@ -8,17 +8,13 @@ import {
   getScholarshipStats,
   getStudentStats,
   getScholarships,
-  getApplications
+  getApplications,
 } from '@/lib/api/mock-api';
+import { ScholarshipType, ApplicationStatus, StudentStatus } from '@/types/scholarship';
 import {
-  ScholarshipType,
-  ApplicationStatus,
-  StudentStatus
-} from '@/types/scholarship';
-import { 
-  DollarSign, 
-  Users, 
-  FileText, 
+  DollarSign,
+  Users,
+  FileText,
   TrendingUp,
   BookOpen,
   Heart,
@@ -27,7 +23,7 @@ import {
   AlertCircle,
   Plus,
   Eye,
-  Download
+  Download,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -66,11 +62,11 @@ export default function BursDashboardPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Load stats
       const [scholarshipStatsResult, studentStatsResult] = await Promise.all([
         getScholarshipStats(),
-        getStudentStats()
+        getStudentStats(),
       ]);
 
       // Load recent scholarships
@@ -91,26 +87,27 @@ export default function BursDashboardPage() {
         const pendingApplications = 12;
         const approvedApplications = 25;
         const rejectedApplications = totalApplications - pendingApplications - approvedApplications;
-        
+
         setStats({
           scholarships: {
             total: scholarshipStatsResult.data?.total || 0,
             active: scholarshipStatsResult.data?.active || 0,
-            byType: scholarshipStatsResult.data?.byType || {} as Record<ScholarshipType, number>,
-            totalBudget: scholarshipStatsResult.data?.totalBudget || 0
+            byType: scholarshipStatsResult.data?.byType || ({} as Record<ScholarshipType, number>),
+            totalBudget: scholarshipStatsResult.data?.totalBudget || 0,
           },
           students: {
             total: studentStatsResult.data?.total || 0,
             active: studentStatsResult.data?.active || 0,
             byEducationLevel: studentStatsResult.data?.byEducationLevel || {},
-            orphans: studentStatsResult.data?.orphans || 0
+            orphans: studentStatsResult.data?.orphans || 0,
           },
           applications: {
             total: totalApplications,
             pending: pendingApplications,
             approved: approvedApplications,
-            rejectionRate: totalApplications > 0 ? (rejectedApplications / totalApplications) * 100 : 0
-          }
+            rejectionRate:
+              totalApplications > 0 ? (rejectedApplications / totalApplications) * 100 : 0,
+          },
         });
       }
     } catch (error) {
@@ -124,18 +121,21 @@ export default function BursDashboardPage() {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
       currency: 'TRY',
-      minimumFractionDigits: 0
+      minimumFractionDigits: 0,
     }).format(amount);
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; text: string }> = {
+    const statusConfig: Record<
+      string,
+      { variant: 'default' | 'secondary' | 'destructive' | 'outline'; text: string }
+    > = {
       [ApplicationStatus.DRAFT]: { variant: 'secondary', text: 'Taslak' },
       [ApplicationStatus.SUBMITTED]: { variant: 'default', text: 'Gönderildi' },
       [ApplicationStatus.UNDER_REVIEW]: { variant: 'default', text: 'İnceleniyor' },
       [ApplicationStatus.APPROVED]: { variant: 'default', text: 'Onaylandı' },
       [ApplicationStatus.REJECTED]: { variant: 'destructive', text: 'Reddedildi' },
-      [ApplicationStatus.WAITLIST]: { variant: 'outline', text: 'Beklemede' }
+      [ApplicationStatus.WAITLIST]: { variant: 'outline', text: 'Beklemede' },
     };
 
     const config = statusConfig[status] || { variant: 'outline', text: status };
@@ -156,9 +156,7 @@ export default function BursDashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Burs Yönetimi</h1>
-          <p className="text-muted-foreground">
-            Burs sistemi özet bilgileri ve hızlı erişim
-          </p>
+          <p className="text-muted-foreground">Burs sistemi özet bilgileri ve hızlı erişim</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => router.push('/dashboard/burs/basvurular')}>
@@ -219,9 +217,7 @@ export default function BursDashboardPage() {
             <div className="text-2xl font-bold">
               {formatCurrency(stats?.scholarships.totalBudget || 0)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Yıllık toplam bütçe
-            </p>
+            <p className="text-xs text-muted-foreground">Yıllık toplam bütçe</p>
           </CardContent>
         </Card>
       </div>
@@ -235,13 +231,12 @@ export default function BursDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              %{stats?.applications.approved && stats?.applications.total 
-                ? Math.round((stats.applications.approved / stats.applications.total) * 100) 
+              %
+              {stats?.applications.approved && stats?.applications.total
+                ? Math.round((stats.applications.approved / stats.applications.total) * 100)
                 : 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Onaylanan başvuru oranı
-            </p>
+            <p className="text-xs text-muted-foreground">Onaylanan başvuru oranı</p>
           </CardContent>
         </Card>
         <Card>
@@ -251,9 +246,7 @@ export default function BursDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.students.orphans || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Özel destek gerektiren öğrenci
-            </p>
+            <p className="text-xs text-muted-foreground">Özel destek gerektiren öğrenci</p>
           </CardContent>
         </Card>
         <Card>
@@ -263,9 +256,7 @@ export default function BursDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.applications.pending || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              İnceleme bekleyen başvuru
-            </p>
+            <p className="text-xs text-muted-foreground">İnceleme bekleyen başvuru</p>
           </CardContent>
         </Card>
       </div>
@@ -277,27 +268,26 @@ export default function BursDashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Son Burslar</CardTitle>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => router.push('/dashboard/burs/basvurular')}
               >
                 Tümünü Gör
               </Button>
             </div>
-            <CardDescription>
-              En son eklenen burs programları
-            </CardDescription>
+            <CardDescription>En son eklenen burs programları</CardDescription>
           </CardHeader>
           <CardContent>
             {recentScholarships.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                Henüz burs bulunmuyor
-              </div>
+              <div className="text-center py-4 text-muted-foreground">Henüz burs bulunmuyor</div>
             ) : (
               <div className="space-y-3">
                 {recentScholarships.map((scholarship) => (
-                  <div key={scholarship.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={scholarship.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div>
                       <h4 className="font-medium">{scholarship.name}</h4>
                       <p className="text-sm text-muted-foreground">
@@ -319,27 +309,26 @@ export default function BursDashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Son Başvurular</CardTitle>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => router.push('/dashboard/burs/basvurular')}
               >
                 Tümünü Gör
               </Button>
             </div>
-            <CardDescription>
-              En son alınan burs başvuruları
-            </CardDescription>
+            <CardDescription>En son alınan burs başvuruları</CardDescription>
           </CardHeader>
           <CardContent>
             {recentApplications.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">
-                Henüz başvuru bulunmuyor
-              </div>
+              <div className="text-center py-4 text-muted-foreground">Henüz başvuru bulunmuyor</div>
             ) : (
               <div className="space-y-3">
                 {recentApplications.map((application) => (
-                  <div key={application.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={application.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div>
                       <h4 className="font-medium">Öğrenci #{application.studentId.slice(-4)}</h4>
                       <p className="text-sm text-muted-foreground">
@@ -359,38 +348,36 @@ export default function BursDashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Hızlı İşlemler</CardTitle>
-          <CardDescription>
-            Sık kullanılan işlemlere hızlı erişim
-          </CardDescription>
+          <CardDescription>Sık kullanılan işlemlere hızlı erişim</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex flex-col items-center justify-center space-y-2"
               onClick={() => router.push('/dashboard/burs/ogrenciler')}
             >
               <Users className="h-6 w-6" />
               <span>Yeni Öğrenci</span>
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex flex-col items-center justify-center space-y-2"
               onClick={() => router.push('/dashboard/burs/basvurular')}
             >
               <FileText className="h-6 w-6" />
               <span>Yeni Başvuru</span>
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex flex-col items-center justify-center space-y-2"
               onClick={() => router.push('/dashboard/burs/yetim')}
             >
               <Heart className="h-6 w-6" />
               <span>Yetim Desteği</span>
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="h-20 flex flex-col items-center justify-center space-y-2"
             >
               <Download className="h-6 w-6" />
@@ -405,9 +392,7 @@ export default function BursDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Burs Türleri Dağılımı</CardTitle>
-            <CardDescription>
-              Mevcut burs programlarının türlere göre dağılımı
-            </CardDescription>
+            <CardDescription>Mevcut burs programlarının türlere göre dağılımı</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -419,11 +404,14 @@ export default function BursDashboardPage() {
                   [ScholarshipType.SPECIAL_NEEDS]: 'Özel Gereksinim',
                   [ScholarshipType.REFUGEE]: 'Mülteci',
                   [ScholarshipType.DISASTER_VICTIM]: 'Afet Mağduru',
-                  [ScholarshipType.TALENT]: 'Yetenek'
+                  [ScholarshipType.TALENT]: 'Yetenek',
                 };
 
                 return (
-                  <div key={type} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={type}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <span className="font-medium">{typeNames[type] || type}</span>
                     <Badge variant="outline">{count}</Badge>
                   </div>

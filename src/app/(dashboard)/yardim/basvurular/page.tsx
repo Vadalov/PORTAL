@@ -7,9 +7,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Eye, Calendar, DollarSign, Utensils, Package, Stethoscope } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Eye,
+  Calendar,
+  DollarSign,
+  Utensils,
+  Package,
+  Stethoscope,
+} from 'lucide-react';
 import Link from 'next/link';
 import { AidApplicationForm } from '@/components/forms/AidApplicationForm';
 
@@ -58,9 +73,7 @@ export default function AidApplicationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Yardım Başvuruları</h1>
-          <p className="text-gray-600 mt-2">
-            Portal Plus tarzı başvuru sistemi - {total} kayıt
-          </p>
+          <p className="text-gray-600 mt-2">Portal Plus tarzı başvuru sistemi - {total} kayıt</p>
         </div>
 
         <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
@@ -139,9 +152,7 @@ export default function AidApplicationsPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
           ) : error ? (
-            <div className="text-center text-red-600 py-8">
-              Veriler yüklenirken hata oluştu
-            </div>
+            <div className="text-center text-red-600 py-8">Veriler yüklenirken hata oluştu</div>
           ) : applications.length === 0 ? (
             <div className="text-center text-gray-500 py-12">
               <p className="text-lg font-medium">Başvuru bulunamadı</p>
@@ -160,7 +171,13 @@ export default function AidApplicationsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold text-lg">{app.applicant_name}</h3>
-                        <Badge variant="outline">{app.applicant_type === 'person' ? 'Kişi' : app.applicant_type === 'organization' ? 'Kurum' : 'Partner'}</Badge>
+                        <Badge variant="outline">
+                          {app.applicant_type === 'person'
+                            ? 'Kişi'
+                            : app.applicant_type === 'organization'
+                              ? 'Kurum'
+                              : 'Partner'}
+                        </Badge>
                       </div>
 
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">

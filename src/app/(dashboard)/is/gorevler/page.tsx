@@ -6,8 +6,20 @@ import { appwriteApi } from '@/lib/api/appwrite-api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle as _DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle as _DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import {
   Search,
@@ -23,18 +35,18 @@ import {
   CheckSquare,
   Play,
   CheckCircle,
-  XCircle as _XCircle
+  XCircle as _XCircle,
 } from 'lucide-react';
 import { TaskForm } from '@/components/forms/TaskForm';
 import { KanbanBoard } from '@/components/tasks/KanbanBoard';
 import { toast } from 'sonner';
-import { 
-  getPriorityColor, 
-  getStatusColor, 
-  getPriorityLabel, 
-  getStatusLabel, 
-  isTaskOverdue, 
-  isTaskDueSoon 
+import {
+  getPriorityColor,
+  getStatusColor,
+  getPriorityLabel,
+  getStatusLabel,
+  isTaskOverdue,
+  isTaskDueSoon,
 } from '@/lib/validations/task';
 import type { TaskDocument, UserDocument } from '@/types/collections';
 
@@ -44,7 +56,7 @@ type PriorityFilter = 'all' | 'low' | 'normal' | 'high' | 'urgent';
 
 export default function TasksPage() {
   const queryClient = useQueryClient();
-  
+
   // State management
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
   const [search, setSearch] = useState('');
@@ -55,22 +67,23 @@ export default function TasksPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskDocument | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  
+
   const limit = 20;
 
   // Data fetching
   const { data, isLoading, error } = useQuery({
     queryKey: ['tasks', page, search, statusFilter, priorityFilter, assignedFilter],
-    queryFn: () => appwriteApi.tasks.getTasks({
-      page,
-      limit,
-      search,
-      filters: {
-        ...(statusFilter !== 'all' && { status: statusFilter }),
-        ...(priorityFilter !== 'all' && { priority: priorityFilter }),
-        ...(assignedFilter !== 'all' && { assigned_to: assignedFilter }),
-      }
-    }),
+    queryFn: () =>
+      appwriteApi.tasks.getTasks({
+        page,
+        limit,
+        search,
+        filters: {
+          ...(statusFilter !== 'all' && { status: statusFilter }),
+          ...(priorityFilter !== 'all' && { priority: priorityFilter }),
+          ...(assignedFilter !== 'all' && { assigned_to: assignedFilter }),
+        },
+      }),
   });
 
   // Fetch users for assigned filter
@@ -87,9 +100,9 @@ export default function TasksPage() {
   // Calculate stats
   const stats = {
     total: tasks.length,
-    pending: tasks.filter(t => t.status === 'pending').length,
-    inProgress: tasks.filter(t => t.status === 'in_progress').length,
-    completed: tasks.filter(t => t.status === 'completed').length,
+    pending: tasks.filter((t) => t.status === 'pending').length,
+    inProgress: tasks.filter((t) => t.status === 'in_progress').length,
+    completed: tasks.filter((t) => t.status === 'completed').length,
   };
 
   // Task move mutation (for kanban drag-drop)
@@ -172,9 +185,7 @@ export default function TasksPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Görev Yönetimi</h1>
-          <p className="text-gray-600 mt-2">
-            Görevleri görüntüleyin, atayın ve takip edin
-          </p>
+          <p className="text-gray-600 mt-2">Görevleri görüntüleyin, atayın ve takip edin</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -288,7 +299,10 @@ export default function TasksPage() {
             </div>
 
             {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as StatusFilter)}>
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as StatusFilter)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Durum" />
               </SelectTrigger>
@@ -302,7 +316,10 @@ export default function TasksPage() {
             </Select>
 
             {/* Priority Filter */}
-            <Select value={priorityFilter} onValueChange={(value) => setPriorityFilter(value as PriorityFilter)}>
+            <Select
+              value={priorityFilter}
+              onValueChange={(value) => setPriorityFilter(value as PriorityFilter)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Öncelik" />
               </SelectTrigger>
@@ -323,11 +340,13 @@ export default function TasksPage() {
               <SelectContent>
                 <SelectItem value="all">Tümü</SelectItem>
                 <SelectItem value="unassigned">Atanmamış</SelectItem>
-                {users && users.length > 0 ? users.map((user: UserDocument) => (
-                  <SelectItem key={user.$id} value={user.$id}>
-                    {user.name || 'İsimsiz Kullanıcı'}
-                  </SelectItem>
-                )) : (
+                {users && users.length > 0 ? (
+                  users.map((user: UserDocument) => (
+                    <SelectItem key={user.$id} value={user.$id}>
+                      {user.name || 'İsimsiz Kullanıcı'}
+                    </SelectItem>
+                  ))
+                ) : (
                   <SelectItem value="no-users" disabled>
                     Kullanıcı bulunamadı
                   </SelectItem>
@@ -361,10 +380,12 @@ export default function TasksPage() {
               <CheckSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <p className="text-lg font-medium">Görev bulunamadı</p>
               <p className="text-sm mt-2">
-                {search || statusFilter !== 'all' || priorityFilter !== 'all' || assignedFilter !== 'all'
+                {search ||
+                statusFilter !== 'all' ||
+                priorityFilter !== 'all' ||
+                assignedFilter !== 'all'
                   ? 'Arama kriterlerinize uygun görev bulunamadı'
-                  : 'Henüz görev eklenmemiş'
-                }
+                  : 'Henüz görev eklenmemiş'}
               </p>
             </div>
           </CardContent>
@@ -377,11 +398,7 @@ export default function TasksPage() {
             <CardDescription>Görevleri sürükleyip bırakarak durumlarını değiştirin</CardDescription>
           </CardHeader>
           <CardContent>
-            <KanbanBoard
-              tasks={tasks}
-              onTaskMove={handleTaskMove}
-              onTaskClick={handleTaskClick}
-            />
+            <KanbanBoard tasks={tasks} onTaskMove={handleTaskMove} onTaskClick={handleTaskClick} />
           </CardContent>
         </Card>
       ) : (
@@ -396,7 +413,7 @@ export default function TasksPage() {
               {tasks.map((task) => {
                 const isOverdue = task.due_date ? isTaskOverdue(task.due_date) : false;
                 const isDueSoon = task.due_date ? isTaskDueSoon(task.due_date) : false;
-                
+
                 return (
                   <div
                     key={task.$id}
@@ -434,30 +451,34 @@ export default function TasksPage() {
                               {task.assigned_to ? getUserName(task.assigned_to) : 'Atanmamış'}
                             </span>
                           </div>
-                          
+
                           {task.due_date && (
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-gray-400" />
                               <span className="text-gray-500">Son Tarih:</span>
-                              <span className={`font-medium ${
-                                isOverdue ? 'text-red-600' : 
-                                isDueSoon ? 'text-orange-600' : 
-                                'text-gray-600'
-                              }`}>
+                              <span
+                                className={`font-medium ${
+                                  isOverdue
+                                    ? 'text-red-600'
+                                    : isDueSoon
+                                      ? 'text-orange-600'
+                                      : 'text-gray-600'
+                                }`}
+                              >
                                 {new Date(task.due_date).toLocaleDateString('tr-TR')}
                               </span>
                               {isOverdue && <AlertCircle className="h-4 w-4 text-red-500" />}
-                              {isDueSoon && !isOverdue && <Clock className="h-4 w-4 text-orange-500" />}
+                              {isDueSoon && !isOverdue && (
+                                <Clock className="h-4 w-4 text-orange-500" />
+                              )}
                             </div>
                           )}
-                          
+
                           <div>
                             <span className="text-gray-500">Kategori:</span>
-                            <span className="font-medium ml-1">
-                              {task.category || '-'}
-                            </span>
+                            <span className="font-medium ml-1">{task.category || '-'}</span>
                           </div>
-                          
+
                           <div>
                             <span className="text-gray-500">Oluşturulma:</span>
                             <span className="font-medium ml-1">
@@ -553,7 +574,7 @@ export default function TasksPage() {
                 due_date: selectedTask.due_date,
                 category: selectedTask.category,
                 tags: selectedTask.tags,
-                completed_at: selectedTask.completed_at
+                completed_at: selectedTask.completed_at,
               }}
               onSuccess={() => {
                 setShowEditModal(false);

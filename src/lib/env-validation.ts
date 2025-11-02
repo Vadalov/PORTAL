@@ -37,7 +37,10 @@ const serverEnvSchema = clientEnvSchema.extend({
 
   // Optional email configuration
   SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.string().optional().transform((val) => (val ? parseInt(val, 10) : undefined)),
+  SMTP_PORT: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : undefined)),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   SMTP_FROM: z.string().email().optional(),
@@ -96,8 +99,12 @@ export function validateClientEnv(): ClientEnv {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.issues.map((e) => `  - ${e.path.join('.')}: ${e.message}`).join('\n');
-      throw new Error(`❌ Client environment validation failed:\n${missingVars}\n\nPlease check your .env.local file.`);
+      const missingVars = error.issues
+        .map((e) => `  - ${e.path.join('.')}: ${e.message}`)
+        .join('\n');
+      throw new Error(
+        `❌ Client environment validation failed:\n${missingVars}\n\nPlease check your .env.local file.`
+      );
     }
     throw error;
   }
@@ -149,8 +156,12 @@ export function validateServerEnv(): ServerEnv {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.issues.map((e) => `  - ${e.path.join('.')}: ${e.message}`).join('\n');
-      throw new Error(`❌ Server environment validation failed:\n${missingVars}\n\nPlease check your .env.local file.`);
+      const missingVars = error.issues
+        .map((e) => `  - ${e.path.join('.')}: ${e.message}`)
+        .join('\n');
+      throw new Error(
+        `❌ Server environment validation failed:\n${missingVars}\n\nPlease check your .env.local file.`
+      );
     }
     throw error;
   }

@@ -21,6 +21,7 @@ export enum FundRegion {
 }
 
 export enum FileConnection {
+  BAGIMSIZ = 'BAGIMSIZ',
   PARTNER_KURUM = 'PARTNER_KURUM',
   CALISMA_SAHASI = 'CALISMA_SAHASI',
 }

@@ -32,7 +32,7 @@ export class InputSanitizer {
 
     const digits = tcNo.split('').map(Number);
     const sum = digits.slice(0, 10).reduce((a, b) => a + b, 0);
-    const checksum = (sum % 10 + digits[9]) % 10;
+    const checksum = ((sum % 10) + digits[9]) % 10;
 
     return checksum === digits[10];
   }
@@ -60,21 +60,21 @@ export interface RateLimitRecord {
 export class RateLimiter {
   private static attempts = new Map<string, RateLimitRecord>();
   private static violations = new Map<string, number>();
-  
+
   // Whitelist and blacklist configuration
   private static whitelistIPs = new Set(
-    process.env.RATE_LIMIT_WHITELIST_IPS?.split(',').map(ip => ip.trim()) || []
+    process.env.RATE_LIMIT_WHITELIST_IPS?.split(',').map((ip) => ip.trim()) || []
   );
   private static blacklistIPs = new Set(
-    process.env.RATE_LIMIT_BLACKLIST_IPS?.split(',').map(ip => ip.trim()) || []
+    process.env.RATE_LIMIT_BLACKLIST_IPS?.split(',').map((ip) => ip.trim()) || []
   );
-  
+
   // Configurable limits via environment variables
   private static defaultConfig: RateLimitConfig = {
     maxRequests: parseInt(process.env.RATE_LIMIT_DEFAULT_MAX || '100'),
     windowMs: parseInt(process.env.RATE_LIMIT_DEFAULT_WINDOW || '900000'), // 15 minutes
   };
-  
+
   // Premium user multiplier (authenticated users get higher limits)
   private static premiumMultiplier = parseFloat(process.env.RATE_LIMIT_PREMIUM_MULTIPLIER || '2.0');
 
@@ -86,26 +86,26 @@ export class RateLimiter {
     isAuthenticated: boolean = false
   ): { allowed: boolean; remaining: number; resetTime: number } {
     const now = Date.now();
-    
+
     // Extract IP from identifier
     const ip = identifier.split('-')[0];
-    
+
     // Check whitelist (skip rate limiting)
     if (this.whitelistIPs.has(ip)) {
       return {
         allowed: true,
         remaining: Infinity,
-        resetTime: now + windowMs!
+        resetTime: now + windowMs!,
       };
     }
-    
+
     // Check blacklist (always deny)
     if (this.blacklistIPs.has(ip)) {
       this.recordViolation(identifier);
       return {
         allowed: false,
         remaining: 0,
-        resetTime: now + (windowMs || this.defaultConfig.windowMs)
+        resetTime: now + (windowMs || this.defaultConfig.windowMs),
       };
     }
 
@@ -113,7 +113,7 @@ export class RateLimiter {
       maxRequests: maxAttempts || this.defaultConfig.maxRequests,
       windowMs: windowMs || this.defaultConfig.windowMs,
     };
-    
+
     // Apply premium multiplier for authenticated users
     if (isAuthenticated && userId) {
       config.maxRequests = Math.floor(config.maxRequests * this.premiumMultiplier);
@@ -126,54 +126,54 @@ export class RateLimiter {
       const newRecord: RateLimitRecord = {
         count: 1,
         resetTime: now + config.windowMs,
-        firstRequest: now
+        firstRequest: now,
       };
       this.attempts.set(identifier, newRecord);
-      
+
       return {
         allowed: true,
         remaining: config.maxRequests - 1,
-        resetTime: newRecord.resetTime
+        resetTime: newRecord.resetTime,
       };
     }
 
     // Check if limit exceeded
     if (record.count >= config.maxRequests) {
       this.recordViolation(identifier);
-      
+
       return {
         allowed: false,
         remaining: 0,
-        resetTime: record.resetTime
+        resetTime: record.resetTime,
       };
     }
 
     // Increment counter
     record.count++;
-    
+
     return {
       allowed: true,
       remaining: config.maxRequests - record.count,
-      resetTime: record.resetTime
+      resetTime: record.resetTime,
     };
   }
 
   static getRemainingAttempts(identifier: string): number {
     const record = this.attempts.get(identifier);
     if (!record) return this.defaultConfig.maxRequests;
-    
+
     const now = Date.now();
     if (now > record.resetTime) {
       return this.defaultConfig.maxRequests;
     }
-    
+
     return Math.max(0, this.defaultConfig.maxRequests - record.count);
   }
 
   static getRemainingTime(identifier: string): number {
     const record = this.attempts.get(identifier);
     if (!record) return 0;
-    
+
     const now = Date.now();
     return Math.max(0, record.resetTime - now);
   }
@@ -195,7 +195,7 @@ export class RateLimiter {
       identifier,
       violations: currentViolations + 1,
       timestamp: new Date().toISOString(),
-      type: 'rate_limit_violation'
+      type: 'rate_limit_violation',
     });
   }
 
@@ -206,7 +206,7 @@ export class RateLimiter {
   static getAllViolations(): Array<{ identifier: string; count: number }> {
     return Array.from(this.violations.entries()).map(([identifier, count]) => ({
       identifier,
-      count
+      count,
     }));
   }
 
@@ -218,11 +218,13 @@ export class RateLimiter {
     blacklistedIPs: number;
   } {
     const totalRequests = Array.from(this.attempts.values()).reduce(
-      (sum, record) => sum + record.count, 0
+      (sum, record) => sum + record.count,
+      0
     );
-    
+
     const totalViolations = Array.from(this.violations.values()).reduce(
-      (sum, count) => sum + count, 0
+      (sum, count) => sum + count,
+      0
     );
 
     return {
@@ -230,7 +232,7 @@ export class RateLimiter {
       activeLimits: this.attempts.size,
       totalViolations,
       whitelistedIPs: this.whitelistIPs.size,
-      blacklistedIPs: this.blacklistIPs.size
+      blacklistedIPs: this.blacklistIPs.size,
     };
   }
 
@@ -313,8 +315,8 @@ export class FileSecurity {
 
     // Check for common malware signatures
     const malwareSignatures = [
-      [0x4D, 0x5A], // MZ header (Windows executable)
-      [0x7F, 0x45, 0x4C, 0x46], // ELF header (Linux executable)
+      [0x4d, 0x5a], // MZ header (Windows executable)
+      [0x7f, 0x45, 0x4c, 0x46], // ELF header (Linux executable)
     ];
 
     for (const signature of malwareSignatures) {
@@ -364,11 +366,13 @@ export class AuditLogger {
     }
 
     // Determine log level based on severity
-    const level: 'info' | 'warn' | 'error' = logData.status === 'failure'
-      ? 'warn'
-      : logData.action.toLowerCase().includes('violation') || logData.action.toLowerCase().includes('security')
-        ? 'error'
-        : 'info';
+    const level: 'info' | 'warn' | 'error' =
+      logData.status === 'failure'
+        ? 'warn'
+        : logData.action.toLowerCase().includes('violation') ||
+            logData.action.toLowerCase().includes('security')
+          ? 'error'
+          : 'info';
 
     if (process.env.NODE_ENV === 'production') {
       logger[level]('Audit log', {
@@ -376,7 +380,7 @@ export class AuditLogger {
         resource: logData.resource,
         userId: logData.userId,
         status: logData.status,
-        ipAddress: logData.ipAddress
+        ipAddress: logData.ipAddress,
       });
     } else {
       logger.debug('Audit log', { ...auditLog });
@@ -387,7 +391,7 @@ export class AuditLogger {
     let filteredLogs = this.logs;
 
     if (userId) {
-      filteredLogs = filteredLogs.filter(log => log.userId === userId);
+      filteredLogs = filteredLogs.filter((log) => log.userId === userId);
     }
 
     return filteredLogs.slice(-limit).reverse();

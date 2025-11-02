@@ -66,10 +66,7 @@ export function getCsrfTokenFromCookie(): string | null {
 /**
  * Client-side: Fetch wrapper with CSRF token
  */
-export async function fetchWithCsrf(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+export async function fetchWithCsrf(url: string, options: RequestInit = {}): Promise<Response> {
   const csrfToken = getCsrfTokenFromCookie();
 
   const headers = new Headers(options.headers);

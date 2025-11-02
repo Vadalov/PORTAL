@@ -142,7 +142,8 @@ class NetworkMonitorClass {
         this.trackSpecialEndpoints(url, log);
 
         return response;
-      } catch (error) {
+      } catch (err: unknown) {
+        const error = err as Error;
         const endTime = performance.now();
 
         log.duration = endTime - startTime;
@@ -341,7 +342,7 @@ class NetworkMonitorClass {
         successfulRequests,
         failedRequests,
         successRate: totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0,
-        averageDuration: averageDuration.toFixed(2) + 'ms',
+        averageDuration: `${averageDuration.toFixed(2)}ms`,
       },
       endpoints: Array.from(endpointStats.entries()).map(([endpoint, stats]) => ({
         endpoint,
@@ -352,7 +353,7 @@ class NetworkMonitorClass {
       slowestRequests: slowestRequests.map((req) => ({
         url: req.url,
         method: req.method,
-        duration: req.duration?.toFixed(2) + 'ms',
+        duration: `${req.duration?.toFixed(2)}ms`,
         status: req.status,
       })),
       failedRequests: this.getFailedRequests().map((req) => ({

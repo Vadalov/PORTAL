@@ -4,14 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Transaction, 
-  TransactionType, 
-  CreateTransactionInput
-} from '@/types/financial';
+import { Transaction, TransactionType, CreateTransactionInput } from '@/types/financial';
 import { Loader2, CheckCircle, DollarSign, Tag } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -32,19 +34,19 @@ const CATEGORY_LABELS: Record<string, string> = {
   office_supplies: 'Ofis Malzemeleri',
   utilities: 'Faturalar',
   transportation: 'Ulaşım',
-  other_expense: 'Diğer Gider'
+  other_expense: 'Diğer Gider',
 };
 
 const CURRENCIES = [
   { value: 'TRY', label: 'TRY - Türk Lirası' },
   { value: 'USD', label: 'USD - Amerikan Doları' },
-  { value: 'EUR', label: 'EUR - Euro' }
+  { value: 'EUR', label: 'EUR - Euro' },
 ];
 
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Bekliyor' },
   { value: 'completed', label: 'Tamamlandı' },
-  { value: 'cancelled', label: 'İptal' }
+  { value: 'cancelled', label: 'İptal' },
 ];
 
 interface TransactionFormProps {
@@ -56,13 +58,13 @@ interface TransactionFormProps {
   mode?: 'create' | 'edit';
 }
 
-export default function TransactionForm({ 
-  transaction, 
-  onSubmit, 
-  onCancel, 
+export default function TransactionForm({
+  transaction,
+  onSubmit,
+  onCancel,
   loading = false,
   className = '',
-  mode = 'create'
+  mode = 'create',
 }: TransactionFormProps) {
   const [formData, setFormData] = useState<CreateTransactionInput>({
     type: 'income',
@@ -72,7 +74,7 @@ export default function TransactionForm({
     description: '',
     date: new Date(),
     status: 'pending',
-    tags: []
+    tags: [],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [tagInput, setTagInput] = useState('');
@@ -90,7 +92,7 @@ export default function TransactionForm({
           description: transaction.description,
           date: transaction.date,
           status: transaction.status,
-          tags: transaction.tags || []
+          tags: transaction.tags || [],
         });
       }, 0);
     }
@@ -123,7 +125,7 @@ export default function TransactionForm({
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -136,17 +138,20 @@ export default function TransactionForm({
   };
 
   // Handle field changes
-  const handleFieldChange = (field: keyof CreateTransactionInput, value: string | number | Date | string[]) => {
-    setFormData(prev => ({
+  const handleFieldChange = (
+    field: keyof CreateTransactionInput,
+    value: string | number | Date | string[]
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     // Clear error when field is changed
     if (errors[field]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [field]: ''
+        [field]: '',
       }));
     }
   };
@@ -154,9 +159,9 @@ export default function TransactionForm({
   // Add tag
   const handleAddTag = () => {
     if (tagInput.trim() && !formData.tags?.includes(tagInput.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        tags: [...(prev.tags || []), tagInput.trim()]
+        tags: [...(prev.tags || []), tagInput.trim()],
       }));
       setTagInput('');
     }
@@ -164,9 +169,9 @@ export default function TransactionForm({
 
   // Remove tag
   const handleRemoveTag = (tagToRemove: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags?.filter(tag => tag !== tagToRemove) || []
+      tags: prev.tags?.filter((tag) => tag !== tagToRemove) || [],
     }));
   };
 
@@ -182,11 +187,32 @@ export default function TransactionForm({
   const getCategories = () => {
     if (formData.type === 'income') {
       return Object.entries(CATEGORY_LABELS)
-        .filter(([key]) => ['donation', 'membership_fee', 'sponsorship', 'event_revenue', 'grant', 'other_income'].includes(key))
+        .filter(([key]) =>
+          [
+            'donation',
+            'membership_fee',
+            'sponsorship',
+            'event_revenue',
+            'grant',
+            'other_income',
+          ].includes(key)
+        )
         .map(([key, label]) => ({ value: key, label }));
     } else {
       return Object.entries(CATEGORY_LABELS)
-        .filter(([key]) => ['administrative', 'program_expenses', 'scholarship', 'assistance', 'marketing', 'office_supplies', 'utilities', 'transportation', 'other_expense'].includes(key))
+        .filter(([key]) =>
+          [
+            'administrative',
+            'program_expenses',
+            'scholarship',
+            'assistance',
+            'marketing',
+            'office_supplies',
+            'utilities',
+            'transportation',
+            'other_expense',
+          ].includes(key)
+        )
         .map(([key, label]) => ({ value: key, label }));
     }
   };
@@ -199,10 +225,9 @@ export default function TransactionForm({
           {mode === 'create' ? 'Yeni İşlem' : 'İşlemi Düzenle'}
         </CardTitle>
         <CardDescription>
-          {mode === 'create' 
+          {mode === 'create'
             ? 'Yeni bir gelir veya gider işlemi oluşturun'
-            : 'Mevcut işlem bilgilerini düzenleyin'
-          }
+            : 'Mevcut işlem bilgilerini düzenleyin'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -211,15 +236,15 @@ export default function TransactionForm({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="type">İşlem Türü</Label>
-              <Select 
-                value={formData.type} 
+              <Select
+                value={formData.type}
                 onValueChange={(value) => {
                   handleFieldChange('type', value);
                   // Reset category when type changes
-                  setFormData(prev => ({ 
-                    ...prev, 
+                  setFormData((prev) => ({
+                    ...prev,
                     type: value as TransactionType,
-                    category: value === 'income' ? 'donation' : 'administrative'
+                    category: value === 'income' ? 'donation' : 'administrative',
                   }));
                 }}
               >
@@ -235,8 +260,8 @@ export default function TransactionForm({
 
             <div>
               <Label htmlFor="category">Kategori</Label>
-              <Select 
-                value={formData.category} 
+              <Select
+                value={formData.category}
                 onValueChange={(value) => handleFieldChange('category', value)}
               >
                 <SelectTrigger>
@@ -244,13 +269,13 @@ export default function TransactionForm({
                 </SelectTrigger>
                 <SelectContent>
                   {getCategories().map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              {errors.category && (
-                <p className="text-sm text-red-500 mt-1">{errors.category}</p>
-              )}
+              {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category}</p>}
             </div>
           </div>
 
@@ -271,15 +296,13 @@ export default function TransactionForm({
                   placeholder="0.00"
                 />
               </div>
-              {errors.amount && (
-                <p className="text-sm text-red-500 mt-1">{errors.amount}</p>
-              )}
+              {errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
             </div>
 
             <div>
               <Label htmlFor="currency">Para Birimi</Label>
-              <Select 
-                value={formData.currency} 
+              <Select
+                value={formData.currency}
                 onValueChange={(value) => handleFieldChange('currency', value)}
               >
                 <SelectTrigger>
@@ -287,7 +310,9 @@ export default function TransactionForm({
                 </SelectTrigger>
                 <SelectContent>
                   {CURRENCIES.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -312,24 +337,20 @@ export default function TransactionForm({
           {/* Date and Status */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="date">
-                Tarih
-              </Label>
+              <Label htmlFor="date">Tarih</Label>
               <Input
                 id="date"
                 type="date"
                 value={formData.date ? formData.date.toISOString().split('T')[0] : ''}
                 onChange={(e) => handleFieldChange('date', new Date(e.target.value))}
               />
-              {errors.date && (
-                <p className="text-sm text-red-500 mt-1">{errors.date}</p>
-              )}
+              {errors.date && <p className="text-sm text-red-500 mt-1">{errors.date}</p>}
             </div>
 
             <div>
               <Label htmlFor="status">Durum</Label>
-              <Select 
-                value={formData.status} 
+              <Select
+                value={formData.status}
                 onValueChange={(value) => handleFieldChange('status', value)}
               >
                 <SelectTrigger>
@@ -337,7 +358,9 @@ export default function TransactionForm({
                 </SelectTrigger>
                 <SelectContent>
                   {STATUS_OPTIONS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -346,9 +369,7 @@ export default function TransactionForm({
 
           {/* Tags */}
           <div>
-            <Label htmlFor="tags">
-              Etiketler
-            </Label>
+            <Label htmlFor="tags">Etiketler</Label>
             <div className="space-y-3">
               {/* Tag Input */}
               <div className="flex gap-2">
@@ -360,21 +381,21 @@ export default function TransactionForm({
                   placeholder="Etiket ekle..."
                   className="flex-1"
                 />
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={handleAddTag}
                   disabled={!tagInput.trim()}
                 >
                   Ekle
                 </Button>
               </div>
-              
+
               {/* Tag List */}
               {formData.tags && formData.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {formData.tags.map((tag, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm"
                     >
@@ -395,19 +416,10 @@ export default function TransactionForm({
 
           {/* Form Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onCancel}
-              disabled={loading}
-            >
+            <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
               İptal
             </Button>
-            <Button 
-              type="submit" 
-              disabled={loading}
-              className="min-w-24"
-            >
+            <Button type="submit" disabled={loading} className="min-w-24">
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

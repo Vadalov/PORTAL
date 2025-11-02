@@ -71,7 +71,9 @@ export function ResponsiveTable({
                     {col.label}
                   </th>
                 ))}
-              {actions && <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Aksiyon</th>}
+              {actions && (
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Aksiyon</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -86,7 +88,10 @@ export function ResponsiveTable({
                 {columns
                   .filter((col) => col.hidden !== 'desktop')
                   .map((col) => (
-                    <td key={`${String(row[rowKey])}-${col.key}`} className="px-4 py-3 text-sm text-gray-900">
+                    <td
+                      key={`${String(row[rowKey])}-${col.key}`}
+                      className="px-4 py-3 text-sm text-gray-900"
+                    >
                       {col.render ? col.render(row[col.key], row) : String(row[col.key] || '-')}
                     </td>
                   ))}
@@ -139,18 +144,17 @@ export function ResponsiveTable({
               .filter((col) => col.hidden !== 'mobile' && col.hidden !== 'mobile-tablet')
               .slice(0, 3)
               .map((col) => (
-                <div key={`${String(row[rowKey])}-${col.key}`} className="flex justify-between items-start">
+                <div
+                  key={`${String(row[rowKey])}-${col.key}`}
+                  className="flex justify-between items-start"
+                >
                   <p className="text-xs font-medium text-gray-500 uppercase">{col.label}</p>
                   <p className="text-sm text-gray-900 text-right max-w-[50%]">
                     {col.render ? col.render(row[col.key], row) : String(row[col.key] || '-')}
                   </p>
                 </div>
               ))}
-            {actions && (
-              <div className="flex gap-2 pt-3 border-t">
-                {actions(row)}
-              </div>
-            )}
+            {actions && <div className="flex gap-2 pt-3 border-t">{actions(row)}</div>}
           </Card>
         ))}
       </div>
@@ -197,7 +201,9 @@ export function ResponsiveGrid({
   const gridCols = `grid-cols-${itemsPerRow.mobile} md:grid-cols-${itemsPerRow.tablet} lg:grid-cols-${itemsPerRow.desktop}`;
 
   return (
-    <div className={`grid gap-4 grid-cols-${itemsPerRow.mobile} md:grid-cols-${itemsPerRow.tablet} lg:grid-cols-${itemsPerRow.desktop}`}>
+    <div
+      className={`grid gap-4 grid-cols-${itemsPerRow.mobile} md:grid-cols-${itemsPerRow.tablet} lg:grid-cols-${itemsPerRow.desktop}`}
+    >
       {data.map((item, index) => (
         <div key={`item-${index}`}>{renderCard(item)}</div>
       ))}

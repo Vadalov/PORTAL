@@ -46,9 +46,7 @@ export function ApplicationCard({ application, onEdit }: ApplicationCardProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                <span>
-                  {new Date(application.applicationDate).toLocaleDateString('tr-TR')}
-                </span>
+                <span>{new Date(application.applicationDate).toLocaleDateString('tr-TR')}</span>
               </div>
             </div>
           </div>
@@ -63,7 +61,8 @@ export function ApplicationCard({ application, onEdit }: ApplicationCardProps) {
                 <DialogHeader>
                   <DialogTitle>Başvuru Detayları</DialogTitle>
                   <DialogDescription>
-                    {application.student?.firstName} {application.student?.lastName} - {application.scholarship?.name}
+                    {application.student?.firstName} {application.student?.lastName} -{' '}
+                    {application.scholarship?.name}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
@@ -82,9 +81,7 @@ export function ApplicationCard({ application, onEdit }: ApplicationCardProps) {
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Durum</Label>
-                      <div className="mt-1">
-                        {getApplicationStatusBadge(application.status)}
-                      </div>
+                      <div className="mt-1">{getApplicationStatusBadge(application.status)}</div>
                     </div>
                     <div>
                       <Label className="text-sm font-medium">Başvuru Tarihi</Label>
@@ -123,4 +120,3 @@ export function ApplicationCard({ application, onEdit }: ApplicationCardProps) {
     </Card>
   );
 }
-

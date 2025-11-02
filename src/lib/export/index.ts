@@ -151,10 +151,7 @@ export function exportCSV(
  * @param data - Array of objects to export
  * @param filename - Output filename (without .json)
  */
-export function exportJSON(
-  data: ExportData,
-  filename: string = 'export'
-): void {
+export function exportJSON(data: ExportData, filename: string = 'export'): void {
   if (!validateExportData(data)) return;
 
   const jsonContent = JSON.stringify(data, null, 2);
@@ -212,7 +209,7 @@ export function exportHTML(
 /**
  * Generate PDF from HTML content using a library
  * Note: Requires pdfkit or similar library
- * 
+ *
  * For now, we'll create a simple text file that can be converted to PDF
  */
 export function exportPDF(

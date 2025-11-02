@@ -13,7 +13,24 @@ export function sanitizeHtml(html: string): string {
   if (!html) return '';
 
   return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+    ALLOWED_TAGS: [
+      'b',
+      'i',
+      'em',
+      'strong',
+      'a',
+      'p',
+      'br',
+      'ul',
+      'ol',
+      'li',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+    ],
     ALLOWED_ATTR: ['href', 'title', 'target'],
     ALLOW_DATA_ATTR: false,
   });
@@ -107,7 +124,8 @@ export function sanitizeTcNo(tcNo: string): string | null {
   if (digit10 !== arr[9]) return null;
 
   // Calculate 11th digit
-  const sum3 = arr[0] + arr[1] + arr[2] + arr[3] + arr[4] + arr[5] + arr[6] + arr[7] + arr[8] + arr[9];
+  const sum3 =
+    arr[0] + arr[1] + arr[2] + arr[3] + arr[4] + arr[5] + arr[6] + arr[7] + arr[8] + arr[9];
   const digit11 = sum3 % 10;
 
   if (digit11 !== arr[10]) return null;
@@ -182,19 +200,19 @@ export function sanitizeNumber(value: string | number): number | null {
   if (value === null || value === undefined || value === '') return null;
 
   let processedValue: string | number = value;
-  
+
   if (typeof value === 'string') {
     let cleaned = value.trim();
-    
+
     // Handle both formats:
     // 1. Turkish format: 5.000,50 (dot as thousand separator, comma as decimal) -> 5000.50
     // 2. US format: 5,000.50 (comma as thousand separator, dot as decimal) -> 5000.50
-    
+
     if (cleaned.includes('.') && cleaned.includes(',')) {
       // Both separators present - determine which is decimal separator
       const lastDot = cleaned.lastIndexOf('.');
       const lastComma = cleaned.lastIndexOf(',');
-      
+
       if (lastComma > lastDot) {
         // Comma is last -> Turkish format (dot thousands, comma decimal)
         cleaned = cleaned.replace(/\./g, '').replace(',', '.');
@@ -215,7 +233,7 @@ export function sanitizeNumber(value: string | number): number | null {
       }
     }
     // If only dots, leave as is
-    
+
     processedValue = cleaned;
   }
 
@@ -281,7 +299,7 @@ export function sanitizeObject<T extends Record<string, any>>(
   if (!obj || typeof obj !== 'object') return obj;
 
   const { allowHtml = false, fieldsToIgnore = [] } = options;
-  const sanitized : unknown= Array.isArray(obj) ? [] : {};
+  const sanitized: Record<string, any> = Array.isArray(obj) ? [] : {};
 
   for (const key in obj) {
     if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;

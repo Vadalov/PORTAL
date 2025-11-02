@@ -38,7 +38,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PUT /api/messages/[id]
  */
-async function updateMessageHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function updateMessageHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { id } = await extractParams(params);
   const body = await request.json();
   return handleUpdate(id, body, validateMessageUpdate, api.messages.updateMessage, 'Mesaj');
@@ -47,7 +50,10 @@ async function updateMessageHandler(request: NextRequest, { params }: { params: 
 /**
  * DELETE /api/messages/[id]
  */
-async function deleteMessageHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function deleteMessageHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { id } = await extractParams(params);
   return handleDelete(id, api.messages.deleteMessage, 'Mesaj');
 }
@@ -56,7 +62,10 @@ async function deleteMessageHandler(request: NextRequest, { params }: { params: 
  * POST /api/messages/[id]/send
  * Note: Implemented via PUT with status change to keep routes simple
  */
-async function sendMessageHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function sendMessageHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   let id: string | undefined;
   try {
     id = (await extractParams(params)).id;
@@ -68,13 +77,13 @@ async function sendMessageHandler(request: NextRequest, { params }: { params: Pr
     if (response.error || !response.data) {
       return errorResponse(response.error || 'Gönderim başarısız', 400);
     }
-    
+
     return successResponse(response.data, 'Mesaj gönderildi');
   } catch (error: unknown) {
     logger.error('Send message error', error, {
       endpoint: '/api/messages/[id]',
       method: 'POST',
-      messageId: id || 'unknown'
+      messageId: id || 'unknown',
     });
     return errorResponse('Gönderim işlemi başarısız', 500);
   }

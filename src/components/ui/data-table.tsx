@@ -71,13 +71,14 @@ export function DataTable<T extends Record<string, unknown>>({
   const handleSearchChange = onSearchChange ?? setInternalSearch;
 
   // Filter data if internal search is used
-  const filteredData = searchable && !onSearchChange
-    ? data.filter((item) =>
-        Object.values(item).some((value) =>
-          String(value).toLowerCase().includes(effectiveSearchValue.toLowerCase())
+  const filteredData =
+    searchable && !onSearchChange
+      ? data.filter((item) =>
+          Object.values(item).some((value) =>
+            String(value).toLowerCase().includes(effectiveSearchValue.toLowerCase())
+          )
         )
-      )
-    : data;
+      : data;
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -184,10 +185,7 @@ export function DataTable<T extends Record<string, unknown>>({
                         {columns.map((column) => (
                           <td
                             key={column.key}
-                            className={cn(
-                              'p-4 text-sm text-foreground',
-                              column.className
-                            )}
+                            className={cn('p-4 text-sm text-foreground', column.className)}
                           >
                             {column.render
                               ? column.render(item, index)

@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -13,21 +13,20 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: () => {},
     dispatchEvent: () => {},
   }),
-})
+});
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
-}
+};
 
 // Mock IntersectionObserver
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(global as any).IntersectionObserver = class IntersectionObserver {
-   
+(global as any).IntersectionObserver = class IntersectionObserver {
   observe(_element: Element): void {}
-   
+
   unobserve(_element: Element): void {}
   disconnect(): void {}
-}
+};

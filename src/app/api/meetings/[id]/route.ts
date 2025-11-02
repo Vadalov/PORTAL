@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     logger.error('Meeting operation error', error, {
       endpoint: '/api/meetings/[id]',
       method: 'GET',
-      meetingId: id || 'unknown'
+      meetingId: id || 'unknown',
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -43,7 +43,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PUT /api/meetings/[id]
  */
-async function updateMeetingHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function updateMeetingHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   let id: string | undefined;
   try {
     id = (await extractParams(params)).id;
@@ -53,7 +56,7 @@ async function updateMeetingHandler(request: NextRequest, { params }: { params: 
     logger.error('Meeting operation error', error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
-      meetingId: id || 'unknown'
+      meetingId: id || 'unknown',
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -62,7 +65,10 @@ async function updateMeetingHandler(request: NextRequest, { params }: { params: 
 /**
  * DELETE /api/meetings/[id]
  */
-async function deleteMeetingHandler(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function deleteMeetingHandler(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   let id: string | undefined;
   try {
     id = (await extractParams(params)).id;
@@ -71,7 +77,7 @@ async function deleteMeetingHandler(request: NextRequest, { params }: { params: 
     logger.error('Meeting operation error', error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
-      meetingId: id || 'unknown'
+      meetingId: id || 'unknown',
     });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

@@ -1,7 +1,7 @@
 /**
  * Frontend Login Test with Playwright
  * Browser'da login yapmayı test eder
- * 
+ *
  * Usage: npx tsx scripts/test-login-frontend.ts
  */
 
@@ -39,14 +39,14 @@ async function testFrontendLogin() {
     // Login butonuna tıkla
     console.log('\n3️⃣  Login butonuna tıklanıyor...');
     await page.click('button[type="submit"]');
-    
+
     // Başarılı login sonrası yönlendirmeyi bekle
     await page.waitForURL('**/genel**', { timeout: 10000 });
     console.log('✅ Login başarılı, yönlendirme yapıldı');
 
     // Kullanıcı bilgilerini kontrol et
     console.log('\n4️⃣  Kullanıcı bilgileri kontrol ediliyor...');
-    
+
     // Auth store'dan kullanıcı bilgisini al
     const userInfo = await page.evaluate(() => {
       const authStore = (window as any).__ZUSTAND_STORE__?.auth;
@@ -64,7 +64,7 @@ async function testFrontendLogin() {
       const stored = await page.evaluate(() => {
         return localStorage.getItem('auth-storage');
       });
-      
+
       if (stored) {
         const parsed = JSON.parse(stored);
         const user = parsed?.state?.user;
@@ -82,12 +82,12 @@ async function testFrontendLogin() {
     const currentUrl = page.url();
     console.log('\n5️⃣  Sayfa kontrolü...');
     console.log('   Current URL:', currentUrl);
-    
+
     if (currentUrl.includes('/genel')) {
       console.log('✅ Dashboard sayfasına yönlendirme başarılı');
     }
 
-    console.log(`\n${  '='.repeat(60)}`);
+    console.log(`\n${'='.repeat(60)}`);
     console.log('🎉 Frontend login testi başarılı!');
     console.log('\n💡 Browser açık kalacak, manuel kontrol edebilirsiniz.');
     console.log('   Kapatmak için 10 saniye bekleyin...');
@@ -100,7 +100,7 @@ async function testFrontendLogin() {
   } catch (error: any) {
     console.error('\n❌ Hata oluştu:', error.message);
     console.error('\n📸 Screenshot alınıyor...');
-    
+
     await page.screenshot({ path: 'login-error.png', fullPage: true });
     console.error('   Screenshot kaydedildi: login-error.png');
 
@@ -110,4 +110,3 @@ async function testFrontendLogin() {
 }
 
 testFrontendLogin();
-

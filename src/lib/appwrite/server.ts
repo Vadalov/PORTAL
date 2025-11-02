@@ -11,6 +11,7 @@
 import { Client, Account, Databases, Storage, Users, Teams, Query } from 'node-appwrite';
 import { appwriteConfig, validateServerConfig, validateServerConfigSafe } from './config';
 import { validateServerSDKUsage } from './sdk-guard';
+import type { AppwriteError } from './types';
 
 // Validation moved to lazy initialization - see initializeServerClient()
 // validateServerConfig(); // ❌ Removed to prevent import-time crash
@@ -23,7 +24,7 @@ validateServerSDKUsage();
  * Server-side Appwrite client
  * Uses API key for elevated permissions
  * IMPORTANT: Only use in server components, API routes, or server actions
- * 
+ *
  * Note: Configuration is validated lazily to prevent import-time crashes.
  * Call initializeServerClient() explicitly if you need strict validation.
  */
@@ -65,15 +66,13 @@ export { Query };
 /**
  * Server-side error handling wrapper
  */
-export async function handleServerError<T>(
-  operation: () => Promise<T>,
-  fallback?: T
-): Promise<T> {
+export async function handleServerError<T>(operation: () => Promise<T>, fallback?: T): Promise<T> {
   try {
     return await operation();
-  } catch (error: unknown) {
+  } catch (err: unknown) {
+    const error = err as AppwriteError;
     console.error('Appwrite Server Error:', error);
-    
+
     // Handle specific error types
     if (error.code === 401) {
       throw new Error('API key geçersiz veya eksik.');
@@ -84,7 +83,7 @@ export async function handleServerError<T>(
     } else if (error.code >= 500) {
       throw new Error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
     }
-    
+
     throw new Error(error.message || 'Beklenmeyen bir hata oluştu.');
   }
 }
@@ -97,10 +96,17 @@ export function isServerInitialized(): boolean {
   try {
     const isServer = typeof window === 'undefined';
     if (!isServer) {
-      console.warn('⚠️ isServerInitialized called from browser context. Server SDK should only be used on server.');
+      console.warn(
+        '⚠️ isServerInitialized called from browser context. Server SDK should only be used on server.'
+      );
       return false;
     }
-    const hasConfig = !!(serverClient && appwriteConfig.endpoint && appwriteConfig.projectId && appwriteConfig.apiKey);
+    const hasConfig = !!(
+      serverClient &&
+      appwriteConfig.endpoint &&
+      appwriteConfig.projectId &&
+      appwriteConfig.apiKey
+    );
     if (!hasConfig) {
       console.warn('⚠️ Appwrite server client is not properly configured');
     }

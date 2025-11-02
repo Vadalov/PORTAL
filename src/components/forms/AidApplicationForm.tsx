@@ -9,7 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,14 +28,14 @@ const aidApplicationSchema = z.object({
   applicant_type: z.enum(['person', 'organization', 'partner']),
   applicant_name: z.string().min(2, 'İsim en az 2 karakter olmalıdır'),
   beneficiary_id: z.string().optional(),
-  
+
   // Yardım türleri
   one_time_aid: z.number().min(0).optional(),
   regular_financial_aid: z.number().min(0).optional(),
   regular_food_aid: z.number().min(0).optional(),
   in_kind_aid: z.number().min(0).optional(),
   service_referral: z.number().min(0).optional(),
-  
+
   description: z.string().optional(),
   notes: z.string().optional(),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
@@ -77,6 +83,7 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
     mutationFn: (data: AidApplicationFormData) =>
       aidApplicationsApi.createAidApplication({
         ...data,
+        application_date: new Date().toISOString(),
         stage: 'draft',
         status: 'open',
       }),
@@ -85,8 +92,9 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
       queryClient.invalidateQueries({ queryKey: ['aid-applications'] });
       onSuccess?.();
     },
-    onError: (error: unknown) => {
-      toast.error(`Başvuru oluşturulurken hata oluştu: ${  error.message}`);
+    onError: (err: unknown) => {
+      const error = err as Error;
+      toast.error(`Başvuru oluşturulurken hata oluştu: ${error.message}`);
     },
   });
 
@@ -122,7 +130,9 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
                 <Label htmlFor="applicant_type">Başvuran Türü *</Label>
                 <Select
                   value={watch('applicant_type')}
-                  onValueChange={(value) => setValue('applicant_type', value)}
+                  onValueChange={(value) =>
+                    setValue('applicant_type', value as 'person' | 'organization' | 'partner')
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -176,7 +186,9 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
                 <Label htmlFor="priority">Öncelik</Label>
                 <Select
                   value={watch('priority')}
-                  onValueChange={(value) => setValue('priority', value)}
+                  onValueChange={(value) =>
+                    setValue('priority', value as 'low' | 'normal' | 'high' | 'urgent' | undefined)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -307,12 +319,7 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
           {/* Form Actions */}
           <Separator />
           <div className="flex flex-col sm:flex-row gap-4 pt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 sm:flex-none"
-              size="lg"
-            >
+            <Button type="submit" disabled={isSubmitting} className="flex-1 sm:flex-none" size="lg">
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -341,4 +348,3 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
     </Card>
   );
 }
-

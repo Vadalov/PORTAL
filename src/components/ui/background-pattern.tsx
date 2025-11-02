@@ -30,13 +30,7 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
                 height="20"
                 patternUnits="userSpaceOnUse"
               >
-                <circle
-                  cx="2"
-                  cy="2"
-                  r="1.5"
-                  fill={color}
-                  fillOpacity={opacity}
-                />
+                <circle cx="2" cy="2" r="1.5" fill={color} fillOpacity={opacity} />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill={`url(#${uniqueId})`} />
@@ -187,27 +181,9 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
                   strokeOpacity={opacity}
                 />
                 {/* Circles at intersections */}
-                <circle
-                  cx="15"
-                  cy="15"
-                  r="2"
-                  fill={color}
-                  fillOpacity={opacity}
-                />
-                <circle
-                  cx="45"
-                  cy="45"
-                  r="2"
-                  fill={color}
-                  fillOpacity={opacity}
-                />
-                <circle
-                  cx="30"
-                  cy="30"
-                  r="1.5"
-                  fill={color}
-                  fillOpacity={opacity * 0.7}
-                />
+                <circle cx="15" cy="15" r="2" fill={color} fillOpacity={opacity} />
+                <circle cx="45" cy="45" r="2" fill={color} fillOpacity={opacity} />
+                <circle cx="30" cy="30" r="1.5" fill={color} fillOpacity={opacity * 0.7} />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill={`url(#${uniqueId})`} />
@@ -268,14 +244,10 @@ export const BackgroundPattern: React.FC<BackgroundPatternProps> = ({
 
   return (
     <div
-      className={cn(
-        'absolute inset-0 pointer-events-none overflow-hidden z-0',
-        className
-      )}
+      className={cn('absolute inset-0 pointer-events-none overflow-hidden z-0', className)}
       aria-hidden="true"
     >
       {renderPattern()}
     </div>
   );
 };
-
