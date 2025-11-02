@@ -42,6 +42,18 @@ export const POST = authRateLimit(async (request: NextRequest) => {
 
     const tempAccount = new Account(tempClient);
 
+    // Validate Appwrite config before attempting login
+    if (!appwriteConfig.endpoint || !appwriteConfig.projectId) {
+      logger.error('Appwrite configuration missing', {
+        endpoint: appwriteConfig.endpoint ? 'present' : 'missing',
+        projectId: appwriteConfig.projectId ? 'present' : 'missing',
+      });
+      return NextResponse.json(
+        { success: false, error: 'Sunucu yapılandırma hatası. Lütfen yöneticiye bildirin.' },
+        { status: 500 }
+      );
+    }
+
     // Log for debugging
     logger.info('Attempting Appwrite login', {
       endpoint: appwriteConfig.endpoint,
@@ -173,9 +185,32 @@ export const POST = authRateLimit(async (request: NextRequest) => {
     // Handle specific Appwrite errors
     // Appwrite returns 401 for invalid credentials
     if (errorCode === 401 || errorCode === '401') {
+      logger.warn('Login failed - invalid credentials', {
+        email: `${email?.substring(0, 3)}***`,
+        endpoint: appwriteConfig.endpoint,
+        projectId: appwriteConfig.projectId ? 'present' : 'missing',
+      });
       return NextResponse.json(
         { success: false, error: 'Geçersiz email veya şifre' },
         { status: 401 }
+      );
+    }
+
+    // Handle connection errors
+    if (
+      errorMessage.toLowerCase().includes('network') ||
+      errorMessage.toLowerCase().includes('connection') ||
+      errorMessage.toLowerCase().includes('timeout') ||
+      errorMessage.toLowerCase().includes('econnrefused')
+    ) {
+      logger.error('Appwrite connection error', {
+        endpoint: appwriteConfig.endpoint,
+        projectId: appwriteConfig.projectId,
+        error: errorMessage,
+      });
+      return NextResponse.json(
+        { success: false, error: 'Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyin.' },
+        { status: 503 }
       );
     }
 

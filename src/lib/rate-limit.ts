@@ -90,9 +90,10 @@ export function withRateLimit(
 // Pre-configured rate limiters for different endpoints
 export const authRateLimit = (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) =>
   withRateLimit(handler, {
-    maxRequests: parseInt(process.env.RATE_LIMIT_AUTH_MAX || '5'),
-    windowMs: parseInt(process.env.RATE_LIMIT_AUTH_WINDOW || '300000'), // 5 attempts per 5 minutes
+    maxRequests: parseInt(process.env.RATE_LIMIT_AUTH_MAX || '10'),
+    windowMs: parseInt(process.env.RATE_LIMIT_AUTH_WINDOW || '600000'), // 10 attempts per 10 minutes
     skipSuccessfulRequests: true,
+    skipFailedRequests: true, // Don't count failed login attempts
   });
 
 export const dataModificationRateLimit = (handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) =>
