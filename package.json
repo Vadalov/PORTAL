@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "Dernek Yönetim Sistemi - Next.js 16 + Appwrite. See README.md for SDK usage guide.",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true && next dev -p 3000",
     "build": "next build",

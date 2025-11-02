@@ -43,7 +43,7 @@ const colors: Record<LogLevel, string> = {
 };
 const resetColor = '\x1b[0m';
 
-function maskSensitive(obj : unknown : unknown{
+function maskSensitive(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) return obj;
   const masked = Array.isArray(obj) ? [...obj] : { ...obj };
   for (const key in masked) {
