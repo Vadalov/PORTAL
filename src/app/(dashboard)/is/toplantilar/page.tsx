@@ -154,8 +154,9 @@ export default function MeetingsPage() {
       toast.success('Toplantı başarıyla silindi');
       setMeetingToDelete(null);
     },
-    onError: (error: any) => {
-      toast.error(`Toplantı silinirken hata oluştu: ${error.message}`);
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Bilinmeyen hata';
+      toast.error(`Toplantı silinirken hata oluştu: ${errorMessage}`);
     },
   });
 
@@ -385,7 +386,7 @@ export default function MeetingsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'invited' | 'attended' | 'informed' | 'open')}>
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="invited">Davet</TabsTrigger>
                 <TabsTrigger value="attended">Katılım</TabsTrigger>

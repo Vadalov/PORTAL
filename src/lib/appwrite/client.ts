@@ -165,13 +165,13 @@ export async function handleAppwriteError<T>(
     console.error('Appwrite Error:', error);
 
     // Handle specific error types
-    if (error.code === 401) {
+    if (error.code !== undefined && error.code === 401) {
       throw new Error('Yetkisiz erişim. Lütfen tekrar giriş yapın.');
-    } else if (error.code === 404) {
+    } else if (error.code !== undefined && error.code === 404) {
       throw new Error('Kayıt bulunamadı.');
-    } else if (error.code === 429) {
+    } else if (error.code !== undefined && error.code === 429) {
       throw new Error('Çok fazla istek. Lütfen bekleyin.');
-    } else if (error.code >= 500) {
+    } else if (error.code !== undefined && error.code >= 500) {
       throw new Error('Sunucu hatası. Lütfen daha sonra tekrar deneyin.');
     }
 

@@ -63,6 +63,7 @@ async function createTaskHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
+    const taskData = body as Partial<TaskDocument>;
     const validation = validateTask(body as Record<string, unknown>);
     if (!validation.isValid) {
       return NextResponse.json(
@@ -71,7 +72,13 @@ async function createTaskHandler(request: NextRequest) {
       );
     }
 
-    const response = await api.tasks.createTask(body as Partial<TaskDocument>);
+    // Ensure required fields have defaults
+    const createData = {
+      ...taskData,
+      status: taskData.status || 'pending',
+    } as Parameters<typeof api.tasks.createTask>[0];
+
+    const response = await api.tasks.createTask(createData);
     if (response.error || !response.data) {
       return NextResponse.json(
         { success: false, error: response.error || 'Oluşturma başarısız' },

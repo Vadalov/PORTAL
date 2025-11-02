@@ -67,6 +67,7 @@ async function createMeetingHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
+    const meetingData = body as Partial<MeetingDocument>;
     const validation = validateMeeting(body as Record<string, unknown>);
     if (!validation.isValid) {
       return NextResponse.json(
@@ -75,7 +76,13 @@ async function createMeetingHandler(request: NextRequest) {
       );
     }
 
-    const response = await api.meetings.createMeeting(body as Partial<MeetingDocument>);
+    // Ensure required fields have defaults
+    const createData = {
+      ...meetingData,
+      status: meetingData.status || 'scheduled',
+    } as Parameters<typeof api.meetings.createMeeting>[0];
+
+    const response = await api.meetings.createMeeting(createData);
     if (response.error || !response.data) {
       return NextResponse.json(
         { success: false, error: response.error || 'Oluşturma başarısız' },

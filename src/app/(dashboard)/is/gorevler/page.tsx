@@ -16,7 +16,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle as _DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';

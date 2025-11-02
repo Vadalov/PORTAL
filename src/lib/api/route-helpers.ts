@@ -55,11 +55,11 @@ export function successResponse<T>(
 /**
  * Create an error response
  */
-export function errorResponse(
+export function errorResponse<T = unknown>(
   error: string,
   status: number = 400,
   details?: string[]
-): NextResponse<ApiResponse> {
+): NextResponse<ApiResponse<T>> {
   return NextResponse.json(
     {
       success: false,
@@ -67,7 +67,7 @@ export function errorResponse(
       ...(details && { details }),
     },
     { status }
-  );
+  ) as NextResponse<ApiResponse<T>>;
 }
 
 /**

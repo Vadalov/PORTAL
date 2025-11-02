@@ -63,13 +63,7 @@ export function MessageForm({
   );
   const [showPreview, setShowPreview] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<MessageFormData>({
+  const form = useForm({
     resolver: zodResolver(messageSchema),
     defaultValues: {
       message_type: initialData?.message_type || defaultMessageType || 'sms',
@@ -83,6 +77,14 @@ export function MessageForm({
       sent_at: initialData?.sent_at || undefined,
     },
   });
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = form;
 
   const messageType = watch('message_type');
   const content = watch('content');
@@ -174,7 +176,7 @@ export function MessageForm({
     setValue('recipients', updatedRecipients);
   };
 
-  const onSubmit = async (data: MessageFormData) => {
+  const onSubmit = async (data: any) => {
     if (!user?.id) {
       toast.error('Gönderen kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
       return;
@@ -195,7 +197,7 @@ export function MessageForm({
     }
   };
 
-  const handleSend = async (data: MessageFormData) => {
+  const handleSend = async (data: any) => {
     if (!user?.id) {
       toast.error('Gönderen kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
       return;
@@ -425,8 +427,8 @@ export function MessageForm({
             <div className="space-y-2">
               <Label>Durum</Label>
               <div className="flex items-center gap-2">
-                <Badge className={getStatusColor(watch('status'))}>
-                  {getStatusLabel(watch('status'))}
+                <Badge className={getStatusColor(watch('status') || 'draft')}>
+                  {getStatusLabel(watch('status') || 'draft')}
                 </Badge>
                 {watch('sent_at') && (
                   <span className="text-sm text-gray-500">
