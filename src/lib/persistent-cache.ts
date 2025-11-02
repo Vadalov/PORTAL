@@ -62,7 +62,9 @@ export class PersistentCache {
   private async initialize(): Promise<void> {
     // Check if we're in a browser environment
     if (typeof window === 'undefined' || !window.indexedDB) {
-      console.warn('[Cache] IndexedDB not available, using memory-only cache');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('[Cache] IndexedDB not available, using memory-only cache');
+      }
       this.useMemoryOnly = true;
       return;
     }
@@ -92,7 +94,9 @@ export class PersistentCache {
         };
       });
 
-      console.log('[Cache] IndexedDB initialized successfully');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Cache] IndexedDB initialized successfully');
+      }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('[Cache] Failed to initialize IndexedDB, falling back to memory:', error);
@@ -277,7 +281,9 @@ export class PersistentCache {
       }
     }
 
-    console.log('[Cache] All caches cleared');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Cache] All caches cleared');
+    }
   }
 
   /**
