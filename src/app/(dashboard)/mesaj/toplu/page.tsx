@@ -76,7 +76,7 @@ export default function BulkMessagingPage() {
   // Fetch statistics
   // const { data: statsResponse, isLoading: isLoadingStats } = useQuery({
   //   queryKey: ['messages-statistics'],
-  //   queryFn: () => appwriteApi.messages.getMessagesStatistics(),
+  //   queryFn: () => api.messages.getMessagesStatistics(),
   // });
 
   const statsResponse = { data: { totalSms: 0, totalEmails: 0, failedMessages: 0 } };
@@ -92,7 +92,7 @@ export default function BulkMessagingPage() {
   // Fetch bulk message history
   // const { data: historyResponse, isLoading: isLoadingHistory } = useQuery({
   //   queryKey: ['bulk-messages-history'],
-  //   queryFn: () => appwriteApi.messages.getMessages({
+  //   queryFn: () => api.messages.getMessages({
   //     filters: { is_bulk: true },
   //     limit: 50
   //   }),
@@ -105,7 +105,7 @@ export default function BulkMessagingPage() {
 
   // Mutations
   const createMessageMutation = useMutation({
-    mutationFn: (_data: Record<string, unknown>) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.createMessage(data),
+    mutationFn: (_data: Record<string, unknown>) => Promise.resolve({ data: null, error: null }), // api.messages.createMessage(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
@@ -113,7 +113,7 @@ export default function BulkMessagingPage() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.sendMessage(id),
+    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // api.messages.sendMessage(id),
   });
 
   // Event handlers

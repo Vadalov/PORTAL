@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { appwriteApi } from '@/lib/api';
+import { api } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -74,7 +74,7 @@ export default function TasksPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['tasks', page, search, statusFilter, priorityFilter, assignedFilter],
     queryFn: () =>
-      appwriteApi.tasks.getTasks({
+      api.tasks.getTasks({
         page,
         limit,
         search,
@@ -89,7 +89,7 @@ export default function TasksPage() {
   // Fetch users for assigned filter
   const { data: usersResponse } = useQuery({
     queryKey: ['users'],
-    queryFn: () => appwriteApi.users.getUsers({ limit: 100 }),
+    queryFn: () => api.users.getUsers({ limit: 100 }),
   });
 
   const tasks = data?.data || [];
@@ -108,7 +108,7 @@ export default function TasksPage() {
   // Task move mutation (for kanban drag-drop)
   const moveTaskMutation = useMutation({
     mutationFn: ({ taskId, newStatus }: { taskId: string; newStatus: TaskDocument['status'] }) =>
-      appwriteApi.tasks.updateTaskStatus(taskId, newStatus),
+      api.tasks.updateTaskStatus(taskId, newStatus),
     onSuccess: () => {
       toast.success('Görev durumu güncellendi');
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
@@ -122,7 +122,7 @@ export default function TasksPage() {
 
   // Delete task mutation
   const deleteTaskMutation = useMutation({
-    mutationFn: (taskId: string) => appwriteApi.tasks.deleteTask(taskId),
+    mutationFn: (taskId: string) => api.tasks.deleteTask(taskId),
     onSuccess: () => {
       toast.success('Görev silindi');
       queryClient.invalidateQueries({ queryKey: ['tasks'] });

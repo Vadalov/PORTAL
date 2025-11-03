@@ -1,14 +1,14 @@
 /**
  * Mock API Functional Testing Utility
- * Tests mock API endpoints to ensure they behave correctly and match Appwrite API behavior
+ * Tests mock API endpoints to ensure they behave correctly and match Convex API behavior
  */
 
 import {
-  appwriteGetBeneficiaries,
-  appwriteGetBeneficiary,
-  appwriteCreateBeneficiary,
-  appwriteUpdateBeneficiary,
-  appwriteDeleteBeneficiary,
+  getBeneficiaryDocs,
+  getBeneficiaryDoc,
+  createBeneficiaryDoc,
+  updateBeneficiaryDoc,
+  deleteBeneficiaryDoc,
 } from '@/lib/api/mock-api';
 import { mockAuthApi } from '@/lib/api/mock-auth-api';
 import {
@@ -41,12 +41,12 @@ export class MockAPITester {
 
     // Test getBeneficiaries with default params
     try {
-      const response = await appwriteGetBeneficiaries();
+      const response = await getBeneficiaryDocs();
       if (response.data && Array.isArray(response.data) && response.error === null) {
-        tests.push({ testName: 'getBeneficiaries default', passed: true, message: 'Success' });
+        tests.push({ testName: 'getBeneficiaryDocs default', passed: true, message: 'Success' });
       } else {
         tests.push({
-          testName: 'getBeneficiaries default',
+          testName: 'getBeneficiaryDocs default',
           passed: false,
           message: 'Invalid response format',
         });
@@ -54,30 +54,30 @@ export class MockAPITester {
     } catch (err: unknown) {
       const error = err as Error;
       tests.push({
-        testName: 'getBeneficiaries default',
+        testName: 'getBeneficiaryDocs default',
         passed: false,
         message: `Error: ${error.message}`,
       });
     }
 
-    // Test getBeneficiary with valid ID
+    // Test getBeneficiaryDoc with valid ID
     try {
-      const response = await appwriteGetBeneficiaries();
+      const response = await getBeneficiaryDocs();
       if (response.data && response.data.length > 0) {
         const validId = response.data[0].$id;
-        const singleResponse = await appwriteGetBeneficiary(validId);
+        const singleResponse = await getBeneficiaryDoc(validId);
         if (singleResponse.data && singleResponse.data.$id === validId) {
-          tests.push({ testName: 'getBeneficiary valid ID', passed: true, message: 'Success' });
+          tests.push({ testName: 'getBeneficiaryDoc valid ID', passed: true, message: 'Success' });
         } else {
           tests.push({
-            testName: 'getBeneficiary valid ID',
+            testName: 'getBeneficiaryDoc valid ID',
             passed: false,
             message: 'Invalid response',
           });
         }
       } else {
         tests.push({
-          testName: 'getBeneficiary valid ID',
+          testName: 'getBeneficiaryDoc valid ID',
           passed: false,
           message: 'No data to test',
         });
@@ -85,24 +85,24 @@ export class MockAPITester {
     } catch (err: unknown) {
       const error = err as Error;
       tests.push({
-        testName: 'getBeneficiary valid ID',
+        testName: 'getBeneficiaryDoc valid ID',
         passed: false,
         message: `Error: ${error.message}`,
       });
     }
 
-    // Test getBeneficiary with invalid ID
+    // Test getBeneficiaryDoc with invalid ID
     try {
-      const response = await appwriteGetBeneficiary('invalid-id');
+      const response = await getBeneficiaryDoc('invalid-id');
       if (response.data === null && response.error) {
         tests.push({
-          testName: 'getBeneficiary invalid ID',
+          testName: 'getBeneficiaryDoc invalid ID',
           passed: true,
           message: 'Correctly returned error',
         });
       } else {
         tests.push({
-          testName: 'getBeneficiary invalid ID',
+          testName: 'getBeneficiaryDoc invalid ID',
           passed: false,
           message: 'Should return error',
         });
@@ -110,15 +110,15 @@ export class MockAPITester {
     } catch (err: unknown) {
       const error = err as Error;
       tests.push({
-        testName: 'getBeneficiary invalid ID',
+        testName: 'getBeneficiaryDoc invalid ID',
         passed: false,
         message: `Error: ${error.message}`,
       });
     }
 
-    // Test createBeneficiary
+    // Test createBeneficiaryDoc
     try {
-      const createData: CreateDocumentData<BeneficiaryDocument> = {
+      const createData: Partial<BeneficiaryDocument> = {
         name: 'Test Beneficiary',
         tc_no: '12345678901',
         phone: '5551234567',
@@ -130,63 +130,63 @@ export class MockAPITester {
         family_size: 4,
         status: 'TASLAK',
       };
-      const response = await appwriteCreateBeneficiary(createData);
+      const response = await createBeneficiaryDoc(createData);
       if (response.data && response.data.name === 'Test Beneficiary') {
-        tests.push({ testName: 'createBeneficiary', passed: true, message: 'Success' });
+        tests.push({ testName: 'createBeneficiaryDoc', passed: true, message: 'Success' });
       } else {
-        tests.push({ testName: 'createBeneficiary', passed: false, message: 'Invalid response' });
+        tests.push({ testName: 'createBeneficiaryDoc', passed: false, message: 'Invalid response' });
       }
     } catch (err: unknown) {
       const error = err as Error;
       tests.push({
-        testName: 'createBeneficiary',
+        testName: 'createBeneficiaryDoc',
         passed: false,
         message: `Error: ${error.message}`,
       });
     }
 
-    // Test updateBeneficiary
+    // Test updateBeneficiaryDoc
     try {
-      const beneficiaries = await appwriteGetBeneficiaries();
+      const beneficiaries = await getBeneficiaryDocs();
       if (beneficiaries.data && beneficiaries.data.length > 0) {
         const id = beneficiaries.data[0].$id;
-        const updateData: UpdateDocumentData<BeneficiaryDocument> = { name: 'Updated Name' };
-        const response = await appwriteUpdateBeneficiary(id, updateData);
+        const updateData: Partial<BeneficiaryDocument> = { name: 'Updated Name' };
+        const response = await updateBeneficiaryDoc(id, updateData);
         if (response.data && response.data.name === 'Updated Name') {
-          tests.push({ testName: 'updateBeneficiary', passed: true, message: 'Success' });
+          tests.push({ testName: 'updateBeneficiaryDoc', passed: true, message: 'Success' });
         } else {
-          tests.push({ testName: 'updateBeneficiary', passed: false, message: 'Invalid response' });
+          tests.push({ testName: 'updateBeneficiaryDoc', passed: false, message: 'Invalid response' });
         }
       } else {
-        tests.push({ testName: 'updateBeneficiary', passed: false, message: 'No data to update' });
+        tests.push({ testName: 'updateBeneficiaryDoc', passed: false, message: 'No data to update' });
       }
     } catch (err: unknown) {
       const error = err as Error;
       tests.push({
-        testName: 'updateBeneficiary',
+        testName: 'updateBeneficiaryDoc',
         passed: false,
         message: `Error: ${error.message}`,
       });
     }
 
-    // Test deleteBeneficiary
+    // Test deleteBeneficiaryDoc
     try {
-      const beneficiaries = await appwriteGetBeneficiaries();
+      const beneficiaries = await getBeneficiaryDocs();
       if (beneficiaries.data && beneficiaries.data.length > 0) {
         const id = beneficiaries.data[0].$id;
-        const response = await appwriteDeleteBeneficiary(id);
+        const response = await deleteBeneficiaryDoc(id);
         if (response.error === null) {
-          tests.push({ testName: 'deleteBeneficiary', passed: true, message: 'Success' });
+          tests.push({ testName: 'deleteBeneficiaryDoc', passed: true, message: 'Success' });
         } else {
-          tests.push({ testName: 'deleteBeneficiary', passed: false, message: 'Failed to delete' });
+          tests.push({ testName: 'deleteBeneficiaryDoc', passed: false, message: 'Failed to delete' });
         }
       } else {
-        tests.push({ testName: 'deleteBeneficiary', passed: false, message: 'No data to delete' });
+        tests.push({ testName: 'deleteBeneficiaryDoc', passed: false, message: 'No data to delete' });
       }
     } catch (err: unknown) {
       const error = err as Error;
       tests.push({
-        testName: 'deleteBeneficiary',
+        testName: 'deleteBeneficiaryDoc',
         passed: false,
         message: `Error: ${error.message}`,
       });
@@ -272,7 +272,7 @@ export class MockAPITester {
 
     // Test pagination with page 1, limit 2
     try {
-      const response = await appwriteGetBeneficiaries({ page: 1, limit: 2 });
+      const response = await getBeneficiaryDocs({ page: 1, limit: 2 });
       if (response.data && response.data.length <= 2 && response.total !== undefined) {
         tests.push({ testName: 'pagination page 1 limit 2', passed: true, message: 'Success' });
       } else {
@@ -293,7 +293,7 @@ export class MockAPITester {
 
     // Test pagination with page 2, limit 1
     try {
-      const response = await appwriteGetBeneficiaries({ page: 2, limit: 1 });
+      const response = await getBeneficiaryDocs({ page: 2, limit: 1 });
       if (response.data && response.data.length <= 1) {
         tests.push({ testName: 'pagination page 2 limit 1', passed: true, message: 'Success' });
       } else {
@@ -322,7 +322,7 @@ export class MockAPITester {
 
     // Test search
     try {
-      const response = await appwriteGetBeneficiaries({ search: 'Ahmet' });
+      const response = await getBeneficiaryDocs({ search: 'Ahmet' });
       if (response.data && response.data.some((b) => b.name.includes('Ahmet'))) {
         tests.push({ testName: 'filtering search', passed: true, message: 'Success' });
       } else {
@@ -339,7 +339,7 @@ export class MockAPITester {
 
     // Test filter by status
     try {
-      const response = await appwriteGetBeneficiaries({ filters: { status: 'AKTIF' } });
+      const response = await getBeneficiaryDocs({ filters: { status: 'AKTIF' } });
       if (response.data && response.data.every((b) => b.status === 'AKTIF')) {
         tests.push({ testName: 'filtering status', passed: true, message: 'Success' });
       } else {
@@ -366,9 +366,9 @@ export class MockAPITester {
     const tests: TestResult[] = [];
     const startTime = Date.now();
 
-    // Test invalid ID in getBeneficiary
+    // Test invalid ID in getBeneficiaryDoc
     try {
-      const response = await appwriteGetBeneficiary('nonexistent');
+      const response = await getBeneficiaryDoc('nonexistent');
       if (response.error) {
         tests.push({
           testName: 'error invalid ID',
@@ -390,7 +390,7 @@ export class MockAPITester {
     // Test create with missing required fields
     try {
     const createData: unknown = { name: 'Test' }; // Missing required fields
-    const response = await appwriteCreateBeneficiary(createData as any);
+    const response = await createBeneficiaryDoc(createData as any);
       if (response.error) {
         tests.push({
           testName: 'error missing fields',

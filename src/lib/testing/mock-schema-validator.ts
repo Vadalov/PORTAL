@@ -1,11 +1,10 @@
 /**
  * Mock Schema Validator
- * Validates mock API data structure against Appwrite collection schemas
- * Ensures mock data stays in sync with real Appwrite collections
+ * Validates mock API data structure against Convex collection schemas
+ * Ensures mock data stays in sync with real Convex collections
  */
 
-import { COLLECTION_SCHEMAS } from '@/lib/appwrite/config';
-import { appwriteGetBeneficiaries } from '@/lib/api/mock-api';
+import { getBeneficiaryDocs } from '@/lib/api/mock-api';
 import type {
   BeneficiaryDocument,
   DonationDocument,
@@ -14,8 +13,21 @@ import type {
   MessageDocument,
 } from '@/types/collections';
 
-// Extended schemas for collections not in config.ts
+// Extended schemas for collections
 const EXTENDED_SCHEMAS = {
+  BENEFICIARIES: {
+    name: 'string',
+    tc_no: 'string',
+    phone: 'string',
+    email: 'string',
+    address: 'string',
+    city: 'string',
+    district: 'string',
+    neighborhood: 'string',
+    family_size: 'number',
+    status: 'string',
+    approval_status: 'string',
+  },
   TASKS: {
     title: 'string',
     description: 'string',
@@ -152,17 +164,60 @@ export class MockSchemaValidator {
   /**
    * Validate beneficiary schema against mock data
    */
-  validateBeneficiarySchema(): ValidationResult {
-    const schema = COLLECTION_SCHEMAS.BENEFICIARIES;
-    // Mock data sample - simplified for TypeScript compilation
-    const sample: any = {
-      name: 'Test User',
-      phone: '5551234567',
-      email: 'test@example.com',
-      status: 'AKTIF',
-    };
+  async validateBeneficiarySchema(): Promise<ValidationResult> {
+    const schema = EXTENDED_SCHEMAS.BENEFICIARIES;
+    
+    try {
+      const response = await getBeneficiaryDocs();
+      const sample = response.data?.[0] || {
+        name: 'Test User',
+        phone: '5551234567',
+        email: 'test@example.com',
+        status: 'AKTIF',
+      };
 
-    if (!sample) {
+      const mismatches: ValidationResult['mismatches'] = [];
+      const missingFields: string[] = [];
+      const extraFields: string[] = [];
+
+      // Check schema fields exist and match types
+      Object.entries(schema).forEach(([field, expectedType]) => {
+        if (!(field in sample)) {
+          missingFields.push(field);
+          return;
+        }
+
+        const actualValue = (sample as any)[field];
+        const comparison = this.compareFieldTypes(expectedType, actualValue);
+
+        if (!comparison.isMatch) {
+          mismatches.push({
+            field,
+            expectedType,
+            actualType: comparison.actualType,
+            value: actualValue,
+            suggestion: comparison.suggestion,
+          });
+        }
+      });
+
+      // Check for extra fields in mock data
+      Object.keys(sample).forEach((field) => {
+        if (!(field in schema) && !field.startsWith('$') && !field.startsWith('_')) {
+          // Skip system fields
+          extraFields.push(field);
+        }
+      });
+
+      return {
+        collection: 'beneficiaries',
+        isValid: mismatches.length === 0 && missingFields.length === 0,
+        fieldsChecked: Object.keys(schema).length,
+        mismatches,
+        missingFields,
+        extraFields,
+      };
+    } catch (error) {
       return {
         collection: 'beneficiaries',
         isValid: false,
@@ -172,55 +227,21 @@ export class MockSchemaValidator {
         extraFields: [],
       };
     }
-
-    const mismatches: ValidationResult['mismatches'] = [];
-    const missingFields: string[] = [];
-    const extraFields: string[] = [];
-
-    // Check schema fields exist and match types
-    Object.entries(schema).forEach(([field, expectedType]) => {
-      if (!(field in sample)) {
-        missingFields.push(field);
-        return;
-      }
-
-      const actualValue = (sample as any)[field];
-      const comparison = this.compareFieldTypes(expectedType, actualValue);
-
-      if (!comparison.isMatch) {
-        mismatches.push({
-          field,
-          expectedType,
-          actualType: comparison.actualType,
-          value: actualValue,
-          suggestion: comparison.suggestion,
-        });
-      }
-    });
-
-    // Check for extra fields in mock data
-    Object.keys(sample).forEach((field) => {
-      if (!(field in schema) && !field.startsWith('$')) {
-        // Skip Appwrite system fields
-        extraFields.push(field);
-      }
-    });
-
-    return {
-      collection: 'beneficiaries',
-      isValid: mismatches.length === 0 && missingFields.length === 0,
-      fieldsChecked: Object.keys(schema).length,
-      mismatches,
-      missingFields,
-      extraFields,
-    };
   }
 
   /**
    * Validate donation schema against mock data
    */
-  validateDonationSchema(): ValidationResult {
-    const schema = COLLECTION_SCHEMAS.DONATIONS;
+  async validateDonationSchema(): Promise<ValidationResult> {
+    const schema = {
+      amount: 'number',
+      currency: 'string',
+      donor_name: 'string',
+      donor_email: 'string',
+      donation_date: 'string',
+      purpose: 'string',
+      status: 'string',
+    };
     // Note: Mock data for donations not implemented in mock-api.ts
     // Return placeholder result
     return {
@@ -236,7 +257,7 @@ export class MockSchemaValidator {
   /**
    * Validate task schema (inferred from TaskDocument type)
    */
-  validateTaskSchema(): ValidationResult {
+  async validateTaskSchema(): Promise<ValidationResult> {
     const schema = EXTENDED_SCHEMAS.TASKS;
     // Note: Mock data for tasks not implemented in mock-api.ts
     // Return placeholder result
@@ -253,7 +274,7 @@ export class MockSchemaValidator {
   /**
    * Validate meeting schema (inferred from MeetingDocument type)
    */
-  validateMeetingSchema(): ValidationResult {
+  async validateMeetingSchema(): Promise<ValidationResult> {
     const schema = EXTENDED_SCHEMAS.MEETINGS;
     // Note: Mock data for meetings not implemented in mock-api.ts
     // Return placeholder result
@@ -270,7 +291,7 @@ export class MockSchemaValidator {
   /**
    * Validate message schema (inferred from MessageDocument type)
    */
-  validateMessageSchema(): ValidationResult {
+  async validateMessageSchema(): Promise<ValidationResult> {
     const schema = EXTENDED_SCHEMAS.MESSAGES;
     // Note: Mock data for messages not implemented in mock-api.ts
     // Return placeholder result
@@ -287,21 +308,21 @@ export class MockSchemaValidator {
   /**
    * Run all schema validations and aggregate results
    */
-  validateAllSchemas(): Record<string, ValidationResult> {
+  async validateAllSchemas(): Promise<Record<string, ValidationResult>> {
     return {
-      beneficiaries: this.validateBeneficiarySchema(),
-      donations: this.validateDonationSchema(),
-      tasks: this.validateTaskSchema(),
-      meetings: this.validateMeetingSchema(),
-      messages: this.validateMessageSchema(),
+      beneficiaries: await this.validateBeneficiarySchema(),
+      donations: await this.validateDonationSchema(),
+      tasks: await this.validateTaskSchema(),
+      meetings: await this.validateMeetingSchema(),
+      messages: await this.validateMessageSchema(),
     };
   }
 
   /**
    * Generate comprehensive schema validation report
    */
-  getSchemaValidationReport(): SchemaValidationReport {
-    const results = Object.values(this.validateAllSchemas());
+  async getSchemaValidationReport(): Promise<SchemaValidationReport> {
+    const results = Object.values(await this.validateAllSchemas());
 
     const summary = {
       totalCollections: results.length,

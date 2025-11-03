@@ -24,10 +24,10 @@ const serverProvider = process.env.BACKEND_PROVIDER;
 
 // Decide provider with sensible defaults
 // IMPORTANT: Set BACKEND_PROVIDER=convex|mock or NEXT_PUBLIC_BACKEND_PROVIDER=convex|mock
-// Default is 'convex' - Appwrite has been removed
+// Default is 'convex' - Appwrite has been completely removed
 const provider = (clientProvider || serverProvider || 'convex').toLowerCase();
 
-// Build a light wrapper to align mock functions to appwriteApi shape
+// Build a light wrapper to align mock functions to api shape
 const mockApi = {
   // Auth (limited in mock for now)
   auth: {
@@ -39,7 +39,7 @@ const mockApi = {
       return { session: null, user: { email } };
     },
     async getCurrentUser(): Promise<{ email: string }> {
-      return { email: 'mock@test.com' };
+      return { email: 'mock@test.com' } ;
     },
     async logout(): Promise<boolean> {
       return true;
@@ -89,15 +89,15 @@ const mockApi = {
     }),
   },
 
-  // Beneficiaries (Appwrite-aligned mock surface)
+  // Beneficiaries (Convex-aligned mock surface)
   beneficiaries: {
-    getBeneficiaries: (params?: QueryParams) => mock.appwriteGetBeneficiaries(params),
-    getBeneficiary: (id: string) => mock.appwriteGetBeneficiary(id),
+    getBeneficiaries: (params?: QueryParams) => mock.getBeneficiaryDocs(params),
+    getBeneficiary: (id: string) => mock.getBeneficiaryDoc(id),
     createBeneficiary: (data: CreateDocumentData<BeneficiaryDocument>) =>
-      mock.appwriteCreateBeneficiary(data),
+      mock.createBeneficiaryDoc(data),
     updateBeneficiary: (id: string, data: UpdateDocumentData<BeneficiaryDocument>) =>
-      mock.appwriteUpdateBeneficiary(id, data),
-    deleteBeneficiary: (id: string) => mock.appwriteDeleteBeneficiary(id),
+      mock.updateBeneficiaryDoc(id, data),
+    deleteBeneficiary: (id: string) => mock.deleteBeneficiaryDoc(id),
   },
 
   donations: {
@@ -285,7 +285,7 @@ const selectedApi = (() => {
   return mockApi;
 })();
 
-export const api = selectedApi;
+export const selectedApiInstance = selectedApi;
 
 // Expose parameters and aid applications APIs
 export const parametersApi =
@@ -328,8 +328,8 @@ export const aidApplicationsApi =
             if (params?.page) searchParams.set('page', params.page.toString());
             if (params?.limit) searchParams.set('limit', params.limit.toString());
             if (params?.search) searchParams.set('search', params.search);
-            if (params?.filters?.stage) searchParams.set('stage', params.filters.stage);
-            if (params?.filters?.status) searchParams.set('status', params.filters.status);
+            if (params?.filters?.stage) searchParams.set('stage', String(params.filters.stage));
+            if (params?.filters?.status) searchParams.set('status', String(params.filters.status));
 
             const response = await fetch(`/api/aid-applications?${searchParams.toString()}`);
             const result = await response.json();
@@ -416,11 +416,11 @@ export const aidApplicationsApi =
         };
 
 // Also export named for compatibility if needed
-export type SelectedApi = typeof api;
+export type SelectedApi = typeof selectedApiInstance;
 
-// Re-export appwriteApi as alias to selectedApi for backward compatibility
-// Components importing appwriteApi from '@/lib/api' will get the selected provider (Convex by default)
-export const appwriteApi = selectedApi;
+// Re-export api as alias to selectedApi for backward compatibility
+// Components importing api from '@/lib/api' will get the selected provider (Convex by default)
+export const api = selectedApiInstance;
 
 // Default export for convenience
-export default api;
+export default selectedApiInstance;

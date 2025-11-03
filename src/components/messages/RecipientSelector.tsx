@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery } from '@tanstack/react-query';
-import { appwriteApi } from '@/lib/api';
+import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import {
   Search,
@@ -71,7 +71,7 @@ export function RecipientSelector({
   const { data: beneficiariesResponse, isLoading: isLoadingBeneficiaries } = useQuery({
     queryKey: ['beneficiaries', searchQuery],
     queryFn: () =>
-      appwriteApi.beneficiaries.getBeneficiaries({
+      api.beneficiaries.getBeneficiaries({
         search: searchQuery,
         limit: 100,
       }),
@@ -81,7 +81,7 @@ export function RecipientSelector({
   const { data: donationsResponse, isLoading: isLoadingDonations } = useQuery({
     queryKey: ['donations', searchQuery],
     queryFn: () =>
-      appwriteApi.donations.getDonations({
+      api.donations.getDonations({
         search: searchQuery,
         limit: 100,
       }),
@@ -91,7 +91,7 @@ export function RecipientSelector({
   const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
     queryKey: ['users', searchQuery],
     queryFn: () =>
-      appwriteApi.users.getUsers({
+      api.users.getUsers({
         limit: 100,
       }),
   });

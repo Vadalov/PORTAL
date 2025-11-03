@@ -28,7 +28,6 @@ const budgets: Budget[] = [
     status: 'active',
     createdAt: new Date('2024-11-01'),
     updatedAt: new Date('2024-11-01'),
-    appwriteId: 'mock-budget-1',
   },
 ];
 
@@ -114,7 +113,6 @@ async function createBudgetHandler(request: NextRequest) {
       status: body.status || 'draft',
       createdAt: new Date(),
       updatedAt: new Date(),
-      appwriteId: `mock-${Date.now()}`,
     };
 
     budgets.unshift(newBudget);

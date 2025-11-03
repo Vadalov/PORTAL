@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { appwriteApi } from '@/lib/api';
+import { api } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -53,13 +53,13 @@ export default function InternalMessagingPage() {
 
       switch (activeTab) {
         case 'inbox':
-          // return appwriteApi.messages.getInboxMessages(user.id);
+          // return api.messages.getInboxMessages(user.id);
           return { data: [], total: 0 };
         case 'sent':
-          // return appwriteApi.messages.getMessagesBySender(user.id);
+          // return api.messages.getMessagesBySender(user.id);
           return { data: [], total: 0 };
         case 'drafts':
-          // return appwriteApi.messages.getMessages({
+          // return api.messages.getMessages({
           //   filters: {
           //     sender: user.id,
           //     status: 'draft',
@@ -79,7 +79,7 @@ export default function InternalMessagingPage() {
   // Fetch users for sender names
   const { data: usersResponse } = useQuery({
     queryKey: ['users'],
-    queryFn: () => appwriteApi.users.getUsers({ limit: 100 }),
+    queryFn: () => api.users.getUsers({ limit: 100 }),
   });
 
   const messages: any[] = data?.data || [];
@@ -94,7 +94,7 @@ export default function InternalMessagingPage() {
 
   // Mutations
   const deleteMessageMutation = useMutation({
-    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.deleteMessage(id),
+    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // api.messages.deleteMessage(id),
     onSuccess: () => {
       toast.success('Mesaj silindi.');
       queryClient.invalidateQueries({ queryKey: ['internal-messages'] });
@@ -107,7 +107,7 @@ export default function InternalMessagingPage() {
   });
 
   const markAsReadMutation = useMutation({
-    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // appwriteApi.messages.markAsRead(id, user?.id || ''),
+    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // api.messages.markAsRead(id, user?.id || ''),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['internal-messages'] });
     },

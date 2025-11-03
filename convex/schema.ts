@@ -10,6 +10,9 @@ export default defineSchema({
     avatar: v.optional(v.string()),
     isActive: v.boolean(),
     labels: v.optional(v.array(v.string())),
+    createdAt: v.optional(v.string()),
+    lastLogin: v.optional(v.string()),
+    passwordHash: v.optional(v.string()),
   })
     .index("by_email", ["email"])
     .index("by_role", ["role"]),

@@ -18,7 +18,7 @@ interface UseInfiniteScrollOptions {
  * const { data, hasMore, isLoading, isFetchingNextPage, ref } = useInfiniteScroll({
  *   limit: 20,
  *   queryKey: ['beneficiaries', search],
- *   queryFn: (page) => appwriteApi.beneficiaries.getBeneficiaries({ page, limit: 20, search }),
+ *   queryFn: (page) => api.beneficiaries.getBeneficiaries({ page, limit: 20, search }),
  * });
  *
  * return (

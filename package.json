@@ -1,7 +1,7 @@
 {
   "name": "dernek-nextjs",
   "version": "0.1.0",
-  "description": "Dernek Yönetim Sistemi - Next.js 16 + Appwrite. See README.md for SDK usage guide.",
+  "description": "Dernek Yönetim Sistemi - Next.js 16 + Convex. Modern non-profit association management system.",
   "private": true,
   "engines": {
     "node": ">=20.9.0",
@@ -30,11 +30,11 @@
     "clean": "rm -rf .next node_modules/.cache",
     "clean:all": "rm -rf .next node_modules package-lock.json && npm install",
     "validate:config": "tsx scripts/validate-config.ts",
-    "test:connectivity": "tsx scripts/test-connectivity.ts",
+    "test:connectivity": "tsx scripts/test-convex-connectivity.ts",
     "test:mock-api": "tsx scripts/test-mock-api.ts",
-    "diagnose": "tsx scripts/diagnose-appwrite.ts",
+    "diagnose": "tsx scripts/diagnose-convex.ts",
     "health:check": "curl http://localhost:3000/api/health?detailed=true",
-    "test:full-system": "tsx scripts/full-system-test.ts",
+    "test:full-system": "tsx scripts/full-system-test-convex.ts",
     "test:browsers": "tsx scripts/test-browser-compatibility.ts",
     "test:prod-enhanced": "tsx scripts/test-production-build-enhanced.ts",
     "test:integration": "npm run test:full-system && npm run test:browsers",

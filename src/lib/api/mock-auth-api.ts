@@ -11,6 +11,7 @@ interface MockUser {
   password: string;
   name: string;
   role: UserRole;
+  convexId?: string;
 }
 
 const mockUsers: MockUser[] = [
@@ -20,6 +21,14 @@ const mockUsers: MockUser[] = [
     password: 'admin123',
     name: 'Admin User',
     role: UserRole.ADMIN,
+  },
+  {
+    id: 'mock-admin-2',
+    email: 'admin@portal.com',
+    password: 'admin123',
+    name: 'Admin User',
+    role: UserRole.ADMIN,
+    convexId: 'k57afr2vdrqdz1ps69n6yp4hth7tpsbv',
   },
   {
     id: 'mock-manager-1',
@@ -57,7 +66,7 @@ export const mockAuthApi = {
 
     // Convert to store user format
     const storeUser: User = {
-      id: user.id,
+      id: user.convexId || user.id,
       email: user.email,
       name: user.name,
       role: user.role,
@@ -71,7 +80,7 @@ export const mockAuthApi = {
     // Create mock session
     const session = {
       $id: `mock-session-${user.id}`,
-      userId: user.id,
+      userId: user.convexId || user.id,
       providerAccessToken: 'mock-token',
       providerAccessTokenExpiry: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
       providerRefreshToken: 'mock-refresh-token',

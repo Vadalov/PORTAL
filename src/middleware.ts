@@ -101,24 +101,6 @@ async function getAuthSession(
   const sessionCookie = request.cookies.get('auth-session');
   try {
     if (!sessionCookie) {
-      // Check for legacy Appwrite session cookie
-      const appwriteSession = request.cookies.get('appwrite-session');
-      if (appwriteSession) {
-        try {
-          const sessionData = JSON.parse(appwriteSession.value);
-          if (sessionData.userId && sessionData.expire) {
-            const expireDate = new Date(sessionData.expire);
-            if (expireDate > new Date()) {
-              return {
-                userId: sessionData.userId,
-                sessionId: sessionData.sessionId || 'legacy',
-              };
-            }
-          }
-        } catch {
-          // Invalid session format
-        }
-      }
       return null;
     }
 

@@ -164,11 +164,6 @@ export class MockAPIHandler {
     this.page.route('/api/tasks', async (route) => {
       await this.handleTasks(route);
     });
-
-    // Mock health check
-    this.page.route('/api/health/appwrite', async (route) => {
-      await this.handleAppwriteHealth(route);
-    });
   }
 
   // Individual route handlers
@@ -468,20 +463,6 @@ export class MockAPIHandler {
     }
   }
 
-  private async handleAppwriteHealth(route: Route): Promise<void> {
-    await this.simulateDelay();
-
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        status: 'connected',
-        success: true,
-        timestamp: new Date().toISOString(),
-      }),
-    });
-  }
-
   // Utility method to simulate network delay
   private async simulateDelay(): Promise<void> {
     if (this.slowNetwork) {
@@ -526,5 +507,4 @@ export function cleanupMockAPI(page: Page): void {
   page.unroute('/api/beneficiaries/*');
   page.unroute('/api/donations');
   page.unroute('/api/tasks');
-  page.unroute('/api/health/appwrite');
 }

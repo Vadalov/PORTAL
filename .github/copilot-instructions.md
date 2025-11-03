@@ -2,33 +2,32 @@
 
 ## Repository Overview
 
-**PORTAL** is a comprehensive Turkish non-profit association management system (Dernek Yönetim Sistemi) built with Next.js 16, TypeScript, and Appwrite backend. The system manages beneficiaries, donations, scholarships, tasks, meetings, and internal communications with full role-based access control.
+**PORTAL** is a comprehensive Turkish non-profit association management system (Dernek Yönetim Sistemi) built with Next.js 16, TypeScript, and Convex backend. The system manages beneficiaries, donations, scholarships, tasks, meetings, and internal communications with full role-based access control.
 
 - **Type**: Full-stack web application (Next.js 16 App Router)
 - **Scale**: ~45,000 lines of code, 1,182+ npm packages
 - **Languages**: TypeScript (strict mode), Turkish UI text
-- **Framework**: Next.js 16 with React 19 (RC), Appwrite BaaS backend
+- **Framework**: Next.js 16 with React 19 (RC), Convex BaaS backend
 - **Key Dependencies**: Zustand, TanStack Query, Zod v4, shadcn/ui, Tailwind CSS v4
 
 ## Critical Architecture Principles
 
-### Dual Appwrite SDK Architecture ⚠️
+### Convex Integration Architecture
 
-This is the **#1 mistake** developers make. The project uses TWO different Appwrite SDKs:
+The project uses Convex for backend services:
 
 ```typescript
 // ✅ CLIENT SDK - Browser/React Components
-// File: src/lib/appwrite/client.ts
-import { databases } from '@/lib/appwrite/client'; // 'use client' required
+// File: src/lib/convex/client.ts
+import { convexHttp } from '@/lib/convex/client';
 
 // ✅ SERVER SDK - Server Components/API Routes
-// File: src/lib/appwrite/server.ts
-import { serverDatabases } from '@/lib/appwrite/server'; // Server-side only
+// File: src/lib/convex/server.ts
+import { convexHttp } from '@/lib/convex/server';
 
-// ❌ NEVER mix them - exposes API key to browser!
+// Use Convex functions from convex/ directory
+import { api } from '@/convex/_generated/api';
 ```
-
-**Rule**: If you see `'use client'` directive, use `client.ts`. Otherwise, use `server.ts`.
 
 ### Turkish Context Requirements
 
@@ -125,14 +124,8 @@ The CI runs these steps (see `.github/workflows/ci.yml`):
 **Mock Environment Variables for CI**:
 
 ```bash
-NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
-NEXT_PUBLIC_APPWRITE_PROJECT_ID=test-project-id
-NEXT_PUBLIC_DATABASE_ID=test-db
-# Storage bucket IDs
-NEXT_PUBLIC_STORAGE_DOCUMENTS=documents
-NEXT_PUBLIC_STORAGE_RECEIPTS=receipts
-NEXT_PUBLIC_STORAGE_PHOTOS=photos
-NEXT_PUBLIC_STORAGE_REPORTS=reports
+NEXT_PUBLIC_CONVEX_URL=https://convex-hello-world.convex.cloud
+NEXT_PUBLIC_NODE_ENV=production
 ```
 
 ### Testing Strategy
@@ -224,16 +217,13 @@ src/
 │   └── forms/              # Form components (BeneficiaryForm, etc.)
 │
 ├── lib/
-│   ├── appwrite/
+│   ├── convex/
 │   │   ├── client.ts       # CLIENT SDK ('use client' directive)
-│   │   ├── server.ts       # SERVER SDK (API key, admin access)
-│   │   ├── config.ts       # Shared configuration
-│   │   ├── permissions.ts  # Appwrite permission helpers
-│   │   ├── sdk-guard.ts    # Runtime SDK validation
-│   │   └── storage.ts      # File upload utilities
+│   │   ├── server.ts       # SERVER SDK (API routes, admin access)
+│   │   ├── api.ts          # Generated API functions
+│   │   └── config.ts       # Shared configuration
 │   ├── api/
-│   │   ├── appwrite-api.ts # Main API layer (uses client SDK)
-│   │   ├── appwrite-server-api.ts # Server API layer
+│   │   ├── convex-api.ts   # Main API layer (uses Convex)
 │   │   ├── mock-api.ts     # Mock backend (development fallback)
 │   │   └── route-helpers.ts # API route utilities
 │   ├── validations/        # Zod schemas (1,144 lines)
@@ -263,12 +253,10 @@ src/
 │   └── mocks/            # Test mocks and fixtures
 │
 ├── middleware.ts          # Next.js middleware (auth checking)
-└── scripts/              # Utility scripts (27 scripts)
-    ├── setup-appwrite.ts        # Appwrite setup wizard
-    ├── test-connectivity.ts     # Connection testing
-    ├── validate-config.ts       # Config validation
-    ├── diagnose-appwrite.ts     # Diagnostics
-    └── [21 more scripts...]     # Testing, migration, deployment
+└── scripts/              # Utility scripts
+    ├── test-convex-mcp.ts       # Convex MCP testing
+    ├── validate-appwrite-config.js # Config validation
+    └── [other scripts...]       # Testing, utility scripts
 ```
 
 ### Important Configuration Details
@@ -353,17 +341,18 @@ const cleanData = {
 
 ```typescript
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { appwriteApi } from '@/lib/api/appwrite-api';
+import { api } from '@/convex/_generated/api';
+import { convexQuery } from '@convex-dev/react-query';
 
 // Query
 const { data, error, isLoading } = useQuery({
   queryKey: ['beneficiaries'],
-  queryFn: () => appwriteApi.beneficiaries.getBeneficiaries(),
+  queryFn: () => convexQuery(api.beneficiaries.getAll)(),
 });
 
 // Mutation
 const mutation = useMutation({
-  mutationFn: appwriteApi.beneficiaries.createBeneficiary,
+  mutationFn: convexMutation(api.beneficiaries.create),
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
   },

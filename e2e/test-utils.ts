@@ -14,17 +14,17 @@ export const getSearchHotkey = () => {
   return process.platform === 'darwin' ? 'Meta+K' : 'Control+K';
 };
 
-// Appwrite Connection Test Helper
-export async function testAppwriteConnection(): Promise<boolean> {
+// Convex Connection Test Helper
+export async function testConvexConnection(): Promise<boolean> {
   try {
-    const response = await fetch('/api/health/appwrite', {
+    const response = await fetch('/api/health', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
     const data = await response.json();
     return data.status === 'connected' || data.success === true;
   } catch (error) {
-    console.warn('Appwrite connection test failed:', error);
+    console.warn('Convex connection test failed:', error);
     return false;
   }
 }

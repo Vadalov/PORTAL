@@ -28,7 +28,6 @@ const invoices: Invoice[] = [
     status: 'sent',
     createdAt: new Date('2024-11-01'),
     updatedAt: new Date('2024-11-01'),
-    appwriteId: 'mock-invoice-1',
   },
 ];
 
@@ -101,7 +100,6 @@ async function createInvoiceHandler(request: NextRequest) {
       notes: body.notes,
       createdAt: new Date(),
       updatedAt: new Date(),
-      appwriteId: `mock-${Date.now()}`,
     };
 
     invoices.unshift(newInvoice);

@@ -45,7 +45,6 @@ export interface Transaction {
   attachments?: string[];
   createdAt: Date;
   updatedAt: Date;
-  appwriteId?: string; // Appwrite database ID
 }
 
 // Budget Types
@@ -76,7 +75,6 @@ export interface Budget {
   status: 'draft' | 'active' | 'completed';
   createdAt: Date;
   updatedAt: Date;
-  appwriteId?: string;
 }
 
 // Financial Report Types
@@ -139,7 +137,6 @@ export interface FinancialReport {
   };
   generatedAt: Date;
   createdAt: Date;
-  appwriteId?: string;
 }
 
 // Invoice Types
@@ -177,7 +174,6 @@ export interface Invoice {
   notes?: string;
   createdAt: Date;
   updatedAt: Date;
-  appwriteId?: string;
 }
 
 // Dashboard Metrics

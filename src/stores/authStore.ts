@@ -2,7 +2,7 @@
 
 /**
  * Authentication Store (Zustand)
- * Real Appwrite authentication using server-side API routes
+ * Real authentication using server-side API routes and Convex backend
  */
 
 import { create } from 'zustand';
@@ -57,27 +57,27 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
-// Convert Appwrite user to Store user
-export const appwriteUserToStoreUser = (appwriteUser: {
-  $id: string;
+// Convert backend user to Store user
+export const backendUserToStoreUser = (backendUser: {
+  id: string;
   email: string;
   name: string;
-  labels?: string[];
+  role?: string;
   avatar?: string;
-  $createdAt?: string;
-  $updatedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }): User => {
-  const role = (appwriteUser.labels?.[0]?.toUpperCase() || 'MEMBER') as UserRole;
+  const role = (backendUser.role?.toUpperCase() || 'MEMBER') as UserRole;
   return {
-    id: appwriteUser.$id,
-    email: appwriteUser.email,
-    name: appwriteUser.name,
+    id: backendUser.id,
+    email: backendUser.email,
+    name: backendUser.name,
     role,
-    avatar: appwriteUser.avatar,
+    avatar: backendUser.avatar,
     permissions: ROLE_PERMISSIONS[role] || [],
     isActive: true,
-    createdAt: appwriteUser.$createdAt || new Date().toISOString(),
-    updatedAt: appwriteUser.$updatedAt || new Date().toISOString(),
+    createdAt: backendUser.createdAt || new Date().toISOString(),
+    updatedAt: backendUser.updatedAt || new Date().toISOString(),
   };
 };
 

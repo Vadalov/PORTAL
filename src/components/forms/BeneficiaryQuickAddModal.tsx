@@ -31,7 +31,7 @@ import {
   quickAddBeneficiarySchema,
   QuickAddBeneficiaryFormData,
 } from '@/lib/validations/beneficiary';
-import { appwriteApi } from '@/lib/api';
+import { api } from '@/lib/api';
 import type { BeneficiaryDocument, CreateDocumentData } from '@/types/collections';
 
 interface BeneficiaryQuickAddModalProps {
@@ -134,7 +134,7 @@ export function BeneficiaryQuickAddModal({ open, onOpenChange }: BeneficiaryQuic
         notes: `Kategori: ${data.category}, Fon Bölgesi: ${data.fundRegion}, Dosya Bağlantısı: ${data.fileConnection}, Dosya No: ${data.fileNumber}`,
       };
 
-      const result = await appwriteApi.beneficiaries.createBeneficiary(beneficiaryData);
+      const result = await api.beneficiaries.createBeneficiary(beneficiaryData);
 
       if (result.data) {
         toast.success('İhtiyaç sahibi başarıyla oluşturuldu');

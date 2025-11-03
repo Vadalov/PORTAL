@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { appwriteApi } from '@/lib/api';
+import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { MeetingForm } from '@/components/forms/MeetingForm';
 import { CalendarView } from '@/components/meetings/CalendarView';
@@ -78,7 +78,7 @@ export default function MeetingsPage() {
   const { data: _meetingsResponse, isLoading: _isLoadingMeetings } = useQuery({
     queryKey: ['meetings', _page, search, statusFilter, meetingTypeFilter, dateFrom, dateTo],
     queryFn: () =>
-      appwriteApi.meetings.getMeetings({
+      api.meetings.getMeetings({
         page: _page,
         limit,
         search,
@@ -100,7 +100,7 @@ export default function MeetingsPage() {
   const { data: calendarMeetingsResponse, isLoading: isLoadingCalendar } = useQuery({
     queryKey: ['meetings-calendar', monthStart, monthEnd],
     queryFn: () =>
-      appwriteApi.meetings.getMeetings({
+      api.meetings.getMeetings({
         limit: 1000,
         filters: {
           date_from: monthStart.toISOString(),
@@ -116,9 +116,9 @@ export default function MeetingsPage() {
     queryFn: () => {
       if (!user?.id) return Promise.resolve({ data: [], error: null });
       if (activeTab === 'all') {
-        return appwriteApi.meetings.getMeetings({});
+        return api.meetings.getMeetings({});
       }
-      return appwriteApi.meetings.getMeetings({
+      return api.meetings.getMeetings({
         filters: { status: activeTab as MeetingDocument['status'] },
       });
     },
@@ -130,10 +130,10 @@ export default function MeetingsPage() {
     queryKey: ['meetings-stats'],
     queryFn: async () => {
       const [total, scheduled, ongoing, completed] = await Promise.all([
-        appwriteApi.meetings.getMeetings({ limit: 1 }),
-        appwriteApi.meetings.getMeetings({ filters: { status: 'scheduled' }, limit: 1 }),
-        appwriteApi.meetings.getMeetings({ filters: { status: 'ongoing' }, limit: 1 }),
-        appwriteApi.meetings.getMeetings({ filters: { status: 'completed' }, limit: 1 }),
+        api.meetings.getMeetings({ limit: 1 }),
+        api.meetings.getMeetings({ filters: { status: 'scheduled' }, limit: 1 }),
+        api.meetings.getMeetings({ filters: { status: 'ongoing' }, limit: 1 }),
+        api.meetings.getMeetings({ filters: { status: 'completed' }, limit: 1 }),
       ]);
       return {
         total: total.total || 0,
@@ -152,7 +152,7 @@ export default function MeetingsPage() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => appwriteApi.meetings.deleteMeeting(id),
+    mutationFn: (id: string) => api.meetings.deleteMeeting(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['meetings'] });
       queryClient.invalidateQueries({ queryKey: ['meetings-stats'] });

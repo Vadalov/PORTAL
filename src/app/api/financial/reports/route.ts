@@ -96,7 +96,6 @@ function generateMockReport(type: ReportType, startDate: Date, endDate: Date): F
     },
     generatedAt: new Date(),
     createdAt: new Date(),
-    appwriteId: `mock-report-${Date.now()}`,
   };
 }
 

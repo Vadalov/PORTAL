@@ -19,10 +19,7 @@ import {
 
 import type {
   BeneficiaryDocument,
-  AppwriteResponse,
   QueryParams,
-  CreateDocumentData,
-  UpdateDocumentData,
 } from '@/types/collections';
 
 // Define ApiResponse type locally (legacy)
@@ -142,8 +139,8 @@ const mockBeneficiaries: Beneficiary[] = [
   },
 ];
 
-// === APPWRITE-ALIGNED MOCK STORAGE ===
-let mockAppwriteBeneficiaries: BeneficiaryDocument[] = mockBeneficiaries.map((b) => ({
+// === CLEAN BENEFICIARY STORAGE ===
+const mockBeneficiaryDocs: BeneficiaryDocument[] = mockBeneficiaries.map((b) => ({
   $id: b.id,
   $createdAt: b.createdAt,
   $updatedAt: b.updatedAt,
@@ -229,36 +226,9 @@ export const createBeneficiary = async (
     };
 
     mockBeneficiaries.push(newBeneficiary);
-    // sync to appwrite-style store
-    mockAppwriteBeneficiaries.push({
-      $id: newBeneficiary.id,
-      $createdAt: newBeneficiary.createdAt!,
-      $updatedAt: newBeneficiary.updatedAt!,
-      $permissions: [],
-      $collectionId: 'beneficiaries',
-      $databaseId: 'mock-db',
-      name: `${newBeneficiary.firstName} ${newBeneficiary.lastName}`,
-      tc_no: newBeneficiary.identityNumber || '',
-      phone: newBeneficiary.mobilePhone || '',
-      email: newBeneficiary.email || '',
-      birth_date: undefined,
-      gender: undefined,
-      nationality: newBeneficiary.nationality,
-      religion: undefined,
-      marital_status: undefined,
-      address: newBeneficiary.address || '',
-      city: newBeneficiary.city || '',
-      district: newBeneficiary.district || '',
-      neighborhood: newBeneficiary.neighborhood || '',
-      family_size: newBeneficiary.familyMemberCount || 1,
-      status: 'TASLAK',
-      approval_status: 'pending',
-    } as BeneficiaryDocument);
-
     return {
       success: true,
       data: newBeneficiary,
-      error: null,
       message: 'İhtiyaç sahibi başarıyla oluşturuldu',
     };
   } catch (_error) {
@@ -297,27 +267,6 @@ export const updateBeneficiary = async (
     };
 
     mockBeneficiaries[index] = updatedBeneficiary;
-
-    // sync to appwrite-style store
-    const idx2 = mockAppwriteBeneficiaries.findIndex((b) => b.$id === id);
-    if (idx2 !== -1) {
-      const legacy = updatedBeneficiary;
-      mockAppwriteBeneficiaries[idx2] = {
-        ...mockAppwriteBeneficiaries[idx2],
-        $updatedAt: legacy.updatedAt!,
-        name: `${legacy.firstName} ${legacy.lastName}`,
-        tc_no: legacy.identityNumber || mockAppwriteBeneficiaries[idx2].tc_no,
-        phone: legacy.mobilePhone || mockAppwriteBeneficiaries[idx2].phone,
-        email: legacy.email || mockAppwriteBeneficiaries[idx2].email,
-        nationality: legacy.nationality,
-        address: legacy.address || mockAppwriteBeneficiaries[idx2].address,
-        city: legacy.city || mockAppwriteBeneficiaries[idx2].city,
-        district: legacy.district || mockAppwriteBeneficiaries[idx2].district,
-        neighborhood: legacy.neighborhood || mockAppwriteBeneficiaries[idx2].neighborhood,
-        family_size: legacy.familyMemberCount || mockAppwriteBeneficiaries[idx2].family_size,
-        status: (legacy.status as BeneficiaryStatus) || mockAppwriteBeneficiaries[idx2].status,
-      };
-    }
 
     return {
       success: true,
@@ -460,8 +409,6 @@ export const deleteBeneficiary = async (id: string): Promise<ApiResponse<void>> 
     }
 
     mockBeneficiaries.splice(index, 1);
-    mockAppwriteBeneficiaries = mockAppwriteBeneficiaries.filter((b) => b.$id !== id);
-
     return {
       success: true,
       message: 'İhtiyaç sahibi başarıyla silindi',
@@ -702,9 +649,16 @@ export const exportBeneficiaries = async (
   }
 };
 
-// === APPWRITE-ALIGNED MOCK API (NEW) ===
+// === CLEAN API FUNCTIONS ===
 
-function toAppwriteResponse<T>(data: T | null, total?: number): AppwriteResponse<T> {
+// Simple Convex-style response type
+interface ConvexResponse<T> {
+  data: T | null;
+  error: string | null;
+  total?: number;
+}
+
+function toConvexResponse<T>(data: T | null, total?: number): ConvexResponse<T> {
   return {
     data,
     error: null,
@@ -712,9 +666,10 @@ function toAppwriteResponse<T>(data: T | null, total?: number): AppwriteResponse
   };
 }
 
-export async function appwriteCreateBeneficiary(
-  data: CreateDocumentData<BeneficiaryDocument>
-): Promise<AppwriteResponse<BeneficiaryDocument>> {
+// Convex-style beneficiary functions
+export async function createBeneficiaryDoc(
+  data: Partial<BeneficiaryDocument>
+): Promise<ConvexResponse<BeneficiaryDocument>> {
   await delay();
 
   const now = new Date().toISOString();
@@ -726,106 +681,82 @@ export async function appwriteCreateBeneficiary(
     $permissions: [],
     $collectionId: 'beneficiaries',
     $databaseId: 'mock-db',
-    // Map required core fields with safe fallbacks
-    name: (data as any).name || (data as any).firstName || (data as any).lastName || 'Ad Soyad',
-    tc_no: (data as any).tc_no || '',
-    phone: (data as any).phone || '',
-    email: (data as any).email,
-    birth_date: (data as any).birth_date,
-    gender: (data as any).gender,
-    nationality: (data as any).nationality,
-    religion: (data as any).religion,
-    marital_status: (data as any).marital_status,
-    address: (data as any).address || '',
-    city: (data as any).city || '',
-    district: (data as any).district || '',
-    neighborhood: (data as any).neighborhood || '',
-    family_size: (data as any).family_size ?? 1,
-    children_count: (data as any).children_count,
-    orphan_children_count: (data as any).orphan_children_count,
-    elderly_count: (data as any).elderly_count,
-    disabled_count: (data as any).disabled_count,
-    income_level: (data as any).income_level,
-    income_source: (data as any).income_source,
-    has_debt: !!(data as any).has_debt,
-    housing_type: (data as any).housing_type,
-    has_vehicle: !!(data as any).has_vehicle,
-    health_status: (data as any).health_status,
-    has_chronic_illness: (data as any).has_chronic_illness,
-    chronic_illness_detail: (data as any).chronic_illness_detail,
-    has_disability: (data as any).has_disability,
-    disability_detail: (data as any).disability_detail,
-    has_health_insurance: (data as any).has_health_insurance,
-    regular_medication: (data as any).regular_medication,
-    education_level: (data as any).education_level,
-    occupation: (data as any).occupation,
-    employment_status: (data as any).employment_status,
-    aid_type: (data as any).aid_type,
-    totalAidAmount: (data as any).totalAidAmount,
-    aid_duration: (data as any).aid_duration,
-    priority: (data as any).priority,
-    reference_name: (data as any).reference_name,
-    reference_phone: (data as any).reference_phone,
-    reference_relation: (data as any).reference_relation,
-    application_source: (data as any).application_source,
-    notes: (data as any).notes,
-    previous_aid: !!(data as any).previous_aid,
-    other_organization_aid: !!(data as any).other_organization_aid,
-    emergency: !!(data as any).emergency,
-    contact_preference: (data as any).contact_preference,
-    status: (data as any).status || BeneficiaryStatus.TASLAK,
-    approval_status: (data as any).approval_status || 'pending',
-    approved_by: (data as any).approved_by,
-    approved_at: (data as any).approved_at,
+    name: data.name || '',
+    tc_no: data.tc_no || '',
+    phone: data.phone || '',
+    email: data.email,
+    birth_date: data.birth_date,
+    gender: data.gender,
+    nationality: data.nationality,
+    religion: data.religion,
+    marital_status: data.marital_status,
+    address: data.address || '',
+    city: data.city || '',
+    district: data.district || '',
+    neighborhood: data.neighborhood || '',
+    family_size: data.family_size ?? 1,
+    children_count: data.children_count,
+    orphan_children_count: data.orphan_children_count,
+    elderly_count: data.elderly_count,
+    disabled_count: data.disabled_count,
+    income_level: data.income_level,
+    income_source: data.income_source,
+    has_debt: !!data.has_debt,
+    housing_type: data.housing_type,
+    has_vehicle: !!data.has_vehicle,
+    health_status: data.health_status,
+    has_chronic_illness: data.has_chronic_illness,
+    chronic_illness_detail: data.chronic_illness_detail,
+    has_disability: data.has_disability,
+    disability_detail: data.disability_detail,
+    has_health_insurance: data.has_health_insurance,
+    regular_medication: data.regular_medication,
+    education_level: data.education_level,
+    occupation: data.occupation,
+    employment_status: data.employment_status,
+    aid_type: data.aid_type,
+    totalAidAmount: data.totalAidAmount,
+    aid_duration: data.aid_duration,
+    priority: data.priority,
+    reference_name: data.reference_name,
+    reference_phone: data.reference_phone,
+    reference_relation: data.reference_relation,
+    application_source: data.application_source,
+    notes: data.notes,
+    previous_aid: !!data.previous_aid,
+    other_organization_aid: !!data.other_organization_aid,
+    emergency: !!data.emergency,
+    contact_preference: data.contact_preference,
+    status: data.status || 'TASLAK',
+    approval_status: data.approval_status || 'pending',
+    approved_by: data.approved_by,
+    approved_at: data.approved_at,
   };
 
-  mockAppwriteBeneficiaries.push(doc);
-  return toAppwriteResponse(doc);
+  mockBeneficiaryDocs.push(doc);
+  return toConvexResponse(doc);
 }
 
-export async function appwriteUpdateBeneficiary(
-  id: string,
-  data: UpdateDocumentData<BeneficiaryDocument>
-): Promise<AppwriteResponse<BeneficiaryDocument>> {
-  await delay();
-
-  const idx = mockAppwriteBeneficiaries.findIndex((b) => b.$id === id);
-  if (idx === -1) {
-    return { data: null, error: 'İhtiyaç sahibi bulunamadı' };
-  }
-
-  const now = new Date().toISOString();
-  const prev = mockAppwriteBeneficiaries[idx];
-  const updated: BeneficiaryDocument = {
-    ...prev,
-    ...data,
-    $updatedAt: now,
-  };
-
-  mockAppwriteBeneficiaries[idx] = updated;
-  return toAppwriteResponse(updated);
-}
-
-export async function appwriteGetBeneficiary(
+export async function getBeneficiaryDoc(
   id: string
-): Promise<AppwriteResponse<BeneficiaryDocument>> {
+): Promise<ConvexResponse<BeneficiaryDocument>> {
   await delay();
 
-  const b = mockAppwriteBeneficiaries.find((x) => x.$id === id) || null;
-  if (!b) {
+  const doc = mockBeneficiaryDocs.find((x) => x.$id === id) || null;
+  if (!doc) {
     return { data: null, error: 'İhtiyaç sahibi bulunamadı' };
   }
-  return toAppwriteResponse(b);
+  return toConvexResponse(doc);
 }
 
-export async function appwriteGetBeneficiaries(
+export async function getBeneficiaryDocs(
   params: QueryParams = {}
-): Promise<AppwriteResponse<BeneficiaryDocument[]>> {
+): Promise<ConvexResponse<BeneficiaryDocument[]>> {
   await delay();
 
-  const { search = '', page = 1, limit = 20, orderBy, orderType = 'desc', filters = {} } = params;
+  const { search = '', page = 1, limit = 20 } = params;
 
-  let list = [...mockAppwriteBeneficiaries];
+  let list = [...mockBeneficiaryDocs];
 
   if (search) {
     const s = search.toLowerCase();
@@ -835,23 +766,6 @@ export async function appwriteGetBeneficiaries(
         b.tc_no?.includes(search) ||
         b.$id.toLowerCase().includes(s)
     );
-  }
-
-  // Simple filters support
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-    list = list.filter((b: unknown) => (b as any)[key] === value);
-  });
-
-  // Order
-  if (orderBy) {
-    list.sort((a: unknown, b: unknown) => {
-      const av = (a as any)[orderBy];
-      const bv = (b as any)[orderBy];
-      if (av === bv) return 0;
-      const res = av > bv ? 1 : -1;
-      return orderType === 'desc' ? -res : res;
-    });
   }
 
   const total = list.length;
@@ -866,12 +780,38 @@ export async function appwriteGetBeneficiaries(
   };
 }
 
-export async function appwriteDeleteBeneficiary(id: string): Promise<AppwriteResponse<null>> {
+export async function updateBeneficiaryDoc(
+  id: string,
+  data: Partial<BeneficiaryDocument>
+): Promise<ConvexResponse<BeneficiaryDocument>> {
   await delay();
 
-  const before = mockAppwriteBeneficiaries.length;
-  mockAppwriteBeneficiaries = mockAppwriteBeneficiaries.filter((b) => b.$id !== id);
-  const after = mockAppwriteBeneficiaries.length;
+  const idx = mockBeneficiaryDocs.findIndex((b) => b.$id === id);
+  if (idx === -1) {
+    return { data: null, error: 'İhtiyaç sahibi bulunamadı' };
+  }
+
+  const now = new Date().toISOString();
+  const updated: BeneficiaryDocument = {
+    ...mockBeneficiaryDocs[idx],
+    ...data,
+    $updatedAt: now,
+  };
+
+  mockBeneficiaryDocs[idx] = updated;
+  return toConvexResponse(updated);
+}
+
+export async function deleteBeneficiaryDoc(id: string): Promise<ConvexResponse<null>> {
+  await delay();
+
+  const before = mockBeneficiaryDocs.length;
+  const filtered = mockBeneficiaryDocs.filter((b) => b.$id !== id);
+  const after = filtered.length;
+  
+  // Update the array
+  mockBeneficiaryDocs.length = 0;
+  mockBeneficiaryDocs.push(...filtered);
 
   return {
     data: null,

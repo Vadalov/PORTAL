@@ -27,18 +27,6 @@ export async function POST(_request: NextRequest) {
       path: '/',
     });
 
-    // Clear legacy Appwrite session cookie if exists
-    const appwriteSessionCookie = cookieStore.get('appwrite-session');
-    if (appwriteSessionCookie) {
-      cookieStore.set('appwrite-session', '', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 0,
-        path: '/',
-      });
-    }
-
     return NextResponse.json({
       success: true,
       message: 'Başarıyla çıkış yapıldı',
