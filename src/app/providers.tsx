@@ -3,11 +3,13 @@
 import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ConvexProvider } from 'convex/react';
 import { Toaster } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import { useState } from 'react';
 import { createOptimizedQueryClient, cacheUtils } from '@/lib/cache-config';
 import { persistentCache } from '@/lib/persistent-cache';
+import { convex } from '@/lib/convex/client';
 
 import { SuspenseBoundary } from '@/components/ui/suspense-boundary';
 
@@ -77,22 +79,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SuspenseBoundary
-        loadingVariant="pulse"
-        fullscreen={true}
-        loadingText="Uygulama yükleniyor..."
-        onSuspend={() => {
-          // Suspended state
-        }}
-        onResume={() => {
-          // Resumed state
-        }}
-      >
-        {children}
-      </SuspenseBoundary>
-      <Toaster position="top-right" richColors />
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ConvexProvider client={convex}>
+      <QueryClientProvider client={queryClient}>
+        <SuspenseBoundary
+          loadingVariant="pulse"
+          fullscreen={true}
+          loadingText="Uygulama yükleniyor..."
+          onSuspend={() => {
+            // Suspended state
+          }}
+          onResume={() => {
+            // Resumed state
+          }}
+        >
+          {children}
+        </SuspenseBoundary>
+        <Toaster position="top-right" richColors />
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ConvexProvider>
   );
 }

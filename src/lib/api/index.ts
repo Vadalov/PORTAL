@@ -1,12 +1,7 @@
-// Unified API resolver (mock | appwrite)
+// Unified API resolver - Now using Convex only
 // Import concrete implementations
 import * as mock from './mock-api';
-import {
-  appwriteApi,
-  parametersApi as realParametersApi,
-  aidApplicationsApi as realAidApplicationsApi,
-} from './appwrite-api';
-import { appwriteServerApi } from './appwrite-server-api';
+import { convexApiClient } from './convex-api-client';
 import type {
   QueryParams,
   CreateDocumentData,
@@ -28,8 +23,9 @@ const clientProvider =
 const serverProvider = process.env.BACKEND_PROVIDER;
 
 // Decide provider with sensible defaults
-// IMPORTANT: Set BACKEND_PROVIDER=appwrite or NEXT_PUBLIC_BACKEND_PROVIDER=appwrite to use real Appwrite
-const provider = (clientProvider || serverProvider || 'appwrite').toLowerCase(); // Changed default from 'mock' to 'appwrite'
+// IMPORTANT: Set BACKEND_PROVIDER=convex|mock or NEXT_PUBLIC_BACKEND_PROVIDER=convex|mock
+// Default is 'convex' - Appwrite has been removed
+const provider = (clientProvider || serverProvider || 'convex').toLowerCase();
 
 // Build a light wrapper to align mock functions to appwriteApi shape
 const mockApi = {
@@ -156,6 +152,13 @@ const mockApi = {
       data: null,
       error: 'Not implemented in mock',
     }),
+    updateTaskStatus: async (
+      _id: string,
+      _status: TaskDocument['status']
+    ): Promise<AppwriteResponse<TaskDocument>> => ({
+      data: null,
+      error: 'Not implemented in mock',
+    }),
     deleteTask: async (_id: string): Promise<AppwriteResponse<null>> => ({
       data: null,
       error: null,
@@ -265,28 +268,43 @@ const mockApi = {
 
 // Selected API surface
 const selectedApi = (() => {
-  if (provider !== 'appwrite') {
-    // Only log in development to avoid console spam
+  if (provider === 'convex') {
+    // Use Convex API client (calls Next.js API routes which use Convex)
     if (process.env.NODE_ENV === 'development') {
-      console.warn(
-        `⚠️ Using MOCK API (provider: ${provider}). Set BACKEND_PROVIDER=appwrite to use real Appwrite.`
-      );
+      console.log('✅ Using Convex API (via Next.js API routes)');
     }
-    return mockApi;
+    return convexApiClient;
   }
-  // Use server API on the server, client API in the browser
+  
+  // Fallback to mock (only for testing)
   if (process.env.NODE_ENV === 'development') {
-    console.warn('✅ Using REAL Appwrite API');
+    console.warn(
+      `⚠️ Using MOCK API (provider: ${provider}). Set BACKEND_PROVIDER=convex to use Convex backend.`
+    );
   }
-  return typeof window === 'undefined' ? appwriteServerApi : appwriteApi;
+  return mockApi;
 })();
 
 export const api = selectedApi;
 
 // Expose parameters and aid applications APIs
 export const parametersApi =
-  provider === 'appwrite'
-    ? realParametersApi
+  provider === 'convex'
+    ? {
+        // Convex API routes for parameters (if implemented)
+        getParametersByCategory: async (_category: string) => ({ data: [], error: null, total: 0 }),
+        getAllParameters: async (_params?: QueryParams) => ({ data: [], error: null, total: 0 }),
+        getParameter: async (_id: string) => ({ data: null, error: 'Not implemented' }),
+        createParameter: async (_data: Record<string, unknown>) => ({
+          data: null,
+          error: 'Not implemented',
+        }),
+        updateParameter: async (_id: string, _data: Record<string, unknown>) => ({
+          data: null,
+          error: 'Not implemented',
+        }),
+        deleteParameter: async (_id: string) => ({ data: null, error: null }),
+      }
     : {
         getParametersByCategory: async (_category: string) => ({ data: [], error: null, total: 0 }),
         getAllParameters: async (_params?: QueryParams) => ({ data: [], error: null, total: 0 }),
@@ -303,31 +321,106 @@ export const parametersApi =
       };
 
 export const aidApplicationsApi =
-  provider === 'appwrite'
-    ? realAidApplicationsApi
-    : {
-        getAidApplications: async (_params?: QueryParams) => ({ data: [], error: null, total: 0 }),
-        getAidApplication: async (_id: string) => ({
-          data: null,
-          error: 'Not implemented in mock',
-        }),
-        createAidApplication: async (_data: Record<string, unknown>) => ({
-          data: null,
-          error: 'Not implemented in mock',
-        }),
-        updateAidApplication: async (_id: string, _data: Record<string, unknown>) => ({
-          data: null,
-          error: 'Not implemented in mock',
-        }),
-        deleteAidApplication: async (_id: string) => ({ data: null, error: null }),
-        updateStage: async (_id: string, _stage: string) => ({
-          data: null,
-          error: 'Not implemented in mock',
-        }),
-      };
+  provider === 'convex'
+      ? {
+          getAidApplications: async (params?: QueryParams) => {
+            const searchParams = new URLSearchParams();
+            if (params?.page) searchParams.set('page', params.page.toString());
+            if (params?.limit) searchParams.set('limit', params.limit.toString());
+            if (params?.search) searchParams.set('search', params.search);
+            if (params?.filters?.stage) searchParams.set('stage', params.filters.stage);
+            if (params?.filters?.status) searchParams.set('status', params.filters.status);
+
+            const response = await fetch(`/api/aid-applications?${searchParams.toString()}`);
+            const result = await response.json();
+            return {
+              data: result.data || [],
+              error: result.success ? null : result.error,
+              total: result.total || 0,
+            };
+          },
+          getAidApplication: async (id: string) => {
+            const response = await fetch(`/api/aid-applications/${id}`);
+            const result = await response.json();
+            return {
+              data: result.data || null,
+              error: result.success ? null : result.error,
+            };
+          },
+          createAidApplication: async (data: Record<string, unknown>) => {
+            const response = await fetch('/api/aid-applications', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            return {
+              data: result.data || null,
+              error: result.success ? null : result.error,
+            };
+          },
+          updateAidApplication: async (id: string, data: Record<string, unknown>) => {
+            const response = await fetch(`/api/aid-applications/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            return {
+              data: result.data || null,
+              error: result.success ? null : result.error,
+            };
+          },
+          deleteAidApplication: async (id: string) => {
+            const response = await fetch(`/api/aid-applications/${id}`, {
+              method: 'DELETE',
+            });
+            const result = await response.json();
+            return {
+              data: null,
+              error: result.success ? null : result.error,
+            };
+          },
+          updateStage: async (id: string, stage: string) => {
+            const response = await fetch(`/api/aid-applications/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ stage }),
+            });
+            const result = await response.json();
+            return {
+              data: result.data || null,
+              error: result.success ? null : result.error,
+            };
+          },
+        }
+      : {
+          getAidApplications: async (_params?: QueryParams) => ({ data: [], error: null, total: 0 }),
+          getAidApplication: async (_id: string) => ({
+            data: null,
+            error: 'Not implemented in mock',
+          }),
+          createAidApplication: async (_data: Record<string, unknown>) => ({
+            data: null,
+            error: 'Not implemented in mock',
+          }),
+          updateAidApplication: async (_id: string, _data: Record<string, unknown>) => ({
+            data: null,
+            error: 'Not implemented in mock',
+          }),
+          deleteAidApplication: async (_id: string) => ({ data: null, error: null }),
+          updateStage: async (_id: string, _stage: string) => ({
+            data: null,
+            error: 'Not implemented in mock',
+          }),
+        };
 
 // Also export named for compatibility if needed
 export type SelectedApi = typeof api;
+
+// Re-export appwriteApi as alias to selectedApi for backward compatibility
+// Components importing appwriteApi from '@/lib/api' will get the selected provider (Convex by default)
+export const appwriteApi = selectedApi;
 
 // Default export for convenience
 export default api;

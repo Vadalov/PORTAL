@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
-import { QueryParams, BeneficiaryDocument, CreateDocumentData } from '@/types/collections';
+import { convexBeneficiaries, normalizeQueryParams } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
+import { Id } from '@/convex/_generated/dataModel';
+import type { QueryParams } from '@/types/collections';
 
 // TypeScript interfaces
 interface BeneficiaryFilters {
@@ -106,36 +107,17 @@ function validateBeneficiaryData(data: BeneficiaryData): ValidationResult {
  * List beneficiaries with pagination and filters
  */
 async function getBeneficiariesHandler(request: NextRequest) {
-  const params = parseQueryParams(request);
+  const { searchParams } = new URL(request.url);
+  const params = normalizeQueryParams(searchParams);
+  
   try {
-    // Build filters for Appwrite query
-    const filters: BeneficiaryFilters = {};
-    if (params.filters?.status) {
-      filters.status = params.filters.status;
-    }
-    if (params.filters?.city) {
-      filters.city = params.filters.city;
-    }
-
-    const queryParams: ParsedQueryParams = {
+    const response = await convexBeneficiaries.list({
       ...params,
-      filters: Object.keys(filters).length > 0 ? filters : undefined,
-    };
+      city: searchParams.get('city') || undefined,
+    });
 
-    const response = (await api.beneficiaries.getBeneficiaries(
-      queryParams as QueryParams
-    )) as ApiResponse;
-
-    if (response.error) {
-      return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
-    }
-
-    // Handle different response structures
-    const data = response.data;
-    const beneficiaries = Array.isArray(data)
-      ? data
-      : (data as Record<string, unknown>)?.data || [];
-    const total = Array.isArray(data) ? data.length : (data as Record<string, number>)?.total || 0;
+    const beneficiaries = response.documents || [];
+    const total = response.total || 0;
 
     return NextResponse.json({
       success: true,
@@ -147,9 +129,7 @@ async function getBeneficiariesHandler(request: NextRequest) {
     logger.error('Beneficiaries list error', error, {
       endpoint: '/api/beneficiaries',
       method: 'GET',
-      page: params.page,
-      limit: params.limit,
-      filters: params.filters,
+      params,
     });
 
     return NextResponse.json(
@@ -182,8 +162,8 @@ async function createBeneficiaryHandler(request: NextRequest) {
       );
     }
 
-    // Set default status if not provided
-    const beneficiaryData: CreateDocumentData<BeneficiaryDocument> = {
+    // Prepare Convex mutation data
+    const beneficiaryData = {
       name: body.name || '',
       tc_no: body.tc_no || '',
       phone: body.phone || '',
@@ -192,20 +172,56 @@ async function createBeneficiaryHandler(request: NextRequest) {
       district: body.district || '',
       neighborhood: body.neighborhood || '',
       family_size: body.family_size || 1,
-      status: (body.status as BeneficiaryDocument['status']) || 'TASLAK',
+      status: (body.status as "TASLAK" | "AKTIF" | "PASIF" | "SILINDI") || "TASLAK" as const,
       email: body.email,
+      birth_date: body.birth_date,
+      gender: body.gender,
+      nationality: body.nationality,
+      religion: body.religion,
+      marital_status: body.marital_status,
+      children_count: body.children_count,
+      orphan_children_count: body.orphan_children_count,
+      elderly_count: body.elderly_count,
+      disabled_count: body.disabled_count,
+      income_level: body.income_level,
+      income_source: body.income_source,
+      has_debt: body.has_debt,
+      housing_type: body.housing_type,
+      has_vehicle: body.has_vehicle,
+      health_status: body.health_status,
+      has_chronic_illness: body.has_chronic_illness,
+      chronic_illness_detail: body.chronic_illness_detail,
+      has_disability: body.has_disability,
+      disability_detail: body.disability_detail,
+      has_health_insurance: body.has_health_insurance,
+      regular_medication: body.regular_medication,
+      education_level: body.education_level,
+      occupation: body.occupation,
+      employment_status: body.employment_status,
+      aid_type: body.aid_type,
+      totalAidAmount: body.totalAidAmount,
+      aid_duration: body.aid_duration,
+      priority: body.priority,
+      reference_name: body.reference_name,
+      reference_phone: body.reference_phone,
+      reference_relation: body.reference_relation,
+      application_source: body.application_source,
+      notes: body.notes,
+      previous_aid: body.previous_aid,
+      other_organization_aid: body.other_organization_aid,
+      emergency: body.emergency,
+      contact_preference: body.contact_preference,
+      approval_status: body.approval_status as "pending" | "approved" | "rejected" | undefined,
+      approved_by: body.approved_by,
+      approved_at: body.approved_at,
     };
 
-    const response = (await api.beneficiaries.createBeneficiary(beneficiaryData)) as ApiResponse;
-
-    if (response.error) {
-      return NextResponse.json({ success: false, error: 'Kayıt oluşturulamadı' }, { status: 500 });
-    }
+    const response = await convexBeneficiaries.create(beneficiaryData);
 
     return NextResponse.json(
       {
         success: true,
-        data: response.data,
+        data: response,
         message: 'İhtiyaç sahibi başarıyla oluşturuldu',
       },
       { status: 201 }
@@ -219,7 +235,7 @@ async function createBeneficiaryHandler(request: NextRequest) {
 
     // Handle duplicate TC number
     const errorMessage = error instanceof Error ? error.message : '';
-    if (errorMessage?.includes('duplicate') || errorMessage?.includes('unique')) {
+    if (errorMessage?.includes('already exists') || errorMessage?.includes('duplicate')) {
       return NextResponse.json(
         { success: false, error: 'Bu TC Kimlik No zaten kayıtlı' },
         { status: 409 }

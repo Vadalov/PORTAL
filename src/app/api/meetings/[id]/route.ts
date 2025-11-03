@@ -1,22 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
+import { convexMeetings } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import {
-  handleGetById,
-  handleUpdate,
-  handleDelete,
-  extractParams,
-  type ValidationResult,
-} from '@/lib/api/route-helpers';
+import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
-import { MeetingDocument } from '@/types/collections';
+import { Id } from '@/convex/_generated/dataModel';
 
-function validateMeetingUpdate(data: Partial<MeetingDocument>): ValidationResult {
+function validateMeetingUpdate(data: Record<string, unknown>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
-  if (data.title && data.title.trim().length < 3) {
+  if (data.title && typeof data.title === 'string' && data.title.trim().length < 3) {
     errors.push('Toplantı başlığı en az 3 karakter olmalıdır');
   }
-  if (data.status && !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status)) {
+  if (data.status && !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status as string)) {
     errors.push('Geçersiz durum');
   }
   return { isValid: errors.length === 0, errors };
@@ -26,17 +20,31 @@ function validateMeetingUpdate(data: Partial<MeetingDocument>): ValidationResult
  * GET /api/meetings/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  let id: string | undefined;
+  const { id } = await extractParams(params);
   try {
-    id = (await extractParams(params)).id;
-    return handleGetById(id, api.meetings.getMeeting, 'Toplantı');
+    const meeting = await convexMeetings.get(id as Id<"meetings">);
+    
+    if (!meeting) {
+      return NextResponse.json(
+        { success: false, error: 'Toplantı bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: meeting,
+    });
   } catch (error) {
-    logger.error('Meeting operation error', error, {
+    logger.error('Get meeting error', error, {
       endpoint: '/api/meetings/[id]',
       method: 'GET',
-      meetingId: id || 'unknown',
+      meetingId: id,
     });
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Veri alınamadı' },
+      { status: 500 }
+    );
   }
 }
 
@@ -47,18 +55,55 @@ async function updateMeetingHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let id: string | undefined;
+  const { id } = await extractParams(params);
   try {
-    id = (await extractParams(params)).id;
-    const body = await request.json();
-    return handleUpdate(id, body, validateMeetingUpdate, api.meetings.updateMeeting, 'Toplantı');
+    const body = await request.json() as Record<string, unknown>;
+    
+    const validation = validateMeetingUpdate(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const meetingData: Parameters<typeof convexMeetings.update>[1] = {
+      title: body.title as string | undefined,
+      description: body.description as string | undefined,
+      meeting_date: body.meeting_date as string | undefined,
+      location: body.location as string | undefined,
+      participants: body.participants as Id<"users">[] | undefined,
+      status: body.status as 'scheduled' | 'ongoing' | 'completed' | 'cancelled' | undefined,
+      agenda: body.agenda as string | undefined,
+      notes: body.notes as string | undefined,
+    };
+
+    const updated = await convexMeetings.update(id as Id<"meetings">, meetingData);
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: 'Toplantı başarıyla güncellendi',
+    });
   } catch (error) {
-    logger.error('Meeting operation error', error, {
+    logger.error('Update meeting error', error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
-      meetingId: id || 'unknown',
+      meetingId: id,
     });
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'Toplantı bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 
@@ -69,17 +114,33 @@ async function deleteMeetingHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let id: string | undefined;
+  const { id } = await extractParams(params);
   try {
-    id = (await extractParams(params)).id;
-    return handleDelete(id, api.meetings.deleteMeeting, 'Toplantı');
+    await convexMeetings.remove(id as Id<"meetings">);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Toplantı başarıyla silindi',
+    });
   } catch (error) {
-    logger.error('Meeting operation error', error, {
+    logger.error('Delete meeting error', error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
-      meetingId: id || 'unknown',
+      meetingId: id,
     });
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'Toplantı bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Silme işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

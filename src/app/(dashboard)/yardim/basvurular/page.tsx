@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { aidApplicationsApi } from '@/lib/api/appwrite-api';
+import { aidApplicationsApi } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -162,7 +162,7 @@ export default function AidApplicationsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {applications.map((app) => (
+              {applications.map((app: any) => (
                 <div
                   key={app.$id}
                   className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
@@ -221,11 +221,11 @@ export default function AidApplicationsPage() {
 
                       {/* Aşama ve Durum */}
                       <div className="flex gap-2">
-                        <Badge className={STAGE_LABELS[app.stage].color}>
-                          {STAGE_LABELS[app.stage].label}
+                        <Badge className={STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS].color}>
+                          {STAGE_LABELS[app.stage as keyof typeof STAGE_LABELS].label}
                         </Badge>
-                        <Badge className={STATUS_LABELS[app.status].color}>
-                          {STATUS_LABELS[app.status].label}
+                        <Badge className={STATUS_LABELS[app.status as keyof typeof STATUS_LABELS].color}>
+                          {STATUS_LABELS[app.status as keyof typeof STATUS_LABELS].label}
                         </Badge>
                       </div>
                     </div>

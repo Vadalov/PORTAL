@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
+import { convexMessages, normalizeQueryParams } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { AppwriteDocument, MessageDocument } from '@/types/collections';
+import { Id } from '@/convex/_generated/dataModel';
 
-function validateMessage(data: Partial<MessageDocument>): {
+function validateMessage(data: Record<string, unknown>): {
   isValid: boolean;
   errors: string[];
-  normalizedData?: Omit<MessageDocument, keyof AppwriteDocument>;
+  normalizedData?: Record<string, unknown>;
 } {
   const errors: string[] = [];
-  if (!data.message_type || !['sms', 'email', 'internal'].includes(data.message_type)) {
+  if (!data.message_type || !['sms', 'email', 'internal'].includes(data.message_type as string)) {
     errors.push('Geçersiz mesaj türü');
   }
-  if (!data.sender || typeof data.sender !== 'string') {
+  if (!data.sender) {
     errors.push('Gönderen zorunludur');
   }
   if (!Array.isArray(data.recipients) || data.recipients.length === 0) {
     errors.push('En az bir alıcı seçilmelidir');
   }
-  if (!data.content || data.content.trim().length < 3) {
+  if (!data.content || (typeof data.content === 'string' && data.content.trim().length < 3)) {
     errors.push('İçerik en az 3 karakter olmalıdır');
   }
 
@@ -29,8 +29,8 @@ function validateMessage(data: Partial<MessageDocument>): {
 
   const normalizedData = {
     ...data,
-    status: (data.status as 'draft' | 'sent' | 'failed') || 'draft',
-  } as Omit<MessageDocument, keyof AppwriteDocument>;
+    status: (data.status as string) || 'draft',
+  };
 
   return { isValid: true, errors: [], normalizedData };
 }
@@ -40,36 +40,24 @@ function validateMessage(data: Partial<MessageDocument>): {
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const page = Number(searchParams.get('page') || '1');
-  const limit = Number(searchParams.get('limit') || '20');
-  const search = searchParams.get('search') || undefined;
-
-  const filters: Record<string, string | number | boolean | undefined> = {};
-  const message_type = searchParams.get('message_type');
-  const status = searchParams.get('status');
-  const sender = searchParams.get('sender');
-  const is_bulk = searchParams.get('is_bulk');
-
-  if (message_type) filters.message_type = message_type;
-  if (status) filters.status = status;
-  if (sender) filters.sender = sender;
-  if (is_bulk !== null) filters.is_bulk = is_bulk === 'true';
+  const params = normalizeQueryParams(searchParams);
 
   try {
-    const response = await api.messages.getMessages({ page, limit, search, filters });
+    const response = await convexMessages.list({
+      ...params,
+      sender: searchParams.get('sender') as Id<"users"> | undefined,
+    });
 
     return NextResponse.json({
       success: true,
-      data: response.data,
-      total: response.total ?? 0,
+      data: response.documents || [],
+      total: response.total || 0,
     });
   } catch (error: unknown) {
     logger.error('List messages error', error, {
       endpoint: '/api/messages',
       method: 'GET',
-      page,
-      limit,
-      filters,
+      params,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -82,7 +70,7 @@ async function createMessageHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateMessage(body as Partial<MessageDocument>);
+    const validation = validateMessage(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
@@ -90,18 +78,21 @@ async function createMessageHandler(request: NextRequest) {
       );
     }
 
-    const response = await api.messages.createMessage(
-      validation.normalizedData
-    );
-    if (response.error || !response.data) {
-      return NextResponse.json(
-        { success: false, error: response.error || 'Oluşturma başarısız' },
-        { status: 400 }
-      );
-    }
+    const messageData = {
+      message_type: validation.normalizedData.message_type as 'sms' | 'email' | 'internal',
+      sender: validation.normalizedData.sender as Id<"users">,
+      recipients: validation.normalizedData.recipients as Id<"users">[],
+      subject: validation.normalizedData.subject as string | undefined,
+      content: validation.normalizedData.content as string,
+      status: (validation.normalizedData.status || 'draft') as 'draft' | 'sent' | 'failed',
+      is_bulk: (validation.normalizedData.is_bulk as boolean) || false,
+      template_id: validation.normalizedData.template_id as string | undefined,
+    };
+
+    const response = await convexMessages.create(messageData);
 
     return NextResponse.json(
-      { success: true, data: response.data, message: 'Mesaj taslağı oluşturuldu' },
+      { success: true, data: response, message: 'Mesaj taslağı oluşturuldu' },
       { status: 201 }
     );
   } catch (error: unknown) {

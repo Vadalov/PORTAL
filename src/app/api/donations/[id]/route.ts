@@ -1,31 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
+import { convexDonations } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import {
-  handleGetById,
-  handleUpdate,
-  handleDelete,
-  extractParams,
-  type ValidationResult,
-} from '@/lib/api/route-helpers';
+import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
-import { DonationDocument } from '@/types/collections';
+import { Id } from '@/convex/_generated/dataModel';
 
-function validateDonationUpdate(data: Partial<DonationDocument>): ValidationResult {
+function validateDonationUpdate(data: Record<string, unknown>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (data.amount !== undefined && Number(data.amount) <= 0) {
     errors.push('Bağış tutarı pozitif olmalıdır');
   }
-  if (data.currency && !['TRY', 'USD', 'EUR'].includes(data.currency)) {
+  if (data.currency && !['TRY', 'USD', 'EUR'].includes(data.currency as string)) {
     errors.push('Geçersiz para birimi');
   }
-  if (data.donor_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.donor_email)) {
+  if (data.donor_email && typeof data.donor_email === 'string' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.donor_email)) {
     errors.push('Geçersiz e-posta');
   }
-  if (data.donor_phone && !/^[0-9\s\-\+\(\)]{10,15}$/.test(data.donor_phone)) {
+  if (data.donor_phone && typeof data.donor_phone === 'string' && !/^[0-9\s\-\+\(\)]{10,15}$/.test(data.donor_phone)) {
     errors.push('Geçersiz telefon numarası');
   }
-  if (data.status && !['pending', 'completed', 'cancelled'].includes(data.status)) {
+  if (data.status && !['pending', 'completed', 'cancelled'].includes(data.status as string)) {
     errors.push('Geçersiz durum');
   }
   return { isValid: errors.length === 0, errors };
@@ -35,17 +29,31 @@ function validateDonationUpdate(data: Partial<DonationDocument>): ValidationResu
  * GET /api/donations/[id]
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  let id: string | undefined;
+  const { id } = await extractParams(params);
   try {
-    id = (await extractParams(params)).id;
-    return handleGetById(id, api.donations.getDonation, 'Bağış');
+    const donation = await convexDonations.get(id as Id<"donations">);
+    
+    if (!donation) {
+      return NextResponse.json(
+        { success: false, error: 'Bağış bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: donation,
+    });
   } catch (error) {
-    logger.error('Donation operation error', error, {
+    logger.error('Get donation error', error, {
       endpoint: '/api/donations/[id]',
       method: 'GET',
-      donationId: id || 'unknown',
+      donationId: id,
     });
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: 'Veri alınamadı' },
+      { status: 500 }
+    );
   }
 }
 
@@ -56,18 +64,50 @@ async function updateDonationHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let id: string | undefined;
+  const { id } = await extractParams(params);
   try {
-    id = (await extractParams(params)).id;
-    const body = await request.json();
-    return handleUpdate(id, body, validateDonationUpdate, api.donations.updateDonation, 'Bağış');
+    const body = await request.json() as Record<string, unknown>;
+    
+    const validation = validateDonationUpdate(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const donationData: Parameters<typeof convexDonations.update>[1] = {
+      status: body.status as 'pending' | 'completed' | 'cancelled' | undefined,
+      amount: body.amount as number | undefined,
+      notes: body.notes as string | undefined,
+    };
+
+    const updated = await convexDonations.update(id as Id<"donations">, donationData);
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: 'Bağış başarıyla güncellendi',
+    });
   } catch (error) {
-    logger.error('Donation operation error', error, {
+    logger.error('Update donation error', error, {
       endpoint: '/api/donations/[id]',
       method: 'PUT',
-      donationId: id || 'unknown',
+      donationId: id,
     });
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'Bağış bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 
@@ -78,17 +118,33 @@ async function deleteDonationHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  let id: string | undefined;
+  const { id } = await extractParams(params);
   try {
-    id = (await extractParams(params)).id;
-    return handleDelete(id, api.donations.deleteDonation, 'Bağış');
+    await convexDonations.remove(id as Id<"donations">);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Bağış başarıyla silindi',
+    });
   } catch (error) {
-    logger.error('Donation operation error', error, {
+    logger.error('Delete donation error', error, {
       endpoint: '/api/donations/[id]',
       method: 'DELETE',
-      donationId: id || 'unknown',
+      donationId: id,
     });
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'Bağış bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Silme işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

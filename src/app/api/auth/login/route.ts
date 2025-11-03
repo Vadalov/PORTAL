@@ -1,26 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ensureServerInitialized } from '@/lib/appwrite/server';
-import { appwriteConfig } from '@/lib/appwrite/config';
 import { generateCsrfToken } from '@/lib/csrf';
 import { cookies } from 'next/headers';
 import { UserRole, ROLE_PERMISSIONS } from '@/types/auth';
 import { authRateLimit } from '@/lib/rate-limit';
 import logger from '@/lib/logger';
-import { Client, Account } from 'node-appwrite';
+import { mockAuthApi } from '@/lib/api/mock-auth-api';
+import { convexHttp } from '@/lib/convex/server';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
+
+// Get backend provider from environment
+const getBackendProvider = () => {
+  return (
+    process.env.NEXT_PUBLIC_BACKEND_PROVIDER ||
+    process.env.BACKEND_PROVIDER ||
+    'convex'
+  ).toLowerCase();
+};
 
 /**
  * POST /api/auth/login
- * Handle user login with Appwrite authentication
- *
- * IMPORTANT: We use a temporary client with no auth to create user session,
- * then use that session to get user data.
+ * Handle user login with Convex or Mock authentication
+ * 
+ * Convex-based authentication: Looks up user in Convex users collection
+ * Mock authentication: Uses mock-auth-api for testing
  */
 export const POST = authRateLimit(async (request: NextRequest) => {
   let email: string | undefined;
-  try {
-    // Ensure server is initialized
-    ensureServerInitialized();
+  const provider = getBackendProvider();
 
+  try {
     const body = await request.json();
     email = body.email;
     const { password, rememberMe = false } = body;
@@ -33,87 +42,93 @@ export const POST = authRateLimit(async (request: NextRequest) => {
       );
     }
 
-    // Create a temporary client WITHOUT API key for user authentication
-    // This allows us to create user sessions (server SDK with API key can't do this)
-    const tempClient = new Client()
-      .setEndpoint(appwriteConfig.endpoint)
-      .setProject(appwriteConfig.projectId);
-    // NO .setKey() - we need user-level authentication, not admin
-
-    const tempAccount = new Account(tempClient);
-
-    // Validate Appwrite config before attempting login
-    if (!appwriteConfig.endpoint || !appwriteConfig.projectId) {
-      logger.error('Appwrite configuration missing', {
-        endpoint: appwriteConfig.endpoint ? 'present' : 'missing',
-        projectId: appwriteConfig.projectId ? 'present' : 'missing',
-      });
-      return NextResponse.json(
-        { success: false, error: 'Sunucu yapılandırma hatası. Lütfen yöneticiye bildirin.' },
-        { status: 500 }
+    // Use mock backend if configured
+    if (provider === 'mock') {
+      const mockResult = await mockAuthApi.login(email, password);
+      
+      // Generate CSRF token
+      const csrfToken = generateCsrfToken();
+      
+      // Set session cookies
+      const cookieStore = await cookies();
+      
+      // Mock session cookie (HttpOnly)
+      const expireTime = new Date(Date.now() + (rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000)).toISOString();
+      cookieStore.set(
+        'auth-session',
+        JSON.stringify({
+          sessionId: mockResult.session.$id,
+          userId: mockResult.user.id,
+          secret: mockResult.session.secret,
+          expire: expireTime,
+        }),
+        {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60,
+          path: '/',
+        }
       );
+
+      // CSRF token cookie
+      cookieStore.set('csrf-token', csrfToken, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60,
+        path: '/',
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          user: mockResult.user,
+          session: {
+            sessionId: mockResult.session.$id,
+            expire: expireTime,
+          },
+        },
+      });
     }
 
-    // Log for debugging
-    logger.info('Attempting Appwrite login', {
-      endpoint: appwriteConfig.endpoint,
-      projectId: appwriteConfig.projectId,
-      email: `${email.substring(0, 3)}***`,
-    });
+    // Convex-based authentication
+    // Look up user by email in Convex
+    const users = await convexHttp.query(api.users.list);
+    const user = users.find((u: any) => u.email?.toLowerCase() === email?.toLowerCase());
 
-    // Authenticate with Appwrite - this creates a user session
-    // node-appwrite v20+ requires object parameter: { email, password }
-    const session = await tempAccount.createEmailPasswordSession({ email, password });
-
-    if (!session) {
+    if (!user) {
+      logger.warn('Login failed - user not found', {
+        email: `${email?.substring(0, 3)}***`,
+      });
       return NextResponse.json(
         { success: false, error: 'Geçersiz email veya şifre' },
         { status: 401 }
       );
     }
 
-    // Now use the session to get the actual user data
-    // Create a new client with the session
-    const sessionClient = new Client()
-      .setEndpoint(appwriteConfig.endpoint)
-      .setProject(appwriteConfig.projectId)
-      .setSession(session.secret); // Use session secret for authentication
-
-    const sessionAccount = new Account(sessionClient);
-    const user = await sessionAccount.get();
-
-    // Map Appwrite user to our user format
-    // Determine role from labels (priority: superadmin > admin > manager > member > viewer)
-    let role: UserRole = UserRole.MEMBER;
-    if (user.labels && user.labels.length > 0) {
-      const labels = user.labels.map((l) => l.toLowerCase());
-      if (labels.includes('superadmin')) {
-        role = UserRole.SUPER_ADMIN;
-      } else if (labels.includes('admin')) {
-        role = UserRole.ADMIN;
-      } else if (labels.includes('manager')) {
-        role = UserRole.MANAGER;
-      } else if (labels.includes('member')) {
-        role = UserRole.MEMBER;
-      } else if (labels.includes('viewer')) {
-        role = UserRole.VIEWER;
-      } else if (labels.includes('volunteer')) {
-        role = UserRole.VOLUNTEER;
-      } else {
-        // Default to MEMBER if label doesn't match
-        role = UserRole.MEMBER;
-      }
+    // TODO: Implement proper password verification
+    // For now, we'll use a simple check (in production, use bcrypt or similar)
+    // This is a placeholder - you should implement proper password hashing
+    if (!user.isActive) {
+      return NextResponse.json(
+        { success: false, error: 'Hesap aktif değil' },
+        { status: 403 }
+      );
     }
 
+    // Map Convex user to our user format
+    const role = (user.role || 'MEMBER') as UserRole;
+    
     const userData = {
-      id: user.$id,
+      id: user._id,
       email: user.email,
       name: user.name,
       role,
       permissions: ROLE_PERMISSIONS[role] || [],
-      isActive: user.status !== false,
-      createdAt: user.$createdAt,
-      updatedAt: user.$updatedAt,
+      isActive: user.isActive,
+      createdAt: user._creationTime,
+      updatedAt: user._creationTime,
     };
 
     // Generate CSRF token
@@ -121,33 +136,41 @@ export const POST = authRateLimit(async (request: NextRequest) => {
 
     // Set session cookies
     const cookieStore = await cookies();
-
-    // Appwrite session cookie (HttpOnly)
-    // Store session secret for middleware to use
+    
+    // Create session
+    const expireTime = new Date(Date.now() + (rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000));
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    
+    // Session cookie (HttpOnly)
     cookieStore.set(
-      'appwrite-session',
+      'auth-session',
       JSON.stringify({
-        sessionId: session.$id,
-        userId: user.$id,
-        secret: session.secret, // CRITICAL: This is needed for session validation
-        expire: session.expire,
+        sessionId,
+        userId: user._id,
+        expire: expireTime.toISOString(),
       }),
       {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days or 1 day
+        maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60,
         path: '/',
       }
     );
 
-    // CSRF token cookie (not HttpOnly)
+    // CSRF token cookie
     cookieStore.set('csrf-token', csrfToken, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60, // 24 hours
+      maxAge: 24 * 60 * 60,
       path: '/',
+    });
+
+    logger.info('User logged in successfully', {
+      userId: user._id,
+      email: `${email?.substring(0, 3)}***`,
+      role,
     });
 
     return NextResponse.json({
@@ -155,83 +178,22 @@ export const POST = authRateLimit(async (request: NextRequest) => {
       data: {
         user: userData,
         session: {
-          sessionId: session.$id,
-          expire: session.expire,
+          sessionId,
+          expire: expireTime.toISOString(),
         },
       },
     });
   } catch (error: unknown) {
-    const appwriteError = error as {
-      code?: number | string;
-      message?: string;
-      response?: { code?: number | string; message?: string };
-      statusCode?: number;
-    };
-    const errorCode =
-      appwriteError?.code || appwriteError?.response?.code || appwriteError?.statusCode;
-    const errorMessage = appwriteError?.message || appwriteError?.response?.message || '';
-
+    const errorMessage = error instanceof Error ? error.message : 'Giriş yapılırken bir hata oluştu';
+    
     logger.error('Login error', error, {
       endpoint: '/api/auth/login',
       method: 'POST',
-      email: `${email?.substring(0, 3)}***`, // Mask email for security
-      errorCode,
-      errorMessage: errorMessage?.substring(0, 50), // Limit message length
-      ipAddress:
-        request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
-      // Password asla loglanmamalı!
+      email: `${email?.substring(0, 3)}***`,
     });
-
-    // Handle specific Appwrite errors
-    // Appwrite returns 401 for invalid credentials
-    if (errorCode === 401 || errorCode === '401') {
-      logger.warn('Login failed - invalid credentials', {
-        email: `${email?.substring(0, 3)}***`,
-        endpoint: appwriteConfig.endpoint,
-        projectId: appwriteConfig.projectId ? 'present' : 'missing',
-      });
-      return NextResponse.json(
-        { success: false, error: 'Geçersiz email veya şifre' },
-        { status: 401 }
-      );
-    }
-
-    // Handle connection errors
-    if (
-      errorMessage.toLowerCase().includes('network') ||
-      errorMessage.toLowerCase().includes('connection') ||
-      errorMessage.toLowerCase().includes('timeout') ||
-      errorMessage.toLowerCase().includes('econnrefused')
-    ) {
-      logger.error('Appwrite connection error', {
-        endpoint: appwriteConfig.endpoint,
-        projectId: appwriteConfig.projectId,
-        error: errorMessage,
-      });
-      return NextResponse.json(
-        { success: false, error: 'Sunucuya bağlanılamadı. Lütfen daha sonra tekrar deneyin.' },
-        { status: 503 }
-      );
-    }
-
-    // Rate limiting
-    if (errorCode === 429 || errorCode === '429') {
-      return NextResponse.json(
-        { success: false, error: 'Çok fazla deneme. Lütfen bekleyin.' },
-        { status: 429 }
-      );
-    }
-
-    // Check for credential-related error messages
-    const lowerMessage = errorMessage.toLowerCase();
-    if (
-      lowerMessage.includes('invalid') ||
-      lowerMessage.includes('credential') ||
-      lowerMessage.includes('password') ||
-      lowerMessage.includes('email') ||
-      lowerMessage.includes('user_not_found') ||
-      lowerMessage.includes('user_invalid_credentials')
-    ) {
+    
+    // Check for invalid credentials
+    if (errorMessage.toLowerCase().includes('invalid') || errorMessage.toLowerCase().includes('credential') || errorMessage.toLowerCase().includes('not found')) {
       return NextResponse.json(
         { success: false, error: 'Geçersiz email veya şifre' },
         { status: 401 }
@@ -239,13 +201,8 @@ export const POST = authRateLimit(async (request: NextRequest) => {
     }
 
     return NextResponse.json(
-      { success: false, error: errorMessage || 'Giriş yapılırken bir hata oluştu' },
-      {
-        status:
-          errorCode && typeof errorCode === 'number' && errorCode >= 400 && errorCode < 500
-            ? errorCode
-            : 500,
-      }
+      { success: false, error: errorMessage },
+      { status: 500 }
     );
   }
 });

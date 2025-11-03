@@ -1,23 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { aidApplicationsApi as api } from '@/lib/api';
+import { convexAidApplications, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import { AidApplicationDocument, CreateDocumentData } from '@/types/collections';
+import { Id } from '@/convex/_generated/dataModel';
 
-function validateApplication(data: Partial<AidApplicationDocument>): {
+function validateApplication(data: Record<string, unknown>): {
   isValid: boolean;
   errors: string[];
 } {
   const errors: string[] = [];
-  if (!data.applicant_name || data.applicant_name.trim().length < 2)
+  if (!data.applicant_name || (typeof data.applicant_name === 'string' && data.applicant_name.trim().length < 2)) {
     errors.push('Başvuru sahibi adı zorunludur');
-  if (!data.application_date) errors.push('Başvuru tarihi zorunludur');
+  }
+  if (!data.application_date) {
+    errors.push('Başvuru tarihi zorunludur');
+  }
   if (
     !data.stage ||
-    !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage)
-  )
+    !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage as string)
+  ) {
     errors.push('Geçersiz aşama');
-  if (!data.status || !['open', 'closed'].includes(data.status)) errors.push('Geçersiz durum');
+  }
+  if (!data.status || !['open', 'closed'].includes(data.status as string)) {
+    errors.push('Geçersiz durum');
+  }
   return { isValid: errors.length === 0, errors };
 }
 
@@ -26,26 +32,25 @@ function validateApplication(data: Partial<AidApplicationDocument>): {
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const page = Number(searchParams.get('page') || '1');
-  const limit = Number(searchParams.get('limit') || '20');
-  const search = searchParams.get('search') || undefined;
-  const filters: Record<string, string> = {};
-  const stage = searchParams.get('stage');
-  const status = searchParams.get('status');
-
-  if (stage) filters.stage = stage;
-  if (status) filters.status = status;
+  const params = normalizeQueryParams(searchParams);
 
   try {
-    const response = await api.getAidApplications({ page, limit, search, filters });
-    return NextResponse.json({ success: true, data: response.data, total: response.total ?? 0 });
+    const response = await convexAidApplications.list({
+      ...params,
+      stage: searchParams.get('stage') || undefined,
+      beneficiary_id: searchParams.get('beneficiary_id') as Id<"beneficiaries"> | undefined,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: response.documents || [],
+      total: response.total || 0,
+    });
   } catch (error: unknown) {
     logger.error('List aid applications error', error, {
       endpoint: '/api/aid-applications',
       method: 'GET',
-      page,
-      limit,
-      filters,
+      params,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -55,9 +60,9 @@ export async function GET(request: NextRequest) {
  * POST /api/aid-applications
  */
 async function createApplicationHandler(request: NextRequest) {
-  let body: Partial<AidApplicationDocument> | null = null;
+  let body: Record<string, unknown> | null = null;
   try {
-    body = await request.json();
+    body = await request.json() as Record<string, unknown>;
     if (!body) {
       return NextResponse.json({ success: false, error: 'Geçersiz istek verisi' }, { status: 400 });
     }
@@ -69,27 +74,27 @@ async function createApplicationHandler(request: NextRequest) {
       );
     }
 
-    // After validation, ensure all required fields are present with proper types
-    // Validation ensures status is 'open' | 'closed', but TypeScript needs explicit type
-    const applicationData: CreateDocumentData<AidApplicationDocument> = {
-      ...body,
-      status: body.status || 'open',
-      application_date: body.application_date || new Date().toISOString(),
-      applicant_name: body.applicant_name!,
-      applicant_type: body.applicant_type || 'person',
-      stage: body.stage || 'draft',
-    } as CreateDocumentData<AidApplicationDocument>;
+    const applicationData = {
+      application_date: (body.application_date as string) || new Date().toISOString(),
+      applicant_type: (body.applicant_type as 'person' | 'organization' | 'partner') || 'person',
+      applicant_name: body.applicant_name as string,
+      beneficiary_id: body.beneficiary_id as Id<"beneficiaries"> | undefined,
+      one_time_aid: body.one_time_aid as number | undefined,
+      regular_financial_aid: body.regular_financial_aid as number | undefined,
+      regular_food_aid: body.regular_food_aid as number | undefined,
+      in_kind_aid: body.in_kind_aid as number | undefined,
+      service_referral: body.service_referral as number | undefined,
+      stage: (body.stage as 'draft' | 'under_review' | 'approved' | 'ongoing' | 'completed') || 'draft',
+      status: (body.status as 'open' | 'closed') || 'open',
+      description: body.description as string | undefined,
+      notes: body.notes as string | undefined,
+      priority: body.priority as 'low' | 'normal' | 'high' | 'urgent' | undefined,
+    };
 
-    const response = await api.createAidApplication(applicationData);
-    if (response.error || !response.data) {
-      return NextResponse.json(
-        { success: false, error: response.error || 'Oluşturma başarısız' },
-        { status: 400 }
-      );
-    }
+    const response = await convexAidApplications.create(applicationData);
 
     return NextResponse.json(
-      { success: true, data: response.data, message: 'Başvuru oluşturuldu' },
+      { success: true, data: response, message: 'Başvuru oluşturuldu' },
       { status: 201 }
     );
   } catch (error: unknown) {

@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
+import { convexTasks, normalizeQueryParams } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { AppwriteDocument, TaskDocument } from '@/types/collections';
+import { Id } from '@/convex/_generated/dataModel';
 
-function validateTask(data: Partial<TaskDocument>): {
+function validateTask(data: Record<string, unknown>): {
   isValid: boolean;
   errors: string[];
-  normalizedData?: Omit<TaskDocument, keyof AppwriteDocument>;
+  normalizedData?: Record<string, unknown>;
 } {
   const errors: string[] = [];
-  if (!data.title || data.title.trim().length < 3) {
+  if (!data.title || (typeof data.title === 'string' && data.title.trim().length < 3)) {
     errors.push('Görev başlığı en az 3 karakter olmalıdır');
   }
-  if (data.priority && !['low', 'normal', 'high', 'urgent'].includes(data.priority)) {
+  if (data.priority && !['low', 'normal', 'high', 'urgent'].includes(data.priority as string)) {
     errors.push('Geçersiz öncelik değeri');
   }
-  if (data.status && !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status)) {
+  if (data.status && !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status as string)) {
     errors.push('Geçersiz durum');
   }
 
@@ -26,9 +26,9 @@ function validateTask(data: Partial<TaskDocument>): {
 
   const normalizedData = {
     ...data,
-    status: (data.status as 'pending' | 'in_progress' | 'completed' | 'cancelled') || 'pending',
-    priority: (data.priority as 'low' | 'normal' | 'high' | 'urgent') || 'normal',
-  } as Omit<TaskDocument, keyof AppwriteDocument>;
+    status: (data.status as string) || 'pending',
+    priority: (data.priority as string) || 'normal',
+  };
 
   return { isValid: true, errors: [], normalizedData };
 }
@@ -38,34 +38,25 @@ function validateTask(data: Partial<TaskDocument>): {
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const page = Number(searchParams.get('page') || '1');
-  const limit = Number(searchParams.get('limit') || '20');
-  const search = searchParams.get('search') || undefined;
-
-  const filters: Record<string, string> = {};
-  const status = searchParams.get('status');
-  const priority = searchParams.get('priority');
-  const assigned_to = searchParams.get('assigned_to');
-
-  if (status) filters.status = status;
-  if (priority) filters.priority = priority;
-  if (assigned_to) filters.assigned_to = assigned_to;
+  const params = normalizeQueryParams(searchParams);
 
   try {
-    const response = await api.tasks.getTasks({ page, limit, search, filters });
+    const response = await convexTasks.list({
+      ...params,
+      assigned_to: searchParams.get('assigned_to') as Id<"users"> | undefined,
+      created_by: searchParams.get('created_by') as Id<"users"> | undefined,
+    });
 
     return NextResponse.json({
       success: true,
-      data: response.data,
-      total: response.total ?? 0,
+      data: response.documents || [],
+      total: response.total || 0,
     });
   } catch (error: unknown) {
     logger.error('List tasks error', error, {
       endpoint: '/api/tasks',
       method: 'GET',
-      page,
-      limit,
-      filters,
+      params,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -78,7 +69,7 @@ async function createTaskHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateTask(body as Partial<TaskDocument>);
+    const validation = validateTask(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
@@ -86,18 +77,23 @@ async function createTaskHandler(request: NextRequest) {
       );
     }
 
-    const response = await api.tasks.createTask(
-      validation.normalizedData
-    );
-    if (response.error || !response.data) {
-      return NextResponse.json(
-        { success: false, error: response.error || 'Oluşturma başarısız' },
-        { status: 400 }
-      );
-    }
+    const taskData = {
+      title: validation.normalizedData.title || '',
+      description: validation.normalizedData.description,
+      assigned_to: validation.normalizedData.assigned_to as Id<"users"> | undefined,
+      created_by: validation.normalizedData.created_by as Id<"users">,
+      priority: (validation.normalizedData.priority || 'normal') as 'low' | 'normal' | 'high' | 'urgent',
+      status: (validation.normalizedData.status || 'pending') as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+      due_date: validation.normalizedData.due_date,
+      category: validation.normalizedData.category,
+      tags: validation.normalizedData.tags,
+      is_read: validation.normalizedData.is_read ?? false,
+    };
+
+    const response = await convexTasks.create(taskData);
 
     return NextResponse.json(
-      { success: true, data: response.data, message: 'Görev başarıyla oluşturuldu' },
+      { success: true, data: response, message: 'Görev başarıyla oluşturuldu' },
       { status: 201 }
     );
   } catch (error: unknown) {

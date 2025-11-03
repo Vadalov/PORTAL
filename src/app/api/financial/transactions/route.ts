@@ -1,47 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { convexFinanceRecords, normalizeQueryParams } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
+import logger from '@/lib/logger';
 import {
-  Transaction,
   TransactionQuery,
   CreateTransactionInput,
   TransactionType,
   TransactionCategory,
   ApiResponse,
 } from '@/types/financial';
+import { Id } from '@/convex/_generated/dataModel';
 
-// Mock data store - in real implementation, this would connect to database
-const transactions: Transaction[] = [
-  {
-    id: '1',
-    userId: 'user-1',
-    type: 'income',
-    category: 'donation',
-    amount: 5000,
-    currency: 'TRY',
-    description: 'Bağış geliri',
-    date: new Date('2024-11-01'),
-    status: 'completed',
-    createdAt: new Date('2024-11-01'),
-    updatedAt: new Date('2024-11-01'),
-    tags: ['bağış'],
-    appwriteId: 'mock-tx-1',
-  },
-  {
-    id: '2',
-    userId: 'user-1',
-    type: 'expense',
-    category: 'administrative',
-    amount: 1200,
-    currency: 'TRY',
-    description: 'Ofis kiraları',
-    date: new Date('2024-11-02'),
-    status: 'completed',
-    createdAt: new Date('2024-11-02'),
-    updatedAt: new Date('2024-11-02'),
-    tags: ['ofis', 'kira'],
-    appwriteId: 'mock-tx-2',
-  },
-];
+// Helper to convert finance_record from Convex to Transaction format
+function convertToTransaction(record: any): any {
+  return {
+    id: record._id,
+    userId: record.created_by,
+    type: record.record_type,
+    category: record.category,
+    amount: record.amount,
+    currency: record.currency,
+    description: record.description,
+    date: new Date(record.transaction_date),
+    status: record.status === 'approved' ? 'completed' : record.status === 'rejected' ? 'cancelled' : 'pending',
+    createdAt: new Date(record._creationTime),
+    updatedAt: new Date(record._creationTime),
+    tags: [],
+    appwriteId: record._id,
+  };
+}
 
 // Helper functions
 function parseQueryParams(request: NextRequest): TransactionQuery {
@@ -67,7 +54,8 @@ function parseQueryParams(request: NextRequest): TransactionQuery {
   };
 }
 
-function filterTransactions(transactions: Transaction[], query: TransactionQuery): Transaction[] {
+// Note: Filtering is now done on Convex side, but we keep this for client-side filtering if needed
+function filterTransactions(transactions: any[], query: TransactionQuery): any[] {
   let filtered = [...transactions];
 
   // Type filter
@@ -83,23 +71,21 @@ function filterTransactions(transactions: Transaction[], query: TransactionQuery
   // Date range filter
   if (query.startDate) {
     const startDate = new Date(query.startDate);
-    filtered = filtered.filter((tx) => tx.date >= startDate);
+    filtered = filtered.filter((tx) => new Date(tx.date) >= startDate);
   }
 
   if (query.endDate) {
     const endDate = new Date(query.endDate);
-    filtered = filtered.filter((tx) => tx.date <= endDate);
+    filtered = filtered.filter((tx) => new Date(tx.date) <= endDate);
   }
 
   // Amount range filter
-  const minAmount = query.minAmount;
-  if (minAmount !== undefined) {
-    filtered = filtered.filter((tx) => tx.amount >= minAmount);
+  if (query.minAmount !== undefined) {
+    filtered = filtered.filter((tx) => tx.amount >= query.minAmount!);
   }
 
-  const maxAmount = query.maxAmount;
-  if (maxAmount !== undefined) {
-    filtered = filtered.filter((tx) => tx.amount <= maxAmount);
+  if (query.maxAmount !== undefined) {
+    filtered = filtered.filter((tx) => tx.amount <= query.maxAmount!);
   }
 
   // Status filter
@@ -112,9 +98,8 @@ function filterTransactions(transactions: Transaction[], query: TransactionQuery
     const searchTerm = query.search.toLowerCase();
     filtered = filtered.filter(
       (tx) =>
-        tx.description.toLowerCase().includes(searchTerm) ||
-        tx.category.toLowerCase().includes(searchTerm) ||
-        (tx.tags && tx.tags.some((tag) => tag.toLowerCase().includes(searchTerm)))
+        tx.description?.toLowerCase().includes(searchTerm) ||
+        tx.category?.toLowerCase().includes(searchTerm)
     );
   }
 
@@ -126,10 +111,10 @@ function filterTransactions(transactions: Transaction[], query: TransactionQuery
       case 'amount':
         return (a.amount - b.amount) * order;
       case 'category':
-        return a.category.localeCompare(b.category) * order;
+        return (a.category || '').localeCompare(b.category || '') * order;
       case 'date':
       default:
-        return (a.date.getTime() - b.date.getTime()) * order;
+        return (new Date(a.date).getTime() - new Date(b.date).getTime()) * order;
     }
   });
 
@@ -162,11 +147,29 @@ function paginateResults<T>(results: T[], page: number, limit: number) {
 async function getTransactionsHandler(request: NextRequest) {
   try {
     const query = parseQueryParams(request);
-    const filteredTransactions = filterTransactions(transactions, query);
-    const result = paginateResults(filteredTransactions, query.page, query.limit);
+    const { searchParams } = new URL(request.url);
+    
+    // Get finance records from Convex
+    const params = normalizeQueryParams(searchParams);
+    const response = await convexFinanceRecords.list({
+      ...params,
+      record_type: query.type || undefined,
+      created_by: query.userId ? (query.userId as Id<"users">) : undefined,
+    });
 
-    const response: ApiResponse<{
-      data: Transaction[];
+    // Convert Convex records to Transaction format
+    let transactions = (response.documents || []).map(convertToTransaction);
+
+    // Apply additional client-side filtering
+    if (query.category || query.startDate || query.endDate || query.minAmount || query.maxAmount || query.search) {
+      transactions = filterTransactions(transactions, query);
+    }
+
+    // Paginate
+    const result = paginateResults(transactions, query.page, query.limit);
+
+    const apiResponse: ApiResponse<{
+      data: any[];
       pagination: {
         page: number;
         limit: number;
@@ -181,9 +184,12 @@ async function getTransactionsHandler(request: NextRequest) {
       message: `${result.pagination.total} işlem bulundu`,
     };
 
-    return NextResponse.json(response);
+    return NextResponse.json(apiResponse);
   } catch (error: unknown) {
-    console.error('Transactions list error:', error);
+    logger.error('Transactions list error', error, {
+      endpoint: '/api/financial/transactions',
+      method: 'GET',
+    });
     return NextResponse.json({ success: false, error: 'İşlemler listelenemedi' }, { status: 500 });
   }
 }
@@ -205,34 +211,42 @@ async function createTransactionHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Gerekli alanlar eksik' }, { status: 400 });
     }
 
-    const newTransaction: Transaction = {
-      id: `tx-${Date.now()}`,
-      userId: 'user-1', // In real app, get from auth
-      type: body.type,
-      category: body.category as TransactionCategory,
+    // TODO: Get user ID from auth context
+    const userId = 'user-1' as Id<"users">; // In real app, get from auth
+
+    const financeRecordData = {
+      record_type: body.type as 'income' | 'expense',
+      category: body.category,
       amount: body.amount,
-      currency: body.currency || 'TRY',
+      currency: (body.currency || 'TRY') as 'TRY' | 'USD' | 'EUR',
       description: body.description,
-      date: body.date,
-      status: body.status || 'pending',
-      tags: body.tags || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      appwriteId: `mock-${Date.now()}`,
+      transaction_date: body.date.toISOString(),
+      payment_method: body.paymentMethod,
+      receipt_number: body.receiptNumber,
+      receipt_file_id: body.receiptFileId,
+      related_to: body.relatedTo,
+      created_by: userId,
+      status: (body.status || 'pending') as 'pending' | 'approved' | 'rejected',
     };
 
-    transactions.unshift(newTransaction);
+    const response = await convexFinanceRecords.create(financeRecordData);
+
+    // Convert back to Transaction format for response
+    const transaction = convertToTransaction(response);
 
     return NextResponse.json(
       {
         success: true,
-        data: newTransaction,
+        data: transaction,
         message: 'İşlem başarıyla oluşturuldu',
       },
       { status: 201 }
     );
   } catch (error: unknown) {
-    console.error('Transaction creation error:', error);
+    logger.error('Transaction creation error', error, {
+      endpoint: '/api/financial/transactions',
+      method: 'POST',
+    });
     return NextResponse.json({ success: false, error: 'İşlem oluşturulamadı' }, { status: 500 });
   }
 }
@@ -244,7 +258,20 @@ async function createTransactionHandler(request: NextRequest) {
 async function getTransactionStatsHandler(request: NextRequest) {
   try {
     const query = parseQueryParams(request);
-    const filteredTransactions = filterTransactions(transactions, query);
+    const { searchParams } = new URL(request.url);
+    
+    // Get finance records from Convex
+    const params = normalizeQueryParams(searchParams);
+    const response = await convexFinanceRecords.list({
+      ...params,
+      record_type: query.type || undefined,
+    });
+
+    // Convert to transactions
+    const filteredTransactions = filterTransactions(
+      (response.documents || []).map(convertToTransaction),
+      query
+    );
 
     const stats = {
       totalIncome: filteredTransactions
@@ -284,7 +311,10 @@ async function getTransactionStatsHandler(request: NextRequest) {
       message: 'İstatistikler başarıyla getirildi',
     });
   } catch (error: unknown) {
-    console.error('Transaction stats error:', error);
+    logger.error('Transaction stats error', error, {
+      endpoint: '/api/financial/transactions/stats',
+      method: 'GET',
+    });
     return NextResponse.json(
       { success: false, error: 'İstatistikler getirilemedi' },
       { status: 500 }

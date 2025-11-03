@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { appwriteApi } from '@/lib/api/appwrite-api';
+import { appwriteApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { MeetingForm } from '@/components/forms/MeetingForm';
 import { CalendarView } from '@/components/meetings/CalendarView';
@@ -62,8 +62,8 @@ export default function MeetingsPage() {
   const [meetingTypeFilter, setMeetingTypeFilter] = useState('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState<'invited' | 'attended' | 'informed' | 'open'>(
-    'invited'
+  const [activeTab, setActiveTab] = useState<'all' | 'invited' | 'attended' | 'informed' | 'open'>(
+    'all'
   );
 
   // Modal state
@@ -115,7 +115,12 @@ export default function MeetingsPage() {
     queryKey: ['meetings-tab', activeTab, user?.id],
     queryFn: () => {
       if (!user?.id) return Promise.resolve({ data: [], error: null });
-      return appwriteApi.meetings.getMeetingsByTab(user.id, activeTab);
+      if (activeTab === 'all') {
+        return appwriteApi.meetings.getMeetings({});
+      }
+      return appwriteApi.meetings.getMeetings({
+        filters: { status: activeTab as MeetingDocument['status'] },
+      });
     },
     enabled: viewMode === 'list' && !!user?.id,
   });

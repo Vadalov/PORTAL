@@ -1,24 +1,21 @@
-import { NextRequest } from 'next/server';
-import { aidApplicationsApi as api } from '@/lib/api';
+import { NextRequest, NextResponse } from 'next/server';
+import { convexAidApplications } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import {
-  handleGetById,
-  handleUpdate,
-  handleDelete,
-  extractParams,
-  type ValidationResult,
-} from '@/lib/api/route-helpers';
-import { AidApplicationDocument } from '@/types/collections';
+import { extractParams } from '@/lib/api/route-helpers';
+import { Id } from '@/convex/_generated/dataModel';
 
-function validateApplicationUpdate(data: Partial<AidApplicationDocument>): ValidationResult {
+function validateApplicationUpdate(data: Record<string, unknown>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (
     data.stage &&
-    !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage)
-  )
+    !['draft', 'under_review', 'approved', 'ongoing', 'completed'].includes(data.stage as string)
+  ) {
     errors.push('Geçersiz aşama');
-  if (data.status && !['open', 'closed'].includes(data.status)) errors.push('Geçersiz durum');
+  }
+  if (data.status && !['open', 'closed'].includes(data.status as string)) {
+    errors.push('Geçersiz durum');
+  }
   return { isValid: errors.length === 0, errors };
 }
 
@@ -28,14 +25,29 @@ function validateApplicationUpdate(data: Partial<AidApplicationDocument>): Valid
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
   try {
-    return handleGetById(id, api.getAidApplication, 'Başvuru');
+    const application = await convexAidApplications.get(id as Id<"aid_applications">);
+    
+    if (!application) {
+      return NextResponse.json(
+        { success: false, error: 'Başvuru bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: application,
+    });
   } catch (error) {
-    logger.error('Aid application operation error', error, {
+    logger.error('Get aid application error', error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'GET',
       applicationId: id,
     });
-    throw error;
+    return NextResponse.json(
+      { success: false, error: 'Veri alınamadı' },
+      { status: 500 }
+    );
   }
 }
 
@@ -48,15 +60,60 @@ async function updateApplicationHandler(
 ) {
   const { id } = await extractParams(params);
   try {
-    const body = await request.json();
-    return handleUpdate(id, body, validateApplicationUpdate, api.updateAidApplication, 'Başvuru');
+    const body = await request.json() as Record<string, unknown>;
+    
+    const validation = validateApplicationUpdate(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const applicationData = {
+      stage: body.stage as 'draft' | 'under_review' | 'approved' | 'ongoing' | 'completed' | undefined,
+      status: body.status as 'open' | 'closed' | undefined,
+      priority: body.priority as 'low' | 'normal' | 'high' | 'urgent' | undefined,
+      one_time_aid: body.one_time_aid as number | undefined,
+      regular_financial_aid: body.regular_financial_aid as number | undefined,
+      regular_food_aid: body.regular_food_aid as number | undefined,
+      in_kind_aid: body.in_kind_aid as number | undefined,
+      service_referral: body.service_referral as number | undefined,
+      description: body.description as string | undefined,
+      notes: body.notes as string | undefined,
+      processed_by: body.processed_by as Id<"users"> | undefined,
+      processed_at: body.processed_at as string | undefined,
+      approved_by: body.approved_by as Id<"users"> | undefined,
+      approved_at: body.approved_at as string | undefined,
+      completed_at: body.completed_at as string | undefined,
+    };
+
+    const updated = await convexAidApplications.update(id as Id<"aid_applications">, applicationData);
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: 'Başvuru başarıyla güncellendi',
+    });
   } catch (error) {
-    logger.error('Aid application operation error', error, {
+    logger.error('Update aid application error', error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'PATCH',
       applicationId: id,
     });
-    throw error;
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'Başvuru bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 
@@ -69,14 +126,31 @@ async function deleteApplicationHandler(
 ) {
   const { id } = await extractParams(params);
   try {
-    return handleDelete(id, api.deleteAidApplication, 'Başvuru');
+    await convexAidApplications.remove(id as Id<"aid_applications">);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Başvuru başarıyla silindi',
+    });
   } catch (error) {
-    logger.error('Aid application operation error', error, {
+    logger.error('Delete aid application error', error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'DELETE',
       applicationId: id,
     });
-    throw error;
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'Başvuru bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Silme işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

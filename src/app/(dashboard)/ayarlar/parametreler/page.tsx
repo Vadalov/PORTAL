@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { parametersApi } from '@/lib/api/appwrite-api';
+import { parametersApi } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,7 +75,14 @@ export default function ParametersPage() {
       }),
   });
 
-  const parameters = data?.data || [];
+  const parameters = ((data?.data || []) as Array<{
+    $id: string;
+    category: string;
+    name_tr: string;
+    value: string;
+    order: number;
+    is_active: boolean;
+  }>) || [];
   const total = data?.total || 0;
 
   const toggleStatusMutation = useMutation({

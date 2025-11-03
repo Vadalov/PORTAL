@@ -1,6 +1,6 @@
 # 🏛️ Dernek Yönetim Sistemi - Next.js
 
-Modern, kapsamlı kar amacı gütmeyen dernekler için yönetim sistemi. **Next.js 16 + React 19 + TypeScript + Tailwind CSS + Appwrite Backend** ile geliştirilmiştir.
+Modern, kapsamlı kar amacı gütmeyen dernekler için yönetim sistemi. **Next.js 16 + React 19 + TypeScript + Tailwind CSS + Convex Backend** ile geliştirilmiştir.
 
 [![CI Pipeline](https://github.com/Vadalov/PORTAL/actions/workflows/ci.yml/badge.svg)](https://github.com/Vadalov/PORTAL/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/Vadalov/PORTAL/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Vadalov/PORTAL/actions/workflows/code-quality.yml)
@@ -12,7 +12,7 @@ Modern, kapsamlı kar amacı gütmeyen dernekler için yönetim sistemi. **Next.
 
 **✅ MVP TAMAMLANDI** - Temel özellikler çalışır durumda!
 
-Bu proje, orijinal React + Vite projesinden Next.js 15'e taşınmıştır. Şu anda **mock backend** ile çalışmaktadır ve gerçek backend entegrasyonu için hazırdır.
+Bu proje, orijinal React + Vite projesinden Next.js 16'ya taşınmıştır. **Convex backend** kullanmaktadır.
 
 ---
 
@@ -47,49 +47,72 @@ npm run dev
 
 ---
 
-## 🔧 Appwrite Backend Kurulumu
+---
 
-Bu proje mock backend ile birlikte gelir, ancak gerçek Appwrite backend'i kurmak için:
+## 🗄️ Convex Backend
 
-**📚 Detaylı Kurulum Rehberi**: [APPWRITE_DEPLOYMENT.md](./APPWRITE_DEPLOYMENT.md)
+Bu proje **Convex** backend kullanmaktadır. Appwrite artık kaldırılmıştır.
+
+### Convex Backend Kurulumu
+
+**📚 Detaylı Kurulum Rehberi**: [docs/CONVEX_MCP_SETUP.md](./docs/CONVEX_MCP_SETUP.md)
 
 ### Hızlı Başlangıç
 
 ```bash
 # 1. Environment değişkenlerini ayarla
-cp .env.example .env.local
-# .env.local dosyasını düzenle ve Appwrite bilgilerini gir
+# .env.local dosyasında NEXT_PUBLIC_CONVEX_URL olmalı
+# Örnek: NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
 
-# 2. Otomatik kurulum (Önerilen)
-npm run appwrite:setup
+# 2. Convex MCP bağlantısını test et
+npm run convex:test-mcp
 
-# 3. Veya interaktif kurulum
-npm run appwrite:deploy:quick
+# 3. Convex fonksiyonlarını deploy et (development)
+npm run convex:dev
+
+# 4. Production deploy
+npm run convex:deploy
+
+# 5. Migration test
+npm run tsx scripts/test-convex-migration.ts
 ```
+
+### MCP Server Kurulumu
+
+Convex MCP server'ı Cursor/Claude'ya eklemek için:
+
+```bash
+# Setup script'i çalıştır
+chmod +x setup-mcp-convex.sh
+./setup-mcp-convex.sh
+```
+
+Detaylı bilgi için: [docs/CONVEX_MCP_SETUP.md](./docs/CONVEX_MCP_SETUP.md)
+
+### Convex Dashboard
+
+- **Dashboard**: https://dashboard.convex.dev/d/fleet-octopus-839
+- **Deployment URL**: https://fleet-octopus-839.convex.cloud
 
 ---
 
 ## Diagnostic Tools
 
-This project includes comprehensive diagnostic tools to help with configuration, connectivity, and testing. These tools are essential for troubleshooting Appwrite setup and ensuring smooth development.
+This project includes comprehensive diagnostic tools to help with configuration, connectivity, and testing.
 
 ### Available Commands
 
-- **`npm run validate:config`** - Validates environment variable configuration against requirements. Checks URLs, UUIDs, API keys, and other formats.
-- **`npm run test:connectivity`** - Tests actual connectivity to Appwrite services including endpoint reachability, DNS, and service availability.
 - **`npm run test:mock-api`** - Tests mock backend implementation including schema validation and functional API testing.
-- **`npm run diagnose`** - Runs comprehensive diagnostics across all areas including validation, connectivity, and health checks.
 - **`npm run health:check`** - Checks the health endpoint with detailed diagnostics.
+- **`npm run convex:test-mcp`** - Tests Convex MCP connection.
+- **`npm run tsx scripts/test-convex-migration.ts`** - Tests Convex migration and connectivity.
 
 ### When to Use Each Tool
 
-- **Before starting development:** Run `npm run validate:config` to ensure your environment is properly set up.
-- **When encountering connection issues:** Use `npm run test:connectivity` to diagnose Appwrite connectivity problems.
+- **Before starting development:** Ensure your environment is properly set up with `NEXT_PUBLIC_CONVEX_URL`.
 - **When mock data seems incorrect:** Run `npm run test:mock-api` to verify schema parity and API functionality.
-- **For comprehensive troubleshooting:** Use `npm run diagnose` to get a full report on all potential issues.
+- **For Convex connectivity:** Use `npm run convex:test-mcp` to test Convex connection.
 - **After configuration changes:** Run `npm run health:check` to verify everything is working.
-
-For detailed troubleshooting guides and common issues, see [`docs/CONFIGURATION-TROUBLESHOOTING.md`](docs/CONFIGURATION-TROUBLESHOOTING.md).
 
 ---
 
@@ -164,18 +187,27 @@ npm run health:check
 ### Setup Scripts
 
 ```bash
-# Setup Appwrite backend
-npx tsx scripts/setup-appwrite.ts
+# Test Convex migration
+npx tsx scripts/test-convex-migration.ts
 
 # Create test users
 npx tsx scripts/create-test-users.ts
+
+# Convex MCP connection test
+npm run convex:test-mcp
+
+# Convex development mode (auto-deploy)
+npm run convex:dev
+
+# Convex production deploy
+npm run convex:deploy
 ```
 
 ---
 
 ## ✨ Tamamlanan Özellikler
 
-- ✅ Authentication (Appwrite)
+- ✅ Authentication (Convex-based)
 - ✅ Dashboard with Real Metrics
 - ✅ İhtiyaç Sahipleri (Liste + Detay + Ekle/Düzenle)
 - ✅ Bağışlar (Liste + Ekle/Düzenle + Dosya Yükleme)
@@ -217,7 +249,7 @@ src/
 - Next.js 16, React 19, TypeScript, Tailwind CSS
 - shadcn/ui, Radix UI
 - Zustand, TanStack Query
-- Appwrite Backend (BaaS)
+- Convex Backend (BaaS)
 
 ---
 
@@ -310,117 +342,68 @@ LOG_LEVEL=warn  # production
 
 ## 📦 Dependencies & SDK Usage
 
-### Appwrite SDK Architecture
+### Convex Backend Architecture
 
-Bu proje **iki farklı Appwrite SDK** kullanır:
+Bu proje **Convex** backend kullanmaktadır. Appwrite artık kaldırılmıştır.
 
-| SDK             | Version | Environment | File        | Purpose                |
-| --------------- | ------- | ----------- | ----------- | ---------------------- |
-| `appwrite`      | v21.2.1 | Browser     | `client.ts` | Client-side operations |
-| `node-appwrite` | v20.2.1 | Node.js     | `server.ts` | Server-side operations |
+| Component | Location | Purpose |
+| --------- | -------- | ------- |
+| Convex Client | `src/lib/convex/client.ts` | Client-side Convex React client |
+| Convex Server | `src/lib/convex/server.ts` | Server-side Convex HTTP client |
+| Convex API | `src/lib/convex/api.ts` | API wrapper helpers |
+| Convex Functions | `convex/*.ts` | Serverless functions |
 
 ---
 
-### 1️⃣ Client SDK (`appwrite`)
+### 1️⃣ Client-side (React Components)
 
-**📁 File:** `src/lib/appwrite/client.ts`  
+**📁 File:** `src/lib/convex/client.ts`  
 **🌐 Environment:** Browser/React Components  
-**🔑 Auth:** User sessions (no API key)
-
 **Use Cases:**
 
 - ✅ Client Components (`'use client'`)
-- ✅ User authentication (login/logout)
-- ✅ Session management
-- ✅ User-specific data queries
-- ✅ File uploads from browser
+- ✅ Real-time queries with `useQuery`
+- ✅ Mutations with `useMutation`
 
 **Example:**
 
 ```typescript
 'use client';
-import { account, databases } from '@/lib/appwrite/client';
+import { useQuery } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
-const user = await account.get();
-const data = await databases.listDocuments(DB_ID, COLLECTION_ID);
+const beneficiaries = useQuery(api.beneficiaries.list);
 ```
 
 ---
 
-### 2️⃣ Server SDK (`node-appwrite`)
+### 2️⃣ Server-side (API Routes)
 
-**📁 File:** `src/lib/appwrite/server.ts`  
+**📁 File:** `src/lib/convex/server.ts`  
 **🖥️ Environment:** Server Components/API Routes  
-**🔑 Auth:** API Key (admin permissions)
-
 **Use Cases:**
 
-- ✅ Server Components
 - ✅ API Routes (`/app/api/*`)
+- ✅ Server Components
 - ✅ Server Actions
-- ✅ Admin operations (user management)
-- ✅ Bulk operations
 
 **Example:**
 
 ```typescript
-import { serverDatabases, serverUsers } from '@/lib/appwrite/server';
+import { convexHttp } from '@/lib/convex/server';
+import { api } from '@/convex/_generated/api';
 
-const users = await serverUsers.list();
-const data = await serverDatabases.listDocuments(DB_ID, COLLECTION_ID);
-```
-
----
-
-### 🔒 Security Model
-
-| Aspect                 | Client SDK  | Server SDK  |
-| ---------------------- | ----------- | ----------- |
-| **Permissions**        | User-level  | Admin-level |
-| **API Key**            | ❌ Not used | ✅ Required |
-| **Exposed to Browser** | ✅ Yes      | ❌ No       |
-| **Bundle Size**        | Included    | Server-only |
-
-⚠️ **Never expose `APPWRITE_API_KEY` to the client!**
-
----
-
-### 🚫 Common Mistakes
-
-❌ **Wrong:**
-
-```typescript
-// Using server SDK in client component
-'use client';
-import { serverDatabases } from '@/lib/appwrite/server'; // ERROR!
-```
-
-✅ **Correct:**
-
-```typescript
-// Client component
-'use client';
-import { databases } from '@/lib/appwrite/client';
-
-// Server component
-import { serverDatabases } from '@/lib/appwrite/server';
+const users = await convexHttp.query(api.users.list);
 ```
 
 ---
 
 ### 🔧 Environment Variables
 
-**Client (public - exposed to browser):**
+**Required:**
 
 ```bash
-NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
-NEXT_PUBLIC_APPWRITE_PROJECT_ID=your-project-id
-```
-
-**Server (private - never exposed):**
-
-```bash
-APPWRITE_API_KEY=your-secret-api-key
+NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
 ```
 
 See `.env.example` for complete configuration.
@@ -429,14 +412,15 @@ See `.env.example` for complete configuration.
 
 ### 📚 Related Documentation
 
-- [Appwrite Client SDK Docs](https://appwrite.io/docs/sdks#client)
-- [Appwrite Server SDK Docs](https://appwrite.io/docs/sdks#server)
+- [Convex Documentation](https://docs.convex.dev/)
+- [Convex React Integration](https://docs.convex.dev/client/react)
+- [Convex HTTP API](https://docs.convex.dev/http-api)
 - [Next.js 13+ App Router](https://nextjs.org/docs/app)
 - Project Files:
-  - `src/lib/appwrite/client.ts` - Client SDK wrapper
-  - `src/lib/appwrite/server.ts` - Server SDK wrapper
-  - `src/lib/appwrite/config.ts` - Shared configuration
-  - `src/lib/api/appwrite-api.ts` - API layer
+  - `src/lib/convex/client.ts` - Convex React client
+  - `src/lib/convex/server.ts` - Convex HTTP client
+  - `src/lib/convex/api.ts` - API helpers
+  - `convex/*.ts` - Convex functions
 
 ---
 
@@ -475,7 +459,7 @@ See `.env.example` for complete configuration.
 **Usage:**
 
 ```typescript
-import { appwriteApi } from '@/lib/api/appwrite-api';
+import { appwriteApi } from '@/lib/api';
 
 // Get users with filters
 const { data } = await appwriteApi.users.getUsers({
@@ -859,7 +843,7 @@ try {
 1. **Setup:** Clone repo, run `npm install`, copy `.env.example` to `.env.local`
 2. **Validate:** Run `npm run validate:config` to check configuration
 3. **Develop:** Make changes, run tests with `npm run test`
-4. **Test Connectivity:** If using Appwrite, run `npm run test:connectivity`
+4. **Test Connectivity:** If using Convex, run `npm run convex:test-mcp`
 5. **Build:** Run `npm run build` and test with `npm start`
 6. **Deploy:** Use your deployment pipeline
 
@@ -952,16 +936,14 @@ npm run test:browsers        # Browser compatibility issues
   npm run validate:config
   ```
 - **Required Variables:**
-  - `NEXT_PUBLIC_BACKEND_PROVIDER` (mock or appwrite)
-  - `NEXT_PUBLIC_APPWRITE_ENDPOINT` (if using Appwrite)
-  - `NEXT_PUBLIC_APPWRITE_PROJECT_ID` (if using Appwrite)
-  - `APPWRITE_API_KEY` (server-side, if using Appwrite)
+  - `NEXT_PUBLIC_BACKEND_PROVIDER` (convex or mock)
+  - `NEXT_PUBLIC_CONVEX_URL` (if using Convex)
 - **Validation:** `npm run validate:config` checks all required variables
 - **Detailed Guide:** [`docs/CONFIGURATION-TROUBLESHOOTING.md`](docs/CONFIGURATION-TROUBLESHOOTING.md)
 
-**Appwrite Connection Failed**
+**Convex Connection Failed**
 
-- **Symptoms:** API calls fail, "Cannot connect to Appwrite" errors
+- **Symptoms:** API calls fail, "Cannot connect to Convex" errors
 - **Quick Fix:**
 
   ```bash
@@ -983,7 +965,7 @@ npm run test:browsers        # Browser compatibility issues
   2. Check Appwrite console → Settings → Platforms
   3. Add `http://localhost:3000` to allowed platforms
   4. Verify endpoint is reachable: `curl <endpoint>/health`
-- **Detailed Guide:** [`docs/APPWRITE_SETUP.md`](docs/APPWRITE_SETUP.md)
+- **Detailed Guide:** [`docs/CONVEX_MCP_SETUP.md`](docs/CONVEX_MCP_SETUP.md)
 
 **4. Runtime Issues:**
 
@@ -1191,7 +1173,7 @@ npm run test:browsers        # Browser compatibility issues
 | White screen        | `localStorage.clear()` + reload  | Beyaz Ekran              |
 | App won't start     | `npm run clean:all`              | Application Not Starting |
 | Missing env vars    | `npm run validate:config`        | Environment Variables    |
-| Appwrite connection | `npm run test:connectivity`      | Appwrite Connection      |
+| Convex connection   | `npm run convex:test-mcp`        | Convex Connection        |
 | Loading stuck       | Check `_hasHydrated` in console  | Loading State Stuck      |
 | Hydration error     | Test in Incognito mode           | Hydration Mismatch       |
 | Redirect loop       | Clear auth storage               | Auth Redirect Loop       |
@@ -1219,7 +1201,9 @@ If issues persist after trying solutions above:
    - [Configuration Troubleshooting](docs/CONFIGURATION-TROUBLESHOOTING.md) - Setup issues
    - [Error Boundary Testing](docs/ERROR-BOUNDARY-TESTING-GUIDE.md) - Error handling
    - [Loading States Guide](docs/LOADING-STATES-GUIDE.md) - Loading issues
-   - [Appwrite Setup](docs/APPWRITE_SETUP.md) - Backend configuration
+   - [Convex Setup](docs/CONVEX_MCP_SETUP.md) - Backend configuration
+   - [Migration Notes](MIGRATION_NOTES.md) - Appwrite'dan Convex'e geçiş
+   - [Removed Appwrite](REMOVED_APPWRITE.md) - Kaldırılan Appwrite detayları
 
 3. **Collect Debug Information:**
    - Browser console errors (F12)

@@ -1,34 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
+import { convexUsers, normalizeQueryParams } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
 import logger from '@/lib/logger';
-import { AppwriteDocument, UserDocument } from '@/types/collections';
 
-function validateUser(data: Partial<UserDocument>): {
+function validateUser(data: Record<string, unknown>): {
   isValid: boolean;
   errors: string[];
-  normalizedData?: Omit<UserDocument, keyof AppwriteDocument>;
+  normalizedData?: Record<string, unknown>;
 } {
   const errors: string[] = [];
-  if (!data.name || data.name.trim().length < 2) errors.push('Ad Soyad en az 2 karakter olmalıdır');
-  if (!data.email || !InputSanitizer.validateEmail(data.email))
+  if (!data.name || (typeof data.name === 'string' && data.name.trim().length < 2)) {
+    errors.push('Ad Soyad en az 2 karakter olmalıdır');
+  }
+  if (!data.email || typeof data.email !== 'string' || !InputSanitizer.validateEmail(data.email)) {
     errors.push('Geçerli bir e-posta zorunludur');
-  if (!data.role || !['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER', 'VOLUNTEER'].includes(data.role))
+  }
+  if (!data.role || !['ADMIN', 'MANAGER', 'MEMBER', 'VIEWER', 'VOLUNTEER'].includes(data.role as string)) {
     errors.push('Geçersiz rol');
+  }
 
   if (errors.length > 0) {
     return { isValid: false, errors };
   }
 
   const normalizedData = {
-    name: data.name!,
-    email: data.email!,
-    role: data.role!,
-    avatar: data.avatar,
-    isActive: data.isActive ?? true,
-    labels: data.labels ?? [],
-  } as Omit<UserDocument, keyof AppwriteDocument>;
+    name: data.name as string,
+    email: data.email as string,
+    role: data.role as string,
+    avatar: data.avatar as string | undefined,
+    isActive: (data.isActive as boolean) ?? true,
+    labels: (data.labels as string[]) ?? [],
+  };
 
   return { isValid: true, errors: [], normalizedData };
 }
@@ -37,20 +40,18 @@ function validateUser(data: Partial<UserDocument>): {
  * GET /api/users
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const page = Number(searchParams.get('page') || '1');
-  const limit = Number(searchParams.get('limit') || '10');
-  const search = searchParams.get('search') || undefined;
   try {
-    const response = await api.users.getUsers({ page, limit, search, orderBy: '$createdAt' });
-    return NextResponse.json({ success: true, data: response.data, total: response.total ?? 0 });
+    const response = await convexUsers.list();
+
+    return NextResponse.json({
+      success: true,
+      data: response || [],
+      total: Array.isArray(response) ? response.length : 0,
+    });
   } catch (error: unknown) {
     logger.error('List users error', error, {
       endpoint: '/api/users',
       method: 'GET',
-      page,
-      limit,
-      search,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -63,32 +64,44 @@ async function createUserHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateUser(body as Partial<UserDocument>);
+    const validation = validateUser(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
         { status: 400 }
       );
     }
-    const response = await api.users.createUser(
-      validation.normalizedData
-    );
-    if (response.error || !response.data) {
-      return NextResponse.json(
-        { success: false, error: response.error || 'Oluşturma başarısız' },
-        { status: 400 }
-      );
-    }
+
+    const userData = {
+      name: validation.normalizedData.name as string,
+      email: validation.normalizedData.email as string,
+      role: validation.normalizedData.role as string,
+      avatar: validation.normalizedData.avatar as string | undefined,
+      isActive: (validation.normalizedData.isActive as boolean) ?? true,
+      labels: (validation.normalizedData.labels as string[]) || [],
+    };
+
+    const response = await convexUsers.create(userData);
+
     return NextResponse.json(
-      { success: true, data: response.data, message: 'Kullanıcı oluşturuldu' },
+      { success: true, data: response, message: 'Kullanıcı oluşturuldu' },
       { status: 201 }
     );
   } catch (error: unknown) {
     logger.error('Create user error', error, {
       endpoint: '/api/users',
       method: 'POST',
-      email: (body as Record<string, unknown>)?.email, // Safe to log email for debugging
+      email: (body as Record<string, unknown>)?.email,
     });
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('already exists') || errorMessage?.includes('duplicate')) {
+      return NextResponse.json(
+        { success: false, error: 'Bu e-posta zaten kayıtlı' },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       { success: false, error: 'Oluşturma işlemi başarısız' },
       { status: 500 }

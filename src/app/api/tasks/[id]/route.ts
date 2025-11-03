@@ -1,25 +1,19 @@
-import { NextRequest } from 'next/server';
-import api from '@/lib/api';
+import { NextRequest, NextResponse } from 'next/server';
+import { convexTasks } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import {
-  handleGetById,
-  handleUpdate,
-  handleDelete,
-  extractParams,
-  type ValidationResult,
-} from '@/lib/api/route-helpers';
+import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
-import { TaskDocument } from '@/types/collections';
+import { Id } from '@/convex/_generated/dataModel';
 
-function validateTaskUpdate(data: Partial<TaskDocument>): ValidationResult {
+function validateTaskUpdate(data: Record<string, unknown>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
-  if (data.title && data.title.trim().length < 3) {
+  if (data.title && typeof data.title === 'string' && data.title.trim().length < 3) {
     errors.push('Görev başlığı en az 3 karakter olmalıdır');
   }
-  if (data.priority && !['low', 'normal', 'high', 'urgent'].includes(data.priority)) {
+  if (data.priority && !['low', 'normal', 'high', 'urgent'].includes(data.priority as string)) {
     errors.push('Geçersiz öncelik değeri');
   }
-  if (data.status && !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status)) {
+  if (data.status && !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status as string)) {
     errors.push('Geçersiz durum');
   }
   return { isValid: errors.length === 0, errors };
@@ -31,14 +25,29 @@ function validateTaskUpdate(data: Partial<TaskDocument>): ValidationResult {
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
   try {
-    return handleGetById(id, api.tasks.getTask, 'Görev');
+    const task = await convexTasks.get(id as Id<"tasks">);
+    
+    if (!task) {
+      return NextResponse.json(
+        { success: false, error: 'Görev bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: task,
+    });
   } catch (error) {
-    logger.error('Task operation error', error, {
+    logger.error('Get task error', error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
     });
-    throw error;
+    return NextResponse.json(
+      { success: false, error: 'Veri alınamadı' },
+      { status: 500 }
+    );
   }
 }
 
@@ -51,15 +60,53 @@ async function updateTaskHandler(
 ) {
   const { id } = await extractParams(params);
   try {
-    const body = await request.json();
-    return handleUpdate(id, body, validateTaskUpdate, api.tasks.updateTask, 'Görev');
+    const body = await request.json() as Record<string, unknown>;
+    
+    const validation = validateTaskUpdate(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const taskData: Parameters<typeof convexTasks.update>[1] = {
+      title: body.title as string | undefined,
+      description: body.description as string | undefined,
+      assigned_to: body.assigned_to as Id<"users"> | undefined,
+      priority: body.priority as 'low' | 'normal' | 'high' | 'urgent' | undefined,
+      status: body.status as 'pending' | 'in_progress' | 'completed' | 'cancelled' | undefined,
+      due_date: body.due_date as string | undefined,
+      completed_at: body.completed_at as string | undefined,
+      is_read: body.is_read as boolean | undefined,
+    };
+
+    const updated = await convexTasks.update(id as Id<"tasks">, taskData);
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: 'Görev başarıyla güncellendi',
+    });
   } catch (error) {
-    logger.error('Task operation error', error, {
+    logger.error('Update task error', error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
     });
-    throw error;
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'Görev bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 
@@ -72,14 +119,31 @@ async function deleteTaskHandler(
 ) {
   const { id } = await extractParams(params);
   try {
-    return handleDelete(id, api.tasks.deleteTask, 'Görev');
+    await convexTasks.remove(id as Id<"tasks">);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Görev başarıyla silindi',
+    });
   } catch (error) {
-    logger.error('Task operation error', error, {
+    logger.error('Delete task error', error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
     });
-    throw error;
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'Görev bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Silme işlemi başarısız' },
+      { status: 500 }
+    );
   }
 }
 

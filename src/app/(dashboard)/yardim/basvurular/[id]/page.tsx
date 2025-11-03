@@ -2,7 +2,7 @@
 
 import { use } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { aidApplicationsApi } from '@/lib/api/appwrite-api';
+import { aidApplicationsApi } from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -87,7 +87,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
     );
   }
 
-  const StageIcon = STAGE_LABELS[application.stage].icon;
+  const StageIcon = STAGE_LABELS[application.stage as keyof typeof STAGE_LABELS].icon;
 
   return (
     <div className="space-y-6">
@@ -104,7 +104,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
               <p className="text-gray-600">
                 {new Date(application.application_date).toLocaleDateString('tr-TR')}
               </p>
-              <Badge className={STAGE_LABELS[application.stage].color}>
+              <Badge className={STAGE_LABELS[application.stage as keyof typeof STAGE_LABELS].color}>
                 <StageIcon className="h-3 w-3 mr-1" />
                 {STAGE_LABELS[application.stage].label}
               </Badge>
@@ -133,10 +133,10 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
               <div className="space-y-2">
                 <Label>Mevcut Aşama</Label>
                 <div
-                  className={`p-3 rounded-md ${STAGE_LABELS[application.stage].color} font-medium flex items-center gap-2`}
+                  className={`p-3 rounded-md ${STAGE_LABELS[application.stage as keyof typeof STAGE_LABELS].color} font-medium flex items-center gap-2`}
                 >
                   <StageIcon className="h-4 w-4" />
-                  {STAGE_LABELS[application.stage].label}
+                  {STAGE_LABELS[application.stage as keyof typeof STAGE_LABELS].label}
                 </div>
               </div>
 

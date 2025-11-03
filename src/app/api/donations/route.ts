@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
+import { convexDonations, normalizeQueryParams } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { AppwriteDocument, DonationDocument } from '@/types/collections';
+import type { DonationDocument, AppwriteDocument } from '@/types/collections';
 
 /**
  * Validate donation payload
@@ -49,24 +49,24 @@ function validateDonation(data: Partial<DonationDocument>): {
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const page = Number(searchParams.get('page') || '1');
-  const limit = Number(searchParams.get('limit') || '10');
-  const search = searchParams.get('search') || undefined;
+  const params = normalizeQueryParams(searchParams);
 
   try {
-    const response = await api.donations.getDonations({ page, limit, search });
+    const response = await convexDonations.list({
+      ...params,
+      donor_email: searchParams.get('donor_email') || undefined,
+    });
 
     return NextResponse.json({
       success: true,
-      data: response.data,
-      total: response.total ?? 0,
+      data: response.documents || [],
+      total: response.total || 0,
     });
   } catch (error: unknown) {
     logger.error('List donations error', error, {
       endpoint: '/api/donations',
       method: 'GET',
-      page,
-      limit,
+      params,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -80,7 +80,7 @@ async function createDonationHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateDonation(body as Partial<DonationDocument>);
+    const validation = validateDonation(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
@@ -88,23 +88,33 @@ async function createDonationHandler(request: NextRequest) {
       );
     }
 
-    const response = await api.donations.createDonation(
-      validation.normalizedData
-    );
-    if (response.error) {
-      return NextResponse.json({ success: false, error: response.error }, { status: 400 });
-    }
+    const donationData = {
+      donor_name: validation.normalizedData.donor_name || '',
+      donor_phone: validation.normalizedData.donor_phone || '',
+      donor_email: validation.normalizedData.donor_email,
+      amount: validation.normalizedData.amount || 0,
+      currency: (validation.normalizedData.currency || 'TRY') as 'TRY' | 'USD' | 'EUR',
+      donation_type: validation.normalizedData.donation_type || '',
+      payment_method: validation.normalizedData.payment_method || '',
+      donation_purpose: validation.normalizedData.donation_purpose || '',
+      notes: validation.normalizedData.notes,
+      receipt_number: validation.normalizedData.receipt_number || '',
+      receipt_file_id: validation.normalizedData.receipt_file_id,
+      status: (validation.normalizedData.status || 'pending') as 'pending' | 'completed' | 'cancelled',
+    };
+
+    const response = await convexDonations.create(donationData);
 
     return NextResponse.json(
-      { success: true, data: response.data, message: 'Bağış başarıyla oluşturuldu' },
+      { success: true, data: response, message: 'Bağış başarıyla oluşturuldu' },
       { status: 201 }
     );
   } catch (error: unknown) {
     logger.error('Create donation error', error, {
       endpoint: '/api/donations',
       method: 'POST',
-      donorName: (body as Partial<DonationDocument>)?.donor_name,
-      amount: (body as Partial<DonationDocument>)?.amount,
+      donorName: (body as Record<string, unknown>)?.donor_name,
+      amount: (body as Record<string, unknown>)?.amount,
     });
     return NextResponse.json(
       { success: false, error: 'Oluşturma işlemi başarısız' },

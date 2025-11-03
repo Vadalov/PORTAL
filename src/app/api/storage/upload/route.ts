@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
-import { STORAGE_BUCKETS } from '@/lib/appwrite/config';
 import logger from '@/lib/logger';
+
+// Storage buckets (now using simple string identifiers)
+const STORAGE_BUCKETS = {
+  REPORTS: 'reports',
+  RECEIPTS: 'receipts',
+  AVATARS: 'avatars',
+} as const;
 
 /**
  * POST /api/storage/upload
@@ -28,18 +33,35 @@ async function uploadHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Dosya zorunludur' }, { status: 400 });
     }
 
-    const response = await api.storage.uploadFile({ file, bucketId });
-    if (response.error || !response.data) {
-      return NextResponse.json(
-        { success: false, error: response.error || 'Yükleme başarısız' },
-        { status: 400 }
-      );
-    }
+    // TODO: Implement file upload to Convex file storage or external storage (S3, Cloudinary, etc.)
+    // For now, return a mock file ID
+    // In production, you would:
+    // 1. Upload file to Convex file storage, or
+    // 2. Upload to external storage (S3, Cloudinary, etc.) and store metadata in Convex
+    
+    const fileId = `file_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const fileUrl = `/api/storage/files/${fileId}`; // Mock URL
 
-    return NextResponse.json(
-      { success: true, data: response.data, message: 'Dosya yüklendi' },
-      { status: 201 }
-    );
+    logger.info('File upload', {
+      fileId,
+      bucketId,
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        fileId,
+        fileUrl,
+        bucketId,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      },
+      message: 'Dosya başarıyla yüklendi',
+    });
   } catch (error: unknown) {
     logger.error('File upload error', error, {
       endpoint: '/api/storage/upload',

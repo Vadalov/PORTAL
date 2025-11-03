@@ -31,7 +31,7 @@ import {
   quickAddBeneficiarySchema,
   QuickAddBeneficiaryFormData,
 } from '@/lib/validations/beneficiary';
-import { appwriteApi } from '@/lib/api/appwrite-api';
+import { appwriteApi } from '@/lib/api';
 import type { BeneficiaryDocument, CreateDocumentData } from '@/types/collections';
 
 interface BeneficiaryQuickAddModalProps {

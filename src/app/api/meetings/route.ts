@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import api from '@/lib/api';
+import { convexMeetings, normalizeQueryParams } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { AppwriteDocument, MeetingDocument } from '@/types/collections';
+import { Id } from '@/convex/_generated/dataModel';
 
-function validateMeeting(data: Partial<MeetingDocument>): {
+function validateMeeting(data: Record<string, unknown>): {
   isValid: boolean;
   errors: string[];
-  normalizedData?: Omit<MeetingDocument, keyof AppwriteDocument>;
+  normalizedData?: Record<string, unknown>;
 } {
   const errors: string[] = [];
-  if (!data.title || data.title.trim().length < 3) {
+  if (!data.title || (typeof data.title === 'string' && data.title.trim().length < 3)) {
     errors.push('Toplantı başlığı en az 3 karakter olmalıdır');
   }
   if (!data.meeting_date) {
     errors.push('Toplantı tarihi zorunludur');
   }
-  if (data.status && !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status)) {
+  if (data.status && !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status as string)) {
     errors.push('Geçersiz durum');
   }
 
@@ -26,8 +26,8 @@ function validateMeeting(data: Partial<MeetingDocument>): {
 
   const normalizedData = {
     ...data,
-    status: (data.status as 'scheduled' | 'ongoing' | 'completed' | 'cancelled') || 'scheduled',
-  } as Omit<MeetingDocument, keyof AppwriteDocument>;
+    status: (data.status as string) || 'scheduled',
+  };
 
   return { isValid: true, errors: [], normalizedData };
 }
@@ -37,38 +37,24 @@ function validateMeeting(data: Partial<MeetingDocument>): {
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const page = Number(searchParams.get('page') || '1');
-  const limit = Number(searchParams.get('limit') || '20');
-  const search = searchParams.get('search') || undefined;
-
-  const filters: Record<string, string | number | boolean | undefined> = {};
-  const status = searchParams.get('status');
-  const meeting_type = searchParams.get('meeting_type');
-  const organizer = searchParams.get('organizer');
-  const date_from = searchParams.get('date_from');
-  const date_to = searchParams.get('date_to');
-
-  if (status) filters.status = status;
-  if (meeting_type) filters.meeting_type = meeting_type;
-  if (organizer) filters.organizer = organizer;
-  if (date_from) filters.date_from = date_from;
-  if (date_to) filters.date_to = date_to;
+  const params = normalizeQueryParams(searchParams);
 
   try {
-    const response = await api.meetings.getMeetings({ page, limit, search, filters });
+    const response = await convexMeetings.list({
+      ...params,
+      organizer: searchParams.get('organizer') as Id<"users"> | undefined,
+    });
 
     return NextResponse.json({
       success: true,
-      data: response.data,
-      total: response.total ?? 0,
+      data: response.documents || [],
+      total: response.total || 0,
     });
   } catch (error: unknown) {
     logger.error('List meetings error', error, {
       endpoint: '/api/meetings',
       method: 'GET',
-      page,
-      limit,
-      filters,
+      params,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -81,7 +67,7 @@ async function createMeetingHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     body = await request.json();
-    const validation = validateMeeting(body as Partial<MeetingDocument>);
+    const validation = validateMeeting(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
       return NextResponse.json(
         { success: false, error: 'Doğrulama hatası', details: validation.errors },
@@ -89,18 +75,23 @@ async function createMeetingHandler(request: NextRequest) {
       );
     }
 
-    const response = await api.meetings.createMeeting(
-      validation.normalizedData
-    );
-    if (response.error || !response.data) {
-      return NextResponse.json(
-        { success: false, error: response.error || 'Oluşturma başarısız' },
-        { status: 400 }
-      );
-    }
+    const meetingData = {
+      title: validation.normalizedData.title as string,
+      description: validation.normalizedData.description as string | undefined,
+      meeting_date: validation.normalizedData.meeting_date as string,
+      location: validation.normalizedData.location as string | undefined,
+      organizer: validation.normalizedData.organizer as Id<"users">,
+      participants: (validation.normalizedData.participants as Id<"users">[]) || [],
+      status: (validation.normalizedData.status || 'scheduled') as 'scheduled' | 'ongoing' | 'completed' | 'cancelled',
+      meeting_type: (validation.normalizedData.meeting_type || 'general') as 'general' | 'committee' | 'board' | 'other',
+      agenda: validation.normalizedData.agenda as string | undefined,
+      notes: validation.normalizedData.notes as string | undefined,
+    };
+
+    const response = await convexMeetings.create(meetingData);
 
     return NextResponse.json(
-      { success: true, data: response.data, message: 'Toplantı başarıyla oluşturuldu' },
+      { success: true, data: response, message: 'Toplantı başarıyla oluşturuldu' },
       { status: 201 }
     );
   } catch (error: unknown) {

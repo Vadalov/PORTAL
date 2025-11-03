@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { ensureServerInitialized } from '@/lib/appwrite/server';
 import { UserRole, Permission, ROLE_PERMISSIONS } from '@/types/auth';
-import { appwriteConfig } from '@/lib/appwrite/config';
 import logger from '@/lib/logger';
+import { convexHttp } from '@/lib/convex/server';
+import { api } from '@/convex/_generated/api';
 
 // Public routes that don't require authentication
 const publicRoutes = [
   '/login',
   '/auth',
-  '/test-appwrite',
   '/_next',
   '/favicon.ico',
   '/api/csrf', // CSRF token endpoint is public
@@ -94,46 +93,38 @@ const protectedRoutes: RouteRule[] = [
 ];
 
 /**
- * Check if server is properly initialized
+ * Get user session from auth cookie
  */
-function isServerReady(): boolean {
-  try {
-    ensureServerInitialized();
-    return true;
-  } catch (error) {
-    logger.error('Server initialization failed', error, {
-      context: 'middleware',
-      function: 'isServerReady',
-    });
-    return false;
-  }
-}
-
-/**
- * CSRF validation is handled at the API route level
- * Middleware in Edge Runtime cannot use Node.js crypto module
- */
-
-/**
- * Get user session from Appwrite
- */
-async function getAppwriteSession(
+async function getAuthSession(
   request: NextRequest
-): Promise<{ userId: string; $id: string; secret: string } | null> {
-  const sessionCookie = request.cookies.get('appwrite-session');
+): Promise<{ userId: string; sessionId: string } | null> {
+  const sessionCookie = request.cookies.get('auth-session');
   try {
-    if (!isServerReady()) {
-      return null;
-    }
-
     if (!sessionCookie) {
+      // Check for legacy Appwrite session cookie
+      const appwriteSession = request.cookies.get('appwrite-session');
+      if (appwriteSession) {
+        try {
+          const sessionData = JSON.parse(appwriteSession.value);
+          if (sessionData.userId && sessionData.expire) {
+            const expireDate = new Date(sessionData.expire);
+            if (expireDate > new Date()) {
+              return {
+                userId: sessionData.userId,
+                sessionId: sessionData.sessionId || 'legacy',
+              };
+            }
+          }
+        } catch {
+          // Invalid session format
+        }
+      }
       return null;
     }
 
-    // Use the session cookie to get session info
     const sessionData = JSON.parse(sessionCookie.value);
 
-    if (!sessionData.sessionId || !sessionData.secret) {
+    if (!sessionData.userId || !sessionData.sessionId) {
       return null;
     }
 
@@ -143,22 +134,20 @@ async function getAppwriteSession(
       if (expireDate < new Date()) {
         logger.warn('Session expired', {
           context: 'middleware',
-          function: 'getAppwriteSession',
+          function: 'getAuthSession',
         });
         return null;
       }
     }
 
-    // Return session data from cookie (trusted since it's HttpOnly)
     return {
       userId: sessionData.userId,
-      $id: sessionData.sessionId,
-      secret: sessionData.secret,
+      sessionId: sessionData.sessionId,
     };
   } catch (error) {
-    logger.error('Appwrite session validation error', error, {
+    logger.error('Session validation error', error, {
       context: 'middleware',
-      function: 'getAppwriteSession',
+      function: 'getAuthSession',
       hasCookie: !!sessionCookie,
     });
     return null;
@@ -166,10 +155,10 @@ async function getAppwriteSession(
 }
 
 /**
- * Get user data from Appwrite session
+ * Get user data from Convex using session
  */
 async function getUserFromSession(
-  session: { userId: string; $id: string; secret: string } | null
+  session: { userId: string; sessionId: string } | null
 ): Promise<{
   id: string;
   email: string;
@@ -178,47 +167,24 @@ async function getUserFromSession(
   permissions: string[];
 } | null> {
   try {
-    if (!session || !session.userId || !session.secret) {
+    if (!session || !session.userId) {
       return null;
     }
 
-    // Create a client with the session to get user data
-    const { Client, Account } = await import('node-appwrite');
-    const sessionClient = new Client()
-      .setEndpoint(appwriteConfig.endpoint)
-      .setProject(appwriteConfig.projectId)
-      .setSession(session.secret);
+    // Get user from Convex
+    const user = await convexHttp.query(api.users.get, { id: session.userId as any });
 
-    const sessionAccount = new Account(sessionClient);
-    const user = await sessionAccount.get();
-
-    // Map Appwrite user to our user format
-    // Determine role from labels (priority: superadmin > admin > manager > member > viewer)
-    let role: UserRole = UserRole.MEMBER;
-    if (user.labels && user.labels.length > 0) {
-      const labels = user.labels.map((l) => l.toLowerCase());
-      if (labels.includes('superadmin')) {
-        role = UserRole.SUPER_ADMIN;
-      } else if (labels.includes('admin')) {
-        role = UserRole.ADMIN;
-      } else if (labels.includes('manager')) {
-        role = UserRole.MANAGER;
-      } else if (labels.includes('member')) {
-        role = UserRole.MEMBER;
-      } else if (labels.includes('viewer')) {
-        role = UserRole.VIEWER;
-      } else if (labels.includes('volunteer')) {
-        role = UserRole.VOLUNTEER;
-      } else {
-        // Default to MEMBER if label doesn't match
-        role = UserRole.MEMBER;
-      }
+    if (!user || !user.isActive) {
+      return null;
     }
 
+    // Map Convex user to our user format
+    const role = (user.role || 'MEMBER') as UserRole;
+
     return {
-      id: user.$id,
-      email: user.email,
-      name: user.name,
+      id: user._id,
+      email: user.email || '',
+      name: user.name || '',
       role,
       permissions: ROLE_PERMISSIONS[role] || [],
     };
@@ -226,7 +192,7 @@ async function getUserFromSession(
     logger.error('User data retrieval error', error, {
       context: 'middleware',
       function: 'getUserFromSession',
-      sessionId: session?.$id,
+      sessionId: session?.sessionId,
     });
     return null;
   }
@@ -242,21 +208,25 @@ function hasRequiredPermission(
   if (!user) return false;
 
   // Check role requirement first
-  if (route.requiredRole && user.role !== route.requiredRole) {
-    return false;
+  if (route.requiredRole) {
+    if (user.role !== route.requiredRole && user.role !== UserRole.SUPER_ADMIN) {
+      return false;
+    }
   }
 
-  // Check specific permission
-  if (route.requiredPermission && !user.permissions.includes(route.requiredPermission)) {
-    return false;
+  // Check permission requirement
+  if (route.requiredPermission) {
+    if (!user.permissions.includes(route.requiredPermission)) {
+      return false;
+    }
   }
 
-  // Check if user has any of the required permissions
-  if (route.requiredAnyPermission) {
-    const hasAnyPermission = route.requiredAnyPermission.some((permission) =>
-      user.permissions.includes(permission)
+  // Check any permission requirement
+  if (route.requiredAnyPermission && route.requiredAnyPermission.length > 0) {
+    const hasAny = route.requiredAnyPermission.some((perm) =>
+      user.permissions.includes(perm)
     );
-    if (!hasAnyPermission) {
+    if (!hasAny) {
       return false;
     }
   }
@@ -265,135 +235,98 @@ function hasRequiredPermission(
 }
 
 /**
- * Check if route requires authentication
- */
-function isProtectedRoute(pathname: string): RouteRule | null {
-  return protectedRoutes.find((route) => pathname.startsWith(route.path)) || null;
-}
-
-/**
- * Check if API route requires authentication
- */
-function isProtectedApiRoute(pathname: string): boolean {
-  return protectedApiRoutes.some((route) => pathname.startsWith(route));
-}
-
-/**
- * Add security headers to response
- */
-function addSecurityHeaders(response: NextResponse): NextResponse {
-  response.headers.set('X-Content-Type-Options', 'nosniff');
-  response.headers.set('X-Frame-Options', 'DENY');
-  response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-
-  // CSP header for additional security
-  response.headers.set(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.appwrite.io wss://*.appwrite.io;"
-  );
-
-  return response;
-}
-
-/**
  * Main middleware function
  */
-export default async function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Add security headers to all responses
-  const response = addSecurityHeaders(NextResponse.next());
-
-  // Allow public routes first (before CSRF check)
-  if (publicRoutes.some((route) => pathname.startsWith(route))) {
-    // If authenticated and trying to access auth pages, redirect to dashboard
-    const sessionCookie = request.cookies.get('appwrite-session');
-    if (sessionCookie && authRoutes.some((route) => pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL('/genel', request.url));
-    }
-    return response;
+  // Allow public routes
+  if (
+    publicRoutes.some((route) => pathname.startsWith(route)) ||
+    pathname.startsWith('/api/health')
+  ) {
+    return NextResponse.next();
   }
 
-  // CSRF protection is handled at the API route level
-  // (Middleware runs in Edge Runtime and cannot use Node.js crypto module)
+  // Check if it's a protected API route
+  const isProtectedApiRoute = protectedApiRoutes.some((route) => pathname.startsWith(route));
 
-  // Get Appwrite session
-  const appwriteSession = await getAppwriteSession(request);
-  const user = appwriteSession ? await getUserFromSession(appwriteSession) : null;
+  // Check if it's a protected page route
+  const matchingRoute = protectedRoutes.find((route) => pathname.startsWith(route.path));
 
-  // API route protection
-  if (pathname.startsWith('/api/')) {
-    // Skip auth check for public API routes
-    if (
-      pathname === '/api/csrf' ||
-      pathname === '/api/auth/login' ||
-      pathname === '/api/auth/logout'
-    ) {
-      return response;
-    }
-
-    // Require authentication for protected API routes
-    if (isProtectedApiRoute(pathname)) {
-      if (!user) {
-        return new NextResponse(
-          JSON.stringify({ error: 'Unauthorized', code: 'AUTHENTICATION_REQUIRED' }),
-          {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-      }
-    }
-    return response;
+  // If it's not a protected route, allow access
+  if (!isProtectedApiRoute && !matchingRoute) {
+    return NextResponse.next();
   }
 
-  // Protected page routes
-  const protectedRoute = isProtectedRoute(pathname);
-  if (protectedRoute) {
-    // Require authentication
-    if (!user) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('from', pathname);
-      return NextResponse.redirect(loginUrl);
+  // Get user session
+  const session = await getAuthSession(request);
+
+  // If no session, redirect to login (for pages) or return 401 (for API)
+  if (!session) {
+    if (isProtectedApiRoute) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check permissions
-    if (!hasRequiredPermission(user, protectedRoute)) {
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Forbidden',
-          message: 'Bu sayfaya erişim yetkiniz bulunmamaktadır.',
-          code: 'INSUFFICIENT_PERMISSIONS',
-        }),
-        {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-  }
-
-  // Redirect to login if not authenticated for any other protected route
-  if (!user && pathname !== '/login') {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('from', pathname);
+    loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  return response;
+  // Get user data
+  const user = await getUserFromSession(session);
+
+  if (!user) {
+    if (isProtectedApiRoute) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // For page routes, check permissions
+  if (matchingRoute) {
+    if (!hasRequiredPermission(user, matchingRoute)) {
+      logger.warn('Access denied', {
+        context: 'middleware',
+        userId: user.id,
+        path: pathname,
+        route: matchingRoute.path,
+      });
+
+      // Redirect to dashboard if user doesn't have permission
+      return NextResponse.redirect(new URL('/genel', request.url));
+    }
+  }
+
+  // Add user info to request headers for API routes
+  if (isProtectedApiRoute) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', user.id);
+    requestHeaders.set('x-user-role', user.role);
+    requestHeaders.set('x-user-permissions', user.permissions.join(','));
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

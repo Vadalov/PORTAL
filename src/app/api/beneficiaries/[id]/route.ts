@@ -1,15 +1,10 @@
-import { NextRequest } from 'next/server';
-import api from '@/lib/api';
+import { NextRequest, NextResponse } from 'next/server';
+import { convexBeneficiaries } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { BeneficiaryFormData } from '@/types/beneficiary';
-import {
-  handleGetById,
-  handleUpdate,
-  handleDelete,
-  extractParams,
-  handleApiError,
-} from '@/lib/api/route-helpers';
+import { extractParams } from '@/lib/api/route-helpers';
+import { Id } from '@/convex/_generated/dataModel';
 
 /**
  * Validate beneficiary data for updates
@@ -84,17 +79,29 @@ async function getBeneficiaryHandler(
   const { id } = await extractParams(params);
 
   try {
-    return await handleGetById(id, (id) => api.beneficiaries.getBeneficiary(id), 'İhtiyaç sahibi');
+    const beneficiary = await convexBeneficiaries.get(id as Id<"beneficiaries">);
+    
+    if (!beneficiary) {
+      return NextResponse.json(
+        { success: false, error: 'İhtiyaç sahibi bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: beneficiary,
+    });
   } catch (error: unknown) {
-    return handleApiError(
-      error,
-      logger,
-      {
-        endpoint: '/api/beneficiaries/[id]',
-        method: request.method,
-        beneficiaryId: id,
-      },
-      'Veri alınamadı'
+    logger.error('Get beneficiary error', error, {
+      endpoint: '/api/beneficiaries/[id]',
+      method: request.method,
+      beneficiaryId: id,
+    });
+    
+    return NextResponse.json(
+      { success: false, error: 'Veri alınamadı' },
+      { status: 500 }
     );
   }
 }
@@ -112,23 +119,39 @@ async function updateBeneficiaryHandler(
   try {
     const body = (await request.json()) as Partial<BeneficiaryFormData>;
 
-    return await handleUpdate(
-      id,
-      body,
-      validateBeneficiaryUpdate,
-      (id, data) => api.beneficiaries.updateBeneficiary(id, data as Partial<BeneficiaryFormData>),
-      'İhtiyaç sahibi'
-    );
+    const validation = validateBeneficiaryUpdate(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Doğrulama hatası', details: validation.errors },
+        { status: 400 }
+      );
+    }
+
+    const updated = await convexBeneficiaries.update(id as Id<"beneficiaries">, body);
+
+    return NextResponse.json({
+      success: true,
+      data: updated,
+      message: 'İhtiyaç sahibi başarıyla güncellendi',
+    });
   } catch (error: unknown) {
-    return handleApiError(
-      error,
-      logger,
-      {
-        endpoint: '/api/beneficiaries/[id]',
-        method: request.method,
-        beneficiaryId: id,
-      },
-      'Güncelleme işlemi başarısız'
+    logger.error('Update beneficiary error', error, {
+      endpoint: '/api/beneficiaries/[id]',
+      method: request.method,
+      beneficiaryId: id,
+    });
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'İhtiyaç sahibi bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { status: 500 }
     );
   }
 }
@@ -144,21 +167,30 @@ async function deleteBeneficiaryHandler(
   const { id } = await extractParams(params);
 
   try {
-    return await handleDelete(
-      id,
-      (id) => api.beneficiaries.deleteBeneficiary(id),
-      'İhtiyaç sahibi'
-    );
+    await convexBeneficiaries.remove(id as Id<"beneficiaries">);
+
+    return NextResponse.json({
+      success: true,
+      message: 'İhtiyaç sahibi başarıyla silindi',
+    });
   } catch (error: unknown) {
-    return handleApiError(
-      error,
-      logger,
-      {
-        endpoint: '/api/beneficiaries/[id]',
-        method: request.method,
-        beneficiaryId: id,
-      },
-      'Silme işlemi başarısız'
+    logger.error('Delete beneficiary error', error, {
+      endpoint: '/api/beneficiaries/[id]',
+      method: request.method,
+      beneficiaryId: id,
+    });
+    
+    const errorMessage = error instanceof Error ? error.message : '';
+    if (errorMessage?.includes('not found')) {
+      return NextResponse.json(
+        { success: false, error: 'İhtiyaç sahibi bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Silme işlemi başarısız' },
+      { status: 500 }
     );
   }
 }

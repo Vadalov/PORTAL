@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery } from '@tanstack/react-query';
-import { appwriteApi } from '@/lib/api/appwrite-api';
+import { appwriteApi } from '@/lib/api';
 import { toast } from 'sonner';
 import {
   Search,
