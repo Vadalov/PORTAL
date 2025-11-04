@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('Environment Validation', () => {
   let originalEnv: NodeJS.ProcessEnv;
@@ -6,95 +6,115 @@ describe('Environment Validation', () => {
   beforeEach(() => {
     // Save original env
     originalEnv = { ...process.env };
+    vi.resetModules();
   });
 
   afterEach(() => {
     // Restore original env
-    process.env = originalEnv;
+    Object.assign(process.env, originalEnv);
   });
 
   describe('Client Environment Validation', () => {
-    it('should validate client env variables (Convex)', () => {
+    it('should validate client env variables (Convex)', async () => {
       // Set Convex URL (optional but recommended)
       process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
 
       // Dynamic import to test validation
-      import('@/lib/env-validation').then(({ validateClientEnv }) => {
-        expect(() => validateClientEnv()).not.toThrow();
-      });
+      const { validateClientEnv } = await import('@/lib/env-validation');
+      expect(() => validateClientEnv()).not.toThrow();
     });
 
-    it('should use default values for optional variables', () => {
+    it('should use default values for optional variables', async () => {
       process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
 
-      import('@/lib/env-validation').then(({ getClientEnv }) => {
-        const env = getClientEnv();
-        expect(env.NEXT_PUBLIC_APP_NAME).toBe('Dernek Yönetim Sistemi');
-        expect(env.NEXT_PUBLIC_APP_VERSION).toBe('1.0.0');
-      });
+      const { getClientEnv } = await import('@/lib/env-validation');
+      const env = getClientEnv();
+      expect(env.NEXT_PUBLIC_APP_NAME).toBe('Dernek Yönetim Sistemi');
+      expect(env.NEXT_PUBLIC_APP_VERSION).toBe('1.0.0');
     });
   });
 
   describe('Server Environment Validation', () => {
-    it('should validate server env variables', () => {
+    it('should validate server env variables', async () => {
+      // Set Convex URL (optional but recommended)
       process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
-      process.env.NODE_ENV = 'development';
       // In development, secrets are optional
-      process.env.CSRF_SECRET = 'a'.repeat(32);
-      process.env.SESSION_SECRET = 'b'.repeat(32);
-
-      import('@/lib/env-validation').then(({ validateServerEnv }) => {
-        expect(() => validateServerEnv()).not.toThrow();
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'development',
+        writable: true,
+        configurable: true,
       });
+      Object.defineProperty(process.env, 'CSRF_SECRET', {
+        value: 'a'.repeat(32),
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(process.env, 'SESSION_SECRET', {
+        value: 'b'.repeat(32),
+        writable: true,
+        configurable: true,
+      });
+
+      const { validateServerEnv } = await import('@/lib/env-validation');
+      expect(() => validateServerEnv()).not.toThrow();
     });
 
-    it('should validate secret length in production', () => {
+    it('should validate secret length in production', async () => {
       process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
-      process.env.NODE_ENV = 'production';
-      process.env.CSRF_SECRET = 'too-short'; // Less than 32 chars
-      process.env.SESSION_SECRET = 'b'.repeat(32);
 
-      import('@/lib/env-validation').then(({ validateServerEnv }) => {
-        expect(() => validateServerEnv()).toThrow();
+      Object.defineProperty(process.env, 'NODE_ENV', {
+        value: 'production',
+        writable: true,
+        configurable: true,
       });
+      Object.defineProperty(process.env, 'CSRF_SECRET', {
+        value: 'too-short', // Less than 32 chars
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(process.env, 'SESSION_SECRET', {
+        value: 'b'.repeat(32),
+        writable: true,
+        configurable: true,
+      });
+
+      const { validateServerEnv } = await import('@/lib/env-validation');
+      expect(() => validateServerEnv()).toThrow();
     });
   });
 
   describe('Feature Flags', () => {
-    it('should parse boolean feature flags', () => {
+    it('should parse boolean feature flags', async () => {
       process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
       process.env.NEXT_PUBLIC_ENABLE_REALTIME = 'false';
       process.env.NEXT_PUBLIC_ENABLE_ANALYTICS = 'true';
 
-      import('@/lib/env-validation').then(({ getClientEnv }) => {
-        const env = getClientEnv();
-        expect(env.NEXT_PUBLIC_ENABLE_REALTIME).toBe(false);
-        expect(env.NEXT_PUBLIC_ENABLE_ANALYTICS).toBe(true);
-      });
+      const { getClientEnv } = await import('@/lib/env-validation');
+      const env = getClientEnv();
+      expect(env.NEXT_PUBLIC_ENABLE_REALTIME).toBe(false);
+      expect(env.NEXT_PUBLIC_ENABLE_ANALYTICS).toBe(true);
     });
   });
 
   describe('Helper Functions', () => {
-    it('should detect email configuration', () => {
+    it('should detect email configuration', async () => {
       process.env.SMTP_HOST = 'smtp.gmail.com';
       process.env.SMTP_USER = 'test@gmail.com';
       process.env.SMTP_PASSWORD = 'password';
 
-      import('@/lib/env-validation').then(({ getServerEnv, hasEmailConfig }) => {
-        const env = getServerEnv();
-        expect(hasEmailConfig(env)).toBe(true);
-      });
+      const { getServerEnv, hasEmailConfig } = await import('@/lib/env-validation');
+      const env = getServerEnv();
+      expect(hasEmailConfig(env)).toBe(true);
     });
 
-    it('should detect SMS configuration', () => {
+    it('should detect SMS configuration', async () => {
       process.env.TWILIO_ACCOUNT_SID = 'AC123';
       process.env.TWILIO_AUTH_TOKEN = 'token123';
       process.env.TWILIO_PHONE_NUMBER = '+905551234567';
 
-      import('@/lib/env-validation').then(({ getServerEnv, hasSmsConfig }) => {
-        const env = getServerEnv();
-        expect(hasSmsConfig(env)).toBe(true);
-      });
+      const { getServerEnv, hasSmsConfig } = await import('@/lib/env-validation');
+      const env = getServerEnv();
+      expect(hasSmsConfig(env)).toBe(true);
     });
   });
 });

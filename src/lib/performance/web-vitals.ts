@@ -1,0 +1,117 @@
+/**
+ * Core Web Vitals Tracking
+ * Measures LCP, FID, CLS, and other performance metrics
+ * Sends data to analytics or logs
+ */
+
+import { onCLS, onLCP, onFCP, onTTFB, onINP, Metric } from 'web-vitals';
+
+interface VitalMetric {
+  name: string;
+  value: number;
+  id: string;
+  delta: number;
+  rating: 'good' | 'needs-improvement' | 'poor';
+}
+
+/**
+ * Send metric to analytics (custom implementation)
+ */
+function sendToAnalytics(metric: Metric): void {
+  // In production, send to your analytics service
+  // e.g., Google Analytics, PostHog, etc.
+
+  console.log('Web Vital Metric:', {
+    name: metric.name,
+    value: metric.value,
+    id: metric.id,
+    delta: metric.delta,
+    rating: getRating(metric.name, metric.value),
+  });
+
+  // TODO: Implement your analytics service integration
+  // Examples:
+  // - Google Analytics 4 (gtag)
+  // - PostHog
+  // - Custom endpoint
+  // - Sentry performance monitoring
+}
+
+function getRating(name: string, value: number): 'good' | 'needs-improvement' | 'poor' {
+  const thresholds: Record<string, { good: number; poor: number }> = {
+    LCP: { good: 2500, poor: 4000 },
+    FID: { good: 100, poor: 300 },
+    CLS: { good: 0.1, poor: 0.25 },
+    FCP: { good: 1800, poor: 3000 },
+    TTFB: { good: 800, poor: 1800 },
+    INP: { good: 200, poor: 500 },
+  };
+
+  const threshold = thresholds[name];
+  if (!threshold) return 'needs-improvement';
+
+  if (value <= threshold.good) return 'good';
+  if (value >= threshold.poor) return 'poor';
+  return 'needs-improvement';
+}
+
+/**
+ * Track Core Web Vitals
+ * Call this function in your root layout or _app file
+ */
+export function trackWebVitals() {
+  // Largest Contentful Paint (LCP) - should be < 2.5s
+  onLCP((metric) => {
+    sendToAnalytics(metric);
+  });
+
+  // First Input Delay (FID) - deprecated, using INP instead
+
+  // Cumulative Layout Shift (CLS) - should be < 0.1
+  onCLS((metric) => {
+    sendToAnalytics(metric);
+  });
+
+  // First Contentful Paint (FCP) - should be < 1.8s
+  onFCP((metric) => {
+    sendToAnalytics(metric);
+  });
+
+  // Time to First Byte (TTFB) - should be < 800ms
+  onTTFB((metric) => {
+    sendToAnalytics(metric);
+  });
+
+  // Interaction to Next Paint (INP) - should be < 200ms
+  onINP((metric) => {
+    sendToAnalytics(metric);
+  });
+}
+
+/**
+ * Get performance marks for custom measurements
+ */
+export function getPerformanceMarks(): PerformanceEntry[] {
+  if (typeof window === 'undefined') return [];
+
+  return performance.getEntriesByType('mark');
+}
+
+/**
+ * Measure custom performance metric
+ */
+export function measurePerformance(name: string, startMark: string, endMark: string): number {
+  if (typeof window === 'undefined') return 0;
+
+  const measure = performance.measure(name, startMark, endMark);
+  return measure.duration;
+}
+
+/**
+ * Create performance mark
+ */
+export function createPerformanceMark(name: string) {
+  if (typeof window === 'undefined') return;
+
+  performance.mark(name);
+}

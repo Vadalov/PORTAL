@@ -257,13 +257,13 @@ export function BeneficiaryForm({ onSuccess, onCancel }: BeneficiaryFormProps) {
 
                   // Format as 0555 123 45 67
                   if (value.length >= 4) {
-                    value = value.slice(0, 4) + ' ' + value.slice(4);
+                    value = `${value.slice(0, 4)  } ${  value.slice(4)}`;
                   }
                   if (value.length >= 7) {
-                    value = value.slice(0, 8) + ' ' + value.slice(8);
+                    value = `${value.slice(0, 8)  } ${  value.slice(8)}`;
                   }
                   if (value.length >= 10) {
-                    value = value.slice(0, 11) + ' ' + value.slice(11);
+                    value = `${value.slice(0, 11)  } ${  value.slice(11)}`;
                   }
 
                   e.target.value = value;

@@ -154,6 +154,11 @@ export interface DonationDocument extends AppwriteDocument {
   receipt_number: string;
   receipt_file_id?: string;
   status: 'pending' | 'completed' | 'cancelled';
+  // Kumbara-related fields
+  is_kumbara?: boolean;
+  kumbara_location?: string;
+  collection_date?: string;
+  kumbara_institution?: string;
 }
 
 // Aid Requests Collection

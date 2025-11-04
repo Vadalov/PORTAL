@@ -17,7 +17,7 @@ const publicRoutes = [
 ];
 
 // Auth routes that should redirect to dashboard if already authenticated
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const _authRoutes = ['/login', '/auth'];
 
 // API routes that require authentication (protected endpoints)

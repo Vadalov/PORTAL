@@ -6,7 +6,7 @@ import { generateCsrfToken } from '@/lib/csrf';
  * GET /api/csrf
  * Generate and return CSRF token
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const cookieStore = await cookies();
 

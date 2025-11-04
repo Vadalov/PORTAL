@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
@@ -63,8 +63,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   };
 
-  // Initialize auth on mount
+  // Initialize auth on mount (only once)
   useEffect(() => {
+    if (isInitialized) {
+      // Already initialized, skip
+      return;
+    }
+
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Dashboard: Initializing auth', { isInitialized, isAuthenticated });
       logger.debug('Dashboard: LocalStorage check', { 
@@ -78,9 +83,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     initializeAuth();
 
     if (process.env.NODE_ENV === 'development') {
-      logger.debug('Dashboard: Auth initialized', { isInitialized, isAuthenticated, userId: user?.id });
+      logger.debug('Dashboard: Auth initialization called');
     }
-  }, [initializeAuth, isInitialized, isAuthenticated, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   useEffect(() => {
     if (isInitialized && !isAuthenticated) {
@@ -133,6 +139,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.push('/login');
     });
   };
+
+  // Memoize callbacks to prevent infinite loops
+  const handlePageSuspend = useCallback(() => {
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Dashboard: Page suspended', { pathname });
+    }
+  }, [pathname]);
+
+  const handlePageResume = useCallback(() => {
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug('Dashboard: Page resumed', { pathname });
+    }
+  }, [pathname]);
 
   if (!isInitialized || !isAuthenticated) {
     if (process.env.NODE_ENV === 'development') {
@@ -284,16 +303,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <SuspenseBoundary
                 loadingVariant="pulse"
                 loadingText="Sayfa yükleniyor..."
-                onSuspend={() => {
-                  if (process.env.NODE_ENV === 'development') {
-                    logger.debug('Dashboard: Page suspended', { pathname });
-                  }
-                }}
-                onResume={() => {
-                  if (process.env.NODE_ENV === 'development') {
-                    logger.debug('Dashboard: Page resumed', { pathname });
-                  }
-                }}
+                onSuspend={handlePageSuspend}
+                onResume={handlePageResume}
               >
                 {children}
               </SuspenseBoundary>

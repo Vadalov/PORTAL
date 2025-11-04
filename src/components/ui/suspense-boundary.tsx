@@ -25,12 +25,21 @@ const FallbackWrapper: React.FC<{
 }> = ({ fallback, loadingVariant, loadingText, fullscreen, onSuspend, onResume }) => {
   const suspendStartRef = useRef<number | null>(null);
   const focusedElementRef = useRef<Element | null>(null);
+  // Store callbacks in refs to avoid dependency issues
+  const onSuspendRef = useRef(onSuspend);
+  const onResumeRef = useRef(onResume);
+
+  // Update refs when callbacks change
+  useEffect(() => {
+    onSuspendRef.current = onSuspend;
+    onResumeRef.current = onResume;
+  }, [onSuspend, onResume]);
 
   useEffect(() => {
     // On suspend: save focus and start timing
     suspendStartRef.current = performance.now();
     focusedElementRef.current = document.activeElement;
-    onSuspend?.();
+    onSuspendRef.current?.();
 
     if (process.env.NODE_ENV === 'development') {
       console.log('📄 [SuspenseBoundary] Suspended');
@@ -42,7 +51,7 @@ const FallbackWrapper: React.FC<{
       if (focusedElementRef.current && focusedElementRef.current instanceof HTMLElement) {
         focusedElementRef.current.focus();
       }
-      onResume?.();
+      onResumeRef.current?.();
 
       if (process.env.NODE_ENV === 'development') {
         console.log(`✅ [SuspenseBoundary] Resumed after ${duration.toFixed(2)}ms`);
@@ -51,7 +60,8 @@ const FallbackWrapper: React.FC<{
         }
       }
     };
-  }, [onSuspend, onResume]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array - only run once when component mounts
 
   if (fallback) {
     return <>{fallback}</>;

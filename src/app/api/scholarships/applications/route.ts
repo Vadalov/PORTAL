@@ -171,7 +171,7 @@ async function createApplicationHandler(request: NextRequest) {
  * GET /api/scholarships/applications/scholarships
  * Get available scholarships for application
  */
-async function getAvailableScholarshipsHandler(request: NextRequest) {
+async function getAvailableScholarshipsHandler(_request: NextRequest) {
   try {
     const result = await getScholarships({ isActive: true });
 

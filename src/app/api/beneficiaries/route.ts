@@ -12,7 +12,7 @@ interface BeneficiaryFilters {
   city?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 interface _ParsedQueryParams extends Omit<QueryParams, 'filters'> {
   filters?: BeneficiaryFilters;
 }

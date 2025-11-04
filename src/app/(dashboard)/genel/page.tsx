@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useAuthStore } from '@/stores/authStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +22,71 @@ import {
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Suspense, useMemo } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+// Lazy load chart components to reduce initial bundle size
+const DynamicAreaChart = dynamic(
+  () => import('recharts').then((mod) => mod.AreaChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    ),
+  }
+);
+
+const DynamicArea = dynamic(
+  () => import('recharts').then((mod) => mod.Area),
+  { ssr: false }
+);
+
+const DynamicXAxis = dynamic(
+  () => import('recharts').then((mod) => mod.XAxis),
+  { ssr: false }
+);
+
+const DynamicYAxis = dynamic(
+  () => import('recharts').then((mod) => mod.YAxis),
+  { ssr: false }
+);
+
+const DynamicCartesianGrid = dynamic(
+  () => import('recharts').then((mod) => mod.CartesianGrid),
+  { ssr: false }
+);
+
+const DynamicTooltip = dynamic(
+  () => import('recharts').then((mod) => mod.Tooltip),
+  { ssr: false }
+);
+
+const DynamicResponsiveContainer = dynamic(
+  () => import('recharts').then((mod) => mod.ResponsiveContainer),
+  { ssr: false }
+);
+
+const DynamicPieChart = dynamic(
+  () => import('recharts').then((mod) => mod.PieChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    ),
+  }
+);
+
+const DynamicPie = dynamic(
+  () => import('recharts').then((mod) => mod.Pie),
+  { ssr: false }
+);
+
+const DynamicCell = dynamic(
+  () => import('recharts').then((mod) => mod.Cell),
+  { ssr: false }
+);
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuthStore();
@@ -197,19 +262,19 @@ export default function DashboardPage() {
           <CardContent>
             <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
               <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height={256}>
-                  <AreaChart data={donationData}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="month" className="text-xs" />
-                    <YAxis className="text-xs" />
-                    <Tooltip
+                <DynamicResponsiveContainer width="100%" height={256}>
+                  <DynamicAreaChart data={donationData}>
+                    <DynamicCartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <DynamicXAxis dataKey="month" className="text-xs" />
+                    <DynamicYAxis className="text-xs" />
+                    <DynamicTooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--background))',
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
                       }}
                     />
-                    <Area
+                    <DynamicArea
                       type="monotone"
                       dataKey="amount"
                       stroke="#8884d8"
@@ -222,8 +287,8 @@ export default function DashboardPage() {
                         <stop offset="95%" stopColor="#8884d8" stopOpacity={0.1}/>
                       </linearGradient>
                     </defs>
-                  </AreaChart>
-                </ResponsiveContainer>
+                  </DynamicAreaChart>
+                </DynamicResponsiveContainer>
               </div>
             </Suspense>
           </CardContent>
@@ -245,9 +310,9 @@ export default function DashboardPage() {
           <CardContent>
             <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
               <div className="h-64 w-full">
-                <ResponsiveContainer width="100%" height={256}>
-                  <PieChart>
-                    <Pie
+                <DynamicResponsiveContainer width="100%" height={256}>
+                  <DynamicPieChart>
+                    <DynamicPie
                       data={categoryData}
                       cx="50%"
                       cy="50%"
@@ -257,18 +322,18 @@ export default function DashboardPage() {
                       dataKey="value"
                     >
                       {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <DynamicCell key={`cell-${index}`} fill={entry.color} />
                       ))}
-                    </Pie>
-                    <Tooltip
+                    </DynamicPie>
+                    <DynamicTooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--background))',
                         border: '1px solid hsl(var(--border))',
                         borderRadius: '8px',
                       }}
                     />
-                  </PieChart>
-                </ResponsiveContainer>
+                  </DynamicPieChart>
+                </DynamicResponsiveContainer>
               </div>
             </Suspense>
             <div className="flex flex-wrap gap-2 mt-4">

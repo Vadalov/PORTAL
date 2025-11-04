@@ -95,10 +95,17 @@ export default defineSchema({
     receipt_number: v.string(),
     receipt_file_id: v.optional(v.string()),
     status: v.union(v.literal('pending'), v.literal('completed'), v.literal('cancelled')),
+    // Kumbara-related fields
+    is_kumbara: v.optional(v.boolean()),  // Whether this donation came from a kumbara
+    kumbara_location: v.optional(v.string()),  // Location where kumbara was placed/collected
+    collection_date: v.optional(v.string()),  // Date when kumbara was collected
+    kumbara_institution: v.optional(v.string()),  // Institution/place where kumbara is located
   })
     .index('by_status', ['status'])
     .index('by_donor_email', ['donor_email'])
-    .index('by_receipt_number', ['receipt_number']),
+    .index('by_receipt_number', ['receipt_number'])
+    .index('by_is_kumbara', ['is_kumbara'])
+    .index('by_kumbara_location', ['kumbara_location']),
 
   // Tasks Collection
   tasks: defineTable({

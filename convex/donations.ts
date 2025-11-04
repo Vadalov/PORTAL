@@ -8,11 +8,26 @@ export const list = query({
     skip: v.optional(v.number()),
     status: v.optional(v.string()),
     donor_email: v.optional(v.string()),
+    is_kumbara: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     let donations;
     
-    if (args.status) {
+    // Filter by is_kumbara first if provided
+    if (args.is_kumbara !== undefined) {
+      donations = await ctx.db
+        .query("donations")
+        .withIndex("by_is_kumbara", (q) => q.eq("is_kumbara", args.is_kumbara))
+        .collect();
+      
+      // Apply additional filters on already filtered results
+      if (args.status) {
+        donations = donations.filter((d) => d.status === args.status);
+      }
+      if (args.donor_email) {
+        donations = donations.filter((d) => d.donor_email === args.donor_email);
+      }
+    } else if (args.status) {
       donations = await ctx.db
         .query("donations")
         .withIndex("by_status", (q) => q.eq("status", args.status as "pending" | "completed" | "cancelled"))

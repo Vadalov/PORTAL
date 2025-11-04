@@ -8,8 +8,8 @@ let RateLimitMonitor: typeof import('@/lib/rate-limit-monitor').RateLimitMonitor
 
 async function loadRateLimitMonitor() {
   if (!RateLimitMonitor) {
-    const module = await import('@/lib/rate-limit-monitor');
-    RateLimitMonitor = module.RateLimitMonitor;
+    const rateLimitModule = await import('@/lib/rate-limit-monitor');
+    RateLimitMonitor = rateLimitModule.RateLimitMonitor;
   }
   return { RateLimitMonitor };
 }

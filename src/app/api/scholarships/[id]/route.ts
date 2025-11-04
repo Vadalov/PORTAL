@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getScholarship, updateScholarship, deleteScholarship } from '@/lib/api/mock-api';
+import { getScholarship as _getScholarship, updateScholarship as _updateScholarship, deleteScholarship as _deleteScholarship } from '@/lib/api/mock-api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { ScholarshipType } from '@/types/scholarship';
-
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
 
 interface ScholarshipData {
   name?: string;
@@ -72,7 +65,7 @@ async function getScholarshipHandler(
       return NextResponse.json({ success: false, error: 'Burs ID gerekli' }, { status: 400 });
     }
 
-    const result = await getScholarship(id);
+    const result = await _getScholarship(id);
 
     if (!result.success) {
       return NextResponse.json({ success: false, error: 'Burs bulunamadı' }, { status: 404 });
@@ -126,7 +119,7 @@ async function updateScholarshipHandler(
       );
     }
 
-    const result = await updateScholarship(id, body);
+    const result = await _updateScholarship(id, body);
 
     if (!result.success) {
       return NextResponse.json({ success: false, error: 'Burs güncellenemedi' }, { status: 500 });
@@ -162,7 +155,7 @@ async function deleteScholarshipHandler(
       return NextResponse.json({ success: false, error: 'Burs ID gerekli' }, { status: 400 });
     }
 
-    const result = await deleteScholarship(id);
+    const result = await _deleteScholarship(id);
 
     if (!result.success) {
       return NextResponse.json({ success: false, error: 'Burs silinemedi' }, { status: 500 });

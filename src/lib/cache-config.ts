@@ -261,20 +261,36 @@ export function createOptimizedQueryClient(): QueryClient {
         refetchOnReconnect: true,
         refetchOnMount: true,
 
-        // Retry configuration
+        // Background refetch - critical for performance
+        refetchInterval: false, // Disabled by default, enable per-query if needed
+        refetchIntervalInBackground: false,
+
+        // Retry configuration with exponential backoff
         retry: 2,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+
+        // Network mode - 'online' by default, 'always' for critical data
+        networkMode: 'online',
 
         // Error handling
         throwOnError: false,
 
         // Structural sharing for performance
         structuralSharing: true,
+
+        // Enable query cache persistence in development
+        ...(process.env.NODE_ENV === 'development' && {
+          // Persist cache for faster HMR
+          gcTime: Math.max(GC_TIMES.STANDARD, 1000 * 60 * 60), // At least 1 hour in dev
+        }),
       },
       mutations: {
         // Retry mutations once on network errors
         retry: 1,
         retryDelay: 1000,
+
+        // Network mode for mutations
+        networkMode: 'online',
       },
     },
   });

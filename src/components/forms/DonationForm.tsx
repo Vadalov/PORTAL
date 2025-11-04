@@ -248,13 +248,13 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
 
                     // Format as 0555 123 45 67
                     if (value.length >= 4) {
-                      value = value.slice(0, 4) + ' ' + value.slice(4);
+                      value = `${value.slice(0, 4)  } ${  value.slice(4)}`;
                     }
                     if (value.length >= 7) {
-                      value = value.slice(0, 8) + ' ' + value.slice(8);
+                      value = `${value.slice(0, 8)  } ${  value.slice(8)}`;
                     }
                     if (value.length >= 10) {
-                      value = value.slice(0, 11) + ' ' + value.slice(11);
+                      value = `${value.slice(0, 11)  } ${  value.slice(11)}`;
                     }
 
                     e.target.value = value;
@@ -318,12 +318,12 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
                     // Allow only one comma
                     const parts = value.split(',');
                     if (parts.length > 2) {
-                      value = parts[0] + ',' + parts.slice(1).join('');
+                      value = `${parts[0]  },${  parts.slice(1).join('')}`;
                     }
 
                     // Limit decimal places to 2
                     if (parts[1] && parts[1].length > 2) {
-                      value = parts[0] + ',' + parts[1].substring(0, 2);
+                      value = `${parts[0]  },${  parts[1].substring(0, 2)}`;
                     }
 
                     e.target.value = value;

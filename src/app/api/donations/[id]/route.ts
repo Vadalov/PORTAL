@@ -30,6 +30,15 @@ function validateDonationUpdate(data: Record<string, unknown>): { isValid: boole
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
+  
+  // Handle special "stats" route - redirect to stats endpoint if it exists
+  if (id === 'stats') {
+    return NextResponse.json(
+      { success: false, error: 'Stats endpoint için /api/donations/stats kullanın' },
+      { status: 404 }
+    );
+  }
+  
   try {
     const donation = await convexDonations.get(id as Id<"donations">);
     
