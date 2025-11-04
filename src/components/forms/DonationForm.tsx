@@ -148,22 +148,34 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
   const onSubmit = async (data: DonationFormData) => {
     setIsSubmitting(true);
     try {
-      let uploadedFileId = null;
+      let uploadedFileId: string | undefined = undefined;
 
-      // Upload receipt file if provided
+      // Upload receipt file if provided (using direct API endpoint)
       if (receiptFile) {
-        const uploadResult = await api.storage.uploadFile({
-          file: receiptFile,
-          bucketId: 'receipts',
-          permissions: [],
-        });
-        uploadedFileId = uploadResult.data?.$id;
+        try {
+          const formData = new FormData();
+          formData.append('file', receiptFile);
+          formData.append('bucket', 'receipts');
+          
+          const response = await fetch('/api/storage/upload', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            uploadedFileId = result.data?.fileId;
+          }
+        } catch (error) {
+          console.error('File upload error:', error);
+          // Continue without file if upload fails
+        }
       }
 
       // Create donation with file reference
       const donationData = {
         ...data,
-        receipt_file_id: uploadedFileId || undefined,
+        receipt_file_id: uploadedFileId,
       };
 
       await createDonationMutation.mutateAsync(donationData);

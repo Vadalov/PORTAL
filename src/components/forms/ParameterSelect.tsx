@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import type { ParameterCategory } from '@/types/collections';
+import type { ParameterCategory, ParameterDocument } from '@/types/collections';
 
 interface ParameterSelectProps {
   category: ParameterCategory;
@@ -39,7 +39,7 @@ export function ParameterSelect({
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
-  const parameters = data?.data || [];
+  const parameters: ParameterDocument[] = (data?.data as ParameterDocument[]) || [];
 
   return (
     <div className="space-y-2">

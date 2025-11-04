@@ -118,7 +118,7 @@ export const quickAddBeneficiarySchema = z.object({
     .max(50, 'Uyruk en fazla 50 karakter olmalıdır'),
   birthDate: pastDateSchema,
   identityNumber: tcKimlikNoSchema.optional(),
-  mernisCheck: z.boolean().optional().default(false),
+    mernisCheck: z.boolean().default(false),
   fundRegion: z.nativeEnum(FundRegion, {
     message: 'Fon bölgesi seçiniz',
   }),
@@ -154,7 +154,7 @@ export const beneficiarySchema = z
       .min(2, 'Uyruk en az 2 karakter olmalıdır')
       .max(50, 'Uyruk en fazla 50 karakter olmalıdır'),
     identityNumber: tcKimlikNoSchema.optional(),
-    mernisCheck: z.boolean().optional().default(false),
+    mernisCheck: z.boolean().default(false),
     category: z.nativeEnum(BeneficiaryCategory, {
       message: 'Kategori seçiniz',
     }),

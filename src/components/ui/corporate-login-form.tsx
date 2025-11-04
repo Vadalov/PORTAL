@@ -457,10 +457,10 @@ export function CorporateLoginForm({
               >
               <Checkbox
                 id="remember"
-              checked={rememberMe}
-                onCheckedChange={setRememberMe}
-                  disabled={isLoading}
-                />
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked === true)}
+                disabled={isLoading}
+              />
                 <Label
                   htmlFor="remember"
                   className="text-sm text-slate-700 cursor-pointer"

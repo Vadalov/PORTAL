@@ -13,6 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import type { CreateDocumentData } from '@/types/collections';
+import type { BeneficiaryDocument } from '@/types/collections';
 import { toast } from 'sonner';
 import {
   Loader2,
@@ -47,9 +49,11 @@ import { formatErrorMessage } from '@/lib/errors';
 // Use central validation schema
 const advancedBeneficiarySchema = beneficiarySchema;
 
-// Use central type
+// Use central type - ensure mernisCheck is always boolean
 import type { BeneficiaryFormData } from '@/lib/validations/beneficiary';
-type AdvancedBeneficiaryFormData = z.infer<typeof advancedBeneficiarySchema>;
+type AdvancedBeneficiaryFormData = Omit<BeneficiaryFormData, 'mernisCheck'> & {
+  mernisCheck: boolean; // Ensure mernisCheck is always boolean, not undefined
+};
 
 interface AdvancedBeneficiaryFormProps {
   onSuccess?: () => void;
@@ -79,8 +83,9 @@ export function AdvancedBeneficiaryForm({
     watch,
     formState: { errors },
   } = useForm<AdvancedBeneficiaryFormData>({
-    resolver: zodResolver(advancedBeneficiarySchema),
+    resolver: zodResolver(advancedBeneficiarySchema) as any, // Type assertion needed due to mernisCheck type mismatch
     defaultValues: {
+      mernisCheck: false,
       familyMemberCount: 1,
       children_count: 0,
       orphan_children_count: 0,
@@ -99,12 +104,62 @@ export function AdvancedBeneficiaryForm({
   });
 
   const createBeneficiaryMutation = useMutation({
-    mutationFn: (data: AdvancedBeneficiaryFormData) =>
-      api.beneficiaries.createBeneficiary({
-        ...data,
+    mutationFn: (data: AdvancedBeneficiaryFormData) => {
+      // Transform form data to API format (BeneficiaryDocument)
+      const beneficiaryData: CreateDocumentData<BeneficiaryDocument> = {
+        // Required fields
+        name: `${data.firstName} ${data.lastName}`.trim(),
+        tc_no: data.identityNumber || '',
+        phone: data.mobilePhone || '',
+        address: data.address || '',
+        city: data.city || '',
+        district: data.district || '',
+        neighborhood: data.neighborhood || '',
+        family_size: data.familyMemberCount || 1,
+        
+        // Optional fields
+        email: data.email,
+        birth_date: data.birthDate,
+        gender: data.gender,
+        nationality: data.nationality,
+        religion: data.religion,
+        marital_status: data.maritalStatus,
+        children_count: data.children_count,
+        orphan_children_count: data.orphan_children_count,
+        elderly_count: data.elderly_count,
+        disabled_count: data.disabled_count,
+        income_level: data.income_level,
+        income_source: data.incomeSources?.join(', '),
+        has_debt: data.has_debt,
+        housing_type: data.livingPlace,
+        has_vehicle: data.has_vehicle,
+        health_status: data.hasChronicIllness ? 'chronic' : undefined,
+        has_chronic_illness: data.hasChronicIllness,
+        chronic_illness_detail: data.chronicIllnessDetail,
+        has_disability: data.hasDisability,
+        disability_detail: data.disabilityDetail,
+        has_health_insurance: data.has_health_insurance,
+        education_level: data.educationLevel,
+        occupation: data.occupation,
+        employment_status: data.employment_status,
+        aid_type: data.aidType,
+        totalAidAmount: data.totalAidAmount,
+        aid_duration: data.aid_duration,
+        priority: data.priority,
+        reference_name: data.referenceName,
+        reference_phone: data.referencePhone,
+        reference_relation: data.referenceRelation,
+        notes: data.notes,
+        previous_aid: data.previous_aid,
+        other_organization_aid: data.other_organization_aid,
+        emergency: data.emergency,
+        contact_preference: data.contactPreference,
         status: 'AKTIF',
         approval_status: 'pending',
-      }),
+      };
+      
+      return api.beneficiaries.createBeneficiary(beneficiaryData);
+    },
     onSuccess: () => {
       toast.success('İhtiyaç sahibi başarıyla eklendi');
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });

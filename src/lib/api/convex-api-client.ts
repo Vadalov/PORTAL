@@ -71,8 +71,8 @@ export const convexApiClient = {
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.search) searchParams.set('search', params.search);
-      if (params?.filters?.status) searchParams.set('status', params.filters.status);
-      if (params?.filters?.city) searchParams.set('city', params.filters.city);
+      if (params?.filters?.status) searchParams.set('status', String(params.filters.status));
+      if (params?.filters?.city) searchParams.set('city', String(params.filters.city));
 
       return apiRequest<BeneficiaryDocument[]>(`/api/beneficiaries?${searchParams.toString()}`);
     },
@@ -147,9 +147,9 @@ export const convexApiClient = {
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.search) searchParams.set('search', params.search);
-      if (params?.filters?.status) searchParams.set('status', params.filters.status);
-      if (params?.filters?.priority) searchParams.set('priority', params.filters.priority);
-      if (params?.filters?.assigned_to) searchParams.set('assigned_to', params.filters.assigned_to);
+      if (params?.filters?.status) searchParams.set('status', String(params.filters.status));
+      if (params?.filters?.priority) searchParams.set('priority', String(params.filters.priority));
+      if (params?.filters?.assigned_to) searchParams.set('assigned_to', String(params.filters.assigned_to));
 
       return apiRequest<TaskDocument[]>(`/api/tasks?${searchParams.toString()}`);
     },
@@ -196,7 +196,7 @@ export const convexApiClient = {
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.search) searchParams.set('search', params.search);
-      if (params?.filters?.status) searchParams.set('status', params.filters.status);
+      if (params?.filters?.status) searchParams.set('status', String(params.filters.status));
 
       return apiRequest<MeetingDocument[]>(`/api/meetings?${searchParams.toString()}`);
     },
