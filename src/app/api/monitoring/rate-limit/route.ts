@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { RateLimitMonitor, RateLimitViolation } from '@/lib/rate-limit-monitor';
+
+// Only import rate-limit-monitor at runtime to avoid build-time jsdom issues
+// This prevents Next.js from trying to bundle jsdom during build
+import type { RateLimitViolation } from '@/lib/rate-limit-monitor';
+
+let RateLimitMonitor: typeof import('@/lib/rate-limit-monitor').RateLimitMonitor;
+
+async function loadRateLimitMonitor() {
+  if (!RateLimitMonitor) {
+    const module = await import('@/lib/rate-limit-monitor');
+    RateLimitMonitor = module.RateLimitMonitor;
+  }
+  return { RateLimitMonitor };
+}
 
 /**
  * GET /api/monitoring/rate-limit
@@ -12,6 +25,7 @@ import { RateLimitMonitor, RateLimitViolation } from '@/lib/rate-limit-monitor';
  * - limit: number (for violations, default: 50)
  */
 export async function GET(request: NextRequest) {
+  const { RateLimitMonitor: Monitor } = await loadRateLimitMonitor();
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action');
   const timeRange = (searchParams.get('timeRange') as '1h' | '24h' | '7d' | '30d') || '24h';
@@ -20,7 +34,7 @@ export async function GET(request: NextRequest) {
   try {
     switch (action) {
       case 'stats':
-        const stats = RateLimitMonitor.getStats(timeRange);
+        const stats = Monitor.getStats(timeRange);
         return NextResponse.json({
           success: true,
           data: stats,
@@ -29,7 +43,7 @@ export async function GET(request: NextRequest) {
 
       case 'violations':
         const limit = parseInt(searchParams.get('limit') || '50');
-        const violations = RateLimitMonitor.getRecentViolations(limit);
+        const violations = Monitor.getRecentViolations(limit);
         return NextResponse.json({
           success: true,
           data: violations,
@@ -52,7 +66,7 @@ export async function GET(request: NextRequest) {
         const ipTimeRange = ['1h', '24h', '7d'].includes(timeRange)
           ? (timeRange as '1h' | '24h' | '7d')
           : '24h';
-        const ipStats = RateLimitMonitor.getIPStats(ip, ipTimeRange);
+        const ipStats = Monitor.getIPStats(ip, ipTimeRange);
         return NextResponse.json({
           success: true,
           data: {
@@ -64,7 +78,7 @@ export async function GET(request: NextRequest) {
         });
 
       case 'export':
-        const exportData = RateLimitMonitor.exportData();
+        const exportData = Monitor.exportData();
         return new NextResponse(exportData, {
           headers: {
             'Content-Type': 'application/json',
@@ -82,7 +96,7 @@ export async function GET(request: NextRequest) {
           );
         }
 
-        RateLimitMonitor.reset();
+        Monitor.reset();
         return NextResponse.json({
           success: true,
           message: 'Rate limit monitoring data reset successfully',
@@ -92,8 +106,8 @@ export async function GET(request: NextRequest) {
       default:
         // Default action - return overview
         const overview = {
-          stats: RateLimitMonitor.getStats('24h'),
-          recentViolations: RateLimitMonitor.getRecentViolations(10),
+          stats: Monitor.getStats('24h'),
+          recentViolations: Monitor.getRecentViolations(10),
           availableActions: [
             'stats - Get overall statistics',
             'violations - Get recent violations',
@@ -136,8 +150,9 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'record-violation':
         // Manuel violation kaydetme (test amaçlı)
+        const { RateLimitMonitor: MonitorRecord } = await loadRateLimitMonitor();
         const violationData = data as Omit<RateLimitViolation, 'id' | 'timestamp'>;
-        RateLimitMonitor.recordViolation(violationData);
+        MonitorRecord.recordViolation(violationData);
 
         return NextResponse.json({
           success: true,
@@ -146,7 +161,8 @@ export async function POST(request: NextRequest) {
 
       case 'bulk-export':
         // Toplu export
-        const exportData = RateLimitMonitor.exportData();
+        const { RateLimitMonitor: MonitorExport } = await loadRateLimitMonitor();
+        const exportData = MonitorExport.exportData();
         return new NextResponse(exportData, {
           headers: {
             'Content-Type': 'application/json',
