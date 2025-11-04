@@ -39,15 +39,19 @@ export default function Error({
     }
 
     // Send error to Sentry
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
-        tags: { digest: error.digest, type: 'route-error' },
-      });
+    if (typeof window !== 'undefined') {
+      const windowWithSentry = window as Window & { Sentry?: { captureException: (error: Error, options?: { tags?: Record<string, string> }) => void } };
+      if (windowWithSentry.Sentry) {
+        windowWithSentry.Sentry.captureException(error, {
+          tags: { digest: error.digest, type: 'route-error' },
+        });
+      }
     }
 
     // Add error tracking to window (development only)
     if (process.env.NODE_ENV === 'development') {
-      (window as any).__LAST_ERROR__ = { error, digest: error.digest, timestamp: new Date() };
+      const windowWithError = window as Window & { __LAST_ERROR__?: { error: Error; digest?: string; timestamp: Date } };
+      windowWithError.__LAST_ERROR__ = { error, digest: error.digest, timestamp: new Date() };
     }
   }, [error]);
 

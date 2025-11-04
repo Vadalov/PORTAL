@@ -142,7 +142,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
-      currency: currency,
+      currency,
     }).format(amount);
   };
 
@@ -310,8 +310,8 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
                               size="sm"
                               className="h-auto p-0 text-blue-600 hover:text-blue-700"
                               onClick={() => {
-                                // TODO: Implement file download/preview
-                                toast.info('Dosya görüntüleme özelliği yakında eklenecek');
+                                // Open file in new tab
+                                window.open(`/api/storage/files/${donation.receipt_file_id}?download=true`, '_blank');
                               }}
                             >
                               <span className="text-xs">Belge var</span>

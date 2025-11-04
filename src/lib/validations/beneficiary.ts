@@ -40,29 +40,24 @@ const tcKimlikNoSchema = z
   .length(11, 'TC Kimlik No 11 haneli olmalıdır')
   .regex(/^\d{11}$/, 'TC Kimlik No sadece rakam içermelidir')
   .refine((value) => {
+    // İlk hane 0 olamaz
+    if (value[0] === '0') return false;
+
     // TC Kimlik No algoritma kontrolü
     const digits = value.split('').map(Number);
 
-    // İlk 10 hanenin toplamı
-    const sum1 = digits.slice(0, 10).reduce((sum, digit) => sum + digit, 0);
+    // 10. hane kontrolü: (1,3,5,7,9. hanelerin toplamı * 7 - 2,4,6,8. hanelerin toplamı) % 10
+    const oddSum = digits[0] + digits[2] + digits[4] + digits[6] + digits[8];
+    const evenSum = digits[1] + digits[3] + digits[5] + digits[7];
+    const check10 = (oddSum * 7 - evenSum) % 10;
 
-    // Çift pozisyonlardaki rakamların toplamı
-    const sum2 = digits
-      .filter((_, index) => index % 2 === 0)
-      .reduce((sum, digit) => sum + digit, 0);
+    if (digits[9] !== check10) return false;
 
-    // Tek pozisyonlardaki rakamların toplamı
-    const sum3 = digits
-      .filter((_, index) => index % 2 === 1)
-      .reduce((sum, digit) => sum + digit, 0);
+    // 11. hane kontrolü: (İlk 10 hanenin toplamı) % 10
+    const sum10 = digits.slice(0, 10).reduce((sum, digit) => sum + digit, 0);
+    const check11 = sum10 % 10;
 
-    // 10. hane kontrolü
-    const check10 = (sum2 * 7 - sum3) % 10;
-
-    // 11. hane kontrolü
-    const check11 = sum1 % 10;
-
-    return digits[9] === check10 && digits[10] === check11;
+    return digits[10] === check11;
   }, 'Geçersiz TC Kimlik No');
 
 // Telefon numarası validasyonu (E.164 format)

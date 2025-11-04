@@ -198,7 +198,7 @@ export function MapLocationPicker({
         {
           origin: points[0],
           destination: points[points.length - 1],
-          waypoints: waypoints,
+          waypoints,
           travelMode: window.google.maps.TravelMode.DRIVING,
           optimizeWaypoints: true,
         },
@@ -275,7 +275,7 @@ export function MapLocationPicker({
         // Add marker for searched location
         new window.google.maps.Marker({
           position: pos,
-          map: map,
+          map,
           title: results[0].formatted_address,
         });
 

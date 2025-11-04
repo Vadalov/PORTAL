@@ -159,6 +159,11 @@ export interface DonationDocument extends AppwriteDocument {
   kumbara_location?: string;
   collection_date?: string;
   kumbara_institution?: string;
+  location_coordinates?: { lat: number; lng: number };
+  location_address?: string;
+  route_points?: { lat: number; lng: number }[];
+  route_distance?: number;
+  route_duration?: number;
 }
 
 // Aid Requests Collection

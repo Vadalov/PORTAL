@@ -9,10 +9,41 @@ import {
   TransactionCategory,
   ApiResponse,
 } from '@/types/financial';
-import { Id } from '@/convex/_generated/dataModel';
+import { getCurrentUserId } from '@/lib/auth/get-user';
+
+// Type for finance record from Convex
+interface FinanceRecord {
+  _id: string;
+  _creationTime: number;
+  created_by: string;
+  record_type: string;
+  category: string;
+  amount: number;
+  currency: string;
+  description: string;
+  transaction_date: string;
+  status: 'pending' | 'approved' | 'rejected';
+  [key: string]: unknown;
+}
+
+// Type for transaction response
+interface Transaction {
+  id: string;
+  userId: string;
+  type: string;
+  category: string;
+  amount: number;
+  currency: string;
+  description: string;
+  date: Date;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  tags: string[];
+}
 
 // Helper to convert finance_record from Convex to Transaction format
-function convertToTransaction(record: any): any {
+function convertToTransaction(record: FinanceRecord): Transaction {
   return {
     id: record._id,
     userId: record.created_by,
@@ -54,7 +85,7 @@ function parseQueryParams(request: NextRequest): TransactionQuery {
 }
 
 // Note: Filtering is now done on Convex side, but we keep this for client-side filtering if needed
-function filterTransactions(transactions: any[], query: TransactionQuery): any[] {
+function filterTransactions(transactions: Transaction[], query: TransactionQuery): Transaction[] {
   let filtered = [...transactions];
 
   // Type filter
@@ -167,7 +198,7 @@ async function getTransactionsHandler(request: NextRequest) {
     const result = paginateResults(transactions, query.page, query.limit);
 
     const apiResponse: ApiResponse<{
-      data: any[];
+      data: Transaction[];
       pagination: {
         page: number;
         limit: number;
@@ -209,8 +240,14 @@ async function createTransactionHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Gerekli alanlar eksik' }, { status: 400 });
     }
 
-    // TODO: Get user ID from auth context
-    const userId = 'user-1' as Id<"users">; // In real app, get from auth
+    // Get user ID from auth context
+    const userId = await getCurrentUserId(request);
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: 'Kimlik doğrulama gerekli' },
+        { status: 401 }
+      );
+    }
 
     const financeRecordData = {
       record_type: body.type as 'income' | 'expense',
@@ -227,11 +264,23 @@ async function createTransactionHandler(request: NextRequest) {
       status: (body.status || 'pending') as 'pending' | 'approved' | 'rejected',
     };
 
-    // @ts-ignore - Convex API type issue
-    const response = await convexFinanceRecords.create(financeRecordData);
+    const recordId = await convexFinanceRecords.create(financeRecordData);
 
-    // Convert back to Transaction format for response
-    const transaction = convertToTransaction(response);
+    // Create transaction from the created record data plus the ID
+    const transaction: Transaction = {
+      id: recordId,
+      userId,
+      type: financeRecordData.record_type,
+      category: financeRecordData.category,
+      amount: financeRecordData.amount,
+      currency: financeRecordData.currency,
+      description: financeRecordData.description,
+      date: new Date(financeRecordData.transaction_date),
+      status: financeRecordData.status,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      tags: [],
+    };
 
     return NextResponse.json(
       {

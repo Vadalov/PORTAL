@@ -5,6 +5,7 @@ import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
 import { extractParams } from '@/lib/api/route-helpers';
 import { Id } from '@/convex/_generated/dataModel';
+import { hashPassword, validatePasswordStrength } from '@/lib/auth/password';
 
 function validateUserUpdate(data: Record<string, unknown>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -71,6 +72,20 @@ async function updateUserHandler(
       );
     }
 
+    // Handle password update if provided
+    let passwordHash: string | undefined;
+    if (body.password) {
+      const password = body.password as string;
+      const passwordValidation = validatePasswordStrength(password);
+      if (!passwordValidation.valid) {
+        return NextResponse.json(
+          { success: false, error: passwordValidation.error || 'Geçersiz şifre' },
+          { status: 400 }
+        );
+      }
+      passwordHash = await hashPassword(password);
+    }
+
     const userData: Parameters<typeof convexUsers.update>[1] = {
       name: body.name as string | undefined,
       email: body.email as string | undefined,
@@ -78,6 +93,7 @@ async function updateUserHandler(
       avatar: body.avatar as string | undefined,
       isActive: body.isActive as boolean | undefined,
       labels: body.labels as string[] | undefined,
+      ...(passwordHash && { passwordHash }),
     };
 
     const updated = await convexUsers.update(id as Id<"users">, userData);

@@ -70,12 +70,26 @@ export class ErrorBoundary extends Component<Props, State> {
     ErrorBoundary.errors.push(error);
 
     // Send error to Sentry if available
-    if (typeof window !== 'undefined' && (window as any).Sentry) {
-      (window as any).Sentry.captureException(error, {
-        contexts: { react: errorInfo },
-        tags: { boundaryName: this.props.name || 'unnamed' },
-        extra: { retryCount: this.state.retryCount },
-      });
+    if (typeof window !== 'undefined') {
+      const windowWithSentry = window as Window & {
+        Sentry?: {
+          captureException: (
+            error: Error,
+            options?: {
+              contexts?: Record<string, unknown>;
+              tags?: Record<string, string>;
+              extra?: Record<string, unknown>
+            }
+          ) => void
+        }
+      };
+      if (windowWithSentry.Sentry) {
+        windowWithSentry.Sentry.captureException(error, {
+          contexts: { react: errorInfo },
+          tags: { boundaryName: this.props.name || 'unnamed' },
+          extra: { retryCount: this.state.retryCount },
+        });
+      }
     }
   }
 
@@ -207,7 +221,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
 // Expose to window in development
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  (window as any).__ERROR_BOUNDARIES__ = ErrorBoundary;
+  const windowWithBoundaries = window as Window & { __ERROR_BOUNDARIES__?: typeof ErrorBoundary };
+  windowWithBoundaries.__ERROR_BOUNDARIES__ = ErrorBoundary;
 }
 
 /**

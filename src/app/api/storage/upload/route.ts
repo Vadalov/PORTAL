@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
+import { getConvexHttp } from '@/lib/convex/server';
+import { api } from '@/convex/_generated/api';
+import { getCurrentUserId } from '@/lib/auth/get-user';
 
 // Storage buckets (now using simple string identifiers)
 const STORAGE_BUCKETS = {
@@ -33,35 +36,116 @@ async function uploadHandler(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Dosya zorunludur' }, { status: 400 });
     }
 
-    // TODO: Implement file upload to Convex file storage or external storage (S3, Cloudinary, etc.)
-    // For now, return a mock file ID
-    // In production, you would:
-    // 1. Upload file to Convex file storage, or
-    // 2. Upload to external storage (S3, Cloudinary, etc.) and store metadata in Convex
+    // Validate file size (max 10MB)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { success: false, error: 'Dosya boyutu çok büyük (maksimum 10MB)' },
+        { status: 400 }
+      );
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
     
-    const fileId = `file_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    const fileUrl = `/api/storage/files/${fileId}`; // Mock URL
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { success: false, error: 'Desteklenmeyen dosya türü' },
+        { status: 400 }
+      );
+    }
 
-    logger.info('File upload', {
-      fileId,
-      bucketId,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-    });
+    // Get authenticated user
+    const userId = await getCurrentUserId(request);
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        fileId,
-        fileUrl,
+    // Upload to Convex fileStorage
+    const convexHttp = getConvexHttp();
+
+    try {
+      // Step 1: Generate upload URL from Convex
+      const uploadUrl = await convexHttp.action(api.storage.generateUploadUrl);
+
+      // Step 2: Upload file directly to Convex fileStorage using the signed URL
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': file.type,
+        },
+        body: await file.arrayBuffer(),
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`File upload to Convex failed: ${uploadResponse.statusText}`);
+      }
+
+      // Step 3: Get the storage ID from the response
+      // Convex fileStorage returns the storage ID (Id<"_storage">) in the response as text
+      const storageIdText = await uploadResponse.text();
+      
+      if (!storageIdText) {
+        throw new Error('Failed to get storage ID from Convex');
+      }
+
+      // The storage ID is returned as a string, but we need to use it as Id<"_storage">
+      // Convex will validate this when we use it in the mutation
+      const storageId = storageIdText as any; // Type assertion needed for Convex ID
+
+      // Step 4: Store file metadata in Convex database
+      const fileMetadataId = await convexHttp.mutation(api.storage.storeFileMetadata, {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        bucket: bucketId,
+        storageId, // Convex fileStorage ID
+        uploadedBy: userId || undefined,
+      });
+
+      // Step 5: Get the file URL for accessing the file
+      const fileUrl = await convexHttp.query(api.storage.getFileUrl, {
+        storageId,
+      });
+
+      logger.info('File upload successful', {
+        fileMetadataId,
+        storageId,
         bucketId,
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
-      },
-      message: 'Dosya başarıyla yüklendi',
-    });
+        uploadedBy: userId,
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          fileId: fileMetadataId,
+          storageId,
+          fileUrl: fileUrl || `/api/storage/files/${fileMetadataId}`,
+          bucketId,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+        },
+        message: 'Dosya başarıyla yüklendi',
+      });
+    } catch (uploadError) {
+      logger.error('File storage error', uploadError, {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+      });
+      throw uploadError;
+    }
   } catch (error: unknown) {
     logger.error('File upload error', error, {
       endpoint: '/api/storage/upload',

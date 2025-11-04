@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -59,29 +59,27 @@ export default function BudgetForm({
   className = '',
   mode = 'create',
 }: BudgetFormProps) {
-  const [formData, setFormData] = useState<CreateBudgetInput>({
-    name: '',
-    period: 'monthly',
-    year: new Date().getFullYear(),
-    month: new Date().getMonth() + 1,
-    categories: {},
-    status: 'draft',
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  // Initialize form data when budget changes
-  useEffect(() => {
-    if (budget && mode === 'edit') {
-      setFormData({
+  // Initialize form data - use budget data directly if in edit mode
+  const initialFormData: CreateBudgetInput = budget && mode === 'edit'
+    ? {
         name: budget.name,
         period: budget.period,
         year: budget.year,
         month: budget.month,
         categories: budget.categories,
         status: budget.status,
-      });
-    }
-  }, [budget, mode]);
+      }
+    : {
+        name: '',
+        period: 'monthly',
+        year: new Date().getFullYear(),
+        month: new Date().getMonth() + 1,
+        categories: {},
+        status: 'draft',
+      };
+
+  const [formData, setFormData] = useState<CreateBudgetInput>(initialFormData);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Validate form data
   const validateForm = (): boolean => {
@@ -109,7 +107,7 @@ export default function BudgetForm({
 
     try {
       await onSubmit(formData);
-    } catch (error) {
+    } catch (_error) {
       // Error handled by mutation's onError callback
     }
   };

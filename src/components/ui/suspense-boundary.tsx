@@ -60,7 +60,7 @@ const FallbackWrapper: React.FC<{
         }
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []); // Empty dependency array - only run once when component mounts
 
   if (fallback) {

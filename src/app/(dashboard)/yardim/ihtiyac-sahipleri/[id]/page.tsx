@@ -26,6 +26,7 @@ import {
   FileSignature,
   Package,
   Eye,
+  TrendingUp,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 import api from '@/lib/api';
 import { checkMernis } from '@/lib/api/mock-api';
+
+// Analytics Components
+import { AidHistoryChart } from '@/components/beneficiary-analytics/AidHistoryChart';
 import type { BeneficiaryDocument } from '@/types/collections';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -212,26 +216,44 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
       api.beneficiaries.updateBeneficiary(id, payload),
     onSuccess: (res) => {
       if (!res.error) {
-        toast.success('Kayıt güncellendi');
+        toast.success('✅ İhtiyaç sahibi bilgileri başarıyla güncellendi', {
+          description: `${beneficiary?.name} için yapılan değişiklikler kaydedildi.`,
+          duration: 3000,
+        });
         refetch();
       } else {
-        toast.error(res.error || 'Güncelleme başarısız');
+        toast.error('❌ Güncelleme başarısız', {
+          description: res.error || 'Bir hata oluştu. Lütfen tekrar deneyin.',
+          duration: 5000,
+        });
       }
     },
-    onError: () => toast.error('Güncelleme sırasında hata oluştu'),
+    onError: () => toast.error('❌ Bağlantı hatası', {
+      description: 'Güncelleme sırasında bir hata oluştu. İnternet bağlantınızı kontrol edin.',
+      duration: 5000,
+    }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => api.beneficiaries.deleteBeneficiary(id),
     onSuccess: (res) => {
       if (!res.error) {
-        toast.success('Kayıt silindi');
+        toast.success('🗑️ İhtiyaç sahibi kaydı başarıyla silindi', {
+          description: `${beneficiary?.name} için tüm bilgiler sistemden kaldırıldı.`,
+          duration: 4000,
+        });
         router.push('/yardim/ihtiyac-sahipleri');
       } else {
-        toast.error(res.error || 'Silme işlemi başarısız');
+        toast.error('❌ Silme işlemi başarısız', {
+          description: res.error || 'Kayıt silinirken bir hata oluştu.',
+          duration: 5000,
+        });
       }
     },
-    onError: () => toast.error('Silme sırasında hata oluştu'),
+    onError: () => toast.error('❌ Bağlantı hatası', {
+      description: 'Silme sırasında bir hata oluştu. İnternet bağlantınızı kontrol edin.',
+      duration: 5000,
+    }),
   });
 
   const mernisMutation = useMutation({
@@ -239,15 +261,27 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
     onSuccess: (res) => {
       if (res.success && res.data) {
         if (res.data.isValid) {
-          toast.success(res.data.message || 'Mernis geçerli');
+          toast.success('✅ Mernis Doğrulama Başarılı', {
+            description: res.data.message || 'TC Kimlik numarası geçerli.',
+            duration: 3000,
+          });
         } else {
-          toast.error(res.data.message || 'Mernis geçersiz');
+          toast.error('❌ Mernis Doğrulama Başarısız', {
+            description: res.data.message || 'TC Kimlik numarası geçersiz.',
+            duration: 5000,
+          });
         }
       } else {
-        toast.error(res.error || 'Mernis kontrolü başarısız');
+        toast.error('⚠️ Mernis Kontrolü Başarısız', {
+          description: res.error || 'Mernis servisi şu anda kullanılamıyor.',
+          duration: 5000,
+        });
       }
     },
-    onError: () => toast.error('Mernis kontrolü sırasında hata oluştu'),
+    onError: () => toast.error('❌ Bağlantı Hatası', {
+      description: 'Mernis servisi ile bağlantı kurulamadı. Lütfen daha sonra tekrar deneyin.',
+      duration: 5000,
+    }),
   });
 
   const {
@@ -364,13 +398,6 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
 
   const modalCards = [
     {
-      id: 'bank',
-      title: 'Banka Hesapları',
-      icon: CreditCard,
-      count: 0,
-      description: 'Bağlı banka hesaplarını görüntüle ve yönet',
-    },
-    {
       id: 'documents',
       title: 'Dokümanlar',
       icon: FileText,
@@ -386,10 +413,17 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
     },
     {
       id: 'aid-requests',
-      title: 'Yardım Talepleri',
-      icon: HandHeart,
+      title: 'Yapılan Yardımlar',
+      icon: Package,
       count: 0,
-      description: 'Yardım taleplerini ve geçmişi görüntüle',
+      description: 'Yapılan yardımları görüntüle ve takip et',
+    },
+    {
+      id: 'bank',
+      title: 'Banka Hesapları',
+      icon: CreditCard,
+      count: 0,
+      description: 'Bağlı banka hesaplarını görüntüle ve yönet',
     },
     {
       id: 'consent',
@@ -397,13 +431,6 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
       icon: FileSignature,
       count: 0,
       description: 'Rıza beyanlarını görüntüle ve yönet',
-    },
-    {
-      id: 'aid-given',
-      title: 'Yapılan Yardımlar',
-      icon: Package,
-      count: 0,
-      description: 'Yapılan yardımları görüntüle ve takip et',
     },
     {
       id: 'dependent-people',
@@ -418,40 +445,58 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
     <form onSubmit={handleSubmit(onSubmit)} className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50/50">
       {/* Premium Header */}
       <div className="bg-white/95 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-[1800px] mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" onClick={() => router.back()} size="sm" className="gap-2 hover:bg-slate-100/80">
-                <ArrowLeft className="h-4 w-4" />
-                Geri
-              </Button>
-              <Separator orientation="vertical" className="h-6" />
-              <div>
-                <h1 className="text-lg font-semibold text-slate-800 tracking-tight">
-                  İhtiyaç Sahibi Detay - {beneficiary.name}
-                </h1>
-              </div>
-            </div>
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 py-3 sm:py-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+      <div className="flex items-center gap-3 min-w-0">
+      <Button variant="ghost" onClick={() => router.back()} size="sm" className="gap-2 hover:bg-slate-100/80 shrink-0">
+      <ArrowLeft className="h-4 w-4" />
+      <span className="hidden sm:inline">Geri</span>
+      </Button>
+      <Separator orientation="vertical" className="h-6 hidden sm:block" />
+      <div className="min-w-0">
+      <h1 className="text-base sm:text-lg font-semibold text-slate-800 tracking-tight truncate">
+      İhtiyaç Sahibi Detay - {beneficiary.name}
+      </h1>
+      </div>
+      </div>
 
-            <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
               <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 text-red-600 hover:bg-red-50/80 border-red-200/60"
-                onClick={() => deleteMutation.mutate()}
-                disabled={deleteMutation.isPending}
+              variant="outline"
+              size="sm"
+              className="gap-2 text-red-600 hover:bg-red-50/80 border-red-200/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
               >
-                <Trash2 className="h-4 w-4" />
-                {deleteMutation.isPending ? 'Siliniyor...' : 'Kaldır'}
+              {deleteMutation.isPending ? (
+                <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-600 border-t-transparent" />
+                    Siliniyor...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    Kaldır
+                  </>
+                )}
               </Button>
               <Button
-                type="submit"
-                size="sm"
-                className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={isSubmitting || updateMutation.isPending}
+              type="submit"
+              size="sm"
+              className="gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              disabled={isSubmitting || updateMutation.isPending}
               >
-                <Save className="h-4 w-4" />
-                {isSubmitting || updateMutation.isPending ? 'Kaydediliyor...' : 'Kaydet'}
+              {isSubmitting || updateMutation.isPending ? (
+                <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    Kaydediliyor...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Kaydet
+                  </>
+                )}
               </Button>
               <Button variant="outline" size="sm" className="gap-2 hover:bg-slate-100/80" onClick={() => router.back()}>
                 <X className="h-4 w-4" />
@@ -463,10 +508,10 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
       </div>
 
       {/* Main Content */}
-      <div className="max-w-[1800px] mx-auto px-6 py-4">
-        <div className="grid grid-cols-12 gap-3">
-          {/* Left Column - Main Form */}
-          <div className="col-span-9 space-y-3">
+      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 py-4">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 xl:gap-6">
+      {/* Left Column - Main Form */}
+      <div className="col-span-1 xl:col-span-9 space-y-4 xl:space-y-6">
             {/* Temel Bilgiler */}
             <Card>
               <CardHeader className="pb-3 border-b border-slate-100">
@@ -484,17 +529,37 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                     <p className="text-xs text-center text-muted-foreground mt-2">Fotoğraf</p>
                   </div>
 
-                  <div className="col-span-10 grid grid-cols-3 gap-3">
+                  <div className="col-span-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">Ad *</Label>
-                      <Input {...register('firstName')} className="h-10 border-slate-200/60 focus:border-blue-500/50" />
-                      {errors.firstName && <p className="text-xs text-red-600">{errors.firstName.message}</p>}
+                    <Label className="text-sm font-medium text-slate-700">Ad *</Label>
+                    <Input
+                      {...register('firstName')}
+                        className={`h-10 border-slate-200/60 focus:border-blue-500/50 transition-colors ${
+                          errors.firstName ? 'border-red-300 focus:border-red-500' : ''
+                        }`}
+                    />
+                    {errors.firstName && (
+                      <p className="text-xs text-red-600 animate-in slide-in-from-top-1 duration-200 flex items-center gap-1">
+                          <span className="inline-block w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                          {errors.firstName.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-slate-700">Soyad *</Label>
-                      <Input {...register('lastName')} className="h-10 border-slate-200/60 focus:border-blue-500/50" />
-                      {errors.lastName && <p className="text-xs text-red-600">{errors.lastName.message}</p>}
+                      <Input
+                        {...register('lastName')}
+                        className={`h-10 border-slate-200/60 focus:border-blue-500/50 transition-colors ${
+                          errors.lastName ? 'border-red-300 focus:border-red-500' : ''
+                        }`}
+                      />
+                      {errors.lastName && (
+                        <p className="text-xs text-red-600 animate-in slide-in-from-top-1 duration-200 flex items-center gap-1">
+                          <span className="inline-block w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                          {errors.lastName.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className="space-y-2">
@@ -580,8 +645,20 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium text-slate-700">Telefon</Label>
-                      <Input {...register('phone')} className="h-10 border-slate-200/60 focus:border-blue-500/50" />
+                    <Label className="text-sm font-medium text-slate-700">Telefon</Label>
+                    <Input
+                        {...register('phone')}
+                        className={`h-10 border-slate-200/60 focus:border-blue-500/50 transition-colors ${
+                          errors.phone ? 'border-red-300 focus:border-red-500' : ''
+                        }`}
+                        placeholder="+90 5XX XXX XX XX"
+                      />
+                      {errors.phone && (
+                        <p className="text-xs text-red-600 animate-in slide-in-from-top-1 duration-200 flex items-center gap-1">
+                          <span className="inline-block w-1 h-1 bg-red-500 rounded-full animate-pulse" />
+                          {errors.phone.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -597,7 +674,7 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 pt-4">
-                <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-slate-700">Doğum Tarihi</Label>
                     <Input type="date" {...register('birth_date')} className="h-10 border-slate-200/60 focus:border-blue-500/50" />
@@ -669,7 +746,7 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 pt-4">
-                <div className="grid grid-cols-5 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-slate-700">Şehir</Label>
                     <Controller
@@ -1413,6 +1490,49 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
               </CardContent>
             </Card>
 
+            {/* Analytics Summary */}
+            <Card>
+              <CardHeader className="pb-3 border-b border-slate-100">
+                <CardTitle className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Genel İstatistikler
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {beneficiary.family_size || 1}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Aile Büyüklüğü</div>
+                  </div>
+
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">
+                      {beneficiary.children_count || 0}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Çocuk Sayısı</div>
+                  </div>
+
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {beneficiary.totalAidAmount ? `${beneficiary.totalAidAmount.toLocaleString('tr-TR')} ₺` : '0 ₺'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Toplam Yardım</div>
+                  </div>
+
+                  <div className="text-center p-3 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {beneficiary.priority === 'ACIL' ? 'Acil' :
+                       beneficiary.priority === 'YUKSEK' ? 'Yüksek' :
+                       beneficiary.priority === 'ORTA' ? 'Orta' : 'Düşük'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Öncelik</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Kayıt Bilgileri */}
             <Card>
               <CardHeader className="pb-3 border-b border-slate-100">
@@ -1438,8 +1558,8 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
           </div>
 
           {/* Right Column - 6 Square Modal Cards */}
-          <div className="col-span-3">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="col-span-1 xl:col-span-3 order-first xl:order-last">
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-2 gap-3 xl:gap-4">
               {modalCards.map((card) => (
                 <Dialog key={card.id} open={openModal === card.id} onOpenChange={(open) => setOpenModal(open ? card.id : null)}>
                   <DialogTrigger asChild>
@@ -1474,6 +1594,49 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
           </div>
         </div>
       </div>
+
+      {/* Active Modal Components */}
+      {openModal === 'aid-requests' ? (
+        <Dialog open={true} onOpenChange={() => setOpenModal(null)}>
+          <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Yapılan Yardımlar</DialogTitle>
+              <DialogDescription>
+                Yapılan yardımları görüntüle ve takip et
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <AidHistoryChart beneficiaryId={id} />
+            </div>
+          </DialogContent>
+        </Dialog>
+      ) : openModal ? (
+        <Dialog open={true} onOpenChange={() => setOpenModal(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {openModal === 'documents' && 'Dokümanlar'}
+                {openModal === 'photos' && 'Fotoğraflar'}
+                {openModal === 'bank' && 'Banka Hesapları'}
+                {openModal === 'consent' && 'Rıza Beyanları'}
+                {openModal === 'dependent-people' && 'Baktığı Kişiler'}
+              </DialogTitle>
+              <DialogDescription>
+                {openModal === 'documents' && 'Kimlik, belgeler ve diğer dokümanları görüntüle'}
+                {openModal === 'photos' && 'Kişi ve aile fotoğraflarını görüntüle'}
+                {openModal === 'bank' && 'Bağlı banka hesaplarını görüntüle ve yönet'}
+                {openModal === 'consent' && 'Rıza beyanlarını görüntüle ve yönet'}
+                {openModal === 'dependent-people' && 'Bakmakla yükümlü olduğu kişileri görüntüle'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-muted-foreground">
+                Bu bölüm yakında aktif olacaktır. İlgili bilgiler burada görüntülenecek.
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </form>
   );
 }

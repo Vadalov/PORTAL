@@ -63,15 +63,19 @@ export default function InvoiceForm({
     dueDate: string;
     status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
     notes?: string;
-  }>({
-    clientName: '',
-    clientEmail: '',
-    clientAddress: '',
-    items: [],
-    issueDate: new Date().toISOString().split('T')[0],
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-    status: 'draft',
-    notes: '',
+  }>(() => {
+    const today = new Date();
+    const thirtyDaysLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    return {
+      clientName: '',
+      clientEmail: '',
+      clientAddress: '',
+      items: [],
+      issueDate: today.toISOString().split('T')[0],
+      dueDate: thirtyDaysLater.toISOString().split('T')[0],
+      status: 'draft',
+      notes: '',
+    };
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [items, setItems] = useState<InvoiceItem[]>([
@@ -298,7 +302,7 @@ export default function InvoiceForm({
             </div>
 
             <div className="space-y-3">
-              {items.map((item, index) => (
+              {items.map((item, _index) => (
                 <div key={item.id} className="grid grid-cols-12 gap-2 p-3 border rounded-lg">
                   <div className="col-span-4">
                     <Input

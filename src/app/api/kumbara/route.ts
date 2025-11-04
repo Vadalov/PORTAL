@@ -1,9 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { convexDonations, normalizeQueryParams } from '@/lib/convex/api';
+import { convexDonations } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import QRCode from 'qrcode';
 import type { DonationDocument } from '@/types/collections';
+
+// Type for QR data
+interface QRData {
+  type: string;
+  id: string;
+  location: string;
+  institution: string;
+  collection_date: string;
+  scan_url: string;
+  coordinates?: { lat: number; lng: number };
+  address?: string;
+}
+
+// Type for validation result
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  normalizedData?: Partial<DonationDocument>;
+}
 
 /**
  * Generate QR code for kumbara donation
@@ -16,7 +35,7 @@ async function generateKumbaraQR(data: {
   location_coordinates?: { lat: number; lng: number } | null;
   location_address?: string;
 }): Promise<string> {
-  const qrData: any = {
+  const qrData: QRData = {
     type: 'KUMBARA',
     id: data.id,
     location: data.location,
@@ -47,11 +66,7 @@ async function generateKumbaraQR(data: {
 /**
  * Validate kumbara donation payload
  */
-function validateKumbaraDonation(data: any): {
-  isValid: boolean;
-  errors: string[];
-  normalizedData?: any;
-} {
+function validateKumbaraDonation(data: Partial<DonationDocument>): ValidationResult {
   const errors: string[] = [];
 
   // Validate basic donation fields
@@ -128,7 +143,7 @@ function validateKumbaraDonation(data: any): {
     route_points: data.route_points || [],
     route_distance: data.route_distance || null,
     route_duration: data.route_duration || null,
-  } as any;
+  } as Partial<DonationDocument>;
 
   return { isValid: true, errors: [], normalizedData };
 }
@@ -170,29 +185,29 @@ export async function GET(request: NextRequest) {
     if (search && search.trim()) {
       const searchLower = search.toLowerCase();
       filteredData = filteredData.filter(
-        (donation: any) =>
-          donation.donor_name?.toLowerCase().includes(searchLower) ||
-          donation.kumbara_location?.toLowerCase().includes(searchLower) ||
-          donation.kumbara_institution?.toLowerCase().includes(searchLower) ||
-          donation.receipt_number?.toLowerCase().includes(searchLower)
+        (donation) =>
+          (donation as unknown as DonationDocument).donor_name?.toLowerCase().includes(searchLower) ||
+          (donation as unknown as DonationDocument).kumbara_location?.toLowerCase().includes(searchLower) ||
+          (donation as unknown as DonationDocument).kumbara_institution?.toLowerCase().includes(searchLower) ||
+          (donation as unknown as DonationDocument).receipt_number?.toLowerCase().includes(searchLower)
       );
     }
-    
+
     if (location && location !== 'all') {
-      filteredData = filteredData.filter((d: any) => d.kumbara_location === location);
+      filteredData = filteredData.filter((d) => (d as unknown as DonationDocument).kumbara_location === location);
     }
-    
+
     if (status && status !== 'all') {
-      filteredData = filteredData.filter((d: any) => d.status === status);
+      filteredData = filteredData.filter((d) => (d as unknown as DonationDocument).status === status);
     }
-    
+
     if (currency && currency !== 'all') {
-      filteredData = filteredData.filter((d: any) => d.currency === currency);
+      filteredData = filteredData.filter((d) => (d as unknown as DonationDocument).currency === currency);
     }
-    
+
     // Date range filtering
     if (startDate || endDate) {
-      filteredData = filteredData.filter((d: any) => {
+      filteredData = filteredData.filter((d) => {
         const collectionDate = d.collection_date;
         if (!collectionDate) return false;
         const date = new Date(collectionDate);
@@ -431,8 +446,8 @@ export const POST = withCsrfProtection(async (request: NextRequest) => {
       location: body.kumbara_location || '',
       institution: body.kumbara_institution || '',
       collection_date: body.collection_date || '',
-      location_coordinates: (body as any).location_coordinates || null,
-      location_address: (body as any).location_address || '',
+      location_coordinates: body.location_coordinates || null,
+      location_address: body.location_address || '',
     });
 
     logger.info('Created kumbara donation', {

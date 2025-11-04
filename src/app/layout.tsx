@@ -3,6 +3,8 @@ import { Inter, Poppins, Montserrat } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils';
+import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
+import { WebVitalsTracker } from '@/components/analytics/WebVitalsTracker';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -39,8 +41,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="tr" suppressHydrationWarning>
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body className={cn(inter.variable, poppins.variable, montserrat.variable, inter.className)}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <WebVitalsTracker />
+          {children}
+        </Providers>
       </body>
     </html>
   );

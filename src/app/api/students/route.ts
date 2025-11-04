@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStudents, getStudent, createStudent } from '@/lib/api/mock-api';
+import { getStudents, createStudent } from '@/lib/api/mock-api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { StudentStatus, EducationLevel } from '@/types/scholarship';
 
@@ -117,7 +117,7 @@ async function getStudentsHandler(request: NextRequest) {
       );
     }
 
-    const response: ApiResponse<any> = {
+    const response: ApiResponse<unknown> = {
       success: true,
       data: result.data?.data || [],
       total: result.data?.total || 0,

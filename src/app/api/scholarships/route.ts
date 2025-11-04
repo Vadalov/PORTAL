@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getScholarships,
-  getScholarship,
   createScholarship,
-  updateScholarship,
-  deleteScholarship,
   getScholarshipStats,
 } from '@/lib/api/mock-api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
@@ -195,7 +192,7 @@ async function createScholarshipHandler(request: NextRequest) {
  * GET /api/scholarships/stats
  * Get scholarship statistics
  */
-async function getScholarshipStatsHandler(request: NextRequest) {
+async function getScholarshipStatsHandler(_request: NextRequest) {
   try {
     const result = await getScholarshipStats();
 

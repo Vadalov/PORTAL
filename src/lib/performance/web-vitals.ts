@@ -18,23 +18,69 @@ interface VitalMetric {
  * Send metric to analytics (custom implementation)
  */
 function sendToAnalytics(metric: Metric): void {
-  // In production, send to your analytics service
-  // e.g., Google Analytics, PostHog, etc.
+  const rating = getRating(metric.name, metric.value);
 
-  console.log('Web Vital Metric:', {
-    name: metric.name,
-    value: metric.value,
-    id: metric.id,
-    delta: metric.delta,
-    rating: getRating(metric.name, metric.value),
-  });
+  // Log in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Web Vital Metric:', {
+      name: metric.name,
+      value: metric.value,
+      id: metric.id,
+      delta: metric.delta,
+      rating,
+    });
+  }
 
-  // TODO: Implement your analytics service integration
-  // Examples:
-  // - Google Analytics 4 (gtag)
-  // - PostHog
-  // - Custom endpoint
-  // - Sentry performance monitoring
+  // Send to Google Analytics 4 (if configured)
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    const gtag = (window as any).gtag;
+    gtag('event', metric.name, {
+      event_category: 'Web Vitals',
+      event_label: metric.id,
+      value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+      non_interaction: true,
+      custom_map: {
+        metric_rating: rating,
+        metric_delta: metric.delta,
+      },
+    });
+  }
+
+  // Send to Sentry (if configured)
+  if (typeof window !== 'undefined' && (window as any).Sentry) {
+    const Sentry = (window as any).Sentry;
+    Sentry.metrics?.distribution(`web_vital.${metric.name.toLowerCase()}`, metric.value, {
+      tags: {
+        rating,
+        id: metric.id,
+      },
+    });
+  }
+
+  // Send to custom analytics endpoint (if configured)
+  const analyticsEndpoint = process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT;
+  if (analyticsEndpoint && typeof window !== 'undefined') {
+    fetch(analyticsEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        metric: metric.name,
+        value: metric.value,
+        id: metric.id,
+        delta: metric.delta,
+        rating,
+        timestamp: Date.now(),
+      }),
+      keepalive: true, // Send even if page is unloading
+    }).catch((error) => {
+      // Silently fail - analytics should not block the app
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to send analytics:', error);
+      }
+    });
+  }
 }
 
 function getRating(name: string, value: number): 'good' | 'needs-improvement' | 'poor' {

@@ -15,6 +15,7 @@ import type * as donations from "../donations.js";
 import type * as finance_records from "../finance_records.js";
 import type * as meetings from "../meetings.js";
 import type * as messages from "../messages.js";
+import type * as storage from "../storage.js";
 import type * as tasks from "../tasks.js";
 import type * as users from "../users.js";
 
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   finance_records: typeof finance_records;
   meetings: typeof meetings;
   messages: typeof messages;
+  storage: typeof storage;
   tasks: typeof tasks;
   users: typeof users;
 }>;

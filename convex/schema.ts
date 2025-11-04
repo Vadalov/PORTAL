@@ -100,6 +100,11 @@ export default defineSchema({
     kumbara_location: v.optional(v.string()),  // Location where kumbara was placed/collected
     collection_date: v.optional(v.string()),  // Date when kumbara was collected
     kumbara_institution: v.optional(v.string()),  // Institution/place where kumbara is located
+    location_coordinates: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+    location_address: v.optional(v.string()),
+    route_points: v.optional(v.array(v.object({ lat: v.number(), lng: v.number() }))),
+    route_distance: v.optional(v.number()),
+    route_duration: v.optional(v.number()),
   })
     .index('by_status', ['status'])
     .index('by_donor_email', ['donor_email'])
@@ -245,4 +250,18 @@ export default defineSchema({
     .index('by_record_type', ['record_type'])
     .index('by_status', ['status'])
     .index('by_created_by', ['created_by']),
+
+  // Files Collection (metadata for uploaded files)
+  files: defineTable({
+    fileName: v.string(),
+    fileSize: v.number(),
+    fileType: v.string(),
+    bucket: v.string(),
+    storageId: v.id('_storage'), // Convex fileStorage ID
+    uploadedBy: v.optional(v.id('users')),
+    uploadedAt: v.string(),
+  })
+    .index('by_storage_id', ['storageId'])
+    .index('by_bucket', ['bucket'])
+    .index('by_uploaded_by', ['uploadedBy']),
 });

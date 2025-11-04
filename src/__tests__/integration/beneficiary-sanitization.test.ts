@@ -12,10 +12,10 @@ import { BeneficiaryCategory, FundRegion, FileConnection } from '@/types/benefic
 describe('Beneficiary Sanitization Integration', () => {
   describe('TC Kimlik No Sanitization + Validation', () => {
     it('should sanitize and validate correct TC Kimlik No', () => {
-      const rawTc = '10000000146'; // Valid TC (example)
+      const rawTc = '11111111110'; // Valid TC with correct checksum
       const sanitized = sanitizeTcNo(rawTc);
 
-      expect(sanitized).toBe('10000000146');
+      expect(sanitized).toBe('11111111110');
 
       // Validate with schema
       const data = {
@@ -42,11 +42,11 @@ describe('Beneficiary Sanitization Integration', () => {
     });
 
     it('should sanitize TC with formatting', () => {
-      const rawTc = '100-000-001-46'; // With dashes
+      const rawTc = '111-111-111-10'; // With dashes - valid TC
       const sanitized = sanitizeTcNo(rawTc);
 
       // Should extract digits and return valid TC
-      expect(sanitized).toBe('10000000146');
+      expect(sanitized).toBe('11111111110');
     });
   });
 
@@ -210,7 +210,7 @@ describe('Beneficiary Sanitization Integration', () => {
         firstName: '  Ahmet  ',
         lastName: '  Yılmaz  ',
         nationality: 'Türkiye',
-        identityNumber: '10000000146',
+        identityNumber: '11111111110', // Valid TC with correct checksum
         mobilePhone: '0555 123 45 67',
         email: '  AHMET@EXAMPLE.COM  ',
         monthlyIncome: '5,000',
@@ -243,7 +243,7 @@ describe('Beneficiary Sanitization Integration', () => {
       if (result.success) {
         expect(result.data.firstName).toBe('Ahmet');
         expect(result.data.lastName).toBe('Yılmaz');
-        expect(result.data.identityNumber).toBe('10000000146');
+        expect(result.data.identityNumber).toBe('11111111110');
         expect(result.data.mobilePhone).toBe('+905551234567');
         expect(result.data.email).toBe('ahmet@example.com');
         expect(result.data.monthlyIncome).toBe(5000);

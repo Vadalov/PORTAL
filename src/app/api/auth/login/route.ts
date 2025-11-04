@@ -7,6 +7,7 @@ import logger from '@/lib/logger';
 import { mockAuthApi } from '@/lib/api/mock-auth-api';
 import { convexHttp } from '@/lib/convex/server';
 import { api } from '@/convex/_generated/api';
+import { verifyPassword } from '@/lib/auth/password';
 
 // Get backend provider from environment
 const getBackendProvider = () => {
@@ -93,8 +94,7 @@ export const POST = authRateLimit(async (request: NextRequest) => {
 
     // Convex-based authentication
     // Look up user by email in Convex
-    const users = await convexHttp.query(api.users.list);
-    const user = users.find((u) => u.email?.toLowerCase() === email?.toLowerCase());
+    const user = await convexHttp.query(api.auth.getUserByEmail, { email: email.toLowerCase() });
 
     if (!user) {
       logger.warn('Login failed - user not found', {
@@ -106,13 +106,36 @@ export const POST = authRateLimit(async (request: NextRequest) => {
       );
     }
 
-    // TODO: Implement proper password verification
-    // For now, we'll use a simple check (in production, use bcrypt or similar)
-    // This is a placeholder - you should implement proper password hashing
+    // Check if user is active
     if (!user.isActive) {
+      logger.warn('Login failed - inactive account', {
+        email: `${email?.substring(0, 3)}***`,
+      });
       return NextResponse.json(
         { success: false, error: 'Hesap aktif değil' },
         { status: 403 }
+      );
+    }
+
+    // Verify password
+    if (!user.passwordHash) {
+      logger.warn('Login failed - no password hash', {
+        email: `${email?.substring(0, 3)}***`,
+      });
+      return NextResponse.json(
+        { success: false, error: 'Geçersiz email veya şifre' },
+        { status: 401 }
+      );
+    }
+
+    const isPasswordValid = await verifyPassword(password, user.passwordHash);
+    if (!isPasswordValid) {
+      logger.warn('Login failed - invalid password', {
+        email: `${email?.substring(0, 3)}***`,
+      });
+      return NextResponse.json(
+        { success: false, error: 'Geçersiz email veya şifre' },
+        { status: 401 }
       );
     }
 
@@ -165,6 +188,17 @@ export const POST = authRateLimit(async (request: NextRequest) => {
       maxAge: 24 * 60 * 60,
       path: '/',
     });
+
+    // Update last login time
+    try {
+      await convexHttp.mutation(api.auth.updateLastLogin, { userId: user._id });
+    } catch (error) {
+      // Log but don't fail login if this fails
+      logger.warn('Failed to update last login time', {
+        error,
+        userId: user._id,
+      });
+    }
 
     logger.info('User logged in successfully', {
       userId: user._id,

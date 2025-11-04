@@ -31,7 +31,6 @@ import { ParameterSelect } from './ParameterSelect';
 
 // Central validation schema
 import { beneficiarySchema } from '@/lib/validations/beneficiary';
-import { z } from 'zod';
 
 // Sanitization functions
 import {
@@ -46,21 +45,19 @@ import {
 // Error handling
 import { formatErrorMessage } from '@/lib/errors';
 
-// Use central validation schema
+// Use central validation schema (mernisCheck is already included)
 const advancedBeneficiarySchema = beneficiarySchema;
 
-// Use central type - ensure mernisCheck is always boolean
+// Use central type with mernisCheck required
 import type { BeneficiaryFormData } from '@/lib/validations/beneficiary';
-type AdvancedBeneficiaryFormData = Omit<BeneficiaryFormData, 'mernisCheck'> & {
-  mernisCheck: boolean; // Ensure mernisCheck is always boolean, not undefined
-};
+type AdvancedBeneficiaryFormData = BeneficiaryFormData;
 
 interface AdvancedBeneficiaryFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   initialData?: Partial<AdvancedBeneficiaryFormData>;
   isUpdateMode?: boolean;
-  updateMutation?: { mutateAsync: Function };
+  updateMutation?: { mutateAsync: (data: AdvancedBeneficiaryFormData) => Promise<unknown> };
   beneficiaryId?: string;
 }
 
@@ -83,7 +80,7 @@ export function AdvancedBeneficiaryForm({
     watch,
     formState: { errors },
   } = useForm<AdvancedBeneficiaryFormData>({
-    resolver: zodResolver(advancedBeneficiarySchema) as any, // Type assertion needed due to mernisCheck type mismatch
+    resolver: zodResolver(advancedBeneficiarySchema) as any,
     defaultValues: {
       mernisCheck: false,
       familyMemberCount: 1,
@@ -195,10 +192,7 @@ export function AdvancedBeneficiaryForm({
     },
   });
 
-  // Hangi mutation kullanılacak?
-  const activeMutation = isUpdateMode
-    ? updateMutation || internalUpdateMutation
-    : createBeneficiaryMutation;
+
 
   // Sanitization helper function
   const sanitizeFormData = (data: AdvancedBeneficiaryFormData): AdvancedBeneficiaryFormData => {
@@ -270,8 +264,9 @@ export function AdvancedBeneficiaryForm({
 
     // Emergency contacts - sanitize phone numbers
     if (sanitized.emergencyContacts && Array.isArray(sanitized.emergencyContacts)) {
-      sanitized.emergencyContacts = sanitized.emergencyContacts.map((contact: any) => ({
-        ...contact,
+      sanitized.emergencyContacts = sanitized.emergencyContacts.map((contact: { name?: string; phone?: string; relation?: string }) => ({
+        name: contact.name || '',
+        relationship: contact.relation || '',
         phone: sanitizePhone(contact.phone || '') || contact.phone || '',
       }));
     }
@@ -303,7 +298,7 @@ export function AdvancedBeneficiaryForm({
     return sanitized;
   };
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: AdvancedBeneficiaryFormData) => {
     setIsSubmitting(true);
 
     try {

@@ -192,7 +192,7 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
   const onSubmit = async (data: KumbaraFormData) => {
     setIsSubmitting(true);
     try {
-      let finalData = { ...data };
+      const finalData = { ...data };
 
       // Upload file if present
       if (uploadedFile) {
@@ -218,7 +218,7 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
           } else {
             const error = await uploadResponse.json();
             console.error('File upload failed:', error);
-            toast.error('Dosya yükleme hatası: ' + (error.error || 'Bilinmeyen hata'));
+            toast.error(`Dosya yükleme hatası: ${  error.error || 'Bilinmeyen hata'}`);
             setIsSubmitting(false);
             return;
           }
@@ -242,7 +242,7 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
   const formatCurrency = (value: number, currency: 'TRY' | 'USD' | 'EUR') => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
-      currency: currency,
+      currency,
     }).format(value);
   };
 

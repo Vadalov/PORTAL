@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexDonations } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 
+// Type for donation document
+interface DonationDocument {
+  _id: string;
+  _creationTime: number;
+  amount: number;
+  status?: string;
+  payment_method?: string;
+  donation_type?: string;
+  donation_date?: string;
+  donor_name?: string;
+  [key: string]: unknown;
+}
+
 /**
  * GET /api/donations/stats
  * Get donation statistics
@@ -63,7 +76,7 @@ export async function GET(request: NextRequest) {
 /**
  * Calculate overview statistics
  */
-function calculateOverviewStats(donations: any[]) {
+function calculateOverviewStats(donations: DonationDocument[]) {
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
@@ -110,7 +123,7 @@ function calculateOverviewStats(donations: any[]) {
 /**
  * Calculate monthly statistics for charts
  */
-function calculateMonthlyStats(donations: any[]) {
+function calculateMonthlyStats(donations: DonationDocument[]) {
   const now = new Date();
   const months = [];
 
@@ -143,7 +156,7 @@ function calculateMonthlyStats(donations: any[]) {
 /**
  * Calculate status-based statistics
  */
-function calculateStatusStats(donations: any[]) {
+function calculateStatusStats(donations: DonationDocument[]) {
   const statusMap = new Map<string, { amount: number; count: number }>();
 
   donations.forEach((d) => {
@@ -164,7 +177,7 @@ function calculateStatusStats(donations: any[]) {
 /**
  * Calculate payment method statistics
  */
-function calculatePaymentStats(donations: any[]) {
+function calculatePaymentStats(donations: DonationDocument[]) {
   const paymentMap = new Map<string, { value: number; count: number }>();
 
   donations.forEach((d) => {

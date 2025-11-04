@@ -28,7 +28,7 @@ export function KumbaraPrintQR({ kumbara, qrDataUrl }: KumbaraPrintQRProps) {
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
-      currency: currency,
+      currency,
     }).format(amount);
   };
 

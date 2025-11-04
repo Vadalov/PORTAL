@@ -62,7 +62,7 @@ describe('Beneficiary Validations', () => {
         birthDate: '2000-01-01',
         city: 'ISTANBUL', // Fixed: uppercase city name
         district: 'Kadıköy',
-        identityNumber: '12345678901', // Fixed: Valid TC Kimlik No (11 digits)
+        identityNumber: '12345678910', // Valid TC Kimlik No with correct checksum
         mernisCheck: true,
       };
 

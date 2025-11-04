@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { convexUsers, normalizeQueryParams } from '@/lib/convex/api';
+import { convexUsers } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
 import logger from '@/lib/logger';
+import { hashPassword, validatePasswordStrength } from '@/lib/auth/password';
 
 function validateUser(data: Record<string, unknown>): {
   isValid: boolean;
@@ -39,7 +40,7 @@ function validateUser(data: Record<string, unknown>): {
 /**
  * GET /api/users
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const response = await convexUsers.list();
 
@@ -72,6 +73,21 @@ async function createUserHandler(request: NextRequest) {
       );
     }
 
+    // Handle password if provided
+    let passwordHash: string | undefined;
+    const userBody = body as Record<string, unknown>;
+    if (userBody.password) {
+      const password = userBody.password as string;
+      const passwordValidation = validatePasswordStrength(password);
+      if (!passwordValidation.valid) {
+        return NextResponse.json(
+          { success: false, error: passwordValidation.error || 'Geçersiz şifre' },
+          { status: 400 }
+        );
+      }
+      passwordHash = await hashPassword(password);
+    }
+
     const userData = {
       name: validation.normalizedData.name as string,
       email: validation.normalizedData.email as string,
@@ -79,6 +95,7 @@ async function createUserHandler(request: NextRequest) {
       avatar: validation.normalizedData.avatar as string | undefined,
       isActive: (validation.normalizedData.isActive as boolean) ?? true,
       labels: (validation.normalizedData.labels as string[]) || [],
+      ...(passwordHash && { passwordHash }),
     };
 
     const response = await convexUsers.create(userData);
