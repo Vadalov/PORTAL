@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Search, Plus, DollarSign, User, Calendar, FileText } from 'lucide-react';
 import { DonationForm } from '@/components/forms/DonationForm';
-import { GlassCard } from '@/components/ui/glass-card';
 
 export default function DonationsPage() {
   const [search, setSearch] = useState('');
@@ -35,7 +34,7 @@ export default function DonationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Bağışlar</h1>
-          <p className="text-gray-600 mt-2">Bağış kayıtlarını görüntüleyin ve yönetin</p>
+          <p className="text-muted-foreground mt-2">Bağış kayıtlarını görüntüleyin ve yönetin</p>
         </div>
 
         <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
@@ -56,47 +55,47 @@ export default function DonationsPage() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <GlassCard opacity={0.8}>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Toplam Bağış</CardTitle>
-            <DollarSign className="h-4 w-4 text-gray-400" />
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{total}</div>
           </CardContent>
-        </GlassCard>
+        </Card>
 
-        <GlassCard opacity={0.8}>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Toplam Tutar</CardTitle>
-            <DollarSign className="h-4 w-4 text-gray-400" />
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalAmount.toLocaleString('tr-TR')} ₺</div>
           </CardContent>
-        </GlassCard>
+        </Card>
 
-        <GlassCard opacity={0.8}>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Bu Sayfadaki Tutar</CardTitle>
-            <DollarSign className="h-4 w-4 text-gray-400" />
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {donations.reduce((sum, d) => sum + d.amount, 0).toLocaleString('tr-TR')} ₺
             </div>
           </CardContent>
-        </GlassCard>
+        </Card>
       </div>
 
       {/* Search */}
-      <GlassCard opacity={0.8}>
+      <Card>
         <CardHeader>
           <CardTitle>Arama</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Bağışçı adı veya fiş numarası ile ara..."
               className="pl-10"
@@ -108,10 +107,10 @@ export default function DonationsPage() {
             />
           </div>
         </CardContent>
-      </GlassCard>
+      </Card>
 
       {/* List */}
-      <GlassCard opacity={0.8}>
+      <Card>
         <CardHeader>
           <CardTitle>Bağış Listesi</CardTitle>
           <CardDescription>Toplam {total} bağış kaydı</CardDescription>
@@ -174,7 +173,7 @@ export default function DonationsPage() {
               ))}
             </div>
           ) : donations.length === 0 ? (
-            <div className="text-center text-gray-500 py-12">
+            <div className="text-center text-muted-foreground py-12">
               <p className="text-lg font-medium">Kayıt bulunamadı</p>
             </div>
           ) : (
@@ -182,7 +181,7 @@ export default function DonationsPage() {
               {donations.map((donation) => (
                 <div
                   key={donation.$id}
-                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 space-y-3">
@@ -190,35 +189,35 @@ export default function DonationsPage() {
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-gray-400" />
+                            <User className="h-4 w-4 text-muted-foreground" />
                             <h3 className="font-semibold text-lg">{donation.donor_name}</h3>
                           </div>
-                          <p className="text-sm text-gray-600 mt-1">{donation.donor_email}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{donation.donor_email}</p>
                         </div>
                         <div className="text-right">
                           <div className="text-2xl font-bold text-green-600">
                             {donation.amount.toLocaleString('tr-TR')} ₺
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">{donation.currency}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{donation.currency}</p>
                         </div>
                       </div>
 
                       {/* Details */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <p className="text-gray-500">Ödeme Yöntemi</p>
+                          <p className="text-muted-foreground">Ödeme Yöntemi</p>
                           <p className="font-medium">{donation.payment_method}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Bağış Türü</p>
+                          <p className="text-muted-foreground">Bağış Türü</p>
                           <p className="font-medium">{donation.donation_type}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Amaç</p>
+                          <p className="text-muted-foreground">Amaç</p>
                           <p className="font-medium">{donation.donation_purpose}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
                           <p className="font-medium">
                             {new Date(donation.$createdAt).toLocaleDateString('tr-TR')}
                           </p>
@@ -228,15 +227,15 @@ export default function DonationsPage() {
                       {/* Receipt & Notes */}
                       <div className="flex items-center justify-between pt-2 border-t">
                         <div className="flex items-center gap-2 text-sm">
-                          <FileText className="h-4 w-4 text-gray-400" />
+                          <FileText className="h-4 w-4 text-muted-foreground" />
                           <span className="font-medium">Fiş No:</span>
-                          <span className="text-gray-600">{donation.receipt_number}</span>
+                          <span className="text-muted-foreground">{donation.receipt_number}</span>
                         </div>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-medium ${
                             donation.status === 'completed'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
                           }`}
                         >
                           {donation.status === 'completed' ? 'Tamamlandı' : 'Beklemede'}
@@ -244,7 +243,7 @@ export default function DonationsPage() {
                       </div>
 
                       {donation.notes && (
-                        <p className="text-sm text-gray-600 italic">Not: {donation.notes}</p>
+                        <p className="text-sm text-muted-foreground italic">Not: {donation.notes}</p>
                       )}
                     </div>
                   </div>
@@ -256,7 +255,7 @@ export default function DonationsPage() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-6 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Sayfa {page} / {totalPages}
               </p>
               <div className="flex gap-2">
@@ -280,7 +279,7 @@ export default function DonationsPage() {
             </div>
           )}
         </CardContent>
-      </GlassCard>
+      </Card>
     </div>
   );
 }

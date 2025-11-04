@@ -7,13 +7,8 @@ import { z } from 'zod';
 
 // Client-side (public) environment variables schema
 const clientEnvSchema = z.object({
-  NEXT_PUBLIC_APPWRITE_ENDPOINT: z.string().url('Invalid Appwrite endpoint URL'),
-  NEXT_PUBLIC_APPWRITE_PROJECT_ID: z.string().min(1, 'Appwrite project ID is required'),
-  NEXT_PUBLIC_DATABASE_ID: z.string().min(1, 'Database ID is required'),
-  NEXT_PUBLIC_STORAGE_DOCUMENTS: z.string().optional().default('documents'),
-  NEXT_PUBLIC_STORAGE_RECEIPTS: z.string().optional().default('receipts'),
-  NEXT_PUBLIC_STORAGE_PHOTOS: z.string().optional().default('photos'),
-  NEXT_PUBLIC_STORAGE_REPORTS: z.string().optional().default('reports'),
+  // Convex Configuration (Required in production)
+  NEXT_PUBLIC_CONVEX_URL: z.string().url('Invalid Convex URL').optional(),
   NEXT_PUBLIC_APP_NAME: z.string().optional().default('Dernek Yönetim Sistemi'),
   NEXT_PUBLIC_APP_VERSION: z.string().optional().default('1.0.0'),
   NEXT_PUBLIC_ENABLE_REALTIME: z
@@ -26,14 +21,20 @@ const clientEnvSchema = z.object({
     .optional()
     .default('false')
     .transform((val) => val === 'true'),
+  // Sentry Configuration (Optional)
+  NEXT_PUBLIC_SENTRY_DSN: z.string().url('Invalid Sentry DSN').optional(),
 });
 
 // Server-side (private) environment variables schema
 const serverEnvSchema = clientEnvSchema.extend({
-  APPWRITE_API_KEY: z.string().min(1, 'Appwrite API key is required for server operations'),
   NODE_ENV: z.enum(['development', 'production', 'test']).optional().default('development'),
-  CSRF_SECRET: z.string().min(32, 'CSRF secret must be at least 32 characters'),
-  SESSION_SECRET: z.string().min(32, 'Session secret must be at least 32 characters'),
+  // Production requires these secrets
+  CSRF_SECRET: z.string().min(32, 'CSRF secret must be at least 32 characters').optional(),
+  SESSION_SECRET: z.string().min(32, 'Session secret must be at least 32 characters').optional(),
+  // Sentry Configuration (Optional)
+  SENTRY_DSN: z.string().url('Invalid Sentry DSN').optional(),
+  SENTRY_ORG: z.string().optional(),
+  SENTRY_PROJECT: z.string().optional(),
 
   // Optional email configuration
   SMTP_HOST: z.string().optional(),
@@ -85,17 +86,12 @@ export type ServerEnv = z.infer<typeof serverEnvSchema>;
 export function validateClientEnv(): ClientEnv {
   try {
     return clientEnvSchema.parse({
-      NEXT_PUBLIC_APPWRITE_ENDPOINT: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
-      NEXT_PUBLIC_APPWRITE_PROJECT_ID: process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
-      NEXT_PUBLIC_DATABASE_ID: process.env.NEXT_PUBLIC_DATABASE_ID,
-      NEXT_PUBLIC_STORAGE_DOCUMENTS: process.env.NEXT_PUBLIC_STORAGE_DOCUMENTS,
-      NEXT_PUBLIC_STORAGE_RECEIPTS: process.env.NEXT_PUBLIC_STORAGE_RECEIPTS,
-      NEXT_PUBLIC_STORAGE_PHOTOS: process.env.NEXT_PUBLIC_STORAGE_PHOTOS,
-      NEXT_PUBLIC_STORAGE_REPORTS: process.env.NEXT_PUBLIC_STORAGE_REPORTS,
+      NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
       NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
       NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
       NEXT_PUBLIC_ENABLE_REALTIME: process.env.NEXT_PUBLIC_ENABLE_REALTIME,
       NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS,
+      NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -120,27 +116,33 @@ export function validateServerEnv(): ServerEnv {
   }
 
   try {
+    const nodeEnv = process.env.NODE_ENV || 'development';
+    const isProduction = nodeEnv === 'production';
+    
     return serverEnvSchema.parse({
       // Client vars
-      NEXT_PUBLIC_APPWRITE_ENDPOINT: process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT,
-      NEXT_PUBLIC_APPWRITE_PROJECT_ID: process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID,
-      NEXT_PUBLIC_DATABASE_ID: process.env.NEXT_PUBLIC_DATABASE_ID,
-      NEXT_PUBLIC_STORAGE_DOCUMENTS: process.env.NEXT_PUBLIC_STORAGE_DOCUMENTS,
-      NEXT_PUBLIC_STORAGE_RECEIPTS: process.env.NEXT_PUBLIC_STORAGE_RECEIPTS,
-      NEXT_PUBLIC_STORAGE_PHOTOS: process.env.NEXT_PUBLIC_STORAGE_PHOTOS,
-      NEXT_PUBLIC_STORAGE_REPORTS: process.env.NEXT_PUBLIC_STORAGE_REPORTS,
+      NEXT_PUBLIC_CONVEX_URL: process.env.NEXT_PUBLIC_CONVEX_URL,
       NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
       NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
       NEXT_PUBLIC_ENABLE_REALTIME: process.env.NEXT_PUBLIC_ENABLE_REALTIME,
       NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS,
+      NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
       // Server-only vars
-      APPWRITE_API_KEY: process.env.APPWRITE_API_KEY,
-      NODE_ENV: process.env.NODE_ENV,
-      CSRF_SECRET: process.env.CSRF_SECRET,
-      SESSION_SECRET: process.env.SESSION_SECRET,
+      NODE_ENV: nodeEnv,
+      // Require secrets in production
+      CSRF_SECRET: isProduction 
+        ? process.env.CSRF_SECRET 
+        : process.env.CSRF_SECRET || 'development-csrf-secret-min-32-chars',
+      SESSION_SECRET: isProduction 
+        ? process.env.SESSION_SECRET 
+        : process.env.SESSION_SECRET || 'development-session-secret-min-32-chars',
+      SENTRY_DSN: process.env.SENTRY_DSN,
+      SENTRY_ORG: process.env.SENTRY_ORG,
+      SENTRY_PROJECT: process.env.SENTRY_PROJECT,
 
-      // Optional
+
+      // Optional services
       SMTP_HOST: process.env.SMTP_HOST,
       SMTP_PORT: process.env.SMTP_PORT,
       SMTP_USER: process.env.SMTP_USER,

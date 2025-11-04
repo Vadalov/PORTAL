@@ -82,7 +82,7 @@ export default function InternalMessagingPage() {
     queryFn: () => api.users.getUsers({ limit: 100 }),
   });
 
-  const messages: any[] = data?.data || [];
+  const messages: MessageDocument[] = (data?.data as MessageDocument[]) || [];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / limit);
   const users = usersResponse?.data || [];

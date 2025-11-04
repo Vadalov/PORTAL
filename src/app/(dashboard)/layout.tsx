@@ -4,12 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
-import { Sidebar } from '@/components/layouts/Sidebar';
-import { LogOut, Menu, ChevronDown, Settings } from 'lucide-react';
+import { ModernSidebar } from '@/components/ui/modern-sidebar';
+import { LogOut, Menu, ChevronDown, Settings, Building2, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { BackgroundPattern } from '@/components/ui/background-pattern';
-import { AnimatedGradient } from '@/components/ui/animated-gradient';
 import { LoadingOverlay } from '@/components/ui/loading-overlay';
 import { SuspenseBoundary } from '@/components/ui/suspense-boundary';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -18,6 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { UserRole } from '@/types/auth';
 import Link from 'next/link';
+import logger from '@/lib/logger';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -67,22 +66,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Initialize auth on mount
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔐 [Dashboard] Initializing auth...', { isInitialized, isAuthenticated });
-      console.log('💾 [Dashboard] LocalStorage:', localStorage.getItem('auth-session'));
-      console.log('🔄 [Dashboard] Hydration status:', useAuthStore.persist?.hasHydrated?.());
+      logger.debug('Dashboard: Initializing auth', { isInitialized, isAuthenticated });
+      logger.debug('Dashboard: LocalStorage check', { 
+        hasSession: !!localStorage.getItem('auth-session') 
+      });
+      logger.debug('Dashboard: Hydration status', { 
+        hydrated: useAuthStore.persist?.hasHydrated?.() 
+      });
     }
 
     initializeAuth();
 
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔐 [Dashboard] Auth initialized:', { isInitialized, isAuthenticated, user });
+      logger.debug('Dashboard: Auth initialized', { isInitialized, isAuthenticated, userId: user?.id });
     }
   }, [initializeAuth, isInitialized, isAuthenticated, user]);
 
   useEffect(() => {
     if (isInitialized && !isAuthenticated) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔀 [Dashboard] Redirecting to login...', { isInitialized, isAuthenticated });
+        logger.debug('Dashboard: Redirecting to login', { isInitialized, isAuthenticated });
       }
       router.push('/login');
     }
@@ -99,7 +102,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setIsSidebarCollapsed(stored === 'true');
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('📱 [Dashboard] Sidebar state changed:', stored === 'true');
+        logger.debug('Dashboard: Sidebar state changed', { collapsed: stored === 'true' });
       }
     };
 
@@ -133,96 +136,106 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!isInitialized || !isAuthenticated) {
     if (process.env.NODE_ENV === 'development') {
-      console.log('⏳ [Dashboard] Loading...', { isInitialized, isAuthenticated });
+      logger.debug('Dashboard: Loading state', { isInitialized, isAuthenticated });
     }
     return <LoadingOverlay variant="pulse" fullscreen={true} text="Yükleniyor..." />;
   }
 
   return (
-    <div className="relative min-h-screen">
-      {/* Background Layers */}
-      <BackgroundPattern variant="dots" opacity={0.08} className="text-muted-foreground" />
-      <AnimatedGradient variant="subtle" speed="slow" className="opacity-25 dark:opacity-20" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50/50">
 
-      {/* Header - Premium Top Bar */}
+      {/* Premium Header */}
       <header
         className={cn(
-          'sticky top-0 z-50 relative',
-          'border-b border-border/50',
-          'bg-card/80 backdrop-blur-xl backdrop-saturate-150',
-          'transition-all duration-300',
-          isScrolled ? 'shadow-card-hover border-border' : 'shadow-sm'
+          'sticky top-0 z-50 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/60',
+          'transition-all duration-300 ease-out',
+          isScrolled && 'shadow-lg shadow-slate-200/50 bg-white/98'
         )}
       >
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 relative z-10"
-        >
-          <div className="flex items-center gap-4">
+        <div className="flex h-full items-center justify-between px-4 lg:px-6">
+          <div className="flex items-center gap-3">
             <button
-              className="lg:hidden rounded-md p-2 hover:bg-accent hover:text-accent-foreground transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100/80 transition-all duration-200 active:scale-95"
               onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-              aria-label="Toggle mobile menu"
+              aria-label="Toggle menu"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5 text-slate-600" />
             </button>
-            <h1 className="text-lg font-heading font-bold text-foreground">
-              Dernek Yönetim Sistemi
-            </h1>
+            <button
+              className="hidden lg:flex p-2 rounded-lg hover:bg-slate-100/80 transition-all duration-200 active:scale-95"
+              onClick={() => {
+                const newState = !isSidebarCollapsed;
+                setIsSidebarCollapsed(newState);
+                if (typeof window !== 'undefined') {
+                  window.localStorage.setItem('sidebar-collapsed', String(newState));
+                  window.dispatchEvent(new Event('storage'));
+                }
+              }}
+              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? (
+                <PanelLeftOpen className="h-5 w-5 text-slate-600" />
+              ) : (
+                <PanelLeftClose className="h-5 w-5 text-slate-600" />
+              )}
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 via-blue-600 to-blue-700 flex items-center justify-center shadow-md shadow-blue-500/20">
+                <Building2 className="w-4.5 h-4.5 text-white" />
+              </div>
+              <h1 className="hidden md:block text-lg font-semibold text-slate-800 tracking-tight">Dernek Yönetim Sistemi</h1>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* Search Bar */}
+          <div className="hidden lg:flex flex-1 max-w-md mx-4">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Ara..."
+                className="w-full h-9 pl-9 pr-3 text-sm bg-slate-100/80 border border-slate-200/60 rounded-lg text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-white transition-all duration-200"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
             <Popover open={isUserMenuOpen} onOpenChange={setIsUserMenuOpen}>
               <PopoverTrigger asChild>
-                <button
-                  className="flex items-center gap-2 rounded-full p-1.5 hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                  aria-label="Kullanıcı menüsü"
-                >
-                  <Avatar size="sm">
-                    <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'User'} />
-                    <AvatarFallback className="text-xs font-semibold">
+                <button className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-100/80 transition-all duration-200 active:scale-95">
+                  <Avatar size="sm" className="h-8 w-8 ring-2 ring-slate-200">
+                    <AvatarImage src={user?.avatar ?? undefined} alt={user?.name} />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-700 text-white text-xs font-semibold">
                       {user?.name ? getInitials(user.name) : 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <ChevronDown
-                    className={cn(
-                      'h-4 w-4 text-muted-foreground hidden sm:block transition-transform duration-200',
-                      isUserMenuOpen && 'rotate-180'
-                    )}
-                  />
+                  <ChevronDown className={cn('h-4 w-4 text-slate-500 transition-transform duration-200', isUserMenuOpen && 'rotate-180')} />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-64 p-0" align="end" sideOffset={8}>
-                <div className="p-4">
+              <PopoverContent className="w-64 p-0 border-slate-200/60 shadow-xl" align="end">
+                <div className="p-4 border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white">
                   <div className="flex items-center gap-3">
-                    <Avatar size="md">
-                      <AvatarImage src={user?.avatar || undefined} alt={user?.name || 'User'} />
-                      <AvatarFallback className="font-semibold">
+                    <Avatar className="h-11 w-11 ring-2 ring-slate-200">
+                      <AvatarImage src={user?.avatar ?? undefined} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-700 text-white">
                         {user?.name ? getInitials(user.name) : 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-foreground truncate">
-                        {user?.name || 'Kullanıcı'}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">{user?.email || ''}</p>
-                      <Badge
-                        variant={getRoleBadgeVariant(user?.role || UserRole.VIEWER)}
-                        className="text-xs mt-1"
-                      >
+                      <p className="font-semibold text-sm text-slate-900 truncate">{user?.name || 'Kullanıcı'}</p>
+                      <p className="text-xs text-slate-500 truncate mt-0.5">{user?.email || ''}</p>
+                      <Badge variant={getRoleBadgeVariant(user?.role || UserRole.VIEWER)} className="text-xs mt-2">
                         {user?.role || 'Viewer'}
                       </Badge>
                     </div>
                   </div>
                 </div>
                 <Separator />
-                <div className="p-2">
+                <div className="p-1.5">
                   <Link
                     href="/settings"
                     onClick={() => setIsUserMenuOpen(false)}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-accent transition-colors"
+                    className="flex items-center gap-2.5 w-full px-3 py-2 text-sm rounded-lg hover:bg-slate-100/80 transition-colors duration-200 text-slate-700"
                   >
                     <Settings className="h-4 w-4" />
                     <span>Ayarlar</span>
@@ -232,7 +245,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       setIsUserMenuOpen(false);
                       handleLogout();
                     }}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md hover:bg-destructive/10 hover:text-destructive transition-colors text-left"
+                    className="flex items-center gap-2.5 w-full px-3 py-2 text-sm rounded-lg hover:bg-red-50/80 hover:text-red-600 transition-colors duration-200 text-left text-slate-700"
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Çıkış Yap</span>
@@ -241,28 +254,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </PopoverContent>
             </Popover>
           </div>
-        </motion.div>
+        </div>
       </header>
 
       <div className="flex">
         {/* Sidebar */}
         <SuspenseBoundary loadingVariant="spinner">
-          <Sidebar
+          <ModernSidebar
             isMobileOpen={isMobileSidebarOpen}
             onMobileToggle={() => setIsMobileSidebarOpen(false)}
           />
         </SuspenseBoundary>
 
-        {/* Spacer for fixed sidebar on desktop */}
+        {/* Spacer for fixed sidebar */}
         <div
-          className={cn(
-            'hidden lg:block transition-all duration-300',
-            isSidebarCollapsed ? 'w-20' : 'w-64'
-          )}
+          className={cn('hidden lg:block transition-all duration-300', isSidebarCollapsed ? 'w-16' : 'w-64')}
         />
 
         {/* Main Content */}
-        <main className="flex-1 p-6 lg:p-8 max-w-[1600px] mx-auto w-full relative transition-all duration-300">
+        <main className="flex-1 p-6 lg:p-8 max-w-7xl mx-auto w-full min-h-[calc(100vh-4rem)]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={pathname}
@@ -274,8 +284,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <SuspenseBoundary
                 loadingVariant="pulse"
                 loadingText="Sayfa yükleniyor..."
-                onSuspend={() => console.log('📄 [Dashboard] Page suspended:', pathname)}
-                onResume={() => console.log('✅ [Dashboard] Page resumed:', pathname)}
+                onSuspend={() => {
+                  if (process.env.NODE_ENV === 'development') {
+                    logger.debug('Dashboard: Page suspended', { pathname });
+                  }
+                }}
+                onResume={() => {
+                  if (process.env.NODE_ENV === 'development') {
+                    logger.debug('Dashboard: Page resumed', { pathname });
+                  }
+                }}
               >
                 {children}
               </SuspenseBoundary>

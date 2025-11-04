@@ -14,11 +14,9 @@ describe('Environment Validation', () => {
   });
 
   describe('Client Environment Validation', () => {
-    it('should validate required client env variables', () => {
-      // Set required variables
-      process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT = 'https://cloud.appwrite.io/v1';
-      process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID = 'test-project-id';
-      process.env.NEXT_PUBLIC_DATABASE_ID = 'test-db';
+    it('should validate client env variables (Convex)', () => {
+      // Set Convex URL (optional but recommended)
+      process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
 
       // Dynamic import to test validation
       import('@/lib/env-validation').then(({ validateClientEnv }) => {
@@ -27,24 +25,21 @@ describe('Environment Validation', () => {
     });
 
     it('should use default values for optional variables', () => {
-      process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT = 'https://cloud.appwrite.io/v1';
-      process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID = 'test-project-id';
-      process.env.NEXT_PUBLIC_DATABASE_ID = 'test-db';
+      process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
 
       import('@/lib/env-validation').then(({ getClientEnv }) => {
         const env = getClientEnv();
-        expect(env.NEXT_PUBLIC_STORAGE_DOCUMENTS).toBe('documents');
         expect(env.NEXT_PUBLIC_APP_NAME).toBe('Dernek Yönetim Sistemi');
+        expect(env.NEXT_PUBLIC_APP_VERSION).toBe('1.0.0');
       });
     });
   });
 
   describe('Server Environment Validation', () => {
     it('should validate server env variables', () => {
-      process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT = 'https://cloud.appwrite.io/v1';
-      process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID = 'test-project-id';
-      process.env.NEXT_PUBLIC_DATABASE_ID = 'test-db';
-      process.env.APPWRITE_API_KEY = 'test-api-key';
+      process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
+      process.env.NODE_ENV = 'development';
+      // In development, secrets are optional
       process.env.CSRF_SECRET = 'a'.repeat(32);
       process.env.SESSION_SECRET = 'b'.repeat(32);
 
@@ -53,11 +48,9 @@ describe('Environment Validation', () => {
       });
     });
 
-    it('should validate secret length', () => {
-      process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT = 'https://cloud.appwrite.io/v1';
-      process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID = 'test-project-id';
-      process.env.NEXT_PUBLIC_DATABASE_ID = 'test-db';
-      process.env.APPWRITE_API_KEY = 'test-api-key';
+    it('should validate secret length in production', () => {
+      process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
+      process.env.NODE_ENV = 'production';
       process.env.CSRF_SECRET = 'too-short'; // Less than 32 chars
       process.env.SESSION_SECRET = 'b'.repeat(32);
 
@@ -69,9 +62,7 @@ describe('Environment Validation', () => {
 
   describe('Feature Flags', () => {
     it('should parse boolean feature flags', () => {
-      process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT = 'https://cloud.appwrite.io/v1';
-      process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID = 'test-project-id';
-      process.env.NEXT_PUBLIC_DATABASE_ID = 'test-db';
+      process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
       process.env.NEXT_PUBLIC_ENABLE_REALTIME = 'false';
       process.env.NEXT_PUBLIC_ENABLE_ANALYTICS = 'true';
 

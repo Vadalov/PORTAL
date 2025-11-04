@@ -189,7 +189,7 @@ class StoreDebuggerClass {
           console.log('Auth Session:', JSON.parse(sessionValue));
         }
       } catch (_error) {
-        console.error('❌ Failed to read localStorage:', error);
+        console.error('❌ Failed to read localStorage:', _error);
       }
     }
 

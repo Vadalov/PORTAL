@@ -27,18 +27,19 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { AidApplicationForm } from '@/components/forms/AidApplicationForm';
+import type { AidApplicationDocument } from '@/types/collections';
 
 const STAGE_LABELS = {
-  draft: { label: 'Taslak', color: 'bg-gray-100 text-gray-700' },
-  under_review: { label: 'İnceleme', color: 'bg-blue-100 text-blue-700' },
-  approved: { label: 'Onaylandı', color: 'bg-green-100 text-green-700' },
-  ongoing: { label: 'Devam Ediyor', color: 'bg-yellow-100 text-yellow-700' },
-  completed: { label: 'Tamamlandı', color: 'bg-purple-100 text-purple-700' },
+  draft: { label: 'Taslak', color: 'bg-muted text-muted-foreground' },
+  under_review: { label: 'İnceleme', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' },
+  approved: { label: 'Onaylandı', color: 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' },
+  ongoing: { label: 'Devam Ediyor', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' },
+  completed: { label: 'Tamamlandı', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400' },
 };
 
 const STATUS_LABELS = {
-  open: { label: 'Açık', color: 'bg-green-100 text-green-700' },
-  closed: { label: 'Kapalı', color: 'bg-red-100 text-red-700' },
+  open: { label: 'Açık', color: 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' },
+  closed: { label: 'Kapalı', color: 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400' },
 };
 
 export default function AidApplicationsPage() {
@@ -63,7 +64,7 @@ export default function AidApplicationsPage() {
       }),
   });
 
-  const applications = data?.data || [];
+  const applications: AidApplicationDocument[] = (data?.data as AidApplicationDocument[]) || [];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
@@ -73,7 +74,7 @@ export default function AidApplicationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Yardım Başvuruları</h1>
-          <p className="text-gray-600 mt-2">Portal Plus tarzı başvuru sistemi - {total} kayıt</p>
+          <p className="text-muted-foreground mt-2">Portal Plus tarzı başvuru sistemi - {total} kayıt</p>
         </div>
 
         <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
@@ -100,7 +101,7 @@ export default function AidApplicationsPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Kişi / Kurum / Partner"
                 className="pl-10"
@@ -149,12 +150,12 @@ export default function AidApplicationsPage() {
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
           ) : error ? (
-            <div className="text-center text-red-600 py-8">Veriler yüklenirken hata oluştu</div>
+            <div className="text-center text-destructive py-8">Veriler yüklenirken hata oluştu</div>
           ) : applications.length === 0 ? (
-            <div className="text-center text-gray-500 py-12">
+            <div className="text-center text-muted-foreground py-12">
               <p className="text-lg font-medium">Başvuru bulunamadı</p>
               <p className="text-sm mt-2">
                 {search ? 'Arama kriterlerinize uygun başvuru yok' : 'Henüz başvuru eklenmemiş'}
@@ -162,10 +163,10 @@ export default function AidApplicationsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {applications.map((app: any) => (
+              {applications.map((app) => (
                 <div
                   key={app.$id}
-                  className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                  className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -180,7 +181,7 @@ export default function AidApplicationsPage() {
                         </Badge>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                         <Calendar className="h-4 w-4" />
                         <span>{new Date(app.application_date).toLocaleDateString('tr-TR')}</span>
                       </div>
@@ -188,31 +189,31 @@ export default function AidApplicationsPage() {
                       {/* Yardım Türleri */}
                       <div className="flex flex-wrap gap-2 mb-3">
                         {app.one_time_aid && app.one_time_aid > 0 && (
-                          <Badge className="gap-1 bg-blue-100 text-blue-700">
+                          <Badge className="gap-1 bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
                             <DollarSign className="h-3 w-3" />
                             Tek Seferlik: {app.one_time_aid.toLocaleString('tr-TR')} ₺
                           </Badge>
                         )}
                         {app.regular_financial_aid && app.regular_financial_aid > 0 && (
-                          <Badge className="gap-1 bg-green-100 text-green-700">
+                          <Badge className="gap-1 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">
                             <DollarSign className="h-3 w-3" />
                             Düzenli: {app.regular_financial_aid.toLocaleString('tr-TR')} ₺
                           </Badge>
                         )}
                         {app.regular_food_aid && app.regular_food_aid > 0 && (
-                          <Badge className="gap-1 bg-orange-100 text-orange-700">
+                          <Badge className="gap-1 bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400">
                             <Utensils className="h-3 w-3" />
                             Gıda: {app.regular_food_aid} paket
                           </Badge>
                         )}
                         {app.in_kind_aid && app.in_kind_aid > 0 && (
-                          <Badge className="gap-1 bg-purple-100 text-purple-700">
+                          <Badge className="gap-1 bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400">
                             <Package className="h-3 w-3" />
                             Ayni: {app.in_kind_aid} adet
                           </Badge>
                         )}
                         {app.service_referral && app.service_referral > 0 && (
-                          <Badge className="gap-1 bg-red-100 text-red-700">
+                          <Badge className="gap-1 bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400">
                             <Stethoscope className="h-3 w-3" />
                             Sevk: {app.service_referral}
                           </Badge>
@@ -247,7 +248,7 @@ export default function AidApplicationsPage() {
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-6 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Sayfa {page} / {totalPages}
               </p>
               <div className="flex gap-2">

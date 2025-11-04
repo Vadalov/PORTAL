@@ -79,7 +79,7 @@ export function AdvancedBeneficiaryForm({
     watch,
     formState: { errors },
   } = useForm<AdvancedBeneficiaryFormData>({
-    resolver: zodResolver(advancedBeneficiarySchema) as any,
+    resolver: zodResolver(advancedBeneficiarySchema),
     defaultValues: {
       familyMemberCount: 1,
       children_count: 0,
@@ -99,12 +99,12 @@ export function AdvancedBeneficiaryForm({
   });
 
   const createBeneficiaryMutation = useMutation({
-    mutationFn: (data: any) =>
+    mutationFn: (data: AdvancedBeneficiaryFormData) =>
       api.beneficiaries.createBeneficiary({
         ...data,
-        status: 'active',
+        status: 'AKTIF',
         approval_status: 'pending',
-      }) as Promise<any>,
+      }),
     onSuccess: () => {
       toast.success('İhtiyaç sahibi başarıyla eklendi');
       queryClient.invalidateQueries({ queryKey: ['beneficiaries'] });
@@ -121,9 +121,9 @@ export function AdvancedBeneficiaryForm({
 
   // UPDATE MUTATION (yeni - internal)
   const internalUpdateMutation = useMutation({
-    mutationFn: (data: any) => {
+    mutationFn: (data: AdvancedBeneficiaryFormData) => {
       if (!beneficiaryId) throw new Error('Beneficiary ID bulunamadı');
-      return api.beneficiaries.updateBeneficiary(beneficiaryId, data) as Promise<any>;
+      return api.beneficiaries.updateBeneficiary(beneficiaryId, data);
     },
     onSuccess: () => {
       toast.success('İhtiyaç sahibi başarıyla güncellendi');

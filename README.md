@@ -147,10 +147,28 @@ npm run clean:all        # Clean all build artifacts
 
 ## 🚀 Deployment
 
-The application is configured for deployment on:
-- **Vercel** (recommended)
+### Production Deployment
+
+For detailed production deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+
+**Quick Start:**
+1. Set up environment variables (see `.env.production.example`)
+2. Deploy Convex backend: `npx convex deploy --prod`
+3. Run pre-deployment checks: `./scripts/pre-deploy-check.sh`
+4. Build and deploy to your platform
+5. Run post-deployment verification: `./scripts/post-deploy-check.sh https://your-domain.com`
+
+**Supported Platforms:**
+- **Vercel** (recommended for Next.js)
+- **Railway** (nixpacks.toml included)
 - **Netlify**
-- **Self-hosted** (Docker support)
+- **Self-hosted** (Docker/standalone mode)
+
+**Documentation:**
+- [Deployment Guide](./DEPLOYMENT.md) - Complete deployment instructions
+- [Convex Deployment](./docs/CONVEX_DEPLOYMENT.md) - Backend deployment guide
+- [Security Guide](./docs/SECURITY.md) - Security configuration
+- [Runbook](./docs/RUNBOOK.md) - Troubleshooting and operations
 
 ## 📚 Documentation
 

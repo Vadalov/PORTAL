@@ -17,7 +17,8 @@ const publicRoutes = [
 ];
 
 // Auth routes that should redirect to dashboard if already authenticated
-const authRoutes = ['/login', '/auth'];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _authRoutes = ['/login', '/auth'];
 
 // API routes that require authentication (protected endpoints)
 const protectedApiRoutes = [
@@ -153,7 +154,33 @@ async function getUserFromSession(
       return null;
     }
 
-    // Get user from Convex
+    // Handle mock sessions (development)
+    if (session.userId.startsWith('mock-')) {
+      // Map mock user IDs to mock users
+      const mockUserMap: { [key: string]: { email: string; name: string; role: string } } = {
+        'mock-admin-1': { email: 'admin@test.com', name: 'Admin User', role: 'ADMIN' },
+        'mock-admin-2': { email: 'admin@portal.com', name: 'Admin User', role: 'ADMIN' },
+        'mock-manager-1': { email: 'manager@test.com', name: 'Manager User', role: 'MANAGER' },
+        'mock-member-1': { email: 'member@test.com', name: 'Member User', role: 'MEMBER' },
+        'mock-viewer-1': { email: 'viewer@test.com', name: 'Viewer User', role: 'VIEWER' },
+      };
+
+      const mockUser = mockUserMap[session.userId];
+      if (!mockUser) {
+        return null;
+      }
+
+      const role = mockUser.role as UserRole;
+      return {
+        id: session.userId,
+        email: mockUser.email,
+        name: mockUser.name,
+        role,
+        permissions: ROLE_PERMISSIONS[role] || [],
+      };
+    }
+
+    // Get user from Convex for real sessions
     const user = await convexHttp.query(api.users.get, { id: session.userId as any });
 
     if (!user || !user.isActive) {

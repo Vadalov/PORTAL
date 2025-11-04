@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexBeneficiaries, normalizeQueryParams } from '@/lib/convex/api';
 import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import { Id } from '@/convex/_generated/dataModel';
 import type { QueryParams } from '@/types/collections';
 
 // TypeScript interfaces
@@ -13,14 +12,9 @@ interface BeneficiaryFilters {
   city?: string;
 }
 
-interface ParsedQueryParams extends Omit<QueryParams, 'filters'> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface _ParsedQueryParams extends Omit<QueryParams, 'filters'> {
   filters?: BeneficiaryFilters;
-}
-
-interface ApiResponse {
-  data?: unknown;
-  error?: string;
-  total?: number;
 }
 
 interface BeneficiaryData {
@@ -42,26 +36,6 @@ interface ValidationResult {
   errors: string[];
 }
 
-/**
- * Parse query parameters for pagination and filtering
- */
-function parseQueryParams(request: NextRequest): ParsedQueryParams {
-  const { searchParams } = new URL(request.url);
-
-  return {
-    page: parseInt(searchParams.get('page') || '1'),
-    limit: Math.min(parseInt(searchParams.get('limit') || '20'), 100), // Max 100
-    search: searchParams.get('search') || undefined,
-    orderBy: searchParams.get('orderBy') || undefined,
-    orderType: (searchParams.get('orderType') as 'asc' | 'desc') || 'desc',
-    filters: {
-      status: searchParams.get('status') || undefined,
-      priority: searchParams.get('priority') || undefined,
-      category: searchParams.get('category') || undefined,
-      city: searchParams.get('city') || undefined,
-    },
-  };
-}
 
 /**
  * Validate beneficiary data

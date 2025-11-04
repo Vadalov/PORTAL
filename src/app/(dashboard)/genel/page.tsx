@@ -20,10 +20,29 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { Suspense, useMemo } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuthStore();
+
+  // Sample chart data - memoized to prevent re-renders (moved before early returns)
+  const donationData = useMemo(() => [
+    { month: 'Oca', amount: 4500, beneficiaries: 12 },
+    { month: 'Şub', amount: 5200, beneficiaries: 15 },
+    { month: 'Mar', amount: 4800, beneficiaries: 11 },
+    { month: 'Nis', amount: 6100, beneficiaries: 18 },
+    { month: 'May', amount: 5800, beneficiaries: 16 },
+    { month: 'Haz', amount: 7200, beneficiaries: 22 },
+  ], []);
+
+  const categoryData = useMemo(() => [
+    { name: 'Ramazan Paketi', value: 35, color: '#8884d8' },
+    { name: 'Eğitim Yardımı', value: 25, color: '#82ca9d' },
+    { name: 'Sağlık Desteği', value: 20, color: '#ffc658' },
+    { name: 'Gıda Yardımı', value: 15, color: '#ff7300' },
+    { name: 'Diğer', value: 5, color: '#00ff00' },
+  ], []);
 
   // Show loading if still loading
   if (isLoading) {
@@ -49,27 +68,41 @@ export default function DashboardPage() {
   const stats = [
     {
       title: 'Toplam İhtiyaç Sahibi',
-      value: '0',
+      value: '127',
       icon: Users,
       variant: 'blue' as const,
+      trend: { value: '+12%', direction: 'up' as const },
+      progress: 85,
+      sparkles: true,
+      description: 'Bu ay 15 yeni kayıt',
     },
     {
       title: 'Toplam Bağış',
-      value: '0',
+      value: '89',
       icon: Heart,
       variant: 'red' as const,
+      trend: { value: '+8%', direction: 'up' as const },
+      progress: 92,
+      description: 'Bu ay 12 yeni bağış',
     },
     {
       title: 'Bağış Tutarı',
-      value: '0 ₺',
+      value: '₺147,250',
       icon: DollarSign,
       variant: 'green' as const,
+      trend: { value: '+15%', direction: 'up' as const },
+      progress: 78,
+      sparkles: true,
+      description: 'Hedef: ₺200,000',
     },
     {
       title: 'Aktif Kullanıcı',
-      value: '1',
+      value: '23',
       icon: TrendingUp,
       variant: 'purple' as const,
+      trend: { value: '+3', direction: 'up' as const },
+      progress: 65,
+      description: 'Son 30 günde aktif',
     },
   ];
 
@@ -134,7 +167,7 @@ export default function DashboardPage() {
       badge={{ text: 'Sistem Aktif', variant: 'default' }}
     >
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         {stats.map((stat) => (
           <StatCard
             key={stat.title}
@@ -146,16 +179,119 @@ export default function DashboardPage() {
         ))}
       </div>
 
+      {/* Charts Section */}
+      <div className="grid gap-6 lg:grid-cols-2 mb-6">
+        {/* Donation Trend Chart */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl font-bold">Bağış Trendi</CardTitle>
+                <CardDescription className="mt-1">
+                  Son 6 aylık bağış miktarı ve ihtiyaç sahibi sayısı
+                </CardDescription>
+              </div>
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height={256}>
+                  <AreaChart data={donationData}>
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis dataKey="month" className="text-xs" />
+                    <YAxis className="text-xs" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="amount"
+                      stroke="#8884d8"
+                      fill="url(#colorAmount)"
+                      strokeWidth={2}
+                    />
+                    <defs>
+                      <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#8884d8" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </Suspense>
+          </CardContent>
+        </Card>
+
+        {/* Category Distribution */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl font-bold">Yardım Kategorileri</CardTitle>
+                <CardDescription className="mt-1">
+                  Yardım türlerine göre dağılım
+                </CardDescription>
+              </div>
+              <BarChart3 className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>}>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height={256}>
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {categoryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--background))',
+                        border: '1px solid hsl(var(--border))',
+                        borderRadius: '8px',
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Suspense>
+            <div className="flex flex-wrap gap-2 mt-4">
+              {categoryData.map((item, index) => (
+                <div key={index} className="flex items-center gap-2 text-xs">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-muted-foreground">{item.name}</span>
+                  <span className="font-medium">{item.value}%</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 mb-6">
         {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="lg:col-span-2"
-        >
-          <Card variant="elevated" className="border-2">
+        <div className="lg:col-span-2">
+          <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -173,18 +309,16 @@ export default function DashboardPage() {
                   const Icon = action.icon;
                   return (
                     <Link key={action.title} href={action.href}>
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                      <div
                         className={cn(
-                          'group relative p-5 rounded-xl border-2 transition-all duration-300',
-                          'hover:shadow-lg hover:border-primary/50 cursor-pointer',
-                          'bg-gradient-to-br from-background to-muted/20'
+                          'group relative p-5 rounded-xl border transition-all duration-200',
+                          'hover:shadow-md hover:border-primary/50 cursor-pointer',
+                          'bg-card'
                         )}
                       >
                         <div
                           className={cn(
-                            'inline-flex p-3 rounded-xl mb-3 transition-transform duration-300 group-hover:scale-110',
+                            'inline-flex p-3 rounded-xl mb-3 transition-transform duration-200 group-hover:scale-105',
                             action.iconBg
                           )}
                         >
@@ -195,142 +329,125 @@ export default function DashboardPage() {
                         </h3>
                         <p className="text-sm text-muted-foreground">{action.description}</p>
                         <ArrowUpRight className="h-4 w-4 absolute top-4 right-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </motion.div>
+                      </div>
                     </Link>
                   );
                 })}
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
         {/* Recent Activities */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <Card variant="elevated" className="border-2 h-full">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-xl font-bold">Son Aktiviteler</CardTitle>
-                  <CardDescription className="mt-1">Sistemdeki son işlemler</CardDescription>
-                </div>
-                <Clock className="h-5 w-5 text-muted-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivities.map((activity, index) => {
-                  const Icon = activity.icon;
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 + index * 0.1 }}
-                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
-                    >
-                      <div
-                        className={cn(
-                          'p-2 rounded-lg',
-                          activity.type === 'success' && 'bg-green-500/10',
-                          activity.type === 'info' && 'bg-blue-500/10',
-                          activity.type === 'warning' && 'bg-yellow-500/10'
-                        )}
-                      >
-                        <Icon
-                          className={cn(
-                            'h-4 w-4',
-                            activity.type === 'success' && 'text-green-600 dark:text-green-400',
-                            activity.type === 'info' && 'text-blue-600 dark:text-blue-400',
-                            activity.type === 'warning' && 'text-yellow-600 dark:text-yellow-400'
-                          )}
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{activity.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {activity.description}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* System Status */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <Card variant="elevated" className="border-2">
+        <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl font-bold">Sistem Durumu</CardTitle>
-                <CardDescription className="mt-1">
-                  Sistemin mevcut durumu ve performans metrikleri
-                </CardDescription>
+                <CardTitle className="text-xl font-bold">Son Aktiviteler</CardTitle>
+                <CardDescription className="mt-1">Sistemdeki son işlemler</CardDescription>
               </div>
-              <Target className="h-5 w-5 text-muted-foreground" />
+              <Clock className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500/20">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div className="space-y-4">
+              {recentActivities.map((activity, index) => {
+                const Icon = activity.icon;
+                return (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:shadow-sm transition-shadow"
+                  >
+                    <div className={cn(
+                      'flex h-8 w-8 items-center justify-center rounded-full',
+                      activity.type === 'success' && 'bg-green-500/10',
+                      activity.type === 'info' && 'bg-blue-500/10',
+                      activity.type === 'warning' && 'bg-yellow-500/10'
+                    )}>
+                      <Icon className={cn(
+                        'h-4 w-4',
+                        activity.type === 'success' && 'text-green-600',
+                        activity.type === 'info' && 'text-blue-600',
+                        activity.type === 'warning' && 'text-yellow-600'
+                      )} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{activity.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {activity.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {activity.time}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">Veritabanı</p>
-                    <p className="text-xs text-muted-foreground">Bağlantı aktif</p>
-                  </div>
-                </div>
-                <Badge variant="default" className="bg-green-600">
-                  Aktif
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500/20">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Kimlik Doğrulama</p>
-                    <p className="text-xs text-muted-foreground">Servis aktif</p>
-                  </div>
-                </div>
-                <Badge variant="default" className="bg-green-600">
-                  Aktif
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between p-4 rounded-xl bg-green-500/10 border border-green-500/20">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500/20">
-                    <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">API Servisleri</p>
-                    <p className="text-xs text-muted-foreground">Tüm servisler aktif</p>
-                  </div>
-                </div>
-                <Badge variant="default" className="bg-green-600">
-                  Aktif
-                </Badge>
-              </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
+
+      {/* System Status */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl font-bold">Sistem Durumu</CardTitle>
+              <CardDescription className="mt-1">
+                Sistemin mevcut durumu ve performans metrikleri
+              </CardDescription>
+            </div>
+            <Target className="h-5 w-5 text-muted-foreground" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="flex items-center justify-between p-4 rounded-lg border border-green-500/20 bg-green-500/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Veritabanı</p>
+                  <p className="text-xs text-muted-foreground">Bağlantı aktif</p>
+                </div>
+              </div>
+              <Badge variant="default" className="bg-green-600">
+                Aktif
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-lg border border-green-500/20 bg-green-500/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Kimlik Doğrulama</p>
+                  <p className="text-xs text-muted-foreground">Servis aktif</p>
+                </div>
+              </div>
+              <Badge variant="default" className="bg-green-600">
+                Aktif
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-lg border border-green-500/20 bg-green-500/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">API Servisleri</p>
+                  <p className="text-xs text-muted-foreground">Tüm servisler aktif</p>
+                </div>
+              </div>
+              <Badge variant="default" className="bg-green-600">
+                Aktif
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </PageLayout>
   );
 }

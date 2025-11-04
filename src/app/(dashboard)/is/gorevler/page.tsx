@@ -16,8 +16,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle as _DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -185,7 +183,7 @@ export default function TasksPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Görev Yönetimi</h1>
-          <p className="text-gray-600 mt-2">Görevleri görüntüleyin, atayın ve takip edin</p>
+          <p className="text-muted-foreground mt-2">Görevleri görüntüleyin, atayın ve takip edin</p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -239,7 +237,7 @@ export default function TasksPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Toplam Görev</CardTitle>
-            <CheckSquare className="h-4 w-4 text-gray-400" />
+            <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -286,7 +284,7 @@ export default function TasksPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Görev başlığı ile ara"
                 className="pl-10"
@@ -368,16 +366,16 @@ export default function TasksPage() {
         <Card>
           <CardContent className="p-12">
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-              <span className="ml-3 text-gray-600">Görevler yükleniyor...</span>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+              <span className="ml-3 text-muted-foreground">Görevler yükleniyor...</span>
             </div>
           </CardContent>
         </Card>
       ) : tasks.length === 0 ? (
         <Card>
           <CardContent className="p-12">
-            <div className="text-center text-gray-500">
-              <CheckSquare className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <div className="text-center text-muted-foreground">
+              <CheckSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
               <p className="text-lg font-medium">Görev bulunamadı</p>
               <p className="text-sm mt-2">
                 {search ||
@@ -417,7 +415,7 @@ export default function TasksPage() {
                 return (
                   <div
                     key={task.$id}
-                    className="border rounded-lg p-4 hover:bg-blue-50 transition-colors cursor-pointer"
+                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer"
                     onClick={() => handleTaskClick(task)}
                   >
                     <div className="flex items-start justify-between">
@@ -427,7 +425,7 @@ export default function TasksPage() {
                           <div>
                             <h3 className="font-semibold text-lg">{task.title}</h3>
                             {task.description && (
-                              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                                 {task.description}
                               </p>
                             )}
@@ -445,8 +443,8 @@ export default function TasksPage() {
                         {/* Details */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-500">Atanan:</span>
+                            <User className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Atanan:</span>
                             <span className="font-medium">
                               {task.assigned_to ? getUserName(task.assigned_to) : 'Atanmamış'}
                             </span>
@@ -454,15 +452,15 @@ export default function TasksPage() {
 
                           {task.due_date && (
                             <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-gray-400" />
-                              <span className="text-gray-500">Son Tarih:</span>
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-muted-foreground">Son Tarih:</span>
                               <span
                                 className={`font-medium ${
                                   isOverdue
                                     ? 'text-red-600'
                                     : isDueSoon
                                       ? 'text-orange-600'
-                                      : 'text-gray-600'
+                                      : 'text-muted-foreground'
                                 }`}
                               >
                                 {new Date(task.due_date).toLocaleDateString('tr-TR')}
@@ -475,12 +473,12 @@ export default function TasksPage() {
                           )}
 
                           <div>
-                            <span className="text-gray-500">Kategori:</span>
+                            <span className="text-muted-foreground">Kategori:</span>
                             <span className="font-medium ml-1">{task.category || '-'}</span>
                           </div>
 
                           <div>
-                            <span className="text-gray-500">Oluşturulma:</span>
+                            <span className="text-muted-foreground">Oluşturulma:</span>
                             <span className="font-medium ml-1">
                               {new Date(task.$createdAt).toLocaleDateString('tr-TR')}
                             </span>
@@ -532,7 +530,7 @@ export default function TasksPage() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="mt-6 flex items-center justify-between">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Sayfa {page} / {totalPages}
                 </p>
                 <div className="flex gap-2">

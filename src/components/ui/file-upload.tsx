@@ -4,7 +4,8 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, X, FileText, Image, File, AlertCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Upload, X, FileText, Image, File, AlertCircle, Loader2, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { validateFile } from '@/lib/sanitization';
 
@@ -32,6 +33,9 @@ export function FileUpload({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFileUpload = (file: File): { valid: boolean; sanitizedFilename?: string } => {
@@ -65,15 +69,49 @@ export function FileUpload({
     return { valid: true, sanitizedFilename: validation.sanitizedFilename };
   };
 
+  const createPreview = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
+    }
+  };
+
+  const simulateUpload = async (file: File) => {
+    setUploading(true);
+    setUploadProgress(0);
+
+    // Simulate upload progress
+    const interval = setInterval(() => {
+      setUploadProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setUploading(false);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 100);
+  };
+
   const handleFileSelect = (file: File | null) => {
     if (file) {
       const validation = validateFileUpload(file);
       if (validation.valid) {
         setSelectedFile(file);
+        createPreview(file);
+        simulateUpload(file);
         onFileSelect(file, validation.sanitizedFilename);
       }
     } else {
       setSelectedFile(null);
+      setPreview(null);
+      setUploading(false);
+      setUploadProgress(0);
       onFileSelect(null);
       setError(null);
     }
@@ -111,6 +149,9 @@ export function FileUpload({
 
   const clearFile = () => {
     setSelectedFile(null);
+    setPreview(null);
+    setUploading(false);
+    setUploadProgress(0);
     onFileSelect(null);
     setError(null);
     if (fileInputRef.current) {
@@ -165,26 +206,77 @@ export function FileUpload({
         onClick={() => !disabled && fileInputRef.current?.click()}
       >
         {selectedFile ? (
-          <div className="flex items-center justify-center space-x-4">
-            {getFileIcon(selectedFile)}
-            <div className="text-left">
-              <p className="font-medium text-foreground">{selectedFile.name}</p>
-              <p className="text-sm text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
+        <div className="space-y-4">
+        <div className="flex items-center justify-center space-x-4">
+          {preview ? (
+          <div className="relative group">
+            <img
+                src={preview}
+                alt="Preview"
+              className="w-16 h-16 object-cover rounded-lg border"
+          />
+          <Button
+            type="button"
+            variant="secondary"
+          size="icon-sm"
+          className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+                // Open preview modal or lightbox
+              const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4';
+                  modal.innerHTML = `
+                      <div class="bg-white rounded-lg max-w-2xl max-h-[80vh] overflow-auto">
+                          <div class="p-4 border-b flex justify-between items-center">
+                            <h3 class="font-semibold">${selectedFile.name}</h3>
+                            <button class="text-gray-500 hover:text-gray-700" onclick="this.closest('.fixed').remove()">×</button>
+                          </div>
+                          <div class="p-4">
+                            <img src="${preview}" alt="Preview" class="max-w-full h-auto rounded-lg" />
+                          </div>
+                        </div>
+                      `;
+                      modal.addEventListener('click', (e) => {
+                        if (e.target === modal) modal.remove();
+                      });
+                      document.body.appendChild(modal);
+                    }}
+                  >
+                    <Eye className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                getFileIcon(selectedFile)
+              )}
+              <div className="text-left flex-1">
+                <p className="font-medium text-foreground">{selectedFile.name}</p>
+                <p className="text-sm text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
+                {uploading && (
+                  <div className="mt-2 space-y-1">
+                    <Progress value={uploadProgress} className="h-1" />
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Yükleniyor... {uploadProgress}%
+                    </p>
+                  </div>
+                )}
+              </div>
+              {!disabled && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearFile();
+                  }}
+                  className="text-destructive hover:text-destructive/80"
+                  disabled={uploading}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-            {!disabled && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  clearFile();
-                }}
-                className="text-destructive hover:text-destructive/80"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
           </div>
         ) : (
           <div className="space-y-2">

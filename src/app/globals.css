@@ -1,13 +1,12 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   /* Typography - Font Families */
-  --font-heading: var(--font-heading);
-  --font-heading-alt: var(--font-heading-alt);
-  --font-body: var(--font-body);
+  --font-heading: "Inter", system-ui, sans-serif;
+  --font-heading-alt: "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
 
   /* Typography - Font Sizes */
   --font-size-xs: 0.75rem;
@@ -133,9 +132,16 @@
      Modern, professional gray-based design
      ======================================== */
 
+  /* Font Variables - Missing Definitions */
+  --font-geist-sans: "Inter", system-ui, sans-serif;
+  --font-geist-mono: "JetBrains Mono", "Fira Code", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  /* Ring Offset Background */
+  --ring-offset-background: var(--background);
+
   /* Base Colors - Premium Slate Palette */
-  --background: #f8fafc; /* slate-50 - soft, professional background */
-  --foreground: #0f172a; /* slate-900 - deep readable text */
+  --background: #ffffff; /* Pure white - clean corporate background */
+  --foreground: #0f172a; /* Deep slate for excellent readability */
 
   /* Cards - Clean white with subtle elevation */
   --card: #ffffff; /* Pure white - premium feel */
@@ -145,8 +151,8 @@
   --popover: #ffffff;
   --popover-foreground: #0f172a;
 
-  /* Primary - Professional Slate */
-  --primary: #475569; /* slate-600 - sophisticated, not too bold */
+  /* Primary - Corporate Deep Blue */
+  --primary: #1e40af; /* deep corporate blue - professional */
   --primary-foreground: #ffffff;
 
   /* Secondary - Lighter slate for backgrounds */
@@ -187,12 +193,12 @@
   --sidebar-border: #334155; /* slate-700 - subtle borders */
   --sidebar-ring: #475569; /* slate-600 */
 
-  /* Brand Colors - Premium Corporate Blue */
-  --brand-primary: #3b82f6; /* blue-500 - Modern, professional */
-  --brand-primary-light: #60a5fa; /* blue-400 */
-  --brand-primary-dark: #2563eb; /* blue-600 */
-  --brand-secondary: #10b981; /* emerald-500 - Success green */
-  --brand-accent: #f59e0b; /* amber-500 - Attention orange */
+  /* Brand Colors - Corporate Professional Palette */
+  --brand-primary: #1e40af; /* deep corporate blue */
+  --brand-primary-light: #3b82f6; /* lighter corporate blue */
+  --brand-primary-dark: #1e3a8a; /* darker corporate blue */
+  --brand-secondary: #059669; /* corporate green */
+  --brand-accent: #d97706; /* corporate amber */
 
   /* Semantic Colors - Success */
   --success: oklch(0.6 0.17 145);
@@ -322,7 +328,13 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+
+  /* Remove aggressive ring-2 application - causes conflicts */
+  /* All elements now use natural box-sizing */
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
 
   /* Font Smoothing */
@@ -592,25 +604,25 @@
     box-shadow: var(--shadow-glow-success);
   }
 
-  /* Enhanced Card Shadows - Premium Style */
+  /* Enhanced Card Shadows - Premium Style (Soft & Easy on Eyes) */
   .shadow-card {
     box-shadow:
-      0 1px 3px 0 rgb(15 23 42 / 0.04),
-      0 1px 2px -1px rgb(15 23 42 / 0.04);
+      0 1px 2px 0 rgb(15 23 42 / 0.03),
+      0 1px 1px -1px rgb(15 23 42 / 0.02);
   }
 
   .shadow-card-hover {
     box-shadow:
-      0 4px 12px -2px rgb(15 23 42 / 0.08),
-      0 2px 4px -2px rgb(15 23 42 / 0.08);
+      0 4px 12px -2px rgb(15 23 42 / 0.06),
+      0 2px 4px -2px rgb(15 23 42 / 0.04);
     transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .shadow-card-premium {
     box-shadow:
-      0 0 0 1px rgb(226 232 240 / 0.8),
-      0 2px 4px -2px rgb(15 23 42 / 0.06),
-      0 4px 8px -2px rgb(15 23 42 / 0.04);
+      0 0 0 1px rgb(226 232 240 / 0.6),
+      0 2px 4px -2px rgb(15 23 42 / 0.04),
+      0 4px 8px -2px rgb(15 23 42 / 0.03);
   }
 
   /* Animation Utilities */
@@ -817,6 +829,16 @@
     50% {
       height: 100%;
     }
+  }
+
+  /* Scrollbar Hide - Premium Design */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
   }
 
   /* Accessibility - Reduced Motion */

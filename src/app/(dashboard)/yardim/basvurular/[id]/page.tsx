@@ -30,11 +30,11 @@ import { toast } from 'sonner';
 import type { AidApplicationDocument } from '@/types/collections';
 
 const STAGE_LABELS = {
-  draft: { label: 'Taslak', icon: Clock, color: 'bg-gray-100 text-gray-700' },
-  under_review: { label: 'İnceleme', icon: Clock, color: 'bg-blue-100 text-blue-700' },
-  approved: { label: 'Onaylandı', icon: CheckCircle, color: 'bg-green-100 text-green-700' },
-  ongoing: { label: 'Devam Ediyor', icon: Clock, color: 'bg-yellow-100 text-yellow-700' },
-  completed: { label: 'Tamamlandı', icon: CheckCircle, color: 'bg-purple-100 text-purple-700' },
+  draft: { label: 'Taslak', icon: Clock, color: 'bg-muted text-muted-foreground' },
+  under_review: { label: 'İnceleme', icon: Clock, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' },
+  approved: { label: 'Onaylandı', icon: CheckCircle, color: 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' },
+  ongoing: { label: 'Devam Ediyor', icon: Clock, color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' },
+  completed: { label: 'Tamamlandı', icon: CheckCircle, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400' },
 };
 
 export default function AidApplicationDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -66,7 +66,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     );
   }
@@ -80,7 +80,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
         </Button>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-center text-red-600 py-8">Başvuru bulunamadı</div>
+            <div className="text-center text-destructive py-8">Başvuru bulunamadı</div>
           </CardContent>
         </Card>
       </div>
@@ -101,12 +101,12 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{application.applicant_name}</h1>
             <div className="flex items-center gap-3 mt-2">
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 {new Date(application.application_date).toLocaleDateString('tr-TR')}
               </p>
               <Badge className={STAGE_LABELS[application.stage as keyof typeof STAGE_LABELS].color}>
                 <StageIcon className="h-3 w-3 mr-1" />
-                {STAGE_LABELS[application.stage].label}
+                {STAGE_LABELS[application.stage as keyof typeof STAGE_LABELS].label}
               </Badge>
               <Badge variant={application.status === 'open' ? 'default' : 'secondary'}>
                 {application.status === 'open' ? 'Açık' : 'Kapalı'}
@@ -144,7 +144,9 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
                 <Label>Aşama Değiştir</Label>
                 <Select
                   value={application.stage}
-                  onValueChange={(value) => updateStageMutation.mutate({ stage: value as any })}
+                  onValueChange={(value) => updateStageMutation.mutate({ 
+                    stage: value as 'draft' | 'under_review' | 'approved' | 'ongoing' | 'completed' 
+                  })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -172,58 +174,58 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {application.one_time_aid && application.one_time_aid > 0 && (
-              <div className="p-4 border rounded-lg bg-blue-50">
+              <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-900/10">
                 <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-5 w-5 text-blue-600" />
-                  <h4 className="font-medium text-blue-900">Tek Seferlik</h4>
+                  <DollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <h4 className="font-medium text-blue-900 dark:text-blue-300">Tek Seferlik</h4>
                 </div>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {application.one_time_aid.toLocaleString('tr-TR')} ₺
                 </p>
               </div>
             )}
 
             {application.regular_financial_aid && application.regular_financial_aid > 0 && (
-              <div className="p-4 border rounded-lg bg-green-50">
+              <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-900/10">
                 <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                  <h4 className="font-medium text-green-900">Düzenli Nakdi</h4>
+                  <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <h4 className="font-medium text-green-900 dark:text-green-300">Düzenli Nakdi</h4>
                 </div>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {application.regular_financial_aid.toLocaleString('tr-TR')} ₺/Ay
                 </p>
               </div>
             )}
 
             {application.regular_food_aid && application.regular_food_aid > 0 && (
-              <div className="p-4 border rounded-lg bg-orange-50">
+              <div className="p-4 border rounded-lg bg-orange-50 dark:bg-orange-900/10">
                 <div className="flex items-center gap-2 mb-2">
-                  <Utensils className="h-5 w-5 text-orange-600" />
-                  <h4 className="font-medium text-orange-900">Düzenli Gıda</h4>
+                  <Utensils className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  <h4 className="font-medium text-orange-900 dark:text-orange-300">Düzenli Gıda</h4>
                 </div>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                   {application.regular_food_aid} Paket
                 </p>
               </div>
             )}
 
             {application.in_kind_aid && application.in_kind_aid > 0 && (
-              <div className="p-4 border rounded-lg bg-purple-50">
+              <div className="p-4 border rounded-lg bg-purple-50 dark:bg-purple-900/10">
                 <div className="flex items-center gap-2 mb-2">
-                  <Package className="h-5 w-5 text-purple-600" />
-                  <h4 className="font-medium text-purple-900">Ayni Yardım</h4>
+                  <Package className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <h4 className="font-medium text-purple-900 dark:text-purple-300">Ayni Yardım</h4>
                 </div>
-                <p className="text-2xl font-bold text-purple-600">{application.in_kind_aid} Adet</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{application.in_kind_aid} Adet</p>
               </div>
             )}
 
             {application.service_referral && application.service_referral > 0 && (
-              <div className="p-4 border rounded-lg bg-red-50">
+              <div className="p-4 border rounded-lg bg-red-50 dark:bg-red-900/10">
                 <div className="flex items-center gap-2 mb-2">
-                  <Stethoscope className="h-5 w-5 text-red-600" />
-                  <h4 className="font-medium text-red-900">Hizmet Sevk</h4>
+                  <Stethoscope className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  <h4 className="font-medium text-red-900 dark:text-red-300">Hizmet Sevk</h4>
                 </div>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                   {application.service_referral} Sevk
                 </p>
               </div>
@@ -241,7 +243,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
           <div className="space-y-4">
             {application.description && (
               <div>
-                <p className="text-sm font-medium text-gray-500">Açıklama</p>
+                <p className="text-sm font-medium text-muted-foreground">Açıklama</p>
                 <p className="text-base mt-1 whitespace-pre-wrap">{application.description}</p>
               </div>
             )}
@@ -250,7 +252,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
               <>
                 <Separator />
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Notlar</p>
+                  <p className="text-sm font-medium text-muted-foreground">Notlar</p>
                   <p className="text-base mt-1 whitespace-pre-wrap">{application.notes}</p>
                 </div>
               </>
@@ -259,7 +261,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
             <Separator />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm font-medium text-gray-500">Kayıt Tarihi</p>
+                <p className="text-sm font-medium text-muted-foreground">Kayıt Tarihi</p>
                 <p className="text-base">
                   {new Date(application.$createdAt).toLocaleDateString('tr-TR', {
                     year: 'numeric',
@@ -272,7 +274,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
               </div>
 
               <div>
-                <p className="text-sm font-medium text-gray-500">Son Güncelleme</p>
+                <p className="text-sm font-medium text-muted-foreground">Son Güncelleme</p>
                 <p className="text-base">
                   {new Date(application.$updatedAt).toLocaleDateString('tr-TR', {
                     year: 'numeric',
@@ -286,14 +288,14 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
 
               {application.approved_by && (
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Onaylayan</p>
+                  <p className="text-sm font-medium text-muted-foreground">Onaylayan</p>
                   <p className="text-base">{application.approved_by}</p>
                 </div>
               )}
 
               {application.approved_at && (
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Onay Tarihi</p>
+                  <p className="text-sm font-medium text-muted-foreground">Onay Tarihi</p>
                   <p className="text-base">
                     {new Date(application.approved_at).toLocaleDateString('tr-TR')}
                   </p>

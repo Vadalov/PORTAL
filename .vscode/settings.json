@@ -8,6 +8,8 @@
   "terminal.integrated.confirmOnExit": "never",
   "terminal.integrated.allowChords": false,
   "terminal.integrated.allowMenubar": false,
+  "css.customData": [".vscode/css_custom_data.json"],
+  "css.lint.unknownAtRules": "ignore",
   "chat.tools.terminal.autoApprove": {
     "autoApprove": true,
     "cd": true,

@@ -1,9 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
+import { LucideIcon, TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
 interface StatCardProps {
@@ -16,6 +17,8 @@ interface StatCardProps {
   };
   description?: string;
   variant?: 'blue' | 'red' | 'green' | 'purple' | 'orange' | 'cyan';
+  progress?: number; // 0-100 for progress bar
+  sparkles?: boolean; // Add sparkles effect
   className?: string;
 }
 
@@ -65,6 +68,8 @@ export function StatCard({
   trend,
   description,
   variant = 'blue',
+  progress,
+  sparkles = false,
   className,
 }: StatCardProps) {
   const styles = variantStyles[variant];
@@ -87,6 +92,26 @@ export function StatCard({
         {/* Gradient Background */}
         <div className={cn('absolute inset-0 bg-gradient-to-br opacity-50', styles.gradient)} />
 
+        {/* Sparkles Effect */}
+        {sparkles && (
+          <div className="absolute inset-0 overflow-hidden">
+            <motion.div
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.8, 0.3],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute top-4 right-4"
+            >
+              <Sparkles className="h-4 w-4 text-yellow-400" />
+            </motion.div>
+          </div>
+        )}
+
         {/* Content */}
         <div className="relative">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -101,25 +126,36 @@ export function StatCard({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex items-baseline justify-between">
-              <div className="text-3xl font-bold tracking-tight">{value}</div>
-              {trend && (
-                <Badge
-                  variant={
-                    trend.direction === 'up'
-                      ? 'default'
-                      : trend.direction === 'down'
-                        ? 'destructive'
-                        : 'secondary'
-                  }
-                  className="gap-1 text-xs"
-                >
-                  {trend.direction === 'up' && <TrendingUp className="h-3 w-3" />}
-                  {trend.direction === 'down' && <TrendingDown className="h-3 w-3" />}
-                  {trend.value}
-                </Badge>
-              )}
-            </div>
+          <div className="flex items-baseline justify-between">
+          <div className="text-3xl font-bold tracking-tight">{value}</div>
+          {trend && (
+          <Badge
+          variant={
+          trend.direction === 'up'
+          ? 'default'
+          : trend.direction === 'down'
+          ? 'destructive'
+          : 'secondary'
+          }
+          className="gap-1 text-xs"
+          >
+          {trend.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+          {trend.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+          {trend.value}
+          </Badge>
+          )}
+          </div>
+
+            {/* Progress Bar */}
+            {progress !== undefined && (
+              <div className="mt-3 space-y-1">
+                <Progress value={progress} className="h-1.5" />
+                <p className="text-xs text-muted-foreground text-right">
+                  {progress}% tamamlandı
+                </p>
+              </div>
+            )}
+
             {description && <p className="text-xs text-muted-foreground mt-2">{description}</p>}
           </CardContent>
         </div>

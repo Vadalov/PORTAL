@@ -12,7 +12,8 @@ import api from '@/lib/api';
 import { exportBeneficiaries } from '@/lib/api/mock-api';
 import type { BeneficiaryDocument } from '@/types/collections';
 import { toast } from 'sonner';
-import { ArrowUpRight, Download, Plus } from 'lucide-react';
+import { ArrowUpRight, Download, Plus, Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load heavy modal component
 const BeneficiaryQuickAddModal = lazy(() =>
@@ -124,7 +125,24 @@ export default function BeneficiariesPage() {
   return (
     <>
       {showQuickAddModal && (
-        <Suspense fallback={<div>Yükleniyor...</div>}>
+        <Suspense fallback={
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-background rounded-lg shadow-lg border p-6 max-w-md w-full mx-4">
+              <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+                <div className="space-y-2 w-full">
+                  <Skeleton className="h-4 w-3/4 mx-auto" />
+                  <Skeleton className="h-4 w-1/2 mx-auto" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-1/2 mx-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        }>
           <BeneficiaryQuickAddModal open={showQuickAddModal} onOpenChange={handleModalClose} />
         </Suspense>
       )}
@@ -146,30 +164,31 @@ export default function BeneficiariesPage() {
         }
       >
         <DataTable<Record<string, unknown>>
-          data={beneficiaries as unknown as Record<string, unknown>[]}
-          columns={
-            columns as unknown as import('@/components/ui/data-table').Column<
-              Record<string, unknown>
-            >[]
-          }
-          isLoading={isLoading}
-          error={error as Error}
-          emptyMessage="İhtiyaç sahibi bulunamadı"
-          emptyDescription="Henüz kayıt eklenmemiş"
-          searchable={true}
-          searchValue={search}
-          onSearchChange={(value) => {
-            setSearch(value);
-            setPage(1);
-          }}
-          searchPlaceholder="İsim, TC No veya telefon ile ara..."
-          pagination={{
-            page,
-            totalPages,
-            total,
-            onPageChange: setPage,
-          }}
-          onRowClick={(item) => router.push(`/yardim/ihtiyac-sahipleri/${item.$id}`)}
+        data={beneficiaries as unknown as Record<string, unknown>[]}
+        columns={
+        columns as unknown as import('@/components/ui/data-table').Column<
+        Record<string, unknown>
+        >[]
+        }
+        isLoading={isLoading}
+        error={error as Error}
+        emptyMessage="İhtiyaç sahibi bulunamadı"
+        emptyDescription="Henüz kayıt eklenmemiş"
+        searchable={true}
+        searchValue={search}
+        onSearchChange={(value) => {
+        setSearch(value);
+        setPage(1);
+        }}
+        searchPlaceholder="İsim, TC No veya telefon ile ara..."
+        pagination={{
+        page,
+        totalPages,
+        total,
+        onPageChange: setPage,
+        }}
+        onRowClick={(item) => router.push(`/yardim/ihtiyac-sahipleri/${item.$id}`)}
+          refetch={refetch}
         />
       </PageLayout>
     </>

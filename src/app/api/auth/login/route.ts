@@ -7,7 +7,6 @@ import logger from '@/lib/logger';
 import { mockAuthApi } from '@/lib/api/mock-auth-api';
 import { convexHttp } from '@/lib/convex/server';
 import { api } from '@/convex/_generated/api';
-import { Id } from '@/convex/_generated/dataModel';
 
 // Get backend provider from environment
 const getBackendProvider = () => {
@@ -95,7 +94,7 @@ export const POST = authRateLimit(async (request: NextRequest) => {
     // Convex-based authentication
     // Look up user by email in Convex
     const users = await convexHttp.query(api.users.list);
-    const user = users.find((u: any) => u.email?.toLowerCase() === email?.toLowerCase());
+    const user = users.find((u) => u.email?.toLowerCase() === email?.toLowerCase());
 
     if (!user) {
       logger.warn('Login failed - user not found', {
