@@ -17,6 +17,17 @@ const baseConfig: NextConfig = {
   // Turbopack configuration
   turbopack: {},
 
+  // Exclude test-only packages from server components
+  // These packages are only needed for testing, not for production builds
+  serverExternalPackages: [
+    'jsdom',
+    'vitest',
+    '@vitest/coverage-v8',
+    '@testing-library/jest-dom',
+    '@testing-library/react',
+    '@testing-library/user-event',
+  ],
+
   // Image optimization
   images: {
     formats: ['image/webp', 'image/avif'],
@@ -98,6 +109,22 @@ const baseConfig: NextConfig = {
     // Bundle analyzer
     if (process.env.ANALYZE) {
       // Bundle analyzer will be handled by the wrapper
+    }
+
+    // Exclude test-only dependencies from build (additional webpack externals)
+    // jsdom is only needed for tests, not for production builds
+    if (isServer) {
+      config.externals = config.externals || [];
+      if (Array.isArray(config.externals)) {
+        config.externals.push({
+          jsdom: 'commonjs jsdom',
+          'vitest': 'commonjs vitest',
+          '@vitest/coverage-v8': 'commonjs @vitest/coverage-v8',
+          '@testing-library/jest-dom': 'commonjs @testing-library/jest-dom',
+          '@testing-library/react': 'commonjs @testing-library/react',
+          '@testing-library/user-event': 'commonjs @testing-library/user-event',
+        });
+      }
     }
 
     // Production optimizations
