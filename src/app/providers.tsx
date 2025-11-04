@@ -9,7 +9,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useState } from 'react';
 import { createOptimizedQueryClient, cacheUtils } from '@/lib/cache-config';
 import { persistentCache } from '@/lib/persistent-cache';
-import { convex } from '@/lib/convex/client';
+import { convex, shouldUseConvex } from '@/lib/convex/client';
 
 import { SuspenseBoundary } from '@/components/ui/suspense-boundary';
 
@@ -78,25 +78,51 @@ export function Providers({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Render with or without Convex depending on availability
+  // Type guard: ensure convex is not null before using it
+  if (shouldUseConvex() && convex !== null) {
+    // TypeScript now knows convex is not null in this block
+    return (
+      <ConvexProvider client={convex}>
+        <QueryClientProvider client={queryClient}>
+          <SuspenseBoundary
+            loadingVariant="pulse"
+            fullscreen={true}
+            loadingText="Uygulama yükleniyor..."
+            onSuspend={() => {
+              // Suspended state
+            }}
+            onResume={() => {
+              // Resumed state
+            }}
+          >
+            {children}
+          </SuspenseBoundary>
+          <Toaster position="top-right" richColors />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </ConvexProvider>
+    );
+  }
+
+  // Render without Convex (e.g., during build or when not configured)
   return (
-    <ConvexProvider client={convex}>
-      <QueryClientProvider client={queryClient}>
-        <SuspenseBoundary
-          loadingVariant="pulse"
-          fullscreen={true}
-          loadingText="Uygulama yükleniyor..."
-          onSuspend={() => {
-            // Suspended state
-          }}
-          onResume={() => {
-            // Resumed state
-          }}
-        >
-          {children}
-        </SuspenseBoundary>
-        <Toaster position="top-right" richColors />
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </ConvexProvider>
+    <QueryClientProvider client={queryClient}>
+      <SuspenseBoundary
+        loadingVariant="pulse"
+        fullscreen={true}
+        loadingText="Uygulama yükleniyor..."
+        onSuspend={() => {
+          // Suspended state
+        }}
+        onResume={() => {
+          // Resumed state
+        }}
+      >
+        {children}
+      </SuspenseBoundary>
+      <Toaster position="top-right" richColors />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
