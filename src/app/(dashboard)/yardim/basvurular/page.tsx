@@ -26,7 +26,12 @@ import {
   Stethoscope,
 } from 'lucide-react';
 import Link from 'next/link';
-import { AidApplicationForm } from '@/components/forms/AidApplicationForm';
+import dynamic from 'next/dynamic';
+
+const AidApplicationForm = dynamic(() => import('@/components/forms/AidApplicationForm').then(mod => ({ default: mod.AidApplicationForm })), {
+  loading: () => <div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>,
+  ssr: false,
+});
 import type { AidApplicationDocument } from '@/types/database';
 
 const STAGE_LABELS = {

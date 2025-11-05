@@ -110,7 +110,9 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
       payment_method: 'Nakit',
       status: 'pending',
       is_kumbara: true,
+      collection_date: new Date().toISOString().split('T')[0], // Bugünün tarihi
     },
+    mode: 'onChange', // Real-time validation
   });
 
   // Handle map location selection
@@ -159,12 +161,15 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Kumbara bağışı oluşturulamadı');
+        const errorMessage = error.error || 'Kumbara bağışı oluşturulamadı';
+        const errorDetails = error.details ? (Array.isArray(error.details) ? error.details.join(', ') : error.details) : '';
+        throw new Error(errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage);
       }
 
       return response.json();
     },
     onSuccess: (response) => {
+      setIsSubmitting(false);
       queryClient.invalidateQueries({ queryKey: ['kumbara-donations'] });
 
       // Show success message with QR code
@@ -185,6 +190,7 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
       onSuccess?.();
     },
     onError: (error: Error) => {
+      setIsSubmitting(false);
       toast.error(error.message);
     },
   });
@@ -230,12 +236,22 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
         }
       }
 
+      // Clean up location coordinates - only send if both lat and lng are valid
+      if (finalData.location_coordinates) {
+        const { lat, lng } = finalData.location_coordinates;
+        if (lat === undefined || lng === undefined || isNaN(lat) || isNaN(lng)) {
+          finalData.location_coordinates = undefined;
+        }
+      }
+
       // Create kumbara donation with uploaded file info
+      console.log('Submitting kumbara donation:', finalData);
       createKumbaraDonation(finalData);
+      // Note: setIsSubmitting(false) is called in onSuccess/onError callbacks
     } catch (error) {
       console.error('Error creating kumbara donation:', error);
-    } finally {
       setIsSubmitting(false);
+      toast.error('Bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
@@ -246,28 +262,69 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
     }).format(value);
   };
 
+  // Form completion progress
+  const watchedFields = form.watch();
+  const requiredFields = ['donor_name', 'donor_phone', 'amount', 'currency', 'kumbara_location', 'kumbara_institution', 'collection_date', 'receipt_number'];
+  const completedFields = requiredFields.filter(field => {
+    const value = watchedFields[field];
+    return value !== undefined && value !== null && value !== '';
+  });
+  const progress = Math.round((completedFields.length / requiredFields.length) * 100);
+
   return (
-    <Card className="w-full max-w-5xl mx-auto">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-xl">Yeni Kumbara Bağışı</CardTitle>
-        <CardDescription className="text-sm">
-          Kumbara bağışını kaydetmek için formu doldurunuz. <span className="text-red-500">*</span> zorunlu alanlar
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-0">
+    <div className="w-full">
+      <div className="mb-2 pb-2 border-b">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-bold flex items-center gap-1.5">
+              <span className="text-lg">🐷</span>
+              Yeni Kumbara Bağışı
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Formu doldurunuz. <span className="text-red-500 font-semibold">*</span> zorunlu
+            </p>
+          </div>
+          {/* Progress Indicator */}
+          <div className="flex flex-col items-end gap-1">
+            <div className="text-xs font-medium text-muted-foreground">
+              %{progress}
+            </div>
+            <div className="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2.5">
             {/* Bağışçı Bilgileri */}
-            <div className="space-y-3">
-              <h3 className="text-base font-semibold text-gray-700">👤 Bağışçı Bilgileri</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="space-y-2 p-2 bg-gray-50/50 dark:bg-gray-900/20 rounded-md border border-gray-200 dark:border-gray-800">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">👤</span>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Bağışçı Bilgileri</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
                 <FormField
                   control={form.control}
                   name="donor_name"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Bağışçı Adı" required error={String(form.formState.errors.donor_name?.message || '')}>
-                      <Input {...field} placeholder="Ad Soyad" />
-                    </FieldWithValidation>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Bağışçı Adı <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Ahmet Yılmaz"
+                          className="h-8 text-sm"
+                          autoFocus
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
 
@@ -275,9 +332,25 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                   control={form.control}
                   name="donor_phone"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Telefon" required error={String(form.formState.errors.donor_phone?.message || '')}>
-                      <Input {...field} placeholder="5XXXXXXXXX" />
-                    </FieldWithValidation>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Telefon <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="5XX XXX XX XX"
+                          className="h-8 text-sm"
+                          maxLength={11}
+                          onChange={(e) => {
+                            // Only allow numbers
+                            const value = e.target.value.replace(/\D/g, '');
+                            field.onChange(value);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
 
@@ -285,9 +358,18 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                   control={form.control}
                   name="donor_email"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="E-posta" error={String(form.formState.errors.donor_email?.message || '')}>
-                      <Input type="email" {...field} placeholder="ornek@email.com" />
-                    </FieldWithValidation>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">E-posta</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          {...field}
+                          placeholder="ornek@email.com"
+                          className="h-8 text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
 
@@ -295,31 +377,60 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                   control={form.control}
                   name="receipt_number"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Makbuz Numarası" required error={String(form.formState.errors.receipt_number?.message || '')}>
-                      <Input {...field} placeholder="KB-2024-001" />
-                    </FieldWithValidation>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Makbuz No <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="KB-2024-001"
+                          className="h-8 text-sm font-mono"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
               </div>
             </div>
 
             {/* Bağış Detayları */}
-            <div className="space-y-3">
-              <h3 className="text-base font-semibold text-gray-700">💰 Bağış Detayları</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="space-y-2 p-2 bg-green-50/50 dark:bg-green-900/10 rounded-md border border-green-200 dark:border-green-900/30">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">💰</span>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Bağış Detayları</h3>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
                 <FormField
                   control={form.control}
                   name="amount"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Tutar" required error={String(form.formState.errors.amount?.message || '')}>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                        placeholder="0.00"
-                      />
-                    </FieldWithValidation>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Tutar <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            {...field}
+                            onChange={(e) => {
+                              const value = parseFloat(e.target.value) || 0;
+                              field.onChange(value);
+                            }}
+                            placeholder="0.00"
+                            className="h-8 pr-12 text-sm font-semibold"
+                          />
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
+                            {form.watch('currency') === 'TRY' ? '₺' : form.watch('currency') === 'USD' ? '$' : '€'}
+                          </span>
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
 
@@ -327,20 +438,24 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                   control={form.control}
                   name="currency"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Para Birimi" required error={String(form.formState.errors.currency?.message || '')}>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Para Birimi <span className="text-red-500">*</span>
+                      </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-8 text-sm">
                             <SelectValue placeholder="Seçiniz" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="TRY">Türk Lirası (₺)</SelectItem>
-                          <SelectItem value="USD">Amerikan Doları ($)</SelectItem>
-                          <SelectItem value="EUR">Euro (€)</SelectItem>
+                          <SelectItem value="TRY">🇹🇷 TRY (₺)</SelectItem>
+                          <SelectItem value="USD">🇺🇸 USD ($)</SelectItem>
+                          <SelectItem value="EUR">🇪🇺 EUR (€)</SelectItem>
                         </SelectContent>
                       </Select>
-                    </FieldWithValidation>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
 
@@ -348,37 +463,54 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                   control={form.control}
                   name="payment_method"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Ödeme Yöntemi" required error={String(form.formState.errors.payment_method?.message || '')}>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Ödeme <span className="text-red-500">*</span>
+                      </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-8 text-sm">
                             <SelectValue placeholder="Seçiniz" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Nakit">Nakit</SelectItem>
-                          <SelectItem value="Banka Kartı">Banka Kartı</SelectItem>
-                          <SelectItem value="Kredi Kartı">Kredi Kartı</SelectItem>
-                          <SelectItem value="Havale/EFT">Havale/EFT</SelectItem>
+                          <SelectItem value="Nakit">💵 Nakit</SelectItem>
+                          <SelectItem value="Banka Kartı">💳 Banka Kartı</SelectItem>
+                          <SelectItem value="Kredi Kartı">💳 Kredi Kartı</SelectItem>
+                          <SelectItem value="Havale/EFT">🏦 Havale/EFT</SelectItem>
                         </SelectContent>
                       </Select>
-                    </FieldWithValidation>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
               </div>
             </div>
 
-            {/* Kumbara Bilgileri ve Harita */}
-            <div className="space-y-3">
-              <h3 className="text-base font-semibold text-blue-600">🏦 Kumbara Bilgileri & Harita</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Kumbara Bilgileri */}
+            <div className="space-y-2 p-2 bg-blue-50/50 dark:bg-blue-900/10 rounded-md border border-blue-200 dark:border-blue-900/30">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">🏦</span>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Kumbara Bilgileri</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
                 <FormField
                   control={form.control}
                   name="kumbara_location"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Kumbara Lokasyonu" required error={String(form.formState.errors.kumbara_location?.message || '')}>
-                      <Input {...field} placeholder="Örn: Ofis Giriş, Market Girişi" />
-                    </FieldWithValidation>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Lokasyon <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Ofis Giriş, Market"
+                          className="h-8 text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
 
@@ -386,9 +518,19 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                   control={form.control}
                   name="kumbara_institution"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Kurum/Adres" required error={String(form.formState.errors.kumbara_institution?.message || '')}>
-                      <Input {...field} placeholder="Örn: ABC A.Ş. - Merkez Mah. No:123" />
-                    </FieldWithValidation>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Kurum/Adres <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="ABC A.Ş. - Merkez Mah."
+                          className="h-8 text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
 
@@ -396,36 +538,45 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                   control={form.control}
                   name="collection_date"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Toplama Tarihi" required error={String(form.formState.errors.collection_date?.message || '')}>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Tarih <span className="text-red-500">*</span>
+                      </FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
                               variant="outline"
                               className={cn(
-                                'w-full pl-3 text-left font-normal',
+                                'w-full h-8 pl-2 text-xs text-left font-normal justify-start',
                                 !field.value && 'text-muted-foreground'
                               )}
                             >
+                              <CalendarIcon className="mr-1.5 h-3 w-3" />
                               {field.value ? (
-                                format(new Date(field.value), 'dd MMMM yyyy', { locale: tr })
+                                format(new Date(field.value), 'dd.MM.yyyy', { locale: tr })
                               ) : (
                                 <span>Tarih seçiniz</span>
                               )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
-                            selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) => field.onChange(date?.toISOString())}
+                            selected={field.value ? new Date(field.value) : new Date()}
+                            onSelect={(date) => {
+                              if (date) {
+                                field.onChange(format(date, 'yyyy-MM-dd'));
+                              }
+                            }}
                             initialFocus
+                            disabled={(date) => date > new Date()}
                           />
                         </PopoverContent>
                       </Popover>
-                    </FieldWithValidation>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
 
@@ -433,93 +584,195 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                   control={form.control}
                   name="status"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Durum" required error={String(form.formState.errors.status?.message || '')}>
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">
+                        Durum <span className="text-red-500">*</span>
+                      </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-8 text-sm">
                             <SelectValue placeholder="Seçiniz" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="pending">Beklemede</SelectItem>
-                          <SelectItem value="completed">Tamamlandı</SelectItem>
-                          <SelectItem value="cancelled">İptal Edildi</SelectItem>
+                          <SelectItem value="pending">⏳ Beklemede</SelectItem>
+                          <SelectItem value="completed">✅ Tamamlandı</SelectItem>
+                          <SelectItem value="cancelled">❌ İptal Edildi</SelectItem>
                         </SelectContent>
                       </Select>
-                    </FieldWithValidation>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
                   )}
                 />
               </div>
             </div>
 
-            {/* Harita ve Konum Seçimi - Daraltılmış */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-green-600">🗺️ Konum & Rota</h3>
-                <span className="text-xs text-muted-foreground">(İsteğe bağlı)</span>
+            {/* Konum Bilgileri - Harita olmadan */}
+            <div className="space-y-2 p-2 bg-green-50/50 dark:bg-green-900/10 rounded-md border border-green-200 dark:border-green-900/30">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">📍</span>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Konum (Opsiyonel)</h3>
               </div>
-              <MapLocationPicker
-                onLocationSelect={handleLocationSelect}
-                onRouteUpdate={handleRouteUpdate}
-                height="400px"
-                className="border border-green-200"
-              />
+              <div className="grid grid-cols-2 gap-2">
+                <FormField
+                  control={form.control}
+                  name="location_address"
+                  render={({ field }: any) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel className="text-xs font-medium">Adres</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="Merkez Mah. No:123"
+                          className="h-8 text-sm"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-xs" />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="location_coordinates"
+                  render={({ field }: any) => {
+                    const currentLat = field.value?.lat;
+                    const currentLng = field.value?.lng;
+                    
+                    return (
+                      <FormItem className="space-y-1">
+                        <FormLabel className="text-xs font-medium">Koordinatlar</FormLabel>
+                        <div className="flex gap-1.5">
+                          <Input 
+                            placeholder="Lat"
+                            className="h-8 text-xs"
+                            type="number"
+                            step="any"
+                            value={currentLat !== undefined && currentLat !== null ? currentLat : ''}
+                            onChange={(e) => {
+                              const latStr = e.target.value.trim();
+                              const lat = latStr === '' ? undefined : parseFloat(latStr);
+                              const lng = currentLng !== undefined && currentLng !== null ? currentLng : undefined;
+                              
+                              // Sadece her ikisi de geçerli sayı olduğunda kaydet
+                              if (latStr === '') {
+                                // Lat boşsa, koordinatları temizle
+                                field.onChange(undefined);
+                                setMapLocation(null);
+                              } else if (!isNaN(lat as number)) {
+                                // Lat geçerli, lng de geçerliyse kaydet
+                                const newValue = (lng !== undefined && !isNaN(lng)) 
+                                  ? { lat, lng }
+                                  : undefined;
+                                field.onChange(newValue);
+                                setMapLocation(newValue || null);
+                              }
+                            }}
+                          />
+                          <Input 
+                            placeholder="Lng"
+                            className="h-8 text-xs"
+                            type="number"
+                            step="any"
+                            value={currentLng !== undefined && currentLng !== null ? currentLng : ''}
+                            onChange={(e) => {
+                              const lngStr = e.target.value.trim();
+                              const lng = lngStr === '' ? undefined : parseFloat(lngStr);
+                              const lat = currentLat !== undefined && currentLat !== null ? currentLat : undefined;
+                              
+                              // Sadece her ikisi de geçerli sayı olduğunda kaydet
+                              if (lngStr === '') {
+                                // Lng boşsa, koordinatları temizle
+                                field.onChange(undefined);
+                                setMapLocation(null);
+                              } else if (!isNaN(lng as number)) {
+                                // Lng geçerli, lat de geçerliyse kaydet
+                                const newValue = (lat !== undefined && !isNaN(lat))
+                                  ? { lat, lng }
+                                  : undefined;
+                                field.onChange(newValue);
+                                setMapLocation(newValue || null);
+                              }
+                            }}
+                          />
+                        </div>
+                        <FormMessage className="text-xs" />
+                      </FormItem>
+                    );
+                  }}
+                />
+              </div>
             </div>
 
-            {/* Alt Bölüm: Notlar ve Belgeler - Yan Yana */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Notlar - Kompakt */}
-              <div className="space-y-2">
-                <h3 className="text-base font-semibold text-gray-700">📝 Notlar</h3>
+            {/* Alt Bölüm: Notlar ve Belgeler */}
+            <div className="grid grid-cols-2 gap-1.5">
+              {/* Notlar */}
+              <div className="space-y-1 p-1.5 bg-amber-50/50 dark:bg-amber-900/10 rounded border border-amber-200 dark:border-amber-900/30">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs">📝</span>
+                  <h3 className="text-[10px] font-medium text-gray-900 dark:text-gray-100">Notlar</h3>
+                </div>
                 <FormField
                   control={form.control}
                   name="notes"
                   render={({ field }: any) => (
-                    <FieldWithValidation label="Ek Notlar" error={String(form.formState.errors.notes?.message || '')}>
-                      <Textarea
-                        {...field}
-                        placeholder="İsteğe bağlı notlar..."
-                        rows={4}
-                        className="resize-none"
-                      />
-                    </FieldWithValidation>
+                    <FormItem className="mb-0">
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="..."
+                          rows={1}
+                          className="resize-none text-xs h-8 py-1"
+                        />
+                      </FormControl>
+                      <FormMessage className="text-[10px]" />
+                    </FormItem>
                   )}
                 />
               </div>
 
-              {/* Dosya Yükleme - Kompakt */}
-              <div className="space-y-2">
-                <h3 className="text-base font-semibold text-purple-600">📎 Belgeler</h3>
-                <p className="text-xs text-muted-foreground -mt-1">
-                  Makbuz/fotoğraf (isteğe bağlı)
-                </p>
+              {/* Dosya Yükleme */}
+              <div className="space-y-1 p-1.5 bg-purple-50/50 dark:bg-purple-900/10 rounded border border-purple-200 dark:border-purple-900/30">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs">📎</span>
+                  <h3 className="text-[10px] font-medium text-gray-900 dark:text-gray-100">Belge</h3>
+                </div>
                 <FileUpload
                   onFileSelect={handleFileSelect}
                   accept="image/*,.pdf"
                   maxSize={10}
-                  placeholder="Belge seçin"
+                  placeholder="Seç"
                   disabled={isPending || isSubmitting}
                   allowedTypes={['image/jpeg', 'image/png', 'image/webp', 'application/pdf']}
                   allowedExtensions={['jpg', 'jpeg', 'png', 'webp', 'pdf']}
+                  className="space-y-1"
+                  compact={true}
                 />
+                {uploadedFileName && (
+                  <div className="text-[10px] text-green-600 dark:text-green-400 flex items-center gap-0.5">
+                    <CheckCircle2 className="h-2.5 w-2.5" />
+                    <span className="truncate">{uploadedFileName}</span>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Action Buttons - Kompakt */}
-            <div className="flex gap-3 pt-3 border-t">
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-800">
               <Button
                 type="submit"
-                disabled={isPending || isSubmitting}
-                className="flex-1 h-11"
-                size="lg"
+                disabled={isPending || isSubmitting || !form.formState.isValid}
+                className="flex-1 h-8 text-xs font-semibold"
               >
                 {isPending || isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
                     Kaydediliyor...
                   </>
                 ) : (
-                  '💾 Kumbara Kaydet'
+                  <>
+                    <span className="mr-1.5">💾</span>
+                    Kaydet
+                  </>
                 )}
               </Button>
               <Button
@@ -527,14 +780,36 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                 variant="outline"
                 onClick={onCancel}
                 disabled={isPending || isSubmitting}
-                className="h-11 px-6"
+                className="h-8 px-4 text-xs"
               >
-                ✖️ İptal
+                <span className="mr-1.5">✖️</span>
+                İptal
               </Button>
             </div>
+            
+            {/* Form Validation Summary */}
+            {Object.keys(form.formState.errors).length > 0 && (
+              <div className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                <div className="flex items-start gap-1.5">
+                  <AlertCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-red-900 dark:text-red-100 mb-0.5">
+                      Hataları düzeltin
+                    </p>
+                    <ul className="text-xs text-red-700 dark:text-red-300 space-y-0.5">
+                      {Object.entries(form.formState.errors).slice(0, 2).map(([field, error]: any) => (
+                        <li key={field}>• {error?.message || `${field} hatalı`}</li>
+                      ))}
+                      {Object.keys(form.formState.errors).length > 2 && (
+                        <li>• +{Object.keys(form.formState.errors).length - 2} hata daha</li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
           </form>
         </Form>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

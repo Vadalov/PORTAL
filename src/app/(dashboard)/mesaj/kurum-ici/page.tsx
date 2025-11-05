@@ -24,7 +24,12 @@ import {
   User,
   Mail,
 } from 'lucide-react';
-import { MessageForm } from '@/components/forms/MessageForm';
+import dynamic from 'next/dynamic';
+
+const MessageForm = dynamic(() => import('@/components/forms/MessageForm').then(mod => ({ default: mod.MessageForm })), {
+  loading: () => <div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>,
+  ssr: false,
+});
 import { getStatusLabel, getStatusColor, getMessageTypeLabel } from '@/lib/validations/message';
 import type { MessageDocument, UserDocument } from '@/types/database';
 

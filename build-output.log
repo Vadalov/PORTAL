@@ -1,0 +1,31 @@
+
+> dernek-nextjs@0.1.0 build
+> next build
+
+   ▲ Next.js 16.0.1 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · clientTraceMetadata
+     ✓ optimizeCss
+     · optimizePackageImports
+     ✓ turbopackUseSystemTlsCerts
+
+ ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 4.5s
+   Running next.config.js provided runAfterProductionCompile ...
+ ✓ Completed runAfterProductionCompile in 331ms
+   Running TypeScript ...
+Failed to compile.
+
+./src/lib/route-splitting-fixed.ts:85:8
+Type error: 'Suspense' refers to a value, but is being used as a type here. Did you mean 'typeof Suspense'?
+
+[0m [90m 83 |[39m
+ [90m 84 |[39m     [36mreturn[39m (
+[31m[1m>[22m[39m[90m 85 |[39m       [33m<[39m[33mSuspense[39m 
+ [90m    |[39m        [31m[1m^[22m[39m
+ [90m 86 |[39m         fallback[33m=[39m{
+ [90m 87 |[39m           chunkName [33m===[39m [32m'beneficiaries'[39m [33m||[39m chunkName [33m===[39m [32m'donations'[39m [33m?[39m (
+ [90m 88 |[39m             [33m<[39m[33mTableSkeleton[39m rows[33m=[39m{[35m6[39m} columns[33m=[39m{[35m4[39m} [33m/[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null

@@ -31,7 +31,12 @@ import {
   EyeOff,
   FileText,
 } from 'lucide-react';
-import { MessageForm } from '@/components/forms/MessageForm';
+import dynamic from 'next/dynamic';
+
+const MessageForm = dynamic(() => import('@/components/forms/MessageForm').then(mod => ({ default: mod.MessageForm })), {
+  loading: () => <div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>,
+  ssr: false,
+});
 import { RecipientSelector } from '@/components/messages/RecipientSelector';
 import { MessageTemplateSelector } from '@/components/messages/MessageTemplateSelector';
 import {

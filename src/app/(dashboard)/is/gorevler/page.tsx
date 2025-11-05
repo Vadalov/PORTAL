@@ -35,7 +35,12 @@ import {
   CheckCircle,
   XCircle as _XCircle,
 } from 'lucide-react';
-import { TaskForm } from '@/components/forms/TaskForm';
+import dynamic from 'next/dynamic';
+
+const TaskForm = dynamic(() => import('@/components/forms/TaskForm').then(mod => ({ default: mod.TaskForm })), {
+  loading: () => <div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>,
+  ssr: false,
+});
 import { KanbanBoard } from '@/components/tasks/KanbanBoard';
 import { toast } from 'sonner';
 import {

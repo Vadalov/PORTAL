@@ -213,17 +213,19 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
                   Yeni Kumbara
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
+              <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden p-3">
+                <DialogHeader className="sr-only pb-0">
                   <DialogTitle>Yeni Kumbara Bağışı</DialogTitle>
                   <DialogDescription>
-                    Kumbara bağışını kaydetmek için aşağıdaki formu doldurunuz.
+                    Kumbara bağışını kaydetmek için formu doldurunuz.
                   </DialogDescription>
                 </DialogHeader>
-                <KumbaraForm
-                  onSuccess={handleCreateSuccess}
-                  onCancel={() => setIsFormOpen(false)}
-                />
+                <div className="overflow-y-auto max-h-[calc(90vh-50px)] pr-0.5 -mr-0.5">
+                  <KumbaraForm
+                    onSuccess={handleCreateSuccess}
+                    onCancel={() => setIsFormOpen(false)}
+                  />
+                </div>
               </DialogContent>
             </Dialog>
           </div>

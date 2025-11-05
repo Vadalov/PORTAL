@@ -373,7 +373,7 @@ export default function DashboardPage() {
                 {quickActions.map((action) => {
                   const Icon = action.icon;
                   return (
-                    <Link key={action.title} href={action.href}>
+                    <Link key={action.title} href={action.href} prefetch={true}>
                       <div
                         className={cn(
                           'group relative p-5 rounded-xl border transition-all duration-200',

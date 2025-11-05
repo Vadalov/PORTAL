@@ -27,6 +27,8 @@ import {
   Package,
   Eye,
   TrendingUp,
+  Calendar,
+  Utensils,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -55,6 +57,60 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 
 import api from '@/lib/api';
+import type { AidApplicationDocument } from '@/types/database';
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { Loader2 } from 'lucide-react';
+
+// Lazy load managers for faster dialog opening
+const DocumentsManager = dynamic(
+  () => import('@/components/documents/DocumentsManager').then((mod) => ({ default: mod.DocumentsManager })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <span className="ml-2 text-sm text-muted-foreground">Yükleniyor...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const ConsentsManager = dynamic(
+  () => import('@/components/consents/ConsentsManager').then((mod) => ({ default: mod.ConsentsManager })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const BankAccountsManager = dynamic(
+  () => import('@/components/bank-accounts/BankAccountsManager').then((mod) => ({ default: mod.BankAccountsManager })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const DependentsManager = dynamic(
+  () => import('@/components/dependents/DependentsManager').then((mod) => ({ default: mod.DependentsManager })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 // Stub function for Mernis TC Kimlik validation
 const checkMernis = async (tcNo: string) => {
@@ -236,6 +292,20 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
   });
 
   const beneficiary = data?.data as BeneficiaryDocument | undefined;
+
+  // Fetch aid applications for this beneficiary - MUST be before early returns
+  const { data: aidApplicationsData } = useQuery({
+    queryKey: ['aid-applications', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/aid-applications?beneficiary_id=${id}`);
+      const result = await response.json();
+      return result;
+    },
+    enabled: !!id,
+  });
+
+  const aidApplications: AidApplicationDocument[] = (aidApplicationsData?.data as AidApplicationDocument[]) || [];
+  const aidApplicationsCount = aidApplications.length;
 
   const updateMutation = useMutation({
     mutationFn: (payload: Partial<BeneficiaryDocument>) =>
@@ -422,13 +492,21 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
     );
   }
 
+  const STAGE_LABELS = {
+    draft: { label: 'Taslak', color: 'bg-muted text-muted-foreground' },
+    under_review: { label: 'İnceleme', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' },
+    approved: { label: 'Onaylandı', color: 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' },
+    ongoing: { label: 'Devam Ediyor', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' },
+    completed: { label: 'Tamamlandı', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400' },
+  };
+
   const modalCards = [
     {
       id: 'documents',
       title: 'Dokümanlar',
       icon: FileText,
-      count: 0,
-      description: 'Kimlik, belgeler ve diğer dokümanları görüntüle',
+      count: 0, // TODO: Get actual document count
+      description: 'Kimlik, belgeler ve diğer dokümanları görüntüle ve yönet',
     },
     {
       id: 'photos',
@@ -443,6 +521,13 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
       icon: Package,
       count: 0,
       description: 'Yapılan yardımları görüntüle ve takip et',
+    },
+    {
+      id: 'aid-applications',
+      title: 'Yardım Başvuruları',
+      icon: HandHeart,
+      count: aidApplicationsCount,
+      description: 'Bu kişiye ait yardım başvurularını görüntüle',
     },
     {
       id: 'bank',
@@ -1605,15 +1690,57 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                       </CardContent>
                     </Card>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>{card.title}</DialogTitle>
-                      <DialogDescription>{card.description}</DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                      <p className="text-sm text-muted-foreground">Bu bölüm yakında aktif olacaktır.</p>
-                    </div>
-                  </DialogContent>
+                  {card.id === 'documents' ? (
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>{card.title}</DialogTitle>
+                        <DialogDescription>{card.description}</DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4 min-h-[200px]">
+                        <DocumentsManager beneficiaryId={id} />
+                      </div>
+                    </DialogContent>
+                  ) : card.id === 'consent' ? (
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>{card.title}</DialogTitle>
+                        <DialogDescription>{card.description}</DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4 min-h-[200px]">
+                        <ConsentsManager beneficiaryId={id} />
+                      </div>
+                    </DialogContent>
+                  ) : card.id === 'bank' ? (
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>{card.title}</DialogTitle>
+                        <DialogDescription>{card.description}</DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4 min-h-[200px]">
+                        <BankAccountsManager beneficiaryId={id} />
+                      </div>
+                    </DialogContent>
+                  ) : card.id === 'dependent-people' ? (
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>{card.title}</DialogTitle>
+                        <DialogDescription>{card.description}</DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4 min-h-[200px]">
+                        <DependentsManager beneficiaryId={id} />
+                      </div>
+                    </DialogContent>
+                  ) : (
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>{card.title}</DialogTitle>
+                        <DialogDescription>{card.description}</DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4">
+                        <p className="text-sm text-muted-foreground">Bu bölüm yakında aktif olacaktır.</p>
+                      </div>
+                    </DialogContent>
+                  )}
                 </Dialog>
               ))}
             </div>
@@ -1636,19 +1763,133 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
             </div>
           </DialogContent>
         </Dialog>
+      ) : openModal === 'aid-applications' ? (
+        <Dialog open={true} onOpenChange={() => setOpenModal(null)}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Yardım Başvuruları</DialogTitle>
+              <DialogDescription>
+                Bu kişiye ait yardım başvurularını görüntüle ve yönet
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {aidApplications.length === 0 ? (
+                <div className="text-center py-8">
+                  <HandHeart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-lg font-medium text-muted-foreground">Henüz başvuru bulunmuyor</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Bu kişi için henüz yardım başvurusu oluşturulmamış.
+                  </p>
+                  <Link href={`/yardim/basvurular?beneficiary_id=${id}`}>
+                    <Button className="mt-4" variant="outline">
+                      <Package className="mr-2 h-4 w-4" />
+                      Yeni Başvuru Oluştur
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {aidApplications.map((app) => (
+                    <Card key={app._id} className="hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-semibold text-lg">{app.applicant_name}</h3>
+                              <Badge variant="outline">
+                                {app.applicant_type === 'person'
+                                  ? 'Kişi'
+                                  : app.applicant_type === 'organization'
+                                    ? 'Kurum'
+                                    : 'Partner'}
+                              </Badge>
+                              <Badge className={STAGE_LABELS[app.stage].color}>
+                                {STAGE_LABELS[app.stage].label}
+                              </Badge>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                              <Calendar className="h-4 w-4" />
+                              <span>{new Date(app.application_date).toLocaleDateString('tr-TR')}</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                              {app.one_time_aid && app.one_time_aid > 0 && (
+                                <div className="flex items-center gap-2">
+                                  <DollarSign className="h-4 w-4 text-green-600" />
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">Tek Seferlik</p>
+                                    <p className="font-semibold">{app.one_time_aid.toLocaleString('tr-TR')} ₺</p>
+                                  </div>
+                                </div>
+                              )}
+                              {app.regular_financial_aid && app.regular_financial_aid > 0 && (
+                                <div className="flex items-center gap-2">
+                                  <DollarSign className="h-4 w-4 text-blue-600" />
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">Düzenli Mali</p>
+                                    <p className="font-semibold">{app.regular_financial_aid.toLocaleString('tr-TR')} ₺</p>
+                                  </div>
+                                </div>
+                              )}
+                              {app.regular_food_aid && app.regular_food_aid > 0 && (
+                                <div className="flex items-center gap-2">
+                                  <Utensils className="h-4 w-4 text-orange-600" />
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">Düzenli Gıda</p>
+                                    <p className="font-semibold">{app.regular_food_aid.toLocaleString('tr-TR')} ₺</p>
+                                  </div>
+                                </div>
+                              )}
+                              {app.in_kind_aid && app.in_kind_aid > 0 && (
+                                <div className="flex items-center gap-2">
+                                  <Package className="h-4 w-4 text-purple-600" />
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">Ayni Yardım</p>
+                                    <p className="font-semibold">{app.in_kind_aid.toLocaleString('tr-TR')} ₺</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {app.description && (
+                              <p className="text-sm text-muted-foreground mb-2">{app.description}</p>
+                            )}
+                          </div>
+                          <Link href={`/yardim/basvurular/${app._id}`}>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4 mr-2" />
+                              Detay
+                            </Button>
+                          </Link>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <div className="flex justify-center mt-4">
+                    <Link href={`/yardim/basvurular?beneficiary_id=${id}`}>
+                      <Button variant="outline">
+                        <Package className="mr-2 h-4 w-4" />
+                        Tüm Başvuruları Görüntüle
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       ) : openModal ? (
         <Dialog open={true} onOpenChange={() => setOpenModal(null)}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>
-                {openModal === 'documents' && 'Dokümanlar'}
                 {openModal === 'photos' && 'Fotoğraflar'}
                 {openModal === 'bank' && 'Banka Hesapları'}
                 {openModal === 'consent' && 'Rıza Beyanları'}
                 {openModal === 'dependent-people' && 'Baktığı Kişiler'}
               </DialogTitle>
               <DialogDescription>
-                {openModal === 'documents' && 'Kimlik, belgeler ve diğer dokümanları görüntüle'}
                 {openModal === 'photos' && 'Kişi ve aile fotoğraflarını görüntüle'}
                 {openModal === 'bank' && 'Bağlı banka hesaplarını görüntüle ve yönet'}
                 {openModal === 'consent' && 'Rıza beyanlarını görüntüle ve yönet'}

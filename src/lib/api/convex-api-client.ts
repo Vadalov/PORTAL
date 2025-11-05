@@ -1,6 +1,6 @@
 /**
  * Convex API Client
- * 
+ *
  * Client-side wrapper that calls Next.js API routes which internally use Convex.
  * This provides a clean interface for components to use while keeping the actual
  * Convex implementation hidden behind API routes.
@@ -21,13 +21,36 @@ import type {
   MessageDocument,
 } from '@/types/database';
 
+// Import caching utilities
+import { getCache } from '@/lib/api-cache-fixed';
+
+// Cache configuration
+const CACHE_TTL = {
+  beneficiaries: 5 * 60 * 1000, // 5 minutes
+  donations: 3 * 60 * 1000, // 3 minutes
+  tasks: 2 * 60 * 1000, // 2 minutes
+  default: 2 * 60 * 1000, // 2 minutes
+};
+
 /**
- * Helper function to make API requests
+ * Helper function to make API requests with caching
  */
 async function apiRequest<T>(
   endpoint: string,
-  options?: RequestInit
+  options?: RequestInit,
+  cacheKey?: string,
+  cacheType?: string
 ): Promise<ConvexResponse<T>> {
+  const cache = cacheType ? getCache<ConvexResponse<T>>(cacheType) : null;
+
+  // Try to get from cache first (for GET requests)
+  if (!options?.method || options.method === 'GET') {
+    const cachedData = cache?.get(cacheKey || endpoint);
+    if (cachedData) {
+      return cachedData;
+    }
+  }
+
   try {
     const response = await fetch(endpoint, {
       ...options,
@@ -47,11 +70,18 @@ async function apiRequest<T>(
       };
     }
 
-    return {
+    const result: ConvexResponse<T> = {
       data: data.data as T,
       error: null,
       total: data.total,
     };
+
+    // Cache the successful response (for GET requests)
+    if (!options?.method || options.method === 'GET') {
+      cache?.set(cacheKey || endpoint, result);
+    }
+
+    return result;
   } catch (error) {
     return {
       data: null,
@@ -74,7 +104,15 @@ export const convexApiClient = {
       if (params?.filters?.status) searchParams.set('status', String(params.filters.status));
       if (params?.filters?.city) searchParams.set('city', String(params.filters.city));
 
-      return apiRequest<BeneficiaryDocument[]>(`/api/beneficiaries?${searchParams.toString()}`);
+      const endpoint = `/api/beneficiaries?${searchParams.toString()}`;
+      const cacheKey = `beneficiaries:${searchParams.toString()}`;
+
+      return apiRequest<BeneficiaryDocument[]>(
+        endpoint,
+        undefined,
+        cacheKey,
+        'beneficiaries'
+      );
     },
     getBeneficiary: async (id: string): Promise<ConvexResponse<BeneficiaryDocument>> => {
       return apiRequest<BeneficiaryDocument>(`/api/beneficiaries/${id}`);
@@ -115,7 +153,15 @@ export const convexApiClient = {
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.search) searchParams.set('search', params.search);
 
-      return apiRequest<DonationDocument[]>(`/api/donations?${searchParams.toString()}`);
+      const endpoint = `/api/donations?${searchParams.toString()}`;
+      const cacheKey = `donations:${searchParams.toString()}`;
+
+      return apiRequest<DonationDocument[]>(
+        endpoint,
+        undefined,
+        cacheKey,
+        'donations'
+      );
     },
     getDonation: async (id: string): Promise<ConvexResponse<DonationDocument>> => {
       return apiRequest<DonationDocument>(`/api/donations/${id}`);
@@ -333,6 +379,91 @@ export const convexApiClient = {
         method: 'DELETE',
       });
     },
+  },
+
+  // Partners
+  partners: {
+    getPartners: async (params?: QueryParams): Promise<ConvexResponse<any[]>> => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set('page', params.page.toString());
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.search) searchParams.set('search', params.search);
+      if (params?.filters?.type) searchParams.set('type', String(params.filters.type));
+      if (params?.filters?.status) searchParams.set('status', String(params.filters.status));
+      if (params?.filters?.partnership_type) searchParams.set('partnership_type', String(params.filters.partnership_type));
+
+      return apiRequest<any[]>(`/api/partners?${searchParams.toString()}`);
+    },
+    getPartner: async (id: string): Promise<ConvexResponse<any>> => {
+      return apiRequest<any>(`/api/partners/${id}`);
+    },
+    createPartner: async (data: CreateDocumentData<any>): Promise<ConvexResponse<any>> => {
+      return apiRequest<any>('/api/partners', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updatePartner: async (
+      id: string,
+      data: UpdateDocumentData<any>
+    ): Promise<ConvexResponse<any>> => {
+      return apiRequest<any>(`/api/partners/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    deletePartner: async (id: string): Promise<ConvexResponse<null>> => {
+      return apiRequest<null>(`/api/partners/${id}`, {
+        method: 'DELETE',
+      });
+    },
+  },
+};
+
+// Cache Management Utilities
+export const cacheUtils = {
+  /**
+   * Invalidate cache for a specific data type
+   */
+  invalidateCache: (dataType: string) => {
+    const cache = getCache<any>(dataType);
+    cache.clear();
+  },
+
+  /**
+   * Invalidate cache for multiple data types
+   */
+  invalidateCaches: (dataTypes: string[]) => {
+    dataTypes.forEach(type => {
+      const cache = getCache<any>(type);
+      cache.clear();
+    });
+  },
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats: (dataType: string) => {
+    const cache = getCache<any>(dataType);
+    return cache.getStats();
+  },
+
+  /**
+   * Get cache size
+   */
+  getCacheSize: (dataType: string) => {
+    const cache = getCache<any>(dataType);
+    return cache.size();
+  },
+
+  /**
+   * Clear all caches
+   */
+  clearAllCaches: () => {
+    ['beneficiaries', 'donations', 'tasks', 'meetings', 'default'].forEach(type => {
+      const cache = getCache<any>(type);
+      cache.clear();
+    });
   },
 };
 

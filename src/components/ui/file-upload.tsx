@@ -19,6 +19,7 @@ interface FileUploadProps {
   disabled?: boolean;
   allowedTypes?: string[]; // MIME types
   allowedExtensions?: string[];
+  compact?: boolean; // Compact mode for smaller forms
 }
 
 interface PreviewModalProps {
@@ -92,6 +93,7 @@ export function FileUpload({
   disabled = false,
   allowedTypes,
   allowedExtensions,
+  compact = false,
 }: FileUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -277,7 +279,7 @@ export function FileUpload({
   return (
     <>
       <div className={cn('space-y-2', className)}>
-        <Label>Dosya Yükleme</Label>
+        {!compact && <Label>Dosya Yükleme</Label>}
 
         {/* File Input */}
         <Input
@@ -292,7 +294,8 @@ export function FileUpload({
         {/* Upload Area */}
         <div
           className={cn(
-            'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
+            'border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors',
+            compact ? 'p-2' : 'p-6',
             dragActive ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50',
             disabled && 'opacity-50 cursor-not-allowed',
             error && 'border-destructive bg-destructive/10'
@@ -304,16 +307,16 @@ export function FileUpload({
           onClick={() => !disabled && fileInputRef.current?.click()}
         >
           {selectedFile ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-center space-x-4">
+            <div className={cn(compact ? 'space-y-1' : 'space-y-4')}>
+              <div className={cn('flex items-center justify-center', compact ? 'space-x-2' : 'space-x-4')}>
                 {preview ? (
-                  <div className="relative group w-16 h-16">
+                  <div className={cn('relative group', compact ? 'w-8 h-8' : 'w-16 h-16')}>
                     <NextImage
                       src={preview}
                       alt="Preview"
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 object-cover rounded-lg border"
+                      width={compact ? 32 : 64}
+                      height={compact ? 32 : 64}
+                      className={cn('object-cover rounded-lg border', compact ? 'w-8 h-8' : 'w-16 h-16')}
                       unoptimized
                     />
                     <Button
@@ -326,22 +329,24 @@ export function FileUpload({
                         openPreview();
                       }}
                     >
-                      <Eye className="h-3 w-3" />
+                      <Eye className={cn(compact ? 'h-2 w-2' : 'h-3 w-3')} />
                     </Button>
                   </div>
                 ) : (
-                  getFileIcon(selectedFile)
+                  <div className={cn(compact && '[&_svg]:h-4 [&_svg]:w-4')}>
+                    {getFileIcon(selectedFile)}
+                  </div>
                 )}
                 <div className="text-left flex-1">
-                  <p className="font-medium text-foreground">{selectedFile.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className={cn('font-medium text-foreground', compact && 'text-[10px]')}>{selectedFile.name}</p>
+                  <p className={cn(compact ? 'text-[9px]' : 'text-sm', 'text-muted-foreground')}>
                     {formatFileSize(selectedFile.size)}
                   </p>
                   {uploading && (
-                    <div className="mt-2 space-y-1">
-                      <Progress value={uploadProgress} className="h-1" />
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" />
+                    <div className={cn('mt-2', compact && 'mt-1')}>
+                      <Progress value={uploadProgress} className={cn(compact ? 'h-0.5' : 'h-1')} />
+                      <p className={cn(compact ? 'text-[9px]' : 'text-xs', 'text-muted-foreground flex items-center gap-1')}>
+                        <Loader2 className={cn(compact ? 'h-2 w-2' : 'h-3 w-3', 'animate-spin')} />
                         Yükleniyor... {uploadProgress}%
                       </p>
                     </div>
@@ -351,7 +356,7 @@ export function FileUpload({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="sm"
+                    size={compact ? 'icon' : 'sm'}
                     onClick={(e) => {
                       e.stopPropagation();
                       clearFile();
@@ -359,26 +364,28 @@ export function FileUpload({
                     className="text-destructive hover:text-destructive/80"
                     disabled={uploading}
                   >
-                    <X className="h-4 w-4" />
+                    <X className={cn(compact ? 'h-3 w-3' : 'h-4 w-4')} />
                   </Button>
                 )}
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
+            <div className={cn(compact ? 'space-y-1' : 'space-y-2')}>
+              <Upload className={cn('mx-auto text-muted-foreground', compact ? 'h-6 w-6' : 'h-12 w-12')} />
               <div>
-                <p className="text-sm font-medium text-foreground">{placeholder}</p>
-                <p className="text-xs text-muted-foreground">
-                  Maksimum {maxSize}MB • Desteklenen formatlar: {accept}
-                </p>
+                <p className={cn('font-medium text-foreground', compact ? 'text-[10px]' : 'text-sm')}>{placeholder}</p>
+                {!compact && (
+                  <p className="text-xs text-muted-foreground">
+                    Maksimum {maxSize}MB • Desteklenen formatlar: {accept}
+                  </p>
+                )}
               </div>
             </div>
           )}
         </div>
 
         {/* Error Message */}
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className={cn(compact ? 'text-[10px]' : 'text-sm', 'text-destructive')}>{error}</p>}
       </div>
 
       {/* Preview Modal - XSS Safe */}

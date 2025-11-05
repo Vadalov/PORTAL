@@ -92,6 +92,16 @@ export const create = mutation({
       v.literal("completed"),
       v.literal("cancelled")
     ),
+    // Kumbara-specific fields
+    is_kumbara: v.optional(v.boolean()),
+    kumbara_location: v.optional(v.string()),
+    collection_date: v.optional(v.string()),
+    kumbara_institution: v.optional(v.string()),
+    location_coordinates: v.optional(v.object({ lat: v.number(), lng: v.number() })),
+    location_address: v.optional(v.string()),
+    route_points: v.optional(v.array(v.object({ lat: v.number(), lng: v.number() }))),
+    route_distance: v.optional(v.number()),
+    route_duration: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("donations", args);

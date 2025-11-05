@@ -43,7 +43,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
-import { MeetingForm } from '@/components/forms/MeetingForm';
+import dynamic from 'next/dynamic';
+
+const MeetingForm = dynamic(() => import('@/components/forms/MeetingForm').then(mod => ({ default: mod.MeetingForm })), {
+  loading: () => <div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>,
+  ssr: false,
+});
 import { CalendarView } from '@/components/meetings/CalendarView';
 import type { MeetingDocument } from '@/types/database';
 import { meetingTypeLabels, meetingStatusLabels } from '@/lib/validations/meeting';

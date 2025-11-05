@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -8,11 +9,67 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { settingsApi, type OrganizationSettings, type EmailSettings, type NotificationSettings, type SystemSettings, type SecuritySettings } from '@/lib/api/settings';
+import { Loader2, Save, RotateCcw } from 'lucide-react';
+import { z } from 'zod';
+
+// Validation schemas
+const organizationSchema = z.object({
+  name: z.string().min(1, 'Organizasyon adı gerekli'),
+  address: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email('Geçerli bir e-posta adresi girin').optional().or(z.literal('')),
+});
+
+const emailSchema = z.object({
+  enabled: z.boolean(),
+  smtpHost: z.string().optional(),
+  smtpPort: z.number().min(1).max(65535).optional(),
+  smtpUser: z.string().optional(),
+  smtpPassword: z.string().optional(),
+  fromEmail: z.string().email('Geçerli bir e-posta adresi girin').optional().or(z.literal('')),
+});
+
+const systemSchema = z.object({
+  sessionTimeout: z.number().min(5).max(1440),
+  maxLoginAttempts: z.number().min(3).max(10),
+  maintenanceMode: z.boolean(),
+});
+
+const securitySchema = z.object({
+  requireTwoFactor: z.boolean(),
+  passwordMinLength: z.number().min(6).max(20),
+  sessionTimeout: z.number().min(5).max(1440),
+});
 
 export default function SettingsPage() {
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState('organization');
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Load settings
+  const { data: allSettings, isLoading } = useQuery({
+    queryKey: ['system-settings'],
+    queryFn: async () => {
+      const response = await settingsApi.getSettings();
+      if (!response.success || !response.data) {
+        return {};
+      }
+      return response.data as {
+        organization?: OrganizationSettings;
+        email?: EmailSettings;
+        notifications?: NotificationSettings;
+        system?: SystemSettings;
+        security?: SecuritySettings;
+      };
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Initialize form state with defaults
   const [settings, setSettings] = useState({
     organization: {
-      name: 'Dernek Yönetim Sistemi',
+      name: '',
       address: '',
       phone: '',
       email: '',
@@ -42,18 +99,133 @@ export default function SettingsPage() {
     },
   });
 
-  const [activeTab, setActiveTab] = useState('organization');
-  const [hasChanges, setHasChanges] = useState(false);
+  // Update form when settings are loaded
+  useEffect(() => {
+    if (allSettings) {
+      setSettings((prev) => ({
+        organization: {
+          name: allSettings.organization?.name || prev.organization.name,
+          address: allSettings.organization?.address || prev.organization.address,
+          phone: allSettings.organization?.phone || prev.organization.phone,
+          email: allSettings.organization?.email || prev.organization.email,
+        },
+        email: {
+          enabled: allSettings.email?.enabled ?? prev.email.enabled,
+          smtpHost: allSettings.email?.smtpHost || prev.email.smtpHost,
+          smtpPort: allSettings.email?.smtpPort ?? prev.email.smtpPort,
+          smtpUser: allSettings.email?.smtpUser || prev.email.smtpUser,
+          smtpPassword: allSettings.email?.smtpPassword || prev.email.smtpPassword,
+          fromEmail: allSettings.email?.fromEmail || prev.email.fromEmail,
+        },
+        notifications: {
+          emailNotifications: allSettings.notifications?.emailNotifications ?? prev.notifications.emailNotifications,
+          pushNotifications: allSettings.notifications?.pushNotifications ?? prev.notifications.pushNotifications,
+          smsNotifications: allSettings.notifications?.smsNotifications ?? prev.notifications.smsNotifications,
+        },
+        system: {
+          sessionTimeout: allSettings.system?.sessionTimeout ?? prev.system.sessionTimeout,
+          maxLoginAttempts: allSettings.system?.maxLoginAttempts ?? prev.system.maxLoginAttempts,
+          maintenanceMode: allSettings.system?.maintenanceMode ?? prev.system.maintenanceMode,
+        },
+        security: {
+          requireTwoFactor: allSettings.security?.requireTwoFactor ?? prev.security.requireTwoFactor,
+          passwordMinLength: allSettings.security?.passwordMinLength ?? prev.security.passwordMinLength,
+          sessionTimeout: allSettings.security?.sessionTimeout ?? prev.security.sessionTimeout,
+        },
+      }));
+      setHasChanges(false);
+    }
+  }, [allSettings]);
 
-  const handleSave = () => {
-    toast.success('Ayarlar başarıyla kaydedildi');
-    setHasChanges(false);
+  // Save mutation
+  const saveMutation = useMutation({
+    mutationFn: async (category: string, categorySettings: any) => {
+      const response = await settingsApi.updateCategorySettings(category as any, categorySettings);
+      if (!response.success) {
+        throw new Error(response.error || 'Ayarlar kaydedilemedi');
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['system-settings'] });
+      toast.success('Ayarlar başarıyla kaydedildi');
+      setHasChanges(false);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Ayarlar kaydedilirken hata oluştu');
+    },
+  });
+
+  const handleSave = async () => {
+    try {
+      // Validate based on active tab
+      let categorySettings: any;
+      let category: string;
+
+      switch (activeTab) {
+        case 'organization':
+          category = 'organization';
+          categorySettings = organizationSchema.parse(settings.organization);
+          break;
+        case 'email':
+          category = 'email';
+          categorySettings = emailSchema.parse(settings.email);
+          break;
+        case 'system':
+          category = 'system';
+          categorySettings = systemSchema.parse(settings.system);
+          break;
+        case 'security':
+          category = 'security';
+          categorySettings = securitySchema.parse(settings.security);
+          break;
+        case 'notifications':
+          category = 'notifications';
+          categorySettings = settings.notifications;
+          break;
+        default:
+          return;
+      }
+
+      await saveMutation.mutateAsync(category, categorySettings);
+    } catch (error: any) {
+      if (error?.errors && Array.isArray(error.errors)) {
+        const firstError = error.errors[0];
+        toast.error(firstError?.message || 'Form validasyon hatası');
+      }
+    }
   };
 
-  const handleInitialize = () => {
-    toast.success('Ayarlar başarıyla oluşturuldu');
-    setHasChanges(true);
+  const handleReset = async () => {
+    if (!confirm('Bu kategori ayarlarını varsayılan değerlere sıfırlamak istediğinizden emin misiniz?')) {
+      return;
+    }
+
+    try {
+      const response = await settingsApi.resetSettings(activeTab as any);
+      if (response.success) {
+        queryClient.invalidateQueries({ queryKey: ['system-settings'] });
+        toast.success('Ayarlar varsayılan değerlere sıfırlandı');
+      } else {
+        throw new Error(response.error);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Ayarlar sıfırlanırken hata oluştu');
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="ml-3 text-muted-foreground">Ayarlar yükleniyor...</span>
+        </div>
+      </div>
+    );
+  }
+
+  const hasOrganizationName = settings.organization.name.trim() !== '';
 
   return (
     <div data-testid="settings-page" className="container mx-auto p-6">
@@ -62,23 +234,57 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Sistem ayarlarını yapılandırın</p>
       </div>
 
-      {!settings.organization.name ? (
+      {!hasOrganizationName ? (
         <Card>
           <CardHeader>
             <CardTitle>Ayarları Başlat</CardTitle>
             <CardDescription>
-              İlk kez ayarları yapılandırıyorsunuz. Başlamak için aşağıdaki butona tıklayın.
+              İlk kez ayarları yapılandırıyorsunuz. Organizasyon bilgilerini girin ve başlayın.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button data-testid="settings-initialize-button" onClick={handleInitialize}>
-              Ayarları Oluştur
-            </Button>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="org-name-init">Organizasyon Adı *</Label>
+                <Input
+                  id="org-name-init"
+                  data-testid="settings-org-name"
+                  value={settings.organization.name}
+                  onChange={(e) => {
+                    setSettings((prev) => ({
+                      ...prev,
+                      organization: { ...prev.organization, name: e.target.value },
+                    }));
+                    setHasChanges(true);
+                  }}
+                />
+              </div>
+              <Button
+                data-testid="settings-initialize-button"
+                onClick={() => {
+                  if (settings.organization.name.trim()) {
+                    handleSave();
+                  } else {
+                    toast.error('Organizasyon adı gerekli');
+                  }
+                }}
+                disabled={saveMutation.isPending}
+              >
+                {saveMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Kaydediliyor...
+                  </>
+                ) : (
+                  'Ayarları Oluştur'
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList data-testid="settings-tabs-list">
+          <TabsList data-testid="settings-tabs-list" className="grid w-full grid-cols-5">
             <TabsTrigger data-testid="settings-tab-organization" value="organization">
               Organizasyon
             </TabsTrigger>
@@ -205,6 +411,7 @@ export default function SettingsPage() {
                           }));
                           setHasChanges(true);
                         }}
+                        placeholder="smtp.gmail.com"
                       />
                     </div>
                     <div>
@@ -217,7 +424,7 @@ export default function SettingsPage() {
                         onChange={(e) => {
                           setSettings((prev) => ({
                             ...prev,
-                            email: { ...prev.email, smtpPort: parseInt(e.target.value) },
+                            email: { ...prev.email, smtpPort: parseInt(e.target.value) || 587 },
                           }));
                           setHasChanges(true);
                         }}
@@ -348,7 +555,7 @@ export default function SettingsPage() {
                     onChange={(e) => {
                       setSettings((prev) => ({
                         ...prev,
-                        system: { ...prev.system, sessionTimeout: parseInt(e.target.value) },
+                        system: { ...prev.system, sessionTimeout: parseInt(e.target.value) || 30 },
                       }));
                       setHasChanges(true);
                     }}
@@ -366,7 +573,7 @@ export default function SettingsPage() {
                     onChange={(e) => {
                       setSettings((prev) => ({
                         ...prev,
-                        system: { ...prev.system, maxLoginAttempts: parseInt(e.target.value) },
+                        system: { ...prev.system, maxLoginAttempts: parseInt(e.target.value) || 5 },
                       }));
                       setHasChanges(true);
                     }}
@@ -425,7 +632,7 @@ export default function SettingsPage() {
                     onChange={(e) => {
                       setSettings((prev) => ({
                         ...prev,
-                        security: { ...prev.security, passwordMinLength: parseInt(e.target.value) },
+                        security: { ...prev.security, passwordMinLength: parseInt(e.target.value) || 8 },
                       }));
                       setHasChanges(true);
                     }}
@@ -445,7 +652,7 @@ export default function SettingsPage() {
                     onChange={(e) => {
                       setSettings((prev) => ({
                         ...prev,
-                        security: { ...prev.security, sessionTimeout: parseInt(e.target.value) },
+                        security: { ...prev.security, sessionTimeout: parseInt(e.target.value) || 30 },
                       }));
                       setHasChanges(true);
                     }}
@@ -455,9 +662,33 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <div className="mt-6 flex justify-end">
-            <Button data-testid="settings-save-button" onClick={handleSave} disabled={!hasChanges}>
-              Kaydet
+          <div className="mt-6 flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handleReset}
+              disabled={saveMutation.isPending}
+              className="gap-2"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Kategoriyi Sıfırla
+            </Button>
+            <Button
+              data-testid="settings-save-button"
+              onClick={handleSave}
+              disabled={!hasChanges || saveMutation.isPending}
+              className="gap-2"
+            >
+              {saveMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Kaydediliyor...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Kaydet
+                </>
+              )}
             </Button>
           </div>
         </Tabs>

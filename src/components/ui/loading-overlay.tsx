@@ -115,12 +115,12 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.15, ease: 'easeOut' }}
         className={cn(
           'flex flex-col items-center justify-center z-50',
           fullscreen ? 'fixed inset-0' : 'absolute inset-0',
@@ -129,10 +129,11 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
         )}
         role="status"
         aria-live="polite"
+        aria-busy="true"
       >
         <span className="sr-only">Yükleniyor...</span>
         {renderAnimation()}
-        {text && <p className="mt-4 font-body text-sm text-muted-foreground">{text}</p>}
+        {text && <p className="mt-4 font-body text-sm text-muted-foreground animate-pulse">{text}</p>}
       </motion.div>
     </AnimatePresence>
   );

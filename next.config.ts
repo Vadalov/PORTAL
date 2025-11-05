@@ -9,13 +9,34 @@ const bundleAnalyzer = withBundleAnalyzer({
 const baseConfig: NextConfig = {
   // Performance optimizations
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-icons',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-select',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-tooltip',
+      'recharts',
+      'framer-motion',
+      'sonner',
+      'zod',
+      'react-hook-form',
+      '@hookform/resolvers',
+    ],
     optimizeCss: true,
     turbopackUseSystemTlsCerts: true, // Enable system TLS certificates for Google Fonts
+    // Enable performance hints
+    optimizeServerReact: true,
+    // Advanced build optimizations
+    cpus: Math.max(1, require('os').cpus().length - 1), // Use all but one CPU
   },
 
   // Turbopack configuration
-  turbopack: {},
+  turbopack: {
+    // Additional turbopack optimizations
+  },
 
   // Exclude test-only packages from server components
   // These packages are only needed for testing, not for production builds
@@ -247,6 +268,12 @@ const baseConfig: NextConfig = {
   // Output optimization
   output: 'standalone',
   poweredByHeader: false,
+
+  // Build performance hints
+  onDemandEntries: {
+    maxInactiveAge: 25_000,
+    pagesBufferLength: 2,
+  },
 };
 
 const nextConfig: NextConfig = bundleAnalyzer(baseConfig);

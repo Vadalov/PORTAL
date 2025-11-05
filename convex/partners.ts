@@ -1,0 +1,205 @@
+import { v } from 'convex/values';
+import { query, mutation } from './_generated/server';
+
+export const getPartners = query({
+  args: {
+    page: v.optional(v.number()),
+    limit: v.optional(v.number()),
+    search: v.optional(v.string()),
+    filters: v.optional(
+      v.object({
+        type: v.optional(v.union(v.literal('organization'), v.literal('individual'), v.literal('sponsor'))),
+        status: v.optional(v.union(v.literal('active'), v.literal('inactive'), v.literal('pending'))),
+        partnership_type: v.optional(
+          v.union(
+            v.literal('donor'),
+            v.literal('supplier'),
+            v.literal('volunteer'),
+            v.literal('sponsor'),
+            v.literal('service_provider')
+          )
+        ),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const { page = 1, limit = 50, search, filters } = args;
+
+    let partnersQuery = ctx.db.query('partners');
+
+    // Apply filters
+    if (filters?.type) {
+      partnersQuery = partnersQuery.filter((q) => q.eq(q.field('type'), filters.type));
+    }
+    if (filters?.status) {
+      partnersQuery = partnersQuery.filter((q) => q.eq(q.field('status'), filters.status));
+    }
+    if (filters?.partnership_type) {
+      partnersQuery = partnersQuery.filter((q) =>
+        q.eq(q.field('partnership_type'), filters.partnership_type)
+      );
+    }
+
+    // Get all matching records
+    let allPartners = await partnersQuery.collect();
+
+    // Apply search filter if provided
+    if (search && search.trim()) {
+      const searchLower = search.toLowerCase();
+      allPartners = allPartners.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchLower) ||
+          (p.contact_person && p.contact_person.toLowerCase().includes(searchLower)) ||
+          (p.email && p.email.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Sort by name
+    const sortedPartners = allPartners.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Paginate
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    const paginatedPartners = sortedPartners.slice(start, end);
+
+    // Calculate stats
+    const total = sortedPartners.length;
+    const totalContribution = sortedPartners.reduce((sum, p) => sum + (p.total_contribution || 0), 0);
+    const activePartners = sortedPartners.filter((p) => p.status === 'active').length;
+
+    return {
+      data: paginatedPartners,
+      total,
+      stats: {
+        total,
+        totalContribution,
+        activePartners,
+      },
+    };
+  },
+});
+
+export const getPartnerById = query({
+  args: { id: v.id('partners') },
+  handler: async (ctx, args) => {
+    const partner = await ctx.db.get(args.id);
+    if (!partner) {
+      throw new Error('Partner not found');
+    }
+    return partner;
+  },
+});
+
+export const createPartner = mutation({
+  args: {
+    name: v.string(),
+    type: v.union(v.literal('organization'), v.literal('individual'), v.literal('sponsor')),
+    contact_person: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    address: v.optional(v.string()),
+    website: v.optional(v.string()),
+    tax_number: v.optional(v.string()),
+    partnership_type: v.union(
+      v.literal('donor'),
+      v.literal('supplier'),
+      v.literal('volunteer'),
+      v.literal('sponsor'),
+      v.literal('service_provider')
+    ),
+    collaboration_start_date: v.optional(v.string()),
+    collaboration_end_date: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    status: v.union(v.literal('active'), v.literal('inactive'), v.literal('pending')),
+    total_contribution: v.optional(v.number()),
+    contribution_count: v.optional(v.number()),
+    logo_url: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const partnerId = await ctx.db.insert('partners', {
+      ...args,
+    });
+
+    return await ctx.db.get(partnerId);
+  },
+});
+
+export const updatePartner = mutation({
+  args: {
+    id: v.id('partners'),
+    name: v.optional(v.string()),
+    type: v.optional(v.union(v.literal('organization'), v.literal('individual'), v.literal('sponsor'))),
+    contact_person: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    address: v.optional(v.string()),
+    website: v.optional(v.string()),
+    tax_number: v.optional(v.string()),
+    partnership_type: v.optional(
+      v.union(
+        v.literal('donor'),
+        v.literal('supplier'),
+        v.literal('volunteer'),
+        v.literal('sponsor'),
+        v.literal('service_provider')
+      )
+    ),
+    collaboration_start_date: v.optional(v.string()),
+    collaboration_end_date: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    status: v.optional(v.union(v.literal('active'), v.literal('inactive'), v.literal('pending'))),
+    total_contribution: v.optional(v.number()),
+    contribution_count: v.optional(v.number()),
+    logo_url: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    const partner = await ctx.db.get(id);
+
+    if (!partner) {
+      throw new Error('Partner not found');
+    }
+
+    await ctx.db.patch(id, updates);
+    return await ctx.db.get(id);
+  },
+});
+
+export const deletePartner = mutation({
+  args: { id: v.id('partners') },
+  handler: async (ctx, args) => {
+    const partner = await ctx.db.get(args.id);
+
+    if (!partner) {
+      throw new Error('Partner not found');
+    }
+
+    await ctx.db.delete(args.id);
+    return { success: true };
+  },
+});
+
+export const updateContribution = mutation({
+  args: {
+    id: v.id('partners'),
+    amount: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const { id, amount } = args;
+    const partner = await ctx.db.get(id);
+
+    if (!partner) {
+      throw new Error('Partner not found');
+    }
+
+    const newTotal = (partner.total_contribution || 0) + amount;
+    const newCount = (partner.contribution_count || 0) + 1;
+
+    await ctx.db.patch(id, {
+      total_contribution: newTotal,
+      contribution_count: newCount,
+    });
+
+    return await ctx.db.get(id);
+  },
+});

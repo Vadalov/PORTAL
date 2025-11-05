@@ -49,7 +49,10 @@ const FallbackWrapper: React.FC<{
       // On resume: restore focus and log duration
       const duration = suspendStartRef.current ? performance.now() - suspendStartRef.current : 0;
       if (focusedElementRef.current && focusedElementRef.current instanceof HTMLElement) {
-        focusedElementRef.current.focus();
+        // Use requestAnimationFrame to restore focus after render
+        requestAnimationFrame(() => {
+          (focusedElementRef.current as HTMLElement)?.focus();
+        });
       }
       onResumeRef.current?.();
 

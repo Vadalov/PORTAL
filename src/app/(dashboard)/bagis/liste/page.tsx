@@ -3,30 +3,126 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { VirtualizedDataTable, type DataTableColumn } from '@/components/ui/virtualized-data-table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Search, Plus, DollarSign, User, Calendar, FileText } from 'lucide-react';
-import { DonationForm } from '@/components/forms/DonationForm';
+import dynamic from 'next/dynamic';
+
+const DonationForm = dynamic(() => import('@/components/forms/DonationForm').then(mod => ({ default: mod.DonationForm })), {
+  loading: () => <div className="flex items-center justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>,
+  ssr: false,
+});
 
 export default function DonationsPage() {
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const limit = 10;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['donations', page, search],
-    queryFn: () => api.donations.getDonations({ page, limit, search }),
+    queryKey: ['donations', search],
+    queryFn: () => api.donations.getDonations({
+      page: 1,
+      limit: 10000, // Load all data for virtual scrolling
+      search
+    }),
   });
 
   const donations = data?.data || [];
-  const total = data?.total || 0;
-  const totalPages = Math.ceil(total / limit);
 
   const totalAmount = donations.reduce((sum, d) => sum + d.amount, 0);
+
+  const columns: DataTableColumn<typeof donations[0]>[] = [
+    {
+      key: 'donor',
+      label: 'Bağışçı',
+      render: (item) => (
+        <div>
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4 text-muted-foreground" />
+            <span className="font-semibold">{item.donor_name}</span>
+          </div>
+          {item.donor_email && (
+            <p className="text-sm text-muted-foreground mt-1">{item.donor_email}</p>
+          )}
+        </div>
+      ),
+      className: 'min-w-[200px]',
+    },
+    {
+      key: 'amount',
+      label: 'Tutar',
+      render: (item) => (
+        <div className="text-right">
+          <div className="text-2xl font-bold text-green-600">
+            {item.amount.toLocaleString('tr-TR')} ₺
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">{item.currency}</p>
+        </div>
+      ),
+      className: 'w-[120px] text-right',
+    },
+    {
+      key: 'payment_method',
+      label: 'Ödeme Yöntemi',
+      render: (item) => <span className="font-medium">{item.payment_method}</span>,
+      className: 'min-w-[150px]',
+    },
+    {
+      key: 'donation_type',
+      label: 'Bağış Türü',
+      render: (item) => <span className="font-medium">{item.donation_type}</span>,
+      className: 'min-w-[150px]',
+    },
+    {
+      key: 'purpose',
+      label: 'Amaç',
+      render: (item) => <span className="font-medium">{item.donation_purpose}</span>,
+      className: 'min-w-[150px]',
+    },
+    {
+      key: 'date',
+      label: 'Tarih',
+      render: (item) => (
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium">
+            {new Date(item._creationTime).toLocaleDateString('tr-TR')}
+          </span>
+        </div>
+      ),
+      className: 'min-w-[130px]',
+    },
+    {
+      key: 'receipt',
+      label: 'Fiş No',
+      render: (item) => (
+        <div className="flex items-center gap-2">
+          <FileText className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium">{item.receipt_number}</span>
+        </div>
+      ),
+      className: 'min-w-[120px]',
+    },
+    {
+      key: 'status',
+      label: 'Durum',
+      render: (item) => (
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-medium inline-block ${
+            item.status === 'completed'
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
+          }`}
+        >
+          {item.status === 'completed' ? 'Tamamlandı' : 'Beklemede'}
+        </span>
+      ),
+      className: 'w-[100px]',
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -61,7 +157,7 @@ export default function DonationsPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{total}</div>
+            <div className="text-2xl font-bold">{data?.total || donations.length}</div>
           </CardContent>
         </Card>
 
@@ -100,10 +196,7 @@ export default function DonationsPage() {
               placeholder="Bağışçı adı veya fiş numarası ile ara..."
               className="pl-10"
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </CardContent>
@@ -113,171 +206,18 @@ export default function DonationsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Bağış Listesi</CardTitle>
-          <CardDescription>Toplam {total} bağış kaydı</CardDescription>
+          <CardDescription>Toplam {data?.total || donations.length} bağış kaydı</CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {/* Skeleton for donation items */}
-              {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-3">
-                      {/* Header skeleton */}
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Skeleton className="h-4 w-4" />
-                            <Skeleton className="h-6 w-32" />
-                          </div>
-                          <Skeleton className="h-4 w-48" />
-                        </div>
-                        <div className="text-right space-y-2">
-                          <Skeleton className="h-8 w-24" />
-                          <Skeleton className="h-3 w-12" />
-                        </div>
-                      </div>
-
-                      {/* Details skeleton */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="space-y-1">
-                          <Skeleton className="h-3 w-16" />
-                          <Skeleton className="h-4 w-20" />
-                        </div>
-                        <div className="space-y-1">
-                          <Skeleton className="h-3 w-16" />
-                          <Skeleton className="h-4 w-20" />
-                        </div>
-                        <div className="space-y-1">
-                          <Skeleton className="h-3 w-16" />
-                          <Skeleton className="h-4 w-20" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="h-4 w-4" />
-                          <Skeleton className="h-4 w-20" />
-                        </div>
-                      </div>
-
-                      {/* Footer skeleton */}
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-2">
-                          <Skeleton className="h-4 w-4" />
-                          <Skeleton className="h-3 w-12" />
-                          <Skeleton className="h-3 w-16" />
-                        </div>
-                        <Skeleton className="h-6 w-20 rounded-full" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : donations.length === 0 ? (
-            <div className="text-center text-muted-foreground py-12">
-              <p className="text-lg font-medium">Kayıt bulunamadı</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {donations.map((donation) => (
-                <div
-                  key={donation._id}
-                  className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 space-y-3">
-                      {/* Header */}
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <h3 className="font-semibold text-lg">{donation.donor_name}</h3>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">{donation.donor_email}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-green-600">
-                            {donation.amount.toLocaleString('tr-TR')} ₺
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">{donation.currency}</p>
-                        </div>
-                      </div>
-
-                      {/* Details */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <p className="text-muted-foreground">Ödeme Yöntemi</p>
-                          <p className="font-medium">{donation.payment_method}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Bağış Türü</p>
-                          <p className="font-medium">{donation.donation_type}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Amaç</p>
-                          <p className="font-medium">{donation.donation_purpose}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <p className="font-medium">
-                            {new Date(donation._creationTime).toLocaleDateString('tr-TR')}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Receipt & Notes */}
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-2 text-sm">
-                          <FileText className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">Fiş No:</span>
-                          <span className="text-muted-foreground">{donation.receipt_number}</span>
-                        </div>
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            donation.status === 'completed'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
-                              : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400'
-                          }`}
-                        >
-                          {donation.status === 'completed' ? 'Tamamlandı' : 'Beklemede'}
-                        </span>
-                      </div>
-
-                      {donation.notes && (
-                        <p className="text-sm text-muted-foreground italic">Not: {donation.notes}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Sayfa {page} / {totalPages}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                >
-                  Önceki
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                >
-                  Sonraki
-                </Button>
-              </div>
-            </div>
-          )}
+          <VirtualizedDataTable
+            data={donations}
+            columns={columns}
+            isLoading={isLoading}
+            emptyMessage="Bağış kaydı bulunamadı"
+            emptyDescription="Henüz bağış eklenmemiş"
+            rowHeight={80}
+            containerHeight={600}
+          />
         </CardContent>
       </Card>
     </div>

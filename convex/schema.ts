@@ -260,8 +260,109 @@ export default defineSchema({
     storageId: v.id('_storage'), // Convex fileStorage ID
     uploadedBy: v.optional(v.id('users')),
     uploadedAt: v.string(),
+    beneficiary_id: v.optional(v.id('beneficiaries')), // Link to beneficiary for documents
+    document_type: v.optional(v.string()), // Type: 'identity', 'photo', 'other', etc.
   })
     .index('by_storage_id', ['storageId'])
     .index('by_bucket', ['bucket'])
-    .index('by_uploaded_by', ['uploadedBy']),
+    .index('by_uploaded_by', ['uploadedBy'])
+    .index('by_beneficiary', ['beneficiary_id']),
+
+  // Partners Collection
+  partners: defineTable({
+    name: v.string(),
+    type: v.union(v.literal('organization'), v.literal('individual'), v.literal('sponsor')),
+    contact_person: v.optional(v.string()),
+    email: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    address: v.optional(v.string()),
+    website: v.optional(v.string()),
+    tax_number: v.optional(v.string()),
+    partnership_type: v.union(
+      v.literal('donor'),
+      v.literal('supplier'),
+      v.literal('volunteer'),
+      v.literal('sponsor'),
+      v.literal('service_provider')
+    ),
+    collaboration_start_date: v.optional(v.string()),
+    collaboration_end_date: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    status: v.union(v.literal('active'), v.literal('inactive'), v.literal('pending')),
+    total_contribution: v.optional(v.number()),
+    contribution_count: v.optional(v.number()),
+    logo_url: v.optional(v.string()),
+  })
+    .index('by_type', ['type'])
+    .index('by_status', ['status'])
+    .index('by_partnership_type', ['partnership_type'])
+    .index('by_name', ['name']),
+
+  // Consent Declarations (Rıza Beyanları)
+  consents: defineTable({
+    beneficiary_id: v.id('beneficiaries'),
+    consent_type: v.string(), // 'data_processing', 'photo_usage', 'communication', etc.
+    consent_text: v.string(),
+    status: v.union(v.literal('active'), v.literal('revoked'), v.literal('expired')),
+    signed_at: v.string(),
+    signed_by: v.optional(v.string()), // Person who signed
+    expires_at: v.optional(v.string()),
+    created_by: v.optional(v.id('users')),
+    notes: v.optional(v.string()),
+  })
+    .index('by_beneficiary', ['beneficiary_id'])
+    .index('by_status', ['status']),
+
+  // Bank Accounts (Banka Hesapları)
+  bank_accounts: defineTable({
+    beneficiary_id: v.id('beneficiaries'),
+    bank_name: v.string(),
+    account_holder: v.string(),
+    account_number: v.string(),
+    iban: v.optional(v.string()),
+    branch_name: v.optional(v.string()),
+    branch_code: v.optional(v.string()),
+    account_type: v.union(v.literal('checking'), v.literal('savings'), v.literal('other')),
+    currency: v.union(v.literal('TRY'), v.literal('USD'), v.literal('EUR')),
+    is_primary: v.optional(v.boolean()),
+    status: v.union(v.literal('active'), v.literal('inactive'), v.literal('closed')),
+    notes: v.optional(v.string()),
+  })
+    .index('by_beneficiary', ['beneficiary_id'])
+    .index('by_status', ['status']),
+
+  // Dependent People (Baktığı Kişiler)
+  dependents: defineTable({
+    beneficiary_id: v.id('beneficiaries'), // Who is responsible for this dependent
+    name: v.string(),
+    relationship: v.string(), // 'spouse', 'child', 'parent', 'sibling', 'other'
+    birth_date: v.optional(v.string()),
+    gender: v.optional(v.string()),
+    tc_no: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    education_level: v.optional(v.string()),
+    occupation: v.optional(v.string()),
+    health_status: v.optional(v.string()),
+    has_disability: v.optional(v.boolean()),
+    disability_detail: v.optional(v.string()),
+    monthly_income: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  })
+    .index('by_beneficiary', ['beneficiary_id'])
+    .index('by_relationship', ['relationship']),
+
+  // System Settings (Sistem Ayarları)
+  system_settings: defineTable({
+    category: v.string(), // 'organization', 'email', 'notifications', 'system', 'security', 'appearance', 'integrations', 'reports'
+    key: v.string(), // Unique key for the setting (e.g., 'org_name', 'smtp_host')
+    value: v.any(), // Flexible value type (string, number, boolean, object)
+    description: v.optional(v.string()), // Human-readable description
+    data_type: v.union(v.literal('string'), v.literal('number'), v.literal('boolean'), v.literal('object'), v.literal('array')),
+    is_sensitive: v.optional(v.boolean()), // For sensitive data like passwords
+    updated_by: v.optional(v.id('users')),
+    updated_at: v.string(),
+  })
+    .index('by_category', ['category'])
+    .index('by_key', ['key'])
+    .index('by_category_key', ['category', 'key']),
 });

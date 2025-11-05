@@ -200,7 +200,7 @@ export const convexAidApplications = {
  * Finance Records API
  */
 export const convexFinanceRecords = {
-  list: async (params?: ConvexQueryParams & { 
+  list: async (params?: ConvexQueryParams & {
     record_type?: "income" | "expense";
     created_by?: Id<"users">;
   }) => {
@@ -217,5 +217,37 @@ export const convexFinanceRecords = {
   },
   remove: async (id: Id<"finance_records">) => {
     return await convexHttp.mutation(api.finance_records.remove, { id });
+  },
+};
+
+/**
+ * Partners API
+ * Note: Convex types need to be generated first
+ * Run: npm run convex:dev
+ */
+export const convexPartners = {
+  list: async (params?: ConvexQueryParams & {
+    type?: "organization" | "individual" | "sponsor";
+    status?: "active" | "inactive" | "pending";
+    partnership_type?: "donor" | "supplier" | "volunteer" | "sponsor" | "service_provider";
+  }) => {
+    // @ts-ignore - Partners module not yet in generated types
+    return await convexHttp.query(api.partners.getPartners, params || {});
+  },
+  get: async (id: Id<"partners">) => {
+    // @ts-ignore - Partners module not yet in generated types
+    return await convexHttp.query(api.partners.getPartnerById, { id });
+  },
+  create: async (data: any) => {
+    // @ts-ignore - Partners module not yet in generated types
+    return await convexHttp.mutation(api.partners.createPartner, data);
+  },
+  update: async (id: Id<"partners">, data: any) => {
+    // @ts-ignore - Partners module not yet in generated types
+    return await convexHttp.mutation(api.partners.updatePartner, { id, ...data });
+  },
+  remove: async (id: Id<"partners">) => {
+    // @ts-ignore - Partners module not yet in generated types
+    return await convexHttp.mutation(api.partners.deletePartner, { id });
   },
 };

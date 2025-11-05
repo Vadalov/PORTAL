@@ -86,16 +86,16 @@ export const CACHE_STRATEGIES = {
 
   /** Beneficiaries data */
   BENEFICIARIES: {
-    staleTime: CACHE_TIMES.SHORT,
-    gcTime: GC_TIMES.SHORT,
+    staleTime: CACHE_TIMES.STANDARD, // Increased from SHORT to STANDARD for better performance
+    gcTime: GC_TIMES.STANDARD, // Increased from SHORT to STANDARD
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
   },
 
   /** Donations data */
   DONATIONS: {
-    staleTime: CACHE_TIMES.SHORT,
-    gcTime: GC_TIMES.SHORT,
+    staleTime: CACHE_TIMES.STANDARD, // Increased from SHORT to STANDARD for better performance
+    gcTime: GC_TIMES.STANDARD, // Increased from SHORT to STANDARD
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
   },
@@ -275,8 +275,12 @@ export function createOptimizedQueryClient(): QueryClient {
         // Error handling
         throwOnError: false,
 
-        // Structural sharing for performance
+        // Structural sharing for performance - reduces re-renders
         structuralSharing: true,
+
+        // Enable parallel queries by default
+        // React Query automatically deduplicates identical queries
+        // and can run multiple queries in parallel
 
         // Enable query cache persistence in development
         ...(process.env.NODE_ENV === 'development' && {
@@ -291,6 +295,9 @@ export function createOptimizedQueryClient(): QueryClient {
 
         // Network mode for mutations
         networkMode: 'online',
+
+        // Optimistic updates for better UX
+        // Individual mutations can enable optimistic updates as needed
       },
     },
   });

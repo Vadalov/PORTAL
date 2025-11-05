@@ -136,6 +136,10 @@ function validateKumbaraDonation(data: Partial<DonationDocument>): ValidationRes
     is_kumbara: true, // Always true for kumbara donations
     donation_type: data.donation_type || 'Kumbara',
     donation_purpose: data.donation_purpose || 'Kumbara Bağışı',
+    // Kumbara-specific fields - ensure they are included
+    kumbara_location: data.kumbara_location || '',
+    kumbara_institution: data.kumbara_institution || '',
+    collection_date: data.collection_date || '',
     // Map and route data
     location_coordinates: data.location_coordinates || null,
     location_address: data.location_address || '',
