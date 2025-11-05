@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getScholarship as _getScholarship, updateScholarship as _updateScholarship, deleteScholarship as _deleteScholarship } from '@/lib/api/mock-api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { ScholarshipType } from '@/types/scholarship';
 
 interface ScholarshipData {
@@ -174,5 +173,3 @@ async function deleteScholarshipHandler(
 
 // Export handlers with CSRF protection for mutations
 export const GET = getScholarshipHandler;
-export const PUT = withCsrfProtection(updateScholarshipHandler);
-export const DELETE = withCsrfProtection(deleteScholarshipHandler);

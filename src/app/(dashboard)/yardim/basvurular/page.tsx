@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { AidApplicationForm } from '@/components/forms/AidApplicationForm';
-import type { AidApplicationDocument } from '@/types/collections';
+import type { AidApplicationDocument } from '@/types/database';
 
 const STAGE_LABELS = {
   draft: { label: 'Taslak', color: 'bg-muted text-muted-foreground' },
@@ -165,7 +165,7 @@ export default function AidApplicationsPage() {
             <div className="space-y-4">
               {applications.map((app) => (
                 <div
-                  key={app.$id}
+                  key={app._id}
                   className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
@@ -232,7 +232,7 @@ export default function AidApplicationsPage() {
                     </div>
 
                     <div className="flex flex-col gap-2 ml-4">
-                      <Link href={`/yardim/basvurular/${app.$id}`}>
+                      <Link href={`/yardim/basvurular/${app._id}`}>
                         <Button variant="outline" size="sm" className="gap-2">
                           <Eye className="h-4 w-4" />
                           Detay

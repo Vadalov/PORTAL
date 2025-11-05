@@ -79,7 +79,7 @@ export const mockAuthApi = {
 
     // Create mock session
     const session = {
-      $id: `mock-session-${user.id}`,
+      _id: `mock-session-${user.id}`,
       userId: user.convexId || user.id,
       providerAccessToken: 'mock-token',
       providerAccessTokenExpiry: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
@@ -103,8 +103,8 @@ export const mockAuthApi = {
       factors: [],
       secret: 'mock-secret',
       mfaUpdatedAt: new Date().toISOString(),
-      $createdAt: new Date().toISOString(),
-      $updatedAt: new Date().toISOString(),
+      _creationTime: new Date().toISOString(),
+      _updatedAt: new Date().toISOString(),
     };
 
     return { session, user: storeUser };
@@ -142,11 +142,11 @@ export const mockAuthApi = {
     mockUsers.push(newUser);
 
     return {
-      $id: newUser.id,
+      _id: newUser.id,
       email: newUser.email,
       name: newUser.name,
-      $createdAt: new Date().toISOString(),
-      $updatedAt: new Date().toISOString(),
+      _creationTime: new Date().toISOString(),
+      _updatedAt: new Date().toISOString(),
     };
   },
 
@@ -171,7 +171,7 @@ export const mockAuthApi = {
 
     const mockBeneficiaries = [
       {
-        $id: 'ben-1',
+        _id: 'ben-1',
         name: 'Ahmet Yılmaz',
         tc_no: '12345678901',
         phone: '0532 123 45 67',
@@ -185,11 +185,11 @@ export const mockAuthApi = {
         employment_status: 'İşsiz',
         notes: 'Üç çocuklu bir aile',
         status: 'active' as const,
-        $createdAt: new Date().toISOString(),
-        $updatedAt: new Date().toISOString(),
+        _creationTime: new Date().toISOString(),
+        _updatedAt: new Date().toISOString(),
       },
       {
-        $id: 'ben-2',
+        _id: 'ben-2',
         name: 'Fatma Demir',
         tc_no: '23456789012',
         phone: '0533 987 65 43',
@@ -203,11 +203,11 @@ export const mockAuthApi = {
         employment_status: 'Ev Hanımı',
         notes: 'Engelli çocuğu var',
         status: 'active' as const,
-        $createdAt: new Date().toISOString(),
-        $updatedAt: new Date().toISOString(),
+        _creationTime: new Date().toISOString(),
+        _updatedAt: new Date().toISOString(),
       },
       {
-        $id: 'ben-3',
+        _id: 'ben-3',
         name: 'Mehmet Kaya',
         tc_no: '34567890123',
         phone: '0534 555 77 99',
@@ -221,8 +221,8 @@ export const mockAuthApi = {
         employment_status: 'Emekli',
         notes: 'Acil yardım bekliyor',
         status: 'active' as const,
-        $createdAt: new Date().toISOString(),
-        $updatedAt: new Date().toISOString(),
+        _creationTime: new Date().toISOString(),
+        _updatedAt: new Date().toISOString(),
       },
     ];
 
@@ -239,7 +239,7 @@ export const mockAuthApi = {
 
     const mockDonations = [
       {
-        $id: 'don-1',
+        _id: 'don-1',
         donor_name: 'Ali Veli',
         donor_phone: '0532 111 22 33',
         donor_email: 'ali@example.com',
@@ -252,11 +252,11 @@ export const mockAuthApi = {
         receipt_number: 'RCP-001',
         receipt_file_id: 'file-12345',
         status: 'completed' as const,
-        $createdAt: new Date().toISOString(),
-        $updatedAt: new Date().toISOString(),
+        _creationTime: new Date().toISOString(),
+        _updatedAt: new Date().toISOString(),
       },
       {
-        $id: 'don-2',
+        _id: 'don-2',
         donor_name: 'Ayşe Özkan',
         donor_phone: '0533 444 55 66',
         donor_email: 'ayse@example.com',
@@ -269,11 +269,11 @@ export const mockAuthApi = {
         receipt_number: 'RCP-002',
         receipt_file_id: 'file-67890',
         status: 'completed' as const,
-        $createdAt: new Date().toISOString(),
-        $updatedAt: new Date().toISOString(),
+        _creationTime: new Date().toISOString(),
+        _updatedAt: new Date().toISOString(),
       },
       {
-        $id: 'don-3',
+        _id: 'don-3',
         donor_name: 'Mustafa Çelik',
         donor_phone: '0534 777 88 99',
         donor_email: 'mustafa@example.com',
@@ -285,8 +285,8 @@ export const mockAuthApi = {
         notes: 'Acil durum yardımı',
         receipt_number: 'RCP-003',
         status: 'pending' as const,
-        $createdAt: new Date().toISOString(),
-        $updatedAt: new Date().toISOString(),
+        _creationTime: new Date().toISOString(),
+        _updatedAt: new Date().toISOString(),
       },
     ];
 

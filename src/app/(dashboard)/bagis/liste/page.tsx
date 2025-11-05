@@ -180,7 +180,7 @@ export default function DonationsPage() {
             <div className="space-y-4">
               {donations.map((donation) => (
                 <div
-                  key={donation.$id}
+                  key={donation._id}
                   className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-start justify-between">
@@ -219,7 +219,7 @@ export default function DonationsPage() {
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-muted-foreground" />
                           <p className="font-medium">
-                            {new Date(donation.$createdAt).toLocaleDateString('tr-TR')}
+                            {new Date(donation._creationTime).toLocaleDateString('tr-TR')}
                           </p>
                         </div>
                       </div>

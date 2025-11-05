@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexFinanceRecords, normalizeQueryParams } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import {
   TransactionQuery,
@@ -373,5 +372,4 @@ async function getTransactionStatsHandler(request: NextRequest) {
 
 // Export handlers
 export const GET = getTransactionsHandler;
-export const POST = withCsrfProtection(createTransactionHandler);
 export const GET_stats = getTransactionStatsHandler;

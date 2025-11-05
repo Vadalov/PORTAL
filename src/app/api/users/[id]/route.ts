@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import logger from '@/lib/logger';
 import { convexUsers } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
 import { extractParams } from '@/lib/api/route-helpers';
 import { Id } from '@/convex/_generated/dataModel';
@@ -162,5 +161,3 @@ async function deleteUserHandler(
   }
 }
 
-export const PATCH = withCsrfProtection(updateUserHandler);
-export const DELETE = withCsrfProtection(deleteUserHandler);

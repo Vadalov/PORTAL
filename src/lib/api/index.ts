@@ -7,7 +7,7 @@ import type {
   CreateDocumentData,
   UpdateDocumentData,
   AppwriteResponse,
-} from '@/types/collections';
+} from '@/types/database';
 import type {
   BeneficiaryDocument,
   UserDocument,
@@ -15,7 +15,7 @@ import type {
   TaskDocument,
   MeetingDocument,
   MessageDocument,
-} from '@/types/collections';
+} from '@/types/database';
 
 // Infer provider from environment (client-safe first)
 const clientProvider =

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MessageDocument } from '@/types/collections';
+import { MessageDocument } from '@/types/database';
 
 // Helper for Turkish phone numbers (10 digits, starts with 5)
 export const phoneNumberSchema = z

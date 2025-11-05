@@ -20,7 +20,7 @@ import {
 import type {
   BeneficiaryDocument,
   QueryParams,
-} from '@/types/collections';
+} from '@/types/database';
 
 // Define ApiResponse type locally (legacy)
 interface ApiResponse<T> {
@@ -141,9 +141,9 @@ const mockBeneficiaries: Beneficiary[] = [
 
 // === CLEAN BENEFICIARY STORAGE ===
 const mockBeneficiaryDocs: BeneficiaryDocument[] = mockBeneficiaries.map((b) => ({
-  $id: b.id,
-  $createdAt: b.createdAt,
-  $updatedAt: b.updatedAt,
+  _id: b.id,
+  _creationTime: b.createdAt,
+  _updatedAt: b.updatedAt,
   $permissions: [],
   $collectionId: 'beneficiaries',
   $databaseId: 'mock-db',
@@ -673,11 +673,11 @@ export async function createBeneficiaryDoc(
   await delay();
 
   const now = new Date().toISOString();
-  const $id = generateId();
+  const _id = generateId();
   const doc: BeneficiaryDocument = {
-    $id,
-    $createdAt: now,
-    $updatedAt: now,
+    _id,
+    _creationTime: now,
+    _updatedAt: now,
     $permissions: [],
     $collectionId: 'beneficiaries',
     $databaseId: 'mock-db',
@@ -742,7 +742,7 @@ export async function getBeneficiaryDoc(
 ): Promise<ConvexResponse<BeneficiaryDocument>> {
   await delay();
 
-  const doc = mockBeneficiaryDocs.find((x) => x.$id === id) || null;
+  const doc = mockBeneficiaryDocs.find((x) => x._id === id) || null;
   if (!doc) {
     return { data: null, error: 'İhtiyaç sahibi bulunamadı' };
   }
@@ -764,7 +764,7 @@ export async function getBeneficiaryDocs(
       (b) =>
         b.name.toLowerCase().includes(s) ||
         b.tc_no?.includes(search) ||
-        b.$id.toLowerCase().includes(s)
+        b._id.toLowerCase().includes(s)
     );
   }
 
@@ -786,7 +786,7 @@ export async function updateBeneficiaryDoc(
 ): Promise<ConvexResponse<BeneficiaryDocument>> {
   await delay();
 
-  const idx = mockBeneficiaryDocs.findIndex((b) => b.$id === id);
+  const idx = mockBeneficiaryDocs.findIndex((b) => b._id === id);
   if (idx === -1) {
     return { data: null, error: 'İhtiyaç sahibi bulunamadı' };
   }
@@ -795,7 +795,7 @@ export async function updateBeneficiaryDoc(
   const updated: BeneficiaryDocument = {
     ...mockBeneficiaryDocs[idx],
     ...data,
-    $updatedAt: now,
+    _updatedAt: now,
   };
 
   mockBeneficiaryDocs[idx] = updated;
@@ -806,7 +806,7 @@ export async function deleteBeneficiaryDoc(id: string): Promise<ConvexResponse<n
   await delay();
 
   const before = mockBeneficiaryDocs.length;
-  const filtered = mockBeneficiaryDocs.filter((b) => b.$id !== id);
+  const filtered = mockBeneficiaryDocs.filter((b) => b._id !== id);
   const after = filtered.length;
   
   // Update the array

@@ -24,7 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Search, Trash2, Check, X } from 'lucide-react';
-import type { ParameterCategory } from '@/types/collections';
+import type { ParameterCategory } from '@/types/database';
 
 const CATEGORY_LABELS: Record<ParameterCategory, string> = {
   gender: 'Cinsiyet',
@@ -76,7 +76,7 @@ export default function ParametersPage() {
   });
 
   const parameters = ((data?.data || []) as Array<{
-    $id: string;
+    _id: string;
     category: string;
     name_tr: string;
     value: string;
@@ -218,7 +218,7 @@ export default function ParametersPage() {
 
               {parameters.map((param) => (
                 <div
-                  key={param.$id}
+                  key={param._id}
                   className="grid grid-cols-12 gap-4 p-3 border rounded-md hover:bg-gray-50 transition-colors items-center"
                 >
                   <div className="col-span-3">
@@ -241,7 +241,7 @@ export default function ParametersPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        toggleStatusMutation.mutate({ id: param.$id, is_active: !param.is_active })
+                        toggleStatusMutation.mutate({ id: param._id, is_active: !param.is_active })
                       }
                     >
                       {param.is_active ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
@@ -251,7 +251,7 @@ export default function ParametersPage() {
                       size="sm"
                       onClick={() => {
                         if (confirm('Bu parametreyi silmek istediğinizden emin misiniz?')) {
-                          deleteParameterMutation.mutate(param.$id);
+                          deleteParameterMutation.mutate(param._id);
                         }
                       }}
                     >

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexBeneficiaries, normalizeQueryParams } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import type { QueryParams } from '@/types/collections';
+import type { QueryParams } from '@/types/database';
 
 // TypeScript interfaces
 interface BeneficiaryFilters {
@@ -225,4 +224,3 @@ async function createBeneficiaryHandler(request: NextRequest) {
 
 // Export handlers with CSRF protection
 export const GET = getBeneficiariesHandler;
-export const POST = withCsrfProtection(createBeneficiaryHandler);

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexUsers } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { InputSanitizer } from '@/lib/security';
 import logger from '@/lib/logger';
 import { hashPassword, validatePasswordStrength } from '@/lib/auth/password';
@@ -126,4 +125,3 @@ async function createUserHandler(request: NextRequest) {
   }
 }
 
-export const POST = withCsrfProtection(createUserHandler);

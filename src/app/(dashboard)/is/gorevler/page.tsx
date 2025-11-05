@@ -46,7 +46,7 @@ import {
   isTaskOverdue,
   isTaskDueSoon,
 } from '@/lib/validations/task';
-import type { TaskDocument, UserDocument } from '@/types/collections';
+import type { TaskDocument, UserDocument } from '@/types/database';
 
 type ViewMode = 'kanban' | 'list';
 type StatusFilter = 'all' | 'pending' | 'in_progress' | 'completed' | 'cancelled';
@@ -157,7 +157,7 @@ export default function TasksPage() {
   };
 
   const getUserName = (userId: string) => {
-    const user = users.find((u: UserDocument) => u.$id === userId);
+    const user = users.find((u: UserDocument) => u._id === userId);
     return user?.name || 'Bilinmeyen Kullanıcı';
   };
 
@@ -340,7 +340,7 @@ export default function TasksPage() {
                 <SelectItem value="unassigned">Atanmamış</SelectItem>
                 {users && users.length > 0 ? (
                   users.map((user: UserDocument) => (
-                    <SelectItem key={user.$id} value={user.$id}>
+                    <SelectItem key={user._id} value={user._id}>
                       {user.name || 'İsimsiz Kullanıcı'}
                     </SelectItem>
                   ))
@@ -414,7 +414,7 @@ export default function TasksPage() {
 
                 return (
                   <div
-                    key={task.$id}
+                    key={task._id}
                     className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer"
                     onClick={() => handleTaskClick(task)}
                   >
@@ -480,7 +480,7 @@ export default function TasksPage() {
                           <div>
                             <span className="text-muted-foreground">Oluşturulma:</span>
                             <span className="font-medium ml-1">
-                              {new Date(task.$createdAt).toLocaleDateString('tr-TR')}
+                              {new Date(task._creationTime).toLocaleDateString('tr-TR')}
                             </span>
                           </div>
                         </div>
@@ -514,7 +514,7 @@ export default function TasksPage() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteTask(task.$id);
+                            handleDeleteTask(task._id);
                           }}
                           className="text-red-600 hover:text-red-700"
                         >
@@ -562,7 +562,7 @@ export default function TasksPage() {
         <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <TaskForm
-              taskId={selectedTask.$id}
+              taskId={selectedTask._id}
               initialData={{
                 title: selectedTask.title,
                 description: selectedTask.description,

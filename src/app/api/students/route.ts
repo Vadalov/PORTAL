@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStudents, createStudent } from '@/lib/api/mock-api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { StudentStatus, EducationLevel } from '@/types/scholarship';
 
 interface ApiResponse<T> {
@@ -200,4 +199,3 @@ async function createStudentHandler(request: NextRequest) {
 
 // Export handlers with CSRF protection
 export const GET = getStudentsHandler;
-export const POST = withCsrfProtection(createStudentHandler);

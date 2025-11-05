@@ -57,7 +57,7 @@ export const POST = authRateLimit(async (request: NextRequest) => {
       cookieStore.set(
         'auth-session',
         JSON.stringify({
-          sessionId: mockResult.session.$id,
+          sessionId: mockResult.session._id,
           userId: mockResult.user.id,
           secret: mockResult.session.secret,
           expire: expireTime,
@@ -85,7 +85,7 @@ export const POST = authRateLimit(async (request: NextRequest) => {
         data: {
           user: mockResult.user,
           session: {
-            sessionId: mockResult.session.$id,
+            sessionId: mockResult.session._id,
             expire: expireTime,
           },
         },

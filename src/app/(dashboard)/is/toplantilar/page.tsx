@@ -45,7 +45,7 @@ import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { MeetingForm } from '@/components/forms/MeetingForm';
 import { CalendarView } from '@/components/meetings/CalendarView';
-import type { MeetingDocument } from '@/types/collections';
+import type { MeetingDocument } from '@/types/database';
 import { meetingTypeLabels, meetingStatusLabels } from '@/lib/validations/meeting';
 
 export default function MeetingsPage() {
@@ -412,7 +412,7 @@ export default function MeetingsPage() {
                   <div className="space-y-2">
                     {tabMeetings.map((meeting) => (
                       <Card
-                        key={meeting.$id}
+                        key={meeting._id}
                         className="cursor-pointer transition-all hover:shadow-md hover:bg-blue-50"
                         onClick={() => handleMeetingClick(meeting)}
                       >
@@ -462,7 +462,7 @@ export default function MeetingsPage() {
                                 size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDelete(meeting.$id);
+                                  handleDelete(meeting._id);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4 text-red-500" />
@@ -490,7 +490,7 @@ export default function MeetingsPage() {
                   <div className="space-y-2">
                     {tabMeetings.map((meeting) => (
                       <Card
-                        key={meeting.$id}
+                        key={meeting._id}
                         className="cursor-pointer transition-all hover:shadow-md hover:bg-blue-50"
                         onClick={() => handleMeetingClick(meeting)}
                       >
@@ -540,7 +540,7 @@ export default function MeetingsPage() {
                                 size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDelete(meeting.$id);
+                                  handleDelete(meeting._id);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4 text-red-500" />
@@ -568,7 +568,7 @@ export default function MeetingsPage() {
                   <div className="space-y-2">
                     {tabMeetings.map((meeting) => (
                       <Card
-                        key={meeting.$id}
+                        key={meeting._id}
                         className="cursor-pointer transition-all hover:shadow-md hover:bg-blue-50"
                         onClick={() => handleMeetingClick(meeting)}
                       >
@@ -624,7 +624,7 @@ export default function MeetingsPage() {
                   <div className="space-y-2">
                     {tabMeetings.map((meeting) => (
                       <Card
-                        key={meeting.$id}
+                        key={meeting._id}
                         className="cursor-pointer transition-all hover:shadow-md hover:bg-blue-50"
                         onClick={() => handleMeetingClick(meeting)}
                       >
@@ -674,7 +674,7 @@ export default function MeetingsPage() {
                                 size="icon"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDelete(meeting.$id);
+                                  handleDelete(meeting._id);
                                 }}
                               >
                                 <Trash2 className="h-4 w-4 text-red-500" />
@@ -720,7 +720,7 @@ export default function MeetingsPage() {
           </DialogHeader>
           {selectedMeeting && (
             <MeetingForm
-              meetingId={selectedMeeting.$id}
+              meetingId={selectedMeeting._id}
               initialData={{
                 title: selectedMeeting.title,
                 description: selectedMeeting.description,

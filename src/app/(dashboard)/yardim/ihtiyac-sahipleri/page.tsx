@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { exportBeneficiaries } from '@/lib/api/mock-api';
-import type { BeneficiaryDocument } from '@/types/collections';
+import type { BeneficiaryDocument } from '@/types/database';
 import { toast } from 'sonner';
 import { ArrowUpRight, Download, Plus, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -64,7 +64,7 @@ export default function BeneficiariesPage() {
       key: 'actions',
       label: '',
       render: (item) => (
-        <Link href={`/yardim/ihtiyac-sahipleri/${item.$id}`}>
+        <Link href={`/yardim/ihtiyac-sahipleri/${item._id}`}>
           <Button variant="ghost" size="icon-sm" className="h-8 w-8">
             <ArrowUpRight className="h-4 w-4" />
           </Button>
@@ -187,7 +187,7 @@ export default function BeneficiariesPage() {
         total,
         onPageChange: setPage,
         }}
-        onRowClick={(item) => router.push(`/yardim/ihtiyac-sahipleri/${item.$id}`)}
+        onRowClick={(item) => router.push(`/yardim/ihtiyac-sahipleri/${item._id}`)}
           refetch={refetch}
         />
       </PageLayout>

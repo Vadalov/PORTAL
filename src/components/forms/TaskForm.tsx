@@ -29,7 +29,7 @@ import {
   isTaskDueSoon,
 } from '@/lib/validations/task';
 import { useFormMutation } from '@/hooks/useFormMutation';
-import type { UserDocument, TaskDocument } from '@/types/collections';
+import type { UserDocument, TaskDocument } from '@/types/database';
 
 interface TaskFormProps {
   onSuccess?: () => void;
@@ -232,7 +232,7 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
               <SelectContent>
                 <SelectItem value="">Atanmadı</SelectItem>
                 {users.map((user: UserDocument) => (
-                  <SelectItem key={user.$id} value={user.$id}>
+                  <SelectItem key={user._id} value={user._id}>
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4" />
                       {user.name}

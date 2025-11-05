@@ -67,7 +67,7 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
   //   queryFn: () => api.users.getUsers({ limit: 100 }),
   // });
 
-  const users: Array<{ $id: string; name: string }> = []; // Empty for now
+  const users: Array<{ _id: string; name: string }> = []; // Empty for now
 
   // Form setup
   const {
@@ -170,7 +170,7 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
   };
 
   const getUserName = (userId: string) => {
-    const userObj = users.find((u) => u.$id === userId);
+    const userObj = users.find((u) => u._id === userId);
     return userObj?.name || userId;
   };
 
@@ -319,8 +319,8 @@ export function MeetingForm({ onSuccess, onCancel, initialData, meetingId }: Mee
                   </SelectItem>
                 ) : (
                   users.map((u) => (
-                    <SelectItem key={u.$id} value={u.$id}>
-                      {u.name} {selectedParticipants.includes(u.$id) && '✓'}
+                    <SelectItem key={u._id} value={u._id}>
+                      {u.name} {selectedParticipants.includes(u._id) && '✓'}
                     </SelectItem>
                   ))
                 )}

@@ -4,7 +4,6 @@ import {
   createScholarship,
   getScholarshipStats,
 } from '@/lib/api/mock-api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { ScholarshipType, ScholarshipSearchParams } from '@/types/scholarship';
 
 // TypeScript interfaces
@@ -217,5 +216,4 @@ async function getScholarshipStatsHandler(_request: NextRequest) {
 
 // Export handlers with CSRF protection
 export const GET = getScholarshipsHandler;
-export const POST = withCsrfProtection(createScholarshipHandler);
 export const GET_stats = getScholarshipStatsHandler;

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexAidApplications, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { Id } from '@/convex/_generated/dataModel';
 
 function validateApplication(data: Record<string, unknown>): {
@@ -111,4 +110,3 @@ async function createApplicationHandler(request: NextRequest) {
   }
 }
 
-export const POST = withCsrfProtection(createApplicationHandler);

@@ -15,7 +15,7 @@ import {
   BeneficiaryDocument,
   CreateDocumentData,
   UpdateDocumentData,
-} from '@/types/collections';
+} from '@/types/database';
 
 interface TestResult {
   testName: string;
@@ -64,9 +64,9 @@ export class MockAPITester {
     try {
       const response = await getBeneficiaryDocs();
       if (response.data && response.data.length > 0) {
-        const validId = response.data[0].$id;
+        const validId = response.data[0]._id;
         const singleResponse = await getBeneficiaryDoc(validId);
-        if (singleResponse.data && singleResponse.data.$id === validId) {
+        if (singleResponse.data && singleResponse.data._id === validId) {
           tests.push({ testName: 'getBeneficiaryDoc valid ID', passed: true, message: 'Success' });
         } else {
           tests.push({
@@ -149,7 +149,7 @@ export class MockAPITester {
     try {
       const beneficiaries = await getBeneficiaryDocs();
       if (beneficiaries.data && beneficiaries.data.length > 0) {
-        const id = beneficiaries.data[0].$id;
+        const id = beneficiaries.data[0]._id;
         const updateData: Partial<BeneficiaryDocument> = { name: 'Updated Name' };
         const response = await updateBeneficiaryDoc(id, updateData);
         if (response.data && response.data.name === 'Updated Name') {
@@ -173,7 +173,7 @@ export class MockAPITester {
     try {
       const beneficiaries = await getBeneficiaryDocs();
       if (beneficiaries.data && beneficiaries.data.length > 0) {
-        const id = beneficiaries.data[0].$id;
+        const id = beneficiaries.data[0]._id;
         const response = await deleteBeneficiaryDoc(id);
         if (response.error === null) {
           tests.push({ testName: 'deleteBeneficiaryDoc', passed: true, message: 'Success' });

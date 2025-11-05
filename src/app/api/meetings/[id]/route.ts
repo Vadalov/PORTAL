@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexMeetings } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
@@ -144,5 +143,3 @@ async function deleteMeetingHandler(
   }
 }
 
-export const PUT = withCsrfProtection(updateMeetingHandler);
-export const DELETE = withCsrfProtection(deleteMeetingHandler);

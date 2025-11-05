@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { DonationDocument } from '@/types/collections';
+import type { DonationDocument } from '@/types/database';
 
 // Kumbara donation creation schema
 export const kumbaraCreateSchema = z.object({

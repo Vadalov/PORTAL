@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import {
   Budget,
   BudgetQuery,
@@ -174,5 +173,4 @@ async function getBudgetStatsHandler(request: NextRequest) {
 }
 
 export const GET = readOnlyRateLimit(getBudgetsHandler);
-export const POST = withCsrfProtection(dataModificationRateLimit(createBudgetHandler));
 export const GET_stats = readOnlyRateLimit(getBudgetStatsHandler);

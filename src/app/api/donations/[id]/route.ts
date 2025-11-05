@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexDonations } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
@@ -157,5 +156,3 @@ async function deleteDonationHandler(
   }
 }
 
-export const PUT = withCsrfProtection(updateDonationHandler);
-export const DELETE = withCsrfProtection(deleteDonationHandler);

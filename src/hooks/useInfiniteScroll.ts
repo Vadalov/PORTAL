@@ -23,7 +23,7 @@ interface UseInfiniteScrollOptions {
  *
  * return (
  *   <>
- *     {data.map(item => <Item key={item.$id} item={item} />)}
+ *     {data.map(item => <Item key={item._id} item={item} />)}
  *     <div ref={ref} className="py-4 text-center">
  *       {isFetchingNextPage ? <Spinner /> : hasMore ? 'Yükle...' : 'Tüm kayıtlar yüklendi'}
  *     </div>

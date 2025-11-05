@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { FinancialReport, ReportType, ReportQuery, TransactionCategory } from '@/types/financial';
 
 // Mock data store
@@ -166,4 +165,3 @@ async function generateReportHandler(request: NextRequest) {
 }
 
 export const GET = getReportsHandler;
-export const POST = withCsrfProtection(generateReportHandler);

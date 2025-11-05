@@ -35,7 +35,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { validateRecipients, formatPhoneNumber } from '@/lib/validations/message';
-import type { BeneficiaryDocument, DonationDocument, UserDocument } from '@/types/collections';
+import type { BeneficiaryDocument, DonationDocument, UserDocument } from '@/types/database';
 
 interface RecipientSelectorProps {
   messageType: 'sms' | 'email' | 'internal';
@@ -112,7 +112,7 @@ export function RecipientSelector({
             return true;
           })
           .map((beneficiary: BeneficiaryDocument) => ({
-            id: beneficiary.$id,
+            id: beneficiary._id,
             name: beneficiary.name,
             contact: messageType === 'sms' ? beneficiary.phone || '' : beneficiary.email || '',
             city: beneficiary.city,
@@ -129,7 +129,7 @@ export function RecipientSelector({
                 id: key,
                 name: donation.donor_name,
                 contact: donation.donor_phone,
-                lastDonation: donation.$createdAt,
+                lastDonation: donation._creationTime,
               });
             }
           }
@@ -148,7 +148,7 @@ export function RecipientSelector({
             return false; // Users are only for internal messages
           })
           .map((user: UserDocument) => ({
-            id: user.$id,
+            id: user._id,
             name: user.name,
             contact: user.email,
             role: user.role,

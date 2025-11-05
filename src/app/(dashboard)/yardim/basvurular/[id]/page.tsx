@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import type { AidApplicationDocument } from '@/types/collections';
+import type { AidApplicationDocument } from '@/types/database';
 
 const STAGE_LABELS = {
   draft: { label: 'Taslak', icon: Clock, color: 'bg-muted text-muted-foreground' },
@@ -263,7 +263,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Kayıt Tarihi</p>
                 <p className="text-base">
-                  {new Date(application.$createdAt).toLocaleDateString('tr-TR', {
+                  {new Date(application._creationTime).toLocaleDateString('tr-TR', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -276,7 +276,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Son Güncelleme</p>
                 <p className="text-base">
-                  {new Date(application.$updatedAt).toLocaleDateString('tr-TR', {
+                  {new Date(application._updatedAt).toLocaleDateString('tr-TR', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',

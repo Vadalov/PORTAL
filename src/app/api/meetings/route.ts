@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexMeetings, normalizeQueryParams } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
 
@@ -108,4 +107,3 @@ async function createMeetingHandler(request: NextRequest) {
   }
 }
 
-export const POST = withCsrfProtection(createMeetingHandler);

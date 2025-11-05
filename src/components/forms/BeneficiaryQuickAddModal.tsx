@@ -32,7 +32,7 @@ import {
   QuickAddBeneficiaryFormData,
 } from '@/lib/validations/beneficiary';
 import { api } from '@/lib/api';
-import type { BeneficiaryDocument, CreateDocumentData } from '@/types/collections';
+import type { BeneficiaryDocument, CreateDocumentData } from '@/types/database';
 
 interface BeneficiaryQuickAddModalProps {
   open: boolean;
@@ -142,7 +142,7 @@ export function BeneficiaryQuickAddModal({ open, onOpenChange }: BeneficiaryQuic
         onOpenChange(false);
 
         // Detay sayfasına yönlendir
-        router.push(`/yardim/ihtiyac-sahipleri/${result.data.$id}`);
+        router.push(`/yardim/ihtiyac-sahipleri/${result.data._id}`);
       } else {
         toast.error(result.error || 'İhtiyaç sahibi oluşturulamadı');
       }

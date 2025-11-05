@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { Invoice, CreateInvoiceInput } from '@/types/financial';
 
 // Mock data store
@@ -154,5 +153,4 @@ async function getInvoiceStatsHandler() {
 }
 
 export const GET = getInvoicesHandler;
-export const POST = withCsrfProtection(createInvoiceHandler);
 export const GET_stats = getInvoiceStatsHandler;

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexMessages } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { extractParams } from '@/lib/api/route-helpers';
 import { Id } from '@/convex/_generated/dataModel';
@@ -265,6 +264,3 @@ async function sendMessageHandler(
   }
 }
 
-export const PUT = withCsrfProtection(updateMessageHandler);
-export const DELETE = withCsrfProtection(deleteMessageHandler);
-export const POST = withCsrfProtection(sendMessageHandler);

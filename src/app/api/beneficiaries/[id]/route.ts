@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexBeneficiaries } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { BeneficiaryFormData } from '@/types/beneficiary';
 import { extractParams } from '@/lib/api/route-helpers';
@@ -197,5 +196,3 @@ async function deleteBeneficiaryHandler(
 
 // Export handlers with CSRF protection for state-changing operations
 export const GET = getBeneficiaryHandler;
-export const PUT = withCsrfProtection(updateBeneficiaryHandler);
-export const DELETE = withCsrfProtection(deleteBeneficiaryHandler);

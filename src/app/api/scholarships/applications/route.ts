@@ -5,7 +5,6 @@ import {
   getScholarships,
   getStudents,
 } from '@/lib/api/mock-api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { ApplicationStatus, StudentStatus } from '@/types/scholarship';
 
 interface ApiResponse<T> {
@@ -237,6 +236,5 @@ async function getEligibleStudentsHandler(request: NextRequest) {
 
 // Export handlers with CSRF protection
 export const GET = getApplicationsHandler;
-export const POST = withCsrfProtection(createApplicationHandler);
 export const GET_scholarships = getAvailableScholarshipsHandler;
 export const GET_students = getEligibleStudentsHandler;

@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { MessageForm } from '@/components/forms/MessageForm';
 import { getStatusLabel, getStatusColor, getMessageTypeLabel } from '@/lib/validations/message';
-import type { MessageDocument, UserDocument } from '@/types/collections';
+import type { MessageDocument, UserDocument } from '@/types/database';
 
 type ActiveTab = 'inbox' | 'sent' | 'drafts';
 
@@ -120,7 +120,7 @@ export default function InternalMessagingPage() {
 
     // Mark as read if it's an inbox message
     if (activeTab === 'inbox') {
-      markAsReadMutation.mutate(message.$id);
+      markAsReadMutation.mutate(message._id);
     }
   };
 
@@ -145,7 +145,7 @@ export default function InternalMessagingPage() {
     if (selectedMessages.length === messages.length) {
       setSelectedMessages([]);
     } else {
-      setSelectedMessages(messages.map((m) => m.$id));
+      setSelectedMessages(messages.map((m) => m._id));
     }
   };
 
@@ -158,12 +158,12 @@ export default function InternalMessagingPage() {
   };
 
   const getUserName = (userId: string) => {
-    const user = users.find((u: UserDocument) => u.$id === userId);
+    const user = users.find((u: UserDocument) => u._id === userId);
     return user?.name || 'Bilinmeyen Kullanıcı';
   };
 
   const _getUserEmail = (userId: string) => {
-    const user = users.find((u: UserDocument) => u.$id === userId);
+    const user = users.find((u: UserDocument) => u._id === userId);
     return user?.email || '';
   };
 
@@ -342,19 +342,19 @@ export default function InternalMessagingPage() {
                   <div className="space-y-2">
                     {messages.map((message) => (
                       <Card
-                        key={message.$id}
+                        key={message._id}
                         className={`cursor-pointer transition-colors hover:bg-blue-50 ${
-                          selectedMessages.includes(message.$id) ? 'bg-blue-50 border-blue-200' : ''
+                          selectedMessages.includes(message._id) ? 'bg-blue-50 border-blue-200' : ''
                         }`}
                         onClick={() => handleMessageClick(message)}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-start gap-3">
                             <Checkbox
-                              checked={selectedMessages.includes(message.$id)}
+                              checked={selectedMessages.includes(message._id)}
                               onChange={(e) => {
                                 e.stopPropagation();
-                                handleMessageSelect(message.$id);
+                                handleMessageSelect(message._id);
                               }}
                             />
                             <div className="flex-1">
@@ -379,7 +379,7 @@ export default function InternalMessagingPage() {
                                     <div className="flex items-center gap-1">
                                       <Calendar className="h-3 w-3" />
                                       <span>
-                                        {new Date(message.$createdAt).toLocaleDateString('tr-TR')}
+                                        {new Date(message._creationTime).toLocaleDateString('tr-TR')}
                                       </span>
                                     </div>
                                   </div>
@@ -390,7 +390,7 @@ export default function InternalMessagingPage() {
                                     size="sm"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      handleDeleteMessage(message.$id);
+                                      handleDeleteMessage(message._id);
                                     }}
                                     className="text-red-600 hover:text-red-700"
                                   >
@@ -451,7 +451,7 @@ export default function InternalMessagingPage() {
                 <div className="space-y-2">
                   {messages.map((message) => (
                     <Card
-                      key={message.$id}
+                      key={message._id}
                       className="cursor-pointer transition-colors hover:bg-blue-50"
                       onClick={() => handleMessageClick(message)}
                     >
@@ -477,7 +477,7 @@ export default function InternalMessagingPage() {
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-3 w-3" />
                                 <span>
-                                  {new Date(message.$createdAt).toLocaleDateString('tr-TR')}
+                                  {new Date(message._creationTime).toLocaleDateString('tr-TR')}
                                 </span>
                               </div>
                             </div>
@@ -506,7 +506,7 @@ export default function InternalMessagingPage() {
                 <div className="space-y-2">
                   {messages.map((message) => (
                     <Card
-                      key={message.$id}
+                      key={message._id}
                       className="cursor-pointer transition-colors hover:bg-blue-50"
                       onClick={() => handleMessageClick(message)}
                     >
@@ -533,7 +533,7 @@ export default function InternalMessagingPage() {
                                 <Calendar className="h-3 w-3" />
                                 <span>
                                   Son değişiklik:{' '}
-                                  {new Date(message.$updatedAt).toLocaleDateString('tr-TR')}
+                                  {new Date(message._updatedAt).toLocaleDateString('tr-TR')}
                                 </span>
                               </div>
                             </div>
@@ -544,7 +544,7 @@ export default function InternalMessagingPage() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleDeleteMessage(message.$id);
+                                handleDeleteMessage(message._id);
                               }}
                               className="text-red-600 hover:text-red-700"
                             >
@@ -595,7 +595,7 @@ export default function InternalMessagingPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDeleteMessage(selectedMessage.$id)}
+                    onClick={() => handleDeleteMessage(selectedMessage._id)}
                     className="text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -620,7 +620,7 @@ export default function InternalMessagingPage() {
                   <Calendar className="h-4 w-4" />
                   <span>
                     <strong>Tarih:</strong>{' '}
-                    {new Date(selectedMessage.$createdAt).toLocaleString('tr-TR')}
+                    {new Date(selectedMessage._creationTime).toLocaleString('tr-TR')}
                   </span>
                 </div>
                 {selectedMessage.sent_at && (

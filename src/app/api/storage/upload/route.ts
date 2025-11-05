@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { getConvexHttp } from '@/lib/convex/server';
 import { api } from '@/convex/_generated/api';
@@ -162,4 +161,3 @@ async function uploadHandler(request: NextRequest) {
   }
 }
 
-export const POST = withCsrfProtection(uploadHandler);

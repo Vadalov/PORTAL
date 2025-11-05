@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import type { ParameterCategory, ParameterDocument } from '@/types/collections';
+import type { ParameterCategory, ParameterDocument } from '@/types/database';
 
 interface ParameterSelectProps {
   category: ParameterCategory;
@@ -61,7 +61,7 @@ export function ParameterSelect({
             </SelectItem>
           ) : (
             parameters.map((param) => (
-              <SelectItem key={param.$id} value={param.value}>
+              <SelectItem key={param._id} value={param.value}>
                 {param.name_tr}
               </SelectItem>
             ))

@@ -40,7 +40,7 @@ import {
   getSmsMessageCount,
   formatPhoneNumber,
 } from '@/lib/validations/message';
-import type { MessageDocument } from '@/types/collections';
+import type { MessageDocument } from '@/types/database';
 
 type MessageType = 'sms' | 'email';
 type WizardStep = 'compose' | 'recipients' | 'preview' | 'sending';
@@ -210,7 +210,7 @@ export default function BulkMessagingPage() {
         }
 
         // Send the actual message
-        // await sendMessageMutation.mutateAsync(result.data.$id);
+        // await sendMessageMutation.mutateAsync(result.data._id);
         await sendMessageMutation.mutateAsync('dummy-id');
 
         toast.success(
@@ -756,7 +756,7 @@ function BulkMessageHistory({ messages }: { messages: MessageDocument[] }) {
       ) : (
         <div className="space-y-2">
           {messages.map((message) => (
-            <Card key={message.$id}>
+            <Card key={message._id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -767,7 +767,7 @@ function BulkMessageHistory({ messages }: { messages: MessageDocument[] }) {
                     <p className="text-sm text-gray-600 mb-2 line-clamp-2">{message.content}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span>{message.recipients.length} alıcı</span>
-                      <span>{new Date(message.$createdAt).toLocaleDateString('tr-TR')}</span>
+                      <span>{new Date(message._creationTime).toLocaleDateString('tr-TR')}</span>
                     </div>
                   </div>
                 </div>

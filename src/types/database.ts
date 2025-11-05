@@ -1,22 +1,22 @@
 /**
- * Appwrite Collection Types
- * TypeScript definitions for Appwrite documents
+ * Convex Collection Types
+ * TypeScript definitions for Convex documents
  */
 
 import { UserRole } from '@/types/auth';
 
-// Base Appwrite Document type
-export interface AppwriteDocument {
-  $id: string;
-  $createdAt: string;
-  $updatedAt: string;
+// Base Convex Document type
+export interface Document {
+  _id: string;
+  _creationTime: string;
+  _updatedAt: string;
   $permissions?: string[];
-  $collectionId: string;
-  $databaseId: string;
+  _collectionId: string;
+  _databaseId: string;
 }
 
 // Users Collection
-export interface UserDocument extends AppwriteDocument {
+export interface UserDocument extends Document {
   name: string;
   email: string;
   role: UserRole;
@@ -55,7 +55,7 @@ export type ParameterCategory =
   | 'orphan_detail'; // Yetim Detay
 
 // Parameters Collection
-export interface ParameterDocument extends AppwriteDocument {
+export interface ParameterDocument extends Document {
   category: ParameterCategory;
   name_tr: string;
   name_en?: string;
@@ -68,7 +68,7 @@ export interface ParameterDocument extends AppwriteDocument {
 }
 
 // Beneficiaries Collection (Genişletilmiş)
-export interface BeneficiaryDocument extends AppwriteDocument {
+export interface BeneficiaryDocument extends Document {
   // Temel Kişisel Bilgiler
   name: string;
   tc_no: string;
@@ -141,7 +141,7 @@ export interface BeneficiaryDocument extends AppwriteDocument {
 }
 
 // Donations Collection
-export interface DonationDocument extends AppwriteDocument {
+export interface DonationDocument extends Document {
   donor_name: string;
   donor_phone: string;
   donor_email?: string;
@@ -167,7 +167,7 @@ export interface DonationDocument extends AppwriteDocument {
 }
 
 // Aid Requests Collection
-export interface AidRequestDocument extends AppwriteDocument {
+export interface AidRequestDocument extends Document {
   beneficiary_id: string;
   request_type: 'financial' | 'food' | 'health' | 'education' | 'housing';
   description: string;
@@ -179,7 +179,7 @@ export interface AidRequestDocument extends AppwriteDocument {
 }
 
 // Aid Applications Collection (Portal Plus Style)
-export interface AidApplicationDocument extends AppwriteDocument {
+export interface AidApplicationDocument extends Document {
   // Başvuru Bilgileri
   application_date: string;
   applicant_type: 'person' | 'organization' | 'partner'; // Kişi, Kurum, Partner
@@ -211,7 +211,7 @@ export interface AidApplicationDocument extends AppwriteDocument {
 }
 
 // Scholarships Collection
-export interface ScholarshipDocument extends AppwriteDocument {
+export interface ScholarshipDocument extends Document {
   student_name: string;
   tc_no: string;
   school_name: string;
@@ -224,7 +224,7 @@ export interface ScholarshipDocument extends AppwriteDocument {
 }
 
 // Tasks Collection (Portal Plus - 188 bekleyen iş)
-export interface TaskDocument extends AppwriteDocument {
+export interface TaskDocument extends Document {
   title: string;
   description?: string;
   assigned_to?: string; // User ID
@@ -239,7 +239,7 @@ export interface TaskDocument extends AppwriteDocument {
 }
 
 // Meetings Collection (Portal Plus - Toplantılar)
-export interface MeetingDocument extends AppwriteDocument {
+export interface MeetingDocument extends Document {
   title: string;
   description?: string;
   meeting_date: string;
@@ -253,7 +253,7 @@ export interface MeetingDocument extends AppwriteDocument {
 }
 
 // Messages Collection (SMS & E-posta)
-export interface MessageDocument extends AppwriteDocument {
+export interface MessageDocument extends Document {
   message_type: 'sms' | 'email' | 'internal';
   sender: string;
   recipients: string[];
@@ -266,7 +266,7 @@ export interface MessageDocument extends AppwriteDocument {
 }
 
 // Finance Records Collection (Gelir-Gider)
-export interface FinanceRecordDocument extends AppwriteDocument {
+export interface FinanceRecordDocument extends Document {
   record_type: 'income' | 'expense';
   category: string;
   amount: number;
@@ -283,7 +283,7 @@ export interface FinanceRecordDocument extends AppwriteDocument {
 }
 
 // Orphans Collection (Portal Plus - Yetim/Öğrenci Yönetimi)
-export interface OrphanDocument extends AppwriteDocument {
+export interface OrphanDocument extends Document {
   // Temel Bilgiler
   name: string;
   tc_no: string;
@@ -347,7 +347,7 @@ export interface OrphanDocument extends AppwriteDocument {
 }
 
 // Sponsors Collection (Sponsorluk Yönetimi)
-export interface SponsorDocument extends AppwriteDocument {
+export interface SponsorDocument extends Document {
   sponsor_name: string;
   sponsor_type: 'individual' | 'corporate';
   email?: string;
@@ -368,7 +368,7 @@ export interface SponsorDocument extends AppwriteDocument {
 }
 
 // Campaigns Collection (Kampanya Yönetimi)
-export interface CampaignDocument extends AppwriteDocument {
+export interface CampaignDocument extends Document {
   campaign_name: string;
   campaign_type: 'donation' | 'orphan_support' | 'education' | 'health' | 'ramadan' | 'other';
   description: string;
@@ -381,12 +381,12 @@ export interface CampaignDocument extends AppwriteDocument {
 }
 
 // API Response Types
-export interface AppwriteListResponse<T> {
+export interface ConvexListResponse<T> {
   total: number;
   documents: T[];
 }
 
-export interface AppwriteResponse<T> {
+export interface ConvexResponse<T> {
   data: T | null;
   error: string | null;
   total?: number;
@@ -410,16 +410,16 @@ export interface FileUpload {
 }
 
 export interface UploadedFile {
-  $id: string;
+  _id: string;
   name: string;
   mimeType: string;
   sizeOriginal: number;
-  $createdAt: string;
-  $updatedAt: string;
+  _creationTime: string;
+  _updatedAt: string;
 }
 
 // Error Types
-export interface AppwriteError {
+export interface ConvexError {
   code: number;
   message: string;
   type: string;
@@ -463,6 +463,6 @@ export type DocumentByCollection = {
 // Utility Types
 export type CreateDocumentData<T> = Omit<
   T,
-  '$id' | '$createdAt' | '$updatedAt' | '$permissions' | '$collectionId' | '$databaseId'
+  '_id' | '_creationTime' | '_updatedAt' | '$permissions' | '_collectionId' | '_databaseId'
 >;
 export type UpdateDocumentData<T> = Partial<CreateDocumentData<T>>;

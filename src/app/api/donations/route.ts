@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexDonations, normalizeQueryParams } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
-import type { DonationDocument, AppwriteDocument } from '@/types/collections';
+import type { DonationDocument, AppwriteDocument } from '@/types/database';
 
 /**
  * Validate donation payload
@@ -123,4 +122,3 @@ async function createDonationHandler(request: NextRequest) {
   }
 }
 
-export const POST = withCsrfProtection(createDonationHandler);

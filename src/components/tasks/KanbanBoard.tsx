@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { User, Calendar, AlertCircle, Clock } from 'lucide-react';
-import type { TaskDocument } from '@/types/collections';
+import type { TaskDocument } from '@/types/database';
 import {
   getPriorityColor,
   getStatusColor,
@@ -63,7 +63,7 @@ function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
 
   const handleDragStart = (e: React.DragEvent) => {
     setIsDragging(true);
-    e.dataTransfer.setData('text/plain', task.$id);
+    e.dataTransfer.setData('text/plain', task._id);
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -204,7 +204,7 @@ function KanbanColumn({ title, status, tasks, onTaskMove, onTaskClick, color }: 
           ) : (
             columnTasks.map((task) => (
               <TaskCard
-                key={task.$id}
+                key={task._id}
                 task={task}
                 onTaskMove={onTaskMove}
                 onTaskClick={onTaskClick}

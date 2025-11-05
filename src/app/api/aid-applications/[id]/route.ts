@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexAidApplications } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { extractParams } from '@/lib/api/route-helpers';
 import { Id } from '@/convex/_generated/dataModel';
@@ -154,5 +153,3 @@ async function deleteApplicationHandler(
   }
 }
 
-export const PATCH = withCsrfProtection(updateApplicationHandler);
-export const DELETE = withCsrfProtection(deleteApplicationHandler);

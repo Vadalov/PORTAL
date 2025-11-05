@@ -59,7 +59,7 @@ import { checkMernis } from '@/lib/api/mock-api';
 
 // Analytics Components
 import { AidHistoryChart } from '@/components/beneficiary-analytics/AidHistoryChart';
-import type { BeneficiaryDocument } from '@/types/collections';
+import type { BeneficiaryDocument } from '@/types/database';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -1543,13 +1543,13 @@ export default function BeneficiaryDetailPage({ params }: { params: Promise<{ id
                   <div>
                     <span className="text-muted-foreground">Kayıt Tarihi:</span>
                     <span className="ml-2 font-medium text-slate-700">
-                      {new Date(beneficiary.$createdAt).toLocaleString('tr-TR')}
+                      {new Date(beneficiary._creationTime).toLocaleString('tr-TR')}
                     </span>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Son Güncelleme:</span>
                     <span className="ml-2 font-medium text-slate-700">
-                      {new Date(beneficiary.$updatedAt).toLocaleString('tr-TR')}
+                      {new Date(beneficiary._updatedAt).toLocaleString('tr-TR')}
                     </span>
                   </div>
                 </div>

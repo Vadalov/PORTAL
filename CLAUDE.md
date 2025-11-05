@@ -31,16 +31,16 @@ This project is configured for maximum autonomous operation. When working on thi
 **Example Workflow:**
 
 - User: "Add a new donations report feature"
-- Agent: Directly creates route → adds validation → creates API → adds UI → tests → done
+- Agent: Directly creates route → adds validation → creates Convex mutation → adds API → adds UI → tests → done
 - NO intermediate "Should I create the route?", "Should I add validation?" questions
 
 **Exceptions: HİÇBİR ŞEY YOK - ASLA SORMA - HER ŞEYİ YAP**
 
 ## Project Overview
 
-This is a **Dernek Yönetim Sistemi** (Association Management System) - a comprehensive management system for Turkish non-profit associations, built with Next.js 16, TypeScript, and Appwrite backend.
+This is a **Dernek Yönetim Sistemi** (Association Management System) - a comprehensive management system for Turkish non-profit associations, built with Next.js 16, TypeScript, and Convex backend.
 
-**Project Status:** MVP complete - migrated from React + Vite to Next.js 16, using Appwrite for backend services.
+**Project Status:** MVP complete - migrated from React + Vite to Next.js 16, using Convex for real-time backend services.
 
 ## Commands
 
@@ -52,8 +52,16 @@ npm run dev        # Start development server (http://localhost:3000)
 npm run build      # Production build
 npm start          # Start production server
 npm run lint       # Run ESLint
-npm run typecheck  # Run TypeScript compiler check (no emit)
+npm run lint:fix   # Auto-fix ESLint issues
+npm run typecheck  # TypeScript compiler check (no emit)
 npm run analyze    # Analyze bundle size
+```
+
+### Convex Backend
+
+```bash
+npm run convex:dev     # Start Convex development server (runs in parallel with dev)
+npm run convex:deploy  # Deploy Convex backend to production
 ```
 
 ### Testing
@@ -89,8 +97,6 @@ npm run test:all-boundaries      # Run all boundary tests
 ```bash
 # Configuration & connectivity
 npm run validate:config       # Validate environment variables
-npm run test:connectivity     # Test Appwrite connectivity
-npm run diagnose              # Comprehensive diagnostics
 npm run health:check          # Check API health endpoint
 
 # System testing
@@ -117,7 +123,7 @@ npm run test:run          # Run all tests
 npm run build             # Production build check
 
 # Auto-fix issues
-npm run lint -- --fix     # Auto-fix ESLint issues
+npm run lint:fix          # Auto-fix ESLint issues
 
 # Pre-commit hooks (automatically runs on git commit)
 # - ESLint with auto-fix
@@ -139,30 +145,19 @@ npm run lint -- --fix     # Auto-fix ESLint issues
 Create a `.env.local` file with the following variables:
 
 ```bash
-# Appwrite Configuration (Required)
-NEXT_PUBLIC_APPWRITE_ENDPOINT=https://cloud.appwrite.io/v1
-NEXT_PUBLIC_APPWRITE_PROJECT_ID=your-project-id
-APPWRITE_API_KEY=your-secret-api-key  # Server-side only, never expose to client
-
-# Database & Storage
-NEXT_PUBLIC_DATABASE_ID=dernek_db
-NEXT_PUBLIC_STORAGE_DOCUMENTS=documents
-NEXT_PUBLIC_STORAGE_RECEIPTS=receipts
-NEXT_PUBLIC_STORAGE_PHOTOS=photos
-NEXT_PUBLIC_STORAGE_REPORTS=reports
-
-# Security (Generate random 32+ character strings)
-CSRF_SECRET=your-csrf-secret
-SESSION_SECRET=your-session-secret
+# Convex Configuration (Required)
+NEXT_PUBLIC_CONVEX_URL=https://your-project-name.convex.cloud
 ```
 
-### Appwrite Test Users
+### Test Users
 
-The system uses Appwrite authentication. Test accounts can be created using:
+The system uses Convex authentication with session-based auth. Test accounts can be created via:
 
 ```bash
 npx tsx src/scripts/create-test-users.ts
 ```
+
+Or manually through the application UI.
 
 Default test credentials (if created):
 
@@ -176,7 +171,7 @@ Default test credentials (if created):
 ### Tech Stack
 
 - **Framework:** Next.js 16 (App Router)
-- **Backend:** Appwrite (Cloud BaaS)
+- **Backend:** Convex (Real-time database & API)
 - **Language:** TypeScript (Strict mode)
 - **Styling:** Tailwind CSS v4 + shadcn/ui (New York style)
 - **State Management:** Zustand with Immer, Persist, and DevTools middlewares
@@ -194,7 +189,7 @@ Default test credentials (if created):
 src/
 ├── app/                       # Next.js App Router
 │   ├── (dashboard)/          # Dashboard route group (protected)
-│   ├── api/                  # API routes (auth, beneficiaries, etc.)
+│   ├── api/                  # API routes (auth, health check, etc.)
 │   ├── login/                # Login page
 │   ├── providers.tsx         # Client-side providers (TanStack Query)
 │   └── layout.tsx            # Root layout
@@ -203,128 +198,143 @@ src/
 │   ├── forms/                # Form components
 │   └── ui/                   # shadcn/ui components
 ├── lib/
+│   ├── convex/
+│   │   ├── client.ts        # Convex React client ('use client')
+│   │   ├── server.ts        # Convex HTTP client (server/API routes)
+│   │   └── api.ts           # Generated Convex API types
 │   ├── api/
-│   │   ├── appwrite-api.ts  # Appwrite API wrapper
-│   │   └── mock-api.ts      # Mock API (fallback for development)
-│   ├── appwrite/
-│   │   ├── client.ts        # Client SDK (browser, 'use client')
-│   │   ├── server.ts        # Server SDK (API routes, Node.js)
-│   │   ├── config.ts        # Shared configuration
-│   │   └── permissions.ts   # Appwrite permission helpers
+│   │   ├── convex-api-client.ts  # Convex API client wrapper
+│   │   └── index.ts              # API exports
 │   ├── validations/         # Zod schemas (beneficiary, task, etc.)
-│   ├── csrf.ts              # CSRF protection
-│   ├── security.ts          # Security utilities
+│   ├── auth/                # Authentication utilities
 │   ├── sanitization.ts      # Input sanitization (XSS, SQL injection)
+│   ├── security.ts          # Security utilities
+│   ├── csrf.ts              # CSRF protection
 │   ├── performance.ts       # Performance monitoring
 │   └── utils.ts             # Utility functions (cn, etc.)
 ├── stores/
-│   └── authStore.ts          # Zustand auth store (Appwrite integration)
+│   └── authStore.ts          # Zustand auth store (Convex integration)
 ├── types/
 │   ├── auth.ts               # Auth types, UserRole, Permission, ROLE_PERMISSIONS
 │   ├── beneficiary.ts        # Beneficiary types
-│   ├── collections.ts        # Appwrite collection types
-│   └── appwrite.ts           # Appwrite-specific types
-├── scripts/                  # Database setup & migration scripts
+│   ├── collections.ts        # Convex table types
+│   └── convex.ts             # Convex-specific types
 ├── __tests__/                # Vitest unit tests
 │   ├── lib/                  # Library tests
 │   ├── integration/          # Integration tests
 │   └── mocks/                # Test mocks
-└── middleware.ts             # Auth middleware (Appwrite session checking)
+└── middleware.ts             # Auth middleware (session checking)
+
+convex/                       # Convex backend directory
+├── schema.ts                 # Database schema (tables, indexes)
+├── auth.ts                   # Authentication configuration
+├── storage.ts                # File storage configuration
+├── _generated/               # Generated TypeScript types (DO NOT EDIT)
+└── *.ts                      # Convex functions (mutations, queries, actions)
 ```
 
-### Appwrite Backend Integration
+### Convex Backend Integration
 
-**Critical Architecture Principle:** This project uses **two different Appwrite SDKs** for client and server operations.
+**Critical Architecture Principle:** Convex is a full-stack TypeScript framework with automatic API generation. All database operations go through Convex functions.
 
-#### 1. Client SDK (`appwrite` package)
+#### 1. Client-Side Usage (React Components)
 
-**File:** `src/lib/appwrite/client.ts`
+**File:** `src/lib/convex/client.ts`
 **Directive:** `'use client'` (required for Next.js App Router)
-**Environment:** Browser/React Components
-**Authentication:** User sessions (no API key)
+**Client:** `ConvexReactClient`
 
 **Use Cases:**
-
 - ✅ Client Components (`'use client'`)
-- ✅ User authentication (login/logout)
-- ✅ Session management
-- ✅ User-specific data queries
-- ✅ File uploads from browser
+- ✅ Real-time queries with automatic subscriptions
+- ✅ Mutations (create, update, delete)
+- ✅ File uploads via Convex storage
 
 **Example:**
 
 ```typescript
 'use client';
-import { account, databases } from '@/lib/appwrite/client';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/api';
 
-const user = await account.get();
-const data = await databases.listDocuments(DB_ID, COLLECTION_ID);
+const MyComponent = () => {
+  const createBeneficiary = useMutation(api.beneficiaries.create);
+
+  const handleSubmit = async (data) => {
+    await createBeneficiary(data);
+  };
+
+  return <form onSubmit={handleSubmit}>...</form>;
+};
 ```
 
-#### 2. Server SDK (`node-appwrite` package)
+#### 2. Server-Side Usage (API Routes)
 
-**File:** `src/lib/appwrite/server.ts`
-**Environment:** Server Components/API Routes
-**Authentication:** API Key (admin permissions)
-
+**File:** `src/lib/convex/server.ts`
+**Client:** `ConvexHttpClient`
 **Use Cases:**
-
-- ✅ Server Components (no 'use client')
 - ✅ API Routes (`/app/api/*`)
 - ✅ Server Actions
-- ✅ Admin operations (user management)
+- ✅ Admin operations
 - ✅ Bulk operations
 
 **Example:**
 
 ```typescript
-import { serverDatabases, serverUsers } from '@/lib/appwrite/server';
+import { getConvexHttp } from '@/lib/convex/server';
+import { api } from '@/convex/api';
 
-const users = await serverUsers.list();
-const data = await serverDatabases.listDocuments(DB_ID, COLLECTION_ID);
+const convex = getConvexHttp();
+await convex.mutation(api.donations.create, donationData);
 ```
 
-#### Security Model
+#### 3. Convex Functions Directory
 
-| Aspect                 | Client SDK  | Server SDK  |
-| ---------------------- | ----------- | ----------- |
-| **Permissions**        | User-level  | Admin-level |
-| **API Key**            | ❌ Not used | ✅ Required |
-| **Exposed to Browser** | ✅ Yes      | ❌ No       |
+**Location:** `convex/*.ts`
+**Purpose:** Database schema, queries, mutations, and actions
 
-⚠️ **Never import server SDK in client components!** This will expose your API key.
+**Types of Convex Functions:**
 
-#### Common Mistakes to Avoid
+- **Queries** (`convex/beneficiaries.ts`):
+  ```typescript
+  export const getById = query(async (ctx, id) => {
+    return await ctx.db.get('beneficiaries', id);
+  });
+  ```
 
-```typescript
-// ❌ WRONG: Using server SDK in client component
-'use client';
-import { serverDatabases } from '@/lib/appwrite/server'; // ERROR!
+- **Mutations** (`convex/beneficiaries.ts`):
+  ```typescript
+  export const create = mutation(async (ctx, data) => {
+    const id = await ctx.db.insert('beneficiaries', data);
+    return id;
+  });
+  ```
 
-// ✅ CORRECT: Using client SDK in client component
-('use client');
-import { databases } from '@/lib/appwrite/client';
+- **Actions** (for external API calls):
+  ```typescript
+  export const sendEmail = action(async (ctx, emailData) => {
+    // Call external services
+  });
+  ```
 
-// ✅ CORRECT: Using server SDK in server component or API route
-import { serverDatabases } from '@/lib/appwrite/server';
-```
+**Generated Types:**
+- `convex/_generated/api.d.ts` - Contains all function type definitions
+- `convex/_generated/dataModel.d.ts` - Database schema types
+- **DO NOT EDIT** - These are auto-generated by Convex
 
 ### Authentication & Authorization
 
-**Implementation:** Appwrite authentication with HttpOnly cookies and CSRF protection
+**Implementation:** Convex authentication with session-based auth
 
 1. **Login Flow:**
-   - Client calls `/api/auth/login` API route
-   - Server creates Appwrite session using Server SDK
-   - Session stored in HttpOnly cookie (secure)
-   - CSRF token validation on all mutations
-   - Rate limiting: 5 attempts, 15-minute lockout
+   - Client calls Convex `auth` mutation
+   - Convex creates session using standard auth
+   - Session token stored (Convex handles this automatically)
+   - Middleware validates session on protected routes
 
 2. **Auth Store** (`src/stores/authStore.ts`):
    - Zustand store with persist middleware
-   - Stores user info (not session token) in localStorage
-   - Session token kept in HttpOnly cookie
-   - Integrates with Appwrite via API routes
+   - Stores user info in localStorage
+   - Integrates with Convex auth API
 
 3. **Authorization:**
    - Role-based permissions defined in `src/types/auth.ts`
@@ -335,7 +345,7 @@ import { serverDatabases } from '@/lib/appwrite/server';
 
 4. **Route Protection:**
    - Dashboard routes in `(dashboard)` route group
-   - Middleware checks Appwrite session cookie
+   - Middleware checks Convex session
    - Redirects unauthenticated users to `/login`
    - Shows loading spinner during auth initialization
 
@@ -381,10 +391,11 @@ export const useAuthStore = create<AuthStore>()(
 
 **API Layer:**
 
-- Primary: `src/lib/api/appwrite-api.ts` (Appwrite integration)
+- Primary: Convex (real-time queries, mutations)
 - Fallback: `src/lib/api/mock-api.ts` (development/testing)
-- Returns `ApiResponse<T>` with data/error structure
-- Supports pagination, search, filtering via Appwrite queries
+- Client: `src/lib/api/convex-api-client.ts`
+- Returns standardized response structure
+- Supports real-time subscriptions
 
 ### UI Components (shadcn/ui)
 
@@ -432,49 +443,44 @@ Configured in `tsconfig.json`:
   "@/hooks/*": ["./src/hooks/*"],
   "@/stores/*": ["./src/stores/*"],
   "@/types/*": ["./src/types/*"],
-  "@/data/*": ["./src/data/*"]
+  "@/data/*": ["./src/data/*"],
+  "@/convex/*": ["./convex/*"]
 }
 ```
 
-## Appwrite Database Structure
+## Convex Database Schema
 
-**Database ID:** `dernek_db` (configured in `.env.local`)
+**Schema Location:** `convex/schema.ts`
 
-**Collections:**
+**Database Tables:**
 
 - `users` - User accounts and profiles
 - `beneficiaries` - İhtiyaç sahipleri (beneficiaries)
-- `donations` - Bağışlar (donations)
-- `aid_requests` - Yardım talepleri
+- `donations` - Bağışlar (donations) with kumbara (piggy bank) tracking
 - `aid_applications` - Yardım başvuruları
-- `scholarships` - Burslar (scholarships)
-- `parameters` - System parameters
 - `tasks` - Görevler (tasks)
 - `meetings` - Toplantılar (meetings)
 - `messages` - Mesajlar (messages)
-- `finance_records` - Finans kayıtları
-- `orphans` - Yetimler
-- `sponsors` - Sponsorlar
-- `campaigns` - Kampanyalar
+- `parameters` - System parameters
+- `finance_records` - Finans kayıtları (income/expense tracking)
+- `files` - File metadata (uploaded to Convex storage)
 
-**Storage Buckets:**
+**File Storage:**
 
-- `documents` - General documents
-- `receipts` - Donation receipts (makbuzlar)
-- `photos` - Photos and images
-- `reports` - Generated reports
+Convex provides built-in file storage via `ctx.storage` API:
+- Files uploaded to Convex's secure storage
+- Metadata stored in `files` table
+- Access via signed URLs
 
 **Setup Scripts:**
 
 ```bash
-# Automated setup
-npm run appwrite:setup          # Interactive setup wizard
-npm run appwrite:deploy:quick   # Quick deployment script
+# Convex setup
+npm run convex:dev     # Interactive Convex development
+npm run convex:deploy  # Deploy to production
 
-# Manual operations
-npx tsx src/scripts/test-appwrite-connection.ts  # Test connection
-npx tsx src/scripts/create-test-users.ts         # Create test users
-npx tsx src/scripts/migrate-to-appwrite.ts       # Migrate data
+# Test Convex connection
+npx tsx src/scripts/test-convex-connection.ts
 ```
 
 ## Module Organization
@@ -483,15 +489,15 @@ npx tsx src/scripts/migrate-to-appwrite.ts       # Migrate data
 The application is organized into modules, each with subpages:
 
 - Ana Sayfa (Home) - Dashboard
-- Bağışlar (Donations) - List, Reports, Piggy Bank
-- Yardımlar (Aid) - Beneficiaries, Applications, Lists, Cash Vault
-- Burslar (Scholarships) - Students, Applications, Orphans
-- Fonlar (Funds) - Income/Expense, Reports
-- Mesajlar (Messages) - Internal, Bulk
+- Bağışlar (Donations) - List, Reports, Kumbara tracking
+- Yardımlar (Aid) - Beneficiaries, Applications, Lists
+- Burslar (Scholarships) - Students, Applications (placeholder)
+- Fonlar (Funds) - Income/Expense, Reports (placeholder)
+- Mesajlar (Messages) - Internal, Bulk (placeholder)
 - İşler (Tasks) - Tasks, Meetings
-- Partnerler (Partners) - List
+- Partnerler (Partners) - List (placeholder)
 - Kullanıcılar (Users)
-- Ayarlar (Settings)
+- Ayarlar (Settings) (placeholder)
 
 ## Important Development Notes
 
@@ -499,15 +505,14 @@ The application is organized into modules, each with subpages:
 2. **Client Components:** Most components use `'use client'` directive due to Zustand and TanStack Query
 3. **TypeScript:** Strict mode enabled - maintain type safety
 4. **Styling:** Uses Tailwind CSS v4 with @tailwindcss/postcss
-5. **Appwrite SDK Selection:** Always use correct SDK (client.ts vs server.ts) - see Appwrite Backend Integration section
-6. **Environment Variables:** Never commit `.env.local` - keep API keys secure
-7. **CSRF Protection:** All mutations require CSRF tokens from `/api/csrf`
-8. **Rate Limiting:** API routes have rate limiting configured (see `src/lib/rate-limit.ts` and `src/lib/rate-limit-config.ts`)
-9. **File Uploads:** Use Appwrite Storage buckets with proper permissions (see `src/lib/appwrite/storage.ts`)
-10. **Input Sanitization:** All user inputs must be sanitized using functions from `src/lib/sanitization.ts`
-11. **Validation:** Use Zod schemas from `src/lib/validations/` for all form validations
-12. **Error Monitoring:** Sentry is configured for both client and server - errors are automatically tracked
-13. **SDK Guard:** Use `src/lib/appwrite/sdk-guard.ts` for runtime checks to prevent SDK misuse
+5. **Convex Functions:** All database operations must go through Convex functions (queries/mutations)
+6. **Real-time:** Convex provides automatic real-time subscriptions - use `useQuery()` instead of manual polling
+7. **File Uploads:** Use Convex Storage API via `ctx.storage`
+8. **Input Sanitization:** All user inputs must be sanitized using functions from `src/lib/sanitization.ts`
+9. **Validation:** Use Zod schemas from `src/lib/validations/` for all form validations
+10. **Error Monitoring:** Sentry is configured for both client and server - errors are automatically tracked
+11. **Environment Variables:** Use `NEXT_PUBLIC_CONVEX_URL` - Convex URLs are not sensitive
+12. **Convex Development:** Always run `npm run convex:dev` alongside `npm run dev` for backend functionality
 
 ## Security & Validation
 
@@ -553,27 +558,45 @@ const form = useForm({
 
 1. Create route in `src/app/(dashboard)/[module-name]/`
 2. Add Zod validation schema in `src/lib/validations/[module].ts`
-3. Add API methods in `src/lib/api/appwrite-api.ts`
+3. Add Convex functions in `convex/[module].ts` (queries, mutations)
 4. Create Zustand store if needed in `src/stores/[module]Store.ts`
-5. Add navigation link in `src/components/layouts/Sidebar.tsx`
-6. Add permission checks using `hasPermission()` helper
+5. Create API client wrapper in `src/lib/api/`
+6. Add navigation link in `src/components/layouts/Sidebar.tsx`
+7. Add permission checks using `hasPermission()` helper
 
-### Adding a New API Endpoint
+### Adding a New Convex Function
 
-1. Create API route in `src/app/api/[endpoint]/route.ts`
-2. Use server SDK: `import { serverDatabases } from '@/lib/appwrite/server'`
-3. Add CSRF protection for mutations
-4. Add rate limiting if needed
-5. Return standardized `ApiResponse<T>` format
-6. Add error handling with Sentry
+1. Create function in appropriate `convex/*.ts` file
+2. Use `query()` for reads, `mutation()` for writes, `action()` for side effects
+3. Use `ctx.db` for database operations, `ctx.storage` for files
+4. Add proper TypeScript types with `v` (Convex values)
+5. Export in `convex/api.ts` if needed for external use
+
+**Example Mutation:**
+
+```typescript
+export const create = mutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+  },
+  async handler(ctx, args) {
+    const id = await ctx.db.insert('users', {
+      ...args,
+      createdAt: new Date().toISOString(),
+    });
+    return id;
+  },
+});
+```
 
 ### Adding a New Form
 
 1. Create Zod schema in `src/lib/validations/`
 2. Create form component with React Hook Form
 3. Add sanitization for all inputs
-4. Add CSRF token to submission
-5. Use TanStack Query for submission mutations
+4. Use Convex mutation for submission
+5. Use TanStack Query or Convex mutations for data fetching
 6. Add loading states and error handling
 
 ### Running Tests for a Feature
@@ -602,17 +625,16 @@ npx playwright test e2e/[feature].spec.ts --headed
 - Update documentation
 - Add TypeScript types
 - Create/update Zod schemas
-- Add API endpoints
-- Create database collections/fields
+- Add Convex functions
+- Create database schema changes
 - Update UI components
 - Fix linting/type errors
 - Add comments and improve code quality
-- Create migration scripts
 - Update configurations (tsconfig, tailwind, etc.)
 
 **ASSUME & DOCUMENT (Use Best Judgment):**
 
-- API response formats → Use existing patterns
+- API response formats → Use Convex patterns
 - Component structure → Follow shadcn/ui patterns
 - State management → Use Zustand with immer pattern
 - Validation → Use Zod schemas with Turkish-specific rules
@@ -620,6 +642,7 @@ npx playwright test e2e/[feature].spec.ts --headed
 - Naming conventions → Use Turkish for UI, English for code
 - Error handling → Use Sentry + toast notifications
 - File organization → Follow existing src/ structure
+- Database operations → Use Convex queries/mutations
 
 **ASLA SORMA - HER ŞEYİ YAP - HİÇBİR İSTİSNA YOK**
 

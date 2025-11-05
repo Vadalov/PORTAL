@@ -11,7 +11,7 @@ import type {
   TaskDocument,
   MeetingDocument,
   MessageDocument,
-} from '@/types/collections';
+} from '@/types/database';
 
 // Extended schemas for collections
 const EXTENDED_SCHEMAS = {

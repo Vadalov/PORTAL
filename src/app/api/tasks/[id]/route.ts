@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexTasks } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
@@ -147,5 +146,3 @@ async function deleteTaskHandler(
   }
 }
 
-export const PUT = withCsrfProtection(updateTaskHandler);
-export const DELETE = withCsrfProtection(deleteTaskHandler);

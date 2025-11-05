@@ -33,7 +33,7 @@ import {
 } from '@/lib/validations/message';
 import { useFormMutation } from '@/hooks/useFormMutation';
 import { toast } from 'sonner';
-import type { UserDocument, MessageDocument } from '@/types/collections';
+import type { UserDocument, MessageDocument } from '@/types/database';
 
 interface MessageFormProps {
   onSuccess?: () => void;
@@ -239,7 +239,7 @@ export function MessageForm({
     } else {
       const result = await createMessageMutation.mutateAsync(submissionData);
       if (result && typeof result === 'object' && 'data' in result && result.data) {
-        await sendMessageMutation.mutateAsync((result.data as { $id: string }).$id);
+        await sendMessageMutation.mutateAsync((result.data as { _id: string })._id);
       }
     }
   };

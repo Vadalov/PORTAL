@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
-import type { MeetingDocument } from '@/types/collections';
+import type { MeetingDocument } from '@/types/database';
 import { meetingTypeLabels, meetingStatusLabels } from '@/lib/validations/meeting';
 
 interface CalendarViewProps {
@@ -227,7 +227,7 @@ export function CalendarView({ meetings, onMeetingClick, onDateClick }: Calendar
 
                 return (
                   <Card
-                    key={meeting.$id}
+                    key={meeting._id}
                     className="cursor-pointer transition-all hover:shadow-md hover:bg-blue-50"
                     onClick={() => onMeetingClick(meeting)}
                   >

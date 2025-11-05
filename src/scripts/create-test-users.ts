@@ -56,7 +56,7 @@ export async function createTestUsers() {
       );
 
       // Update user labels with role
-      await serverUsers.updateLabels(newUser.$id, [user.role.toLowerCase()]);
+      await serverUsers.updateLabels(newUser._id, [user.role.toLowerCase()]);
 
       console.log(`✅ Created user: ${user.name} (${user.role})`);
     } catch (error: unknown) {
