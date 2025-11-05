@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexDonations } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import QRCode from 'qrcode';
-import type { DonationDocument } from '@/types/collections';
+import type { DonationDocument } from '@/types/database';
 
 // Type for QR data
 interface QRData {
@@ -420,7 +419,7 @@ function calculatePaymentStats(donations: any[]) {
  * POST /api/kumbara
  * Create new kumbara donation
  */
-export const POST = withCsrfProtection(async (request: NextRequest) => {
+export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as Partial<DonationDocument>;
 
@@ -475,4 +474,4 @@ export const POST = withCsrfProtection(async (request: NextRequest) => {
       { status: 500 }
     );
   }
-});
+}

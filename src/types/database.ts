@@ -15,6 +15,7 @@ export interface Document {
   _databaseId: string;
 }
 
+// Generic API response wrapper
 // Users Collection
 export interface UserDocument extends Document {
   name: string;

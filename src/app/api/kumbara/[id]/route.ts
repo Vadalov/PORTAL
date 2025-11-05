@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexDonations } from '@/lib/convex/api';
-import { withCsrfProtection } from '@/lib/middleware/csrf-middleware';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
-import type { DonationDocument } from '@/types/collections';
+import type { DonationDocument } from '@/types/database';
 
 /**
  * Validate kumbara donation update payload
@@ -92,127 +91,123 @@ export async function GET(
  * PUT /api/kumbara/[id]
  * Update kumbara donation
  */
-export const PUT = withCsrfProtection(
-  async (
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-  ) => {
-    try {
-      const { id } = await params;
-      const body = (await request.json()) as Partial<DonationDocument>;
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const body = (await request.json()) as Partial<DonationDocument>;
 
-      if (!id) {
-        return NextResponse.json(
-          { success: false, error: 'Kumbara bağış ID gereklidir' },
-          { status: 400 }
-        );
-      }
-
-      // First, check if donation exists and is a kumbara donation
-      const existingDonation = await convexDonations.get(id as Id<"donations">);
-      if (!existingDonation) {
-        return NextResponse.json(
-          { success: false, error: 'Kumbara bağışı bulunamadı' },
-          { status: 404 }
-        );
-      }
-
-      if (!existingDonation.is_kumbara) {
-        return NextResponse.json(
-          { success: false, error: 'Bu ID bir kumbara bağışına ait değil' },
-          { status: 404 }
-        );
-      }
-
-      // Validate update data
-      const validation = validateKumbaraUpdate(body);
-      if (!validation.isValid) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Doğrulama hatası',
-            details: validation.errors,
-          },
-          { status: 400 }
-        );
-      }
-
-      // Update donation in Convex
-      await convexDonations.update(id as Id<"donations">, validation.normalizedData);
-
-      logger.info('Updated kumbara donation', {
-        donationId: id,
-        updatedFields: Object.keys(body),
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: 'Kumbara bağışı başarıyla güncellendi',
-      });
-    } catch (error: unknown) {
-      logger.error('Error updating kumbara donation', error);
+    if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Kumbara bağışı güncellenemedi' },
-        { status: 500 }
+        { success: false, error: 'Kumbara bağış ID gereklidir' },
+        { status: 400 }
       );
     }
+
+    // First, check if donation exists and is a kumbara donation
+    const existingDonation = await convexDonations.get(id as Id<"donations">);
+    if (!existingDonation) {
+      return NextResponse.json(
+        { success: false, error: 'Kumbara bağışı bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    if (!existingDonation.is_kumbara) {
+      return NextResponse.json(
+        { success: false, error: 'Bu ID bir kumbara bağışına ait değil' },
+        { status: 404 }
+      );
+    }
+
+    // Validate update data
+    const validation = validateKumbaraUpdate(body);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Doğrulama hatası',
+          details: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Update donation in Convex
+    await convexDonations.update(id as Id<"donations">, validation.normalizedData);
+
+    logger.info('Updated kumbara donation', {
+      donationId: id,
+      updatedFields: Object.keys(body),
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Kumbara bağışı başarıyla güncellendi',
+    });
+  } catch (error: unknown) {
+    logger.error('Error updating kumbara donation', error);
+    return NextResponse.json(
+      { success: false, error: 'Kumbara bağışı güncellenemedi' },
+      { status: 500 }
+    );
   }
-);
+}
 
 /**
  * DELETE /api/kumbara/[id]
  * Delete kumbara donation
  */
-export const DELETE = withCsrfProtection(
-  async (
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-  ) => {
-    try {
-      const { id } = await params;
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
 
-      if (!id) {
-        return NextResponse.json(
-          { success: false, error: 'Kumbara bağış ID gereklidir' },
-          { status: 400 }
-        );
-      }
-
-      // First, check if donation exists and is a kumbara donation
-      const existingDonation = await convexDonations.get(id as Id<"donations">);
-      if (!existingDonation) {
-        return NextResponse.json(
-          { success: false, error: 'Kumbara bağışı bulunamadı' },
-          { status: 404 }
-        );
-      }
-
-      if (!existingDonation.is_kumbara) {
-        return NextResponse.json(
-          { success: false, error: 'Bu ID bir kumbara bağışına ait değil' },
-          { status: 404 }
-        );
-      }
-
-      // Delete donation from Convex
-      await convexDonations.remove(id as Id<"donations">);
-
-      logger.info('Deleted kumbara donation', {
-        donationId: id,
-        amount: existingDonation.amount,
-        location: existingDonation.kumbara_location,
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: 'Kumbara bağışı başarıyla silindi',
-      });
-    } catch (error: unknown) {
-      logger.error('Error deleting kumbara donation', error);
+    if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Kumbara bağışı silinemedi' },
-        { status: 500 }
+        { success: false, error: 'Kumbara bağış ID gereklidir' },
+        { status: 400 }
       );
     }
+
+    // First, check if donation exists and is a kumbara donation
+    const existingDonation = await convexDonations.get(id as Id<"donations">);
+    if (!existingDonation) {
+      return NextResponse.json(
+        { success: false, error: 'Kumbara bağışı bulunamadı' },
+        { status: 404 }
+      );
+    }
+
+    if (!existingDonation.is_kumbara) {
+      return NextResponse.json(
+        { success: false, error: 'Bu ID bir kumbara bağışına ait değil' },
+        { status: 404 }
+      );
+    }
+
+    // Delete donation from Convex
+    await convexDonations.remove(id as Id<"donations">);
+
+    logger.info('Deleted kumbara donation', {
+      donationId: id,
+      amount: existingDonation.amount,
+      location: existingDonation.kumbara_location,
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Kumbara bağışı başarıyla silindi',
+    });
+  } catch (error: unknown) {
+    logger.error('Error deleting kumbara donation', error);
+    return NextResponse.json(
+      { success: false, error: 'Kumbara bağışı silinemedi' },
+      { status: 500 }
+    );
   }
-);
+}

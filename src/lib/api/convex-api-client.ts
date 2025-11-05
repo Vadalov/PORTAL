@@ -10,7 +10,7 @@ import type {
   QueryParams,
   CreateDocumentData,
   UpdateDocumentData,
-  AppwriteResponse,
+  ConvexResponse,
 } from '@/types/database';
 import type {
   BeneficiaryDocument,
@@ -27,7 +27,7 @@ import type {
 async function apiRequest<T>(
   endpoint: string,
   options?: RequestInit
-): Promise<AppwriteResponse<T>> {
+): Promise<ConvexResponse<T>> {
   try {
     const response = await fetch(endpoint, {
       ...options,
@@ -66,7 +66,7 @@ async function apiRequest<T>(
 export const convexApiClient = {
   // Beneficiaries
   beneficiaries: {
-    getBeneficiaries: async (params?: QueryParams): Promise<AppwriteResponse<BeneficiaryDocument[]>> => {
+    getBeneficiaries: async (params?: QueryParams): Promise<ConvexResponse<BeneficiaryDocument[]>> => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
@@ -76,12 +76,12 @@ export const convexApiClient = {
 
       return apiRequest<BeneficiaryDocument[]>(`/api/beneficiaries?${searchParams.toString()}`);
     },
-    getBeneficiary: async (id: string): Promise<AppwriteResponse<BeneficiaryDocument>> => {
+    getBeneficiary: async (id: string): Promise<ConvexResponse<BeneficiaryDocument>> => {
       return apiRequest<BeneficiaryDocument>(`/api/beneficiaries/${id}`);
     },
     createBeneficiary: async (
       data: CreateDocumentData<BeneficiaryDocument>
-    ): Promise<AppwriteResponse<BeneficiaryDocument>> => {
+    ): Promise<ConvexResponse<BeneficiaryDocument>> => {
       return apiRequest<BeneficiaryDocument>('/api/beneficiaries', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -90,22 +90,26 @@ export const convexApiClient = {
     updateBeneficiary: async (
       id: string,
       data: UpdateDocumentData<BeneficiaryDocument>
-    ): Promise<AppwriteResponse<BeneficiaryDocument>> => {
+    ): Promise<ConvexResponse<BeneficiaryDocument>> => {
       return apiRequest<BeneficiaryDocument>(`/api/beneficiaries/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
     },
-    deleteBeneficiary: async (id: string): Promise<AppwriteResponse<null>> => {
+    deleteBeneficiary: async (id: string): Promise<ConvexResponse<null>> => {
       return apiRequest<null>(`/api/beneficiaries/${id}`, {
         method: 'DELETE',
       });
+    },
+    getAidHistory: async (beneficiaryId: string) => {
+      // Stub implementation - returns empty array
+      return [];
     },
   },
 
   // Donations
   donations: {
-    getDonations: async (params?: QueryParams): Promise<AppwriteResponse<DonationDocument[]>> => {
+    getDonations: async (params?: QueryParams): Promise<ConvexResponse<DonationDocument[]>> => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
@@ -113,12 +117,12 @@ export const convexApiClient = {
 
       return apiRequest<DonationDocument[]>(`/api/donations?${searchParams.toString()}`);
     },
-    getDonation: async (id: string): Promise<AppwriteResponse<DonationDocument>> => {
+    getDonation: async (id: string): Promise<ConvexResponse<DonationDocument>> => {
       return apiRequest<DonationDocument>(`/api/donations/${id}`);
     },
     createDonation: async (
       data: CreateDocumentData<DonationDocument>
-    ): Promise<AppwriteResponse<DonationDocument>> => {
+    ): Promise<ConvexResponse<DonationDocument>> => {
       return apiRequest<DonationDocument>('/api/donations', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -127,13 +131,13 @@ export const convexApiClient = {
     updateDonation: async (
       id: string,
       data: UpdateDocumentData<DonationDocument>
-    ): Promise<AppwriteResponse<DonationDocument>> => {
+    ): Promise<ConvexResponse<DonationDocument>> => {
       return apiRequest<DonationDocument>(`/api/donations/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
     },
-    deleteDonation: async (id: string): Promise<AppwriteResponse<null>> => {
+    deleteDonation: async (id: string): Promise<ConvexResponse<null>> => {
       return apiRequest<null>(`/api/donations/${id}`, {
         method: 'DELETE',
       });
@@ -142,7 +146,7 @@ export const convexApiClient = {
 
   // Tasks
   tasks: {
-    getTasks: async (params?: QueryParams): Promise<AppwriteResponse<TaskDocument[]>> => {
+    getTasks: async (params?: QueryParams): Promise<ConvexResponse<TaskDocument[]>> => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
@@ -153,12 +157,12 @@ export const convexApiClient = {
 
       return apiRequest<TaskDocument[]>(`/api/tasks?${searchParams.toString()}`);
     },
-    getTask: async (id: string): Promise<AppwriteResponse<TaskDocument>> => {
+    getTask: async (id: string): Promise<ConvexResponse<TaskDocument>> => {
       return apiRequest<TaskDocument>(`/api/tasks/${id}`);
     },
     createTask: async (
       data: CreateDocumentData<TaskDocument>
-    ): Promise<AppwriteResponse<TaskDocument>> => {
+    ): Promise<ConvexResponse<TaskDocument>> => {
       return apiRequest<TaskDocument>('/api/tasks', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -167,7 +171,7 @@ export const convexApiClient = {
     updateTask: async (
       id: string,
       data: UpdateDocumentData<TaskDocument>
-    ): Promise<AppwriteResponse<TaskDocument>> => {
+    ): Promise<ConvexResponse<TaskDocument>> => {
       return apiRequest<TaskDocument>(`/api/tasks/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -176,13 +180,13 @@ export const convexApiClient = {
     updateTaskStatus: async (
       id: string,
       status: TaskDocument['status']
-    ): Promise<AppwriteResponse<TaskDocument>> => {
+    ): Promise<ConvexResponse<TaskDocument>> => {
       return apiRequest<TaskDocument>(`/api/tasks/${id}`, {
         method: 'PUT',
         body: JSON.stringify({ status }),
       });
     },
-    deleteTask: async (id: string): Promise<AppwriteResponse<null>> => {
+    deleteTask: async (id: string): Promise<ConvexResponse<null>> => {
       return apiRequest<null>(`/api/tasks/${id}`, {
         method: 'DELETE',
       });
@@ -191,7 +195,7 @@ export const convexApiClient = {
 
   // Meetings
   meetings: {
-    getMeetings: async (params?: QueryParams): Promise<AppwriteResponse<MeetingDocument[]>> => {
+    getMeetings: async (params?: QueryParams): Promise<ConvexResponse<MeetingDocument[]>> => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
@@ -200,18 +204,18 @@ export const convexApiClient = {
 
       return apiRequest<MeetingDocument[]>(`/api/meetings?${searchParams.toString()}`);
     },
-    getMeetingsByTab: async (userId: string, tab: string): Promise<AppwriteResponse<MeetingDocument[]>> => {
+    getMeetingsByTab: async (userId: string, tab: string): Promise<ConvexResponse<MeetingDocument[]>> => {
       // Helper method for backward compatibility
       return convexApiClient.meetings.getMeetings({
         filters: { status: tab === 'all' ? undefined : tab },
       });
     },
-    getMeeting: async (id: string): Promise<AppwriteResponse<MeetingDocument>> => {
+    getMeeting: async (id: string): Promise<ConvexResponse<MeetingDocument>> => {
       return apiRequest<MeetingDocument>(`/api/meetings/${id}`);
     },
     createMeeting: async (
       data: CreateDocumentData<MeetingDocument>
-    ): Promise<AppwriteResponse<MeetingDocument>> => {
+    ): Promise<ConvexResponse<MeetingDocument>> => {
       return apiRequest<MeetingDocument>('/api/meetings', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -220,7 +224,7 @@ export const convexApiClient = {
     updateMeeting: async (
       id: string,
       data: UpdateDocumentData<MeetingDocument>
-    ): Promise<AppwriteResponse<MeetingDocument>> => {
+    ): Promise<ConvexResponse<MeetingDocument>> => {
       return apiRequest<MeetingDocument>(`/api/meetings/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -229,13 +233,13 @@ export const convexApiClient = {
     updateMeetingStatus: async (
       id: string,
       status: string
-    ): Promise<AppwriteResponse<MeetingDocument>> => {
+    ): Promise<ConvexResponse<MeetingDocument>> => {
       return apiRequest<MeetingDocument>(`/api/meetings/${id}`, {
         method: 'PUT',
         body: JSON.stringify({ status }),
       });
     },
-    deleteMeeting: async (id: string): Promise<AppwriteResponse<null>> => {
+    deleteMeeting: async (id: string): Promise<ConvexResponse<null>> => {
       return apiRequest<null>(`/api/meetings/${id}`, {
         method: 'DELETE',
       });
@@ -244,7 +248,7 @@ export const convexApiClient = {
 
   // Messages
   messages: {
-    getMessages: async (params?: QueryParams): Promise<AppwriteResponse<MessageDocument[]>> => {
+    getMessages: async (params?: QueryParams): Promise<ConvexResponse<MessageDocument[]>> => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
@@ -252,12 +256,12 @@ export const convexApiClient = {
 
       return apiRequest<MessageDocument[]>(`/api/messages?${searchParams.toString()}`);
     },
-    getMessage: async (id: string): Promise<AppwriteResponse<MessageDocument>> => {
+    getMessage: async (id: string): Promise<ConvexResponse<MessageDocument>> => {
       return apiRequest<MessageDocument>(`/api/messages/${id}`);
     },
     createMessage: async (
       data: CreateDocumentData<MessageDocument>
-    ): Promise<AppwriteResponse<MessageDocument>> => {
+    ): Promise<ConvexResponse<MessageDocument>> => {
       return apiRequest<MessageDocument>('/api/messages', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -266,19 +270,19 @@ export const convexApiClient = {
     updateMessage: async (
       id: string,
       data: UpdateDocumentData<MessageDocument>
-    ): Promise<AppwriteResponse<MessageDocument>> => {
+    ): Promise<ConvexResponse<MessageDocument>> => {
       return apiRequest<MessageDocument>(`/api/messages/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
     },
-    sendMessage: async (id: string): Promise<AppwriteResponse<MessageDocument>> => {
+    sendMessage: async (id: string): Promise<ConvexResponse<MessageDocument>> => {
       return apiRequest<MessageDocument>(`/api/messages/${id}`, {
         method: 'POST',
         body: JSON.stringify({ action: 'send' }),
       });
     },
-    deleteMessage: async (id: string): Promise<AppwriteResponse<null>> => {
+    deleteMessage: async (id: string): Promise<ConvexResponse<null>> => {
       return apiRequest<null>(`/api/messages/${id}`, {
         method: 'DELETE',
       });
@@ -286,7 +290,7 @@ export const convexApiClient = {
     markAsRead: async (
       id: string,
       userId: string
-    ): Promise<AppwriteResponse<MessageDocument>> => {
+    ): Promise<ConvexResponse<MessageDocument>> => {
       return apiRequest<MessageDocument>(`/api/messages/${id}`, {
         method: 'PUT',
         body: JSON.stringify({ is_read: true }),
@@ -296,7 +300,7 @@ export const convexApiClient = {
 
   // Users
   users: {
-    getUsers: async (params?: QueryParams): Promise<AppwriteResponse<UserDocument[]>> => {
+    getUsers: async (params?: QueryParams): Promise<ConvexResponse<UserDocument[]>> => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
@@ -304,12 +308,12 @@ export const convexApiClient = {
 
       return apiRequest<UserDocument[]>(`/api/users?${searchParams.toString()}`);
     },
-    getUser: async (id: string): Promise<AppwriteResponse<UserDocument>> => {
+    getUser: async (id: string): Promise<ConvexResponse<UserDocument>> => {
       return apiRequest<UserDocument>(`/api/users/${id}`);
     },
     createUser: async (
       data: CreateDocumentData<UserDocument>
-    ): Promise<AppwriteResponse<UserDocument>> => {
+    ): Promise<ConvexResponse<UserDocument>> => {
       return apiRequest<UserDocument>('/api/users', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -318,13 +322,13 @@ export const convexApiClient = {
     updateUser: async (
       id: string,
       data: UpdateDocumentData<UserDocument>
-    ): Promise<AppwriteResponse<UserDocument>> => {
+    ): Promise<ConvexResponse<UserDocument>> => {
       return apiRequest<UserDocument>(`/api/users/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       });
     },
-    deleteUser: async (id: string): Promise<AppwriteResponse<null>> => {
+    deleteUser: async (id: string): Promise<ConvexResponse<null>> => {
       return apiRequest<null>(`/api/users/${id}`, {
         method: 'DELETE',
       });

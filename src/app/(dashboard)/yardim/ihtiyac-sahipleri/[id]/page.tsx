@@ -55,7 +55,33 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 
 import api from '@/lib/api';
-import { checkMernis } from '@/lib/api/mock-api';
+
+// Stub function for Mernis TC Kimlik validation
+const checkMernis = async (tcNo: string) => {
+  // Basic TC Kimlik validation
+  if (!tcNo || tcNo.length !== 11) {
+    return {
+      success: false,
+      error: 'TC Kimlik numarası 11 haneli olmalıdır',
+      data: { isValid: false, message: 'TC Kimlik numarası 11 haneli olmalıdır' }
+    };
+  }
+
+  // Validate format
+  if (!/^\d{11}$/.test(tcNo)) {
+    return {
+      success: false,
+      error: 'TC Kimlik numarası sadece rakam içermelidir',
+      data: { isValid: false, message: 'TC Kimlik numarası sadece rakam içermelidir' }
+    };
+  }
+
+  return {
+    success: true,
+    error: null,
+    data: { isValid: true, message: 'TC Kimlik numarası geçerli' }
+  };
+};
 
 // Analytics Components
 import { AidHistoryChart } from '@/components/beneficiary-analytics/AidHistoryChart';

@@ -56,7 +56,7 @@ export class InputSanitizer {
   }
 
   static escapeSql(input: string): string {
-    // Basic SQL injection prevention (though we use Appwrite ORM)
+    // Basic SQL injection prevention (though we use Convex ORM)
     return input.replace(/['"\\]/g, '\\$&');
   }
 }

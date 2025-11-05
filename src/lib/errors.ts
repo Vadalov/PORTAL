@@ -188,7 +188,7 @@ export class InternalServerError extends AppError {
  * Maps common error codes to Turkish messages
  */
 export const ERROR_MESSAGES: Record<string, string> = {
-  // Appwrite error codes
+  // Convex error codes
   '401': 'Kimlik doğrulama hatası. Lütfen tekrar giriş yapın',
   '403': 'Bu işlem için yetkiniz yok',
   '404': 'İstenilen kayıt bulunamadı',
@@ -261,7 +261,7 @@ export function formatErrorMessage(error: unknown): string {
 
   const err = error as any;
 
-  // Handle Appwrite errors
+  // Handle Convex errors
   if (err?.code) {
     const translated = translateError(err.code);
     if (translated !== ERROR_MESSAGES['general_unknown']) {

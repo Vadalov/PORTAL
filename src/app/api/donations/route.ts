@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { convexDonations, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
-import type { DonationDocument, AppwriteDocument } from '@/types/database';
+import type { DonationDocument, Document } from '@/types/database';
 
 /**
  * Validate donation payload
@@ -9,7 +9,7 @@ import type { DonationDocument, AppwriteDocument } from '@/types/database';
 function validateDonation(data: Partial<DonationDocument>): {
   isValid: boolean;
   errors: string[];
-  normalizedData?: Omit<DonationDocument, keyof AppwriteDocument>;
+  normalizedData?: Omit<DonationDocument, keyof Document>;
 } {
   const errors: string[] = [];
 
@@ -37,7 +37,7 @@ function validateDonation(data: Partial<DonationDocument>): {
   const normalizedData = {
     ...data,
     status: (data.status as 'pending' | 'completed' | 'cancelled') || 'pending',
-  } as Omit<DonationDocument, keyof AppwriteDocument>;
+  } as Omit<DonationDocument, keyof Document>;
 
   return { isValid: true, errors: [], normalizedData };
 }

@@ -9,8 +9,13 @@ import { PageLayout } from '@/components/layouts/PageLayout';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { exportBeneficiaries } from '@/lib/api/mock-api';
 import type { BeneficiaryDocument } from '@/types/database';
+
+// Stub function for beneficiary export
+const exportBeneficiaries = async (params: { search?: string; beneficiaries?: BeneficiaryDocument[]; format?: 'csv' | 'excel' | 'pdf' }) => {
+  toast.info('Dışa aktarma özelliği yakında eklenecek');
+  return Promise.resolve({ success: true, data: null, error: null });
+};
 import { toast } from 'sonner';
 import { ArrowUpRight, Download, Plus, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';

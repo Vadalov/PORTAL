@@ -4,30 +4,18 @@ import { cookies } from 'next/headers';
 import { UserRole, ROLE_PERMISSIONS } from '@/types/auth';
 import { authRateLimit } from '@/lib/rate-limit';
 import logger from '@/lib/logger';
-import { mockAuthApi } from '@/lib/api/mock-auth-api';
 import { convexHttp } from '@/lib/convex/server';
 import { api } from '@/convex/_generated/api';
 import { verifyPassword } from '@/lib/auth/password';
 
-// Get backend provider from environment
-const getBackendProvider = () => {
-  return (
-    process.env.NEXT_PUBLIC_BACKEND_PROVIDER ||
-    process.env.BACKEND_PROVIDER ||
-    'convex'
-  ).toLowerCase();
-};
-
 /**
  * POST /api/auth/login
- * Handle user login with Convex or Mock authentication
- * 
- * Convex-based authentication: Looks up user in Convex users collection
- * Mock authentication: Uses mock-auth-api for testing
+ * Handle user login with Convex authentication
+ *
+ * Looks up user in Convex users collection and verifies password
  */
 export const POST = authRateLimit(async (request: NextRequest) => {
   let email: string | undefined;
-  const provider = getBackendProvider();
 
   try {
     const body = await request.json();
@@ -40,56 +28,6 @@ export const POST = authRateLimit(async (request: NextRequest) => {
         { success: false, error: 'Email ve şifre gereklidir' },
         { status: 400 }
       );
-    }
-
-    // Use mock backend if configured
-    if (provider === 'mock') {
-      const mockResult = await mockAuthApi.login(email, password);
-      
-      // Generate CSRF token
-      const csrfToken = generateCsrfToken();
-      
-      // Set session cookies
-      const cookieStore = await cookies();
-      
-      // Mock session cookie (HttpOnly)
-      const expireTime = new Date(Date.now() + (rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000)).toISOString();
-      cookieStore.set(
-        'auth-session',
-        JSON.stringify({
-          sessionId: mockResult.session._id,
-          userId: mockResult.user.id,
-          secret: mockResult.session.secret,
-          expire: expireTime,
-        }),
-        {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
-          maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60,
-          path: '/',
-        }
-      );
-
-      // CSRF token cookie
-      cookieStore.set('csrf-token', csrfToken, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 24 * 60 * 60,
-        path: '/',
-      });
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          user: mockResult.user,
-          session: {
-            sessionId: mockResult.session._id,
-            expire: expireTime,
-          },
-        },
-      });
     }
 
     // Convex-based authentication

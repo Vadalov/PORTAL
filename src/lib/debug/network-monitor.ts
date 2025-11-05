@@ -229,7 +229,7 @@ class NetworkMonitorClass {
     } else if (log.status === 500) {
       console.warn('  - Check server logs for error details');
       console.warn('  - Verify database connection');
-      console.warn('  - Check Appwrite status');
+      console.warn('  - Check Convex status');
     } else if (log.error) {
       console.warn('  - Check network connection');
       console.warn('  - Verify API is running');
