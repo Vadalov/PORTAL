@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -65,7 +65,6 @@ interface Partner {
 }
 
 export default function PartnersPage() {
-  const [partners, setPartners] = useState<Partner[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -92,19 +91,18 @@ export default function PartnersPage() {
       api.partners.getPartners({
         search: searchTerm || undefined,
         filters: {
-          type: typeFilter === 'all' ? undefined : (typeFilter as any),
-          status: statusFilter === 'all' ? undefined : (statusFilter as any),
+          type: typeFilter === 'all' ? undefined : typeFilter,
+          status: statusFilter === 'all' ? undefined : statusFilter,
         },
       }),
   });
 
-  useEffect(() => {
-    if (data?.data) {
-      setPartners(data.data as Partner[]);
-    }
+  // Derive partners from data instead of using state
+  const partners = useMemo(() => {
+    return (data?.data as Partner[]) || [];
   }, [data]);
 
-  const filteredPartners = partners.filter((partner) => {
+  const filteredPartners = partners.filter((partner: Partner) => {
     const matchesSearch =
       partner.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       partner.contact_person?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -174,7 +172,7 @@ export default function PartnersPage() {
       setEditingPartner(null);
       toast.success('Partner başarıyla güncellendi');
       refetch();
-    } catch (error) {
+    } catch (_error) {
       toast.error('Partner güncellenirken hata oluştu');
     }
   };
@@ -188,7 +186,7 @@ export default function PartnersPage() {
       await api.partners.deletePartner(partnerId);
       toast.success('Partner başarıyla silindi');
       refetch();
-    } catch (error) {
+    } catch (_error) {
       toast.error('Partner silinirken hata oluştu');
     }
   };

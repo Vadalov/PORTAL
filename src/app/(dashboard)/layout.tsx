@@ -30,10 +30,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { isAuthenticated, isInitialized, user, logout, initializeAuth } = useAuthStore();
 
   // Performance monitoring
-  const handlePerformanceMetrics = useCallback((metrics: any) => {
+  const handlePerformanceMetrics = useCallback((metrics: unknown) => {
     // Log performance metrics in development
     if (process.env.NODE_ENV === 'development') {
-      logger.debug('Performance metrics', { route: pathname, ...metrics });
+      logger.debug('Performance metrics', { route: pathname, ...(metrics as Record<string, unknown>) });
     }
 
     // You can send metrics to analytics service here
@@ -250,13 +250,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => clearTimeout(timeoutId);
   }, [pathname, isAuthenticated, isInitialized, queryClient]);
 
-  // Memoize animation transition config
-  const pageTransitionConfig = useMemo(() => ({
-    duration: 0.12,
-    ease: 'easeOut',
-    opacity: { duration: 0.1 },
-    scale: { duration: 0.12 }
-  }), []);
 
   if (!isInitialized || !isAuthenticated) {
     if (process.env.NODE_ENV === 'development') {

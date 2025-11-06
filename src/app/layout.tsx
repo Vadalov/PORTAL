@@ -6,11 +6,14 @@ import { cn } from '@/lib/utils';
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
 import { WebVitalsTracker } from '@/components/analytics/WebVitalsTracker';
 
+// Optimized font loading with subset optimization
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-body',
-  display: 'swap',
-  preload: false, // Disable preload to avoid unused resource warnings
+  display: 'swap', // Swap to fallback font immediately, then swap to web font
+  preload: true, // Preload for better performance
+  fallback: ['system-ui', 'arial'], // Fallback fonts
+  adjustFontFallback: true, // Adjust font metrics for better CLS
 });
 
 const poppins = Poppins({
@@ -18,7 +21,9 @@ const poppins = Poppins({
   weight: ['400', '500', '600', '700', '800'],
   variable: '--font-heading-alt',
   display: 'swap',
-  preload: false,
+  preload: false, // Don't preload secondary font
+  fallback: ['system-ui', 'sans-serif'] as string[],
+  adjustFontFallback: true,
 });
 
 const montserrat = Montserrat({
@@ -26,7 +31,9 @@ const montserrat = Montserrat({
   weight: ['500', '600', '700', '800', '900'],
   variable: '--font-heading',
   display: 'swap',
-  preload: false, // Disable preload to avoid unused resource warnings
+  preload: false, // Don't preload secondary font
+  fallback: ['system-ui', 'sans-serif'] as string[],
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {

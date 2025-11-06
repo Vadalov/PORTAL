@@ -2,7 +2,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 interface CacheConfig {
   ttl: number; // Time to live in milliseconds
@@ -217,6 +217,7 @@ export function useCachedQuery<T>({
   const requestId = useRef<string>('');
 
   const query = useQuery<T>({
+    ...queryOptions,
     queryKey: [endpoint, params],
     queryFn: async () => {
       // Check cache first
@@ -226,7 +227,7 @@ export function useCachedQuery<T>({
       }
 
       // Fetch fresh data
-      const response = await fetch(`${endpoint}${params ? '?' + new URLSearchParams(params).toString() : ''}`);
+      const response = await fetch(`${endpoint}${params ? `?${  new URLSearchParams(params).toString()}` : ''}`);
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
       }
@@ -241,7 +242,6 @@ export function useCachedQuery<T>({
     enabled,
     staleTime,
     gcTime,
-    ...queryOptions,
   });
 
   return query;
@@ -282,7 +282,7 @@ export function usePrefetchWithCache() {
     prefetchControllers.current.set(cacheKey, newController);
 
     try {
-      const response = await fetch(`${endpoint}${params ? '?' + new URLSearchParams(params).toString() : ''}`, {
+      const response = await fetch(`${endpoint}${params ? `?${  new URLSearchParams(params).toString()}` : ''}`, {
         signal: newController.signal,
         priority: priority as any,
       });
@@ -298,7 +298,7 @@ export function usePrefetchWithCache() {
       queryClient.setQueryData([endpoint, params], data);
       
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if ((error as Error).name !== 'AbortError') {
         console.warn('Prefetch failed:', error);
       }
     } finally {
@@ -365,8 +365,11 @@ export function useInvalidateCache() {
     }
 
     // Invalidate matching queries
-    queryClient.invalidateQueries({ predicate: (query) => 
-      query.queryKey[0]?.toString().includes(pattern)
+    queryClient.invalidateQueries({ 
+      predicate: (query) => {
+        const firstKey = query.queryKey[0];
+        return typeof firstKey === 'string' && firstKey.includes(pattern);
+      }
     });
   }, [queryClient]);
 

@@ -45,7 +45,7 @@ export function PerformanceMonitor({
     // Largest Contentful Paint
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1] as any;
+      const lastEntry = entries[entries.length - 1] as PerformanceEntry;
       
       if (lastEntry) {
         const metrics: PerformanceMetrics = { lcp: lastEntry.startTime };
@@ -58,7 +58,8 @@ export function PerformanceMonitor({
     // First Input Delay
     const fidObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        const metrics: PerformanceMetrics = { fid: (entry as any).processingStart - (entry as any).startTime };
+        const firstInputEntry = entry as PerformanceEventTiming;
+        const metrics: PerformanceMetrics = { fid: firstInputEntry.processingStart - firstInputEntry.startTime };
         onMetrics?.(metrics);
       }
     });
@@ -69,8 +70,9 @@ export function PerformanceMonitor({
     let clsValue = 0;
     const clsObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        if (!(entry as any).hadRecentInput) {
-          clsValue += (entry as any).value;
+        const layoutShiftEntry = entry as LayoutShift;
+        if (!layoutShiftEntry.hadRecentInput) {
+          clsValue += layoutShiftEntry.value;
         }
       }
       const metrics: PerformanceMetrics = { cls: clsValue };
@@ -124,7 +126,8 @@ export const usePerformanceTracking = () => {
 
   const getMemoryUsage = useCallback(() => {
     if ('memory' in performance) {
-      return (performance as any).memory.usedJSHeapSize;
+      const memoryInfo = (performance as any).memory;
+      return memoryInfo.usedJSHeapSize;
     }
     return null;
   }, []);
@@ -178,11 +181,21 @@ export const usePerformanceMonitor = (routeName: string) => {
 };
 
 // Performance boundary component
+interface PerformanceBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+interface PerformanceBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
 export class PerformanceBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ReactNode },
-  { hasError: boolean; error?: Error }
+  PerformanceBoundaryProps,
+  PerformanceBoundaryState
 > {
-  constructor(props: any) {
+  constructor(props: PerformanceBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -226,10 +239,12 @@ export class PerformanceBoundary extends React.Component<
 export const useFPSMonitor = (enabled = true) => {
   const fpsRef = useRef<number>(60);
   const frameCountRef = useRef<number>(0);
-  const lastTimeRef = useRef<number>(performance.now());
+  const lastTimeRef = useRef<number>(0);
 
   useEffect(() => {
     if (!enabled) return;
+
+    lastTimeRef.current = performance.now();
 
     const measureFPS = () => {
       frameCountRef.current++;

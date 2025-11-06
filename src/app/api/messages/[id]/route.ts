@@ -184,10 +184,10 @@ async function sendMessageHandler(
       const phoneNumbers = recipients
         .map((_user) => {
           // TODO: Get phone number from user profile or linked beneficiary
-          // For now, return null - SMS will be skipped
-          return null;
+          // For now, return empty string - SMS will be skipped
+          return '';
         })
-        .filter((phone): phone is string => phone !== null);
+        .filter((phone): phone is string => typeof phone === 'string' && phone.length > 0);
       
       if (phoneNumbers.length === 0) {
         logger.warn('No phone numbers found for SMS recipients', {

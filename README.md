@@ -165,16 +165,13 @@ For detailed production deployment instructions, see [DEPLOYMENT.md](./DEPLOYMEN
 - **Self-hosted** (Docker/standalone mode)
 
 **Documentation:**
-- [Deployment Guide](./DEPLOYMENT.md) - Complete deployment instructions
-- [Convex Deployment](./docs/CONVEX_DEPLOYMENT.md) - Backend deployment guide
-- [Security Guide](./docs/SECURITY.md) - Security configuration
-- [Runbook](./docs/RUNBOOK.md) - Troubleshooting and operations
+- [Kapsamlı Dokümantasyon](./DOCUMENTATION.md) - Tüm teknik detaylar ve deployment rehberi
 
 ## 📚 Documentation
 
-- **API Documentation**: Available at `/api/docs`
-- **Component Storybook**: Run `npm run storybook`
+- **[Kapsamlı Dokümantasyon](./DOCUMENTATION.md)**: Tüm teknik detaylar, API dokümantasyonu, veritabanı şeması ve daha fazlası
 - **Database Schema**: See `convex/schema.ts`
+- **Convex Backend**: See `convex/README.md`
 
 ## 🤝 Contributing
 

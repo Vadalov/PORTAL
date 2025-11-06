@@ -24,6 +24,12 @@ export async function GET(
     }
 
     // Redirect to the file URL from Convex storage
+    if (!file.url) {
+      return NextResponse.json(
+        { error: 'Dosya URL\'si bulunamadı' },
+        { status: 500 }
+      );
+    }
     return NextResponse.redirect(file.url);
   } catch (error) {
     console.error('File retrieval error:', error);

@@ -16,8 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 // Performance monitoring imports
 import { usePerformanceMonitor, useFPSMonitor } from '@/lib/performance-monitor';
-import { useCachedQuery, usePrefetchWithCache } from '@/lib/api-cache-fixed';
-import { SmartRouteWrapper } from '@/lib/route-splitting-fixed';
+import { useCachedQuery, usePrefetchWithCache } from '@/lib/api-cache';
+import { SmartRouteWrapper } from '@/lib/route-splitting';
 
 // Optimized skeleton
 import { TableSkeleton } from '@/components/ui/skeleton-optimized';

@@ -45,7 +45,12 @@ const resetColor = '\x1b[0m';
 
 function maskSensitive(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) return obj;
-  const masked: Record<string, any> = Array.isArray(obj) ? [...obj] : { ...obj };
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => maskSensitive(item));
+  }
+  
+  const masked: Record<string, unknown> = { ...obj as Record<string, unknown> };
   for (const key in masked) {
     if (
       key.toLowerCase().includes('password') ||

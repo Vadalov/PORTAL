@@ -232,10 +232,10 @@ export function invalidateRelatedCaches(
  */
 export async function prefetchData(
   queryClient: QueryClient,
-  queryKey: string[],
+  queryKey: readonly string[],
   queryFn: () => Promise<unknown>,
   strategy: keyof typeof CACHE_STRATEGIES
-) {
+): Promise<void> {
   const options = CACHE_STRATEGIES[strategy];
 
   await queryClient.prefetchQuery({

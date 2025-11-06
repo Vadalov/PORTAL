@@ -11,6 +11,7 @@ import type {
   CreateDocumentData,
   UpdateDocumentData,
   ConvexResponse,
+  PartnerDocument,
 } from '@/types/database';
 import type {
   BeneficiaryDocument,
@@ -22,7 +23,7 @@ import type {
 } from '@/types/database';
 
 // Import caching utilities
-import { getCache } from '@/lib/api-cache-fixed';
+import { getCache } from '@/lib/api-cache';
 
 // Cache configuration
 const CACHE_TTL = {
@@ -383,7 +384,7 @@ export const convexApiClient = {
 
   // Partners
   partners: {
-    getPartners: async (params?: QueryParams): Promise<ConvexResponse<any[]>> => {
+    getPartners: async (params?: QueryParams): Promise<ConvexResponse<PartnerDocument[]>> => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
@@ -392,22 +393,22 @@ export const convexApiClient = {
       if (params?.filters?.status) searchParams.set('status', String(params.filters.status));
       if (params?.filters?.partnership_type) searchParams.set('partnership_type', String(params.filters.partnership_type));
 
-      return apiRequest<any[]>(`/api/partners?${searchParams.toString()}`);
+      return apiRequest<PartnerDocument[]>(`/api/partners?${searchParams.toString()}`);
     },
-    getPartner: async (id: string): Promise<ConvexResponse<any>> => {
-      return apiRequest<any>(`/api/partners/${id}`);
+    getPartner: async (id: string): Promise<ConvexResponse<PartnerDocument>> => {
+      return apiRequest<PartnerDocument>(`/api/partners/${id}`);
     },
-    createPartner: async (data: CreateDocumentData<any>): Promise<ConvexResponse<any>> => {
-      return apiRequest<any>('/api/partners', {
+    createPartner: async (data: CreateDocumentData<PartnerDocument>): Promise<ConvexResponse<PartnerDocument>> => {
+      return apiRequest<PartnerDocument>('/api/partners', {
         method: 'POST',
         body: JSON.stringify(data),
       });
     },
     updatePartner: async (
       id: string,
-      data: UpdateDocumentData<any>
-    ): Promise<ConvexResponse<any>> => {
-      return apiRequest<any>(`/api/partners/${id}`, {
+      data: UpdateDocumentData<PartnerDocument>
+    ): Promise<ConvexResponse<PartnerDocument>> => {
+      return apiRequest<PartnerDocument>(`/api/partners/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
@@ -426,7 +427,7 @@ export const cacheUtils = {
    * Invalidate cache for a specific data type
    */
   invalidateCache: (dataType: string) => {
-    const cache = getCache<any>(dataType);
+    const cache = getCache<unknown>(dataType);
     cache.clear();
   },
 
@@ -435,7 +436,7 @@ export const cacheUtils = {
    */
   invalidateCaches: (dataTypes: string[]) => {
     dataTypes.forEach(type => {
-      const cache = getCache<any>(type);
+      const cache = getCache<unknown>(type);
       cache.clear();
     });
   },
@@ -444,7 +445,7 @@ export const cacheUtils = {
    * Get cache statistics
    */
   getCacheStats: (dataType: string) => {
-    const cache = getCache<any>(dataType);
+    const cache = getCache<unknown>(dataType);
     return cache.getStats();
   },
 
@@ -452,7 +453,7 @@ export const cacheUtils = {
    * Get cache size
    */
   getCacheSize: (dataType: string) => {
-    const cache = getCache<any>(dataType);
+    const cache = getCache<unknown>(dataType);
     return cache.size();
   },
 
@@ -461,7 +462,7 @@ export const cacheUtils = {
    */
   clearAllCaches: () => {
     ['beneficiaries', 'donations', 'tasks', 'meetings', 'default'].forEach(type => {
-      const cache = getCache<any>(type);
+      const cache = getCache<unknown>(type);
       cache.clear();
     });
   },

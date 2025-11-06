@@ -70,9 +70,9 @@ const createLazyComponent = <T extends ComponentType<any>>(
   const LazyComponent = lazy(importFunc);
   
   // Enhanced suspense wrapper with optimized loading states
-  const SuspensedComponent = (props: React.ComponentProps<T>) => {
+  const LazyComponentWithSuspense = (props: React.ComponentProps<T>) => {
     const router = useRouter();
-    
+
     // Intelligent preloading based on route priority
     React.useEffect(() => {
       if (priority === 'high') {
@@ -80,7 +80,7 @@ const createLazyComponent = <T extends ComponentType<any>>(
         router.prefetch(importFunc.toString());
       }
     }, [router, priority]);
-    
+
     return (
       <Suspense 
         fallback={
@@ -95,10 +95,10 @@ const createLazyComponent = <T extends ComponentType<any>>(
       </Suspense>
     );
   };
-  
-  SuspensedComponent.displayName = `Lazy${chunkName}`;
-  
-  return SuspensedComponent;
+
+  LazyComponentWithSuspense.displayName = `Lazy${chunkName}`;
+
+  return LazyComponentWithSuspense;
 };
 
 // Preload manager for intelligent route preloading
@@ -156,7 +156,6 @@ class PreloadManager {
       if (preloadFunc) {
         await preloadFunc();
         this.preloadedChunks.add(chunkName);
-        console.log(`🚀 Preloaded chunk: ${chunkName}`);
       }
     } catch (error) {
       console.warn(`Failed to preload chunk: ${chunkName}`, error);

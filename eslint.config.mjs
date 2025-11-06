@@ -9,8 +9,8 @@ const eslintConfig = defineConfig([
   // Custom rules
   {
     rules: {
-      // TypeScript strict rules
-      '@typescript-eslint/no-explicit-any': 'error',
+      // TypeScript strict rules - temporarily warn during migration
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {

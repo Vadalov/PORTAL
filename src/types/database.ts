@@ -381,6 +381,26 @@ export interface CampaignDocument extends Document {
   created_by: string;
 }
 
+// Partners Collection (İş Ortakları)
+export interface PartnerDocument extends Document {
+  name: string;
+  type: 'organization' | 'individual' | 'sponsor';
+  contact_person?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  website?: string;
+  tax_number?: string;
+  partnership_type: 'donor' | 'supplier' | 'volunteer' | 'sponsor' | 'service_provider';
+  collaboration_start_date?: string;
+  collaboration_end_date?: string;
+  notes?: string;
+  status: 'active' | 'inactive' | 'pending';
+  total_contribution?: number;
+  contribution_count?: number;
+  logo_url?: string;
+}
+
 // API Response Types
 export interface ConvexListResponse<T> {
   total: number;
@@ -441,7 +461,8 @@ export type CollectionName =
   | 'finance_records'
   | 'orphans'
   | 'sponsors'
-  | 'campaigns';
+  | 'campaigns'
+  | 'partners';
 
 // Document Types Map
 export type DocumentByCollection = {
@@ -459,6 +480,7 @@ export type DocumentByCollection = {
   orphans: OrphanDocument;
   sponsors: SponsorDocument;
   campaigns: CampaignDocument;
+  partners: PartnerDocument;
 };
 
 // Utility Types

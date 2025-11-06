@@ -108,7 +108,7 @@ export function CorporateLoginForm({
 
   const getPasswordStrength = (password: string) => {
     let strength = 0;
-    const feedback = [];
+    const feedback: string[] = [];
 
     if (password.length >= 8) strength += 1;
     else feedback.push('En az 8 karakter');

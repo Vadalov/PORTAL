@@ -34,12 +34,12 @@ export function AidHistoryChart({ beneficiaryId }: AidHistoryChartProps) {
     );
   }
 
-  const totalAid = aidHistory?.reduce((sum: number, aid: any) => sum + (aid.amount || 0), 0) || 0;
-  const averageAid = aidHistory?.length > 0 ? totalAid / aidHistory.length : 0;
-  const lastAid = aidHistory?.[0];
-  const previousAid = aidHistory?.[1];
+  const totalAid = aidHistory?.reduce((sum: number, aid: { amount?: number }) => sum + (aid.amount || 0), 0) || 0;
+  const averageAid = aidHistory && aidHistory.length > 0 ? totalAid / aidHistory.length : 0;
+  const lastAid = aidHistory?.[0] as { amount?: number } | undefined;
+  const previousAid = aidHistory?.[1] as { amount?: number } | undefined;
 
-  const trend = lastAid && previousAid
+  const trend = lastAid?.amount && previousAid?.amount
     ? ((lastAid.amount - previousAid.amount) / previousAid.amount) * 100
     : 0;
 
@@ -129,9 +129,9 @@ export function AidHistoryChart({ beneficiaryId }: AidHistoryChartProps) {
           <CardTitle>Son Yardımlar</CardTitle>
         </CardHeader>
         <CardContent>
-          {aidHistory && aidHistory.length > 0 ? (
+          {aidHistory && Array.isArray(aidHistory) && aidHistory.length > 0 ? (
             <div className="space-y-3">
-              {aidHistory.slice(0, 5).map((aid: any, index: number) => (
+              {aidHistory.slice(0, 5).map((aid: { id?: string; type?: string; date?: string; amount?: number; status?: string }, index: number) => (
                 <div key={aid.id || index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">

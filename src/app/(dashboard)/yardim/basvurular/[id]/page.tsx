@@ -44,7 +44,10 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['aid-application', id],
-    queryFn: () => aidApplicationsApi.getAidApplication(id),
+    queryFn: async () => {
+      const result = await aidApplicationsApi.getAidApplication(id);
+      return result as AidApplicationDocument;
+    },
   });
 
   const updateStageMutation = useMutation({
