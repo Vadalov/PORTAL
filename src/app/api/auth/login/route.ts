@@ -130,10 +130,10 @@ export const POST = authRateLimit(async (request: NextRequest) => {
     // Update last login time
     try {
       await convexHttp.mutation(api.auth.updateLastLogin, { userId: user._id });
-    } catch (error) {
+    } catch (_error) {
       // Log but don't fail login if this fails
       logger.warn('Failed to update last login time', {
-        error,
+        error: _error,
         userId: user._id,
       });
     }
@@ -154,10 +154,10 @@ export const POST = authRateLimit(async (request: NextRequest) => {
         },
       },
     });
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Giriş yapılırken bir hata oluştu';
+  } catch (_error: unknown) {
+    const errorMessage = _error instanceof Error ? _error.message : 'Giriş yapılırken bir hata oluştu';
     
-    logger.error('Login error', error, {
+    logger.error('Login error', _error, {
       endpoint: '/api/auth/login',
       method: 'POST',
       email: `${email?.substring(0, 3)}***`,

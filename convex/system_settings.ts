@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import type { QueryCtx, MutationCtx } from "./_generated/server";
 
 // Get all settings
 export const getSettings = query({
@@ -8,7 +9,7 @@ export const getSettings = query({
     const settings = await ctx.db.query("system_settings").collect();
     
     // Group by category
-    const grouped: Record<string, Record<string, any>> = {};
+    const grouped: Record<string, Record<string, unknown>> = {};
     for (const setting of settings) {
       if (!grouped[setting.category]) {
         grouped[setting.category] = {};
@@ -31,7 +32,7 @@ export const getSettingsByCategory = query({
       .withIndex("by_category", (q) => q.eq("category", args.category))
       .collect();
     
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
     for (const setting of settings) {
       result[setting.key] = setting.value;
     }
@@ -40,25 +41,36 @@ export const getSettingsByCategory = query({
   },
 });
 
-// Get a single setting
+// Helper function to get a single setting
+export async function getSettingValue(
+  ctx: QueryCtx | MutationCtx,
+  category: string,
+  key: string
+): Promise<unknown> {
+  const setting = await ctx.db
+    .query("system_settings")
+    .withIndex("by_category_key", (q) =>
+      q.eq("category", category).eq("key", key)
+    )
+    .first();
+
+  return setting?.value ?? null;
+}
+
+// Get a single setting (Convex query)
 export const getSetting = query({
   args: {
     category: v.string(),
     key: v.string(),
   },
   handler: async (ctx, args) => {
-    const setting = await ctx.db
-      .query("system_settings")
-      .withIndex("by_category_key", (q) => 
-        q.eq("category", args.category).eq("key", args.key)
-      )
-      .first();
-    
-    return setting?.value ?? null;
+    return await getSettingValue(ctx, args.category, args.key);
   },
 });
 
 // Update settings for a category (bulk update)
+// Optimized to use indexed queries per setting to minimize read scope
+// and reduce write conflicts when called concurrently
 export const updateSettings = mutation({
   args: {
     category: v.string(),
@@ -66,9 +78,11 @@ export const updateSettings = mutation({
     updatedBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
-    const settingsObj = args.settings as Record<string, any>;
+    const settingsObj = args.settings as Record<string, unknown>;
     const updatedAt = new Date().toISOString();
     
+    // Process each setting individually using indexed queries
+    // This minimizes the read scope and reduces conflicts
     for (const [key, value] of Object.entries(settingsObj)) {
       // Determine data type
       let dataType: 'string' | 'number' | 'boolean' | 'object' | 'array' = 'string';
@@ -161,32 +175,69 @@ export const updateSetting = mutation({
 });
 
 // Reset settings to defaults
+// Optimized to avoid write conflicts by deleting documents incrementally
+// instead of reading the entire table first
 export const resetSettings = mutation({
   args: {
     category: v.optional(v.string()),
     updatedBy: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    let deletedCount = 0;
+    const batchSize = 50; // Process in smaller batches to reduce conflicts
+    
     // If category specified, reset only that category
     if (args.category) {
       const category = args.category; // Type narrowing
-      const settings = await ctx.db
-        .query("system_settings")
-        .withIndex("by_category", (q) => q.eq("category", category))
-        .collect();
       
-      for (const setting of settings) {
-        await ctx.db.delete(setting._id);
+      // Delete in batches to avoid reading entire table at once
+      // This reduces write conflicts when other mutations modify settings concurrently
+      while (true) {
+        const settings = await ctx.db
+          .query("system_settings")
+          .withIndex("by_category", (q) => q.eq("category", category))
+          .take(batchSize);
+        
+        if (settings.length === 0) {
+          break; // No more settings to delete
+        }
+        
+        // Delete this batch
+        for (const setting of settings) {
+          await ctx.db.delete(setting._id);
+          deletedCount++;
+        }
+        
+        // If we got fewer than batchSize, we're done
+        if (settings.length < batchSize) {
+          break;
+        }
       }
     } else {
-      // Reset all settings
-      const allSettings = await ctx.db.query("system_settings").collect();
-      for (const setting of allSettings) {
-        await ctx.db.delete(setting._id);
+      // Reset all settings - delete in batches
+      while (true) {
+        const settings = await ctx.db
+          .query("system_settings")
+          .take(batchSize);
+        
+        if (settings.length === 0) {
+          break; // No more settings to delete
+        }
+        
+        // Delete this batch
+        for (const setting of settings) {
+          await ctx.db.delete(setting._id);
+          deletedCount++;
+        }
+        
+        // If we got fewer than batchSize, we're done
+        if (settings.length < batchSize) {
+          break;
+        }
       }
     }
     
-    return { success: true };
+    return { success: true, deletedCount };
   },
 });
 

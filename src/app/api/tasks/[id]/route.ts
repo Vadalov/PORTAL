@@ -37,8 +37,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: task,
     });
-  } catch (error) {
-    logger.error('Get task error', error, {
+  } catch (_error) {
+    logger.error('Get task error', _error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
@@ -87,14 +87,14 @@ async function updateTaskHandler(
       data: updated,
       message: 'Görev başarıyla güncellendi',
     });
-  } catch (error) {
-    logger.error('Update task error', error, {
+  } catch (_error) {
+    logger.error('Update task error', _error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
         { success: false, error: 'Görev bulunamadı' },
@@ -124,14 +124,14 @@ async function deleteTaskHandler(
       success: true,
       message: 'Görev başarıyla silindi',
     });
-  } catch (error) {
-    logger.error('Delete task error', error, {
+  } catch (_error) {
+    logger.error('Delete task error', _error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
         { success: false, error: 'Görev bulunamadı' },

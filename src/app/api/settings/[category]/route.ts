@@ -19,10 +19,10 @@ export async function GET(
       success: true,
       data: settings,
     });
-  } catch (error) {
-    console.error('Settings category GET error:', error);
+  } catch (_error) {
+    console.error('Settings category GET error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Ayarlar alınırken hata oluştu' },
+      { error: _error instanceof Error ? _error.message : 'Ayarlar alınırken hata oluştu' },
       { status: 500 }
     );
   }
@@ -55,10 +55,10 @@ export async function POST(
       success: true,
       message: `${category} ayarları başarıyla güncellendi`,
     });
-  } catch (error) {
-    console.error('Settings category POST error:', error);
+  } catch (_error) {
+    console.error('Settings category POST error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Ayarlar kaydedilirken hata oluştu' },
+      { error: _error instanceof Error ? _error.message : 'Ayarlar kaydedilirken hata oluştu' },
       { status: 500 }
     );
   }

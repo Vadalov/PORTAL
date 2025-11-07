@@ -44,7 +44,15 @@ export class PerformanceMonitor {
 // Web Vitals monitoring
 export function reportWebVitals(metric: unknown) {
   if (process.env.NODE_ENV === 'development') {
-    console.log('📊 Web Vital:', metric);
+    // Safely log metric with proper formatting
+    if (metric && typeof metric === 'object' && 'name' in metric && 'value' in metric) {
+      const m = metric as { name: string; value: number; id?: string; delta?: number };
+      const formattedValue = Math.round(m.value * 100) / 100;
+      const unit = m.name.toLowerCase() === 'cls' ? '' : 'ms';
+      console.log(`📊 Web Vital: ${m.name} = ${formattedValue}${unit}`, metric);
+    } else {
+      console.log('📊 Web Vital:', JSON.stringify(metric, null, 2));
+    }
   }
 
   // Send to analytics service in production

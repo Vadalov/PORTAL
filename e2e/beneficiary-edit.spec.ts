@@ -63,7 +63,7 @@ test.describe('Beneficiary Edit Flow', () => {
         }
 
         expect(detailFound).toBeTruthy();
-      } catch (error) {
+      } catch (_error) {
         // Navigation might fail, test should handle gracefully
         console.warn('Navigation to detail page failed:', error);
         expect(true).toBe(true);

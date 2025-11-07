@@ -28,6 +28,8 @@ import {
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { AidApplicationDocument } from '@/types/database';
+import { validateAidApplicationDocument } from '@/lib/validations/aid-application';
+import logger from '@/lib/logger';
 
 const STAGE_LABELS = {
   draft: { label: 'Taslak', icon: Clock, color: 'bg-muted text-muted-foreground' },
@@ -42,13 +44,15 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
   const { id } = use(params);
   const queryClient = useQueryClient();
 
-  const { data, isLoading, error } = useQuery({
+  const queryResult = useQuery({
     queryKey: ['aid-application', id],
     queryFn: async () => {
       const result = await aidApplicationsApi.getAidApplication(id);
-      return result as AidApplicationDocument;
+      return result;
     },
   });
+
+  const { data, isLoading, error } = queryResult;
 
   const updateStageMutation = useMutation({
     mutationFn: ({ stage }: { stage: AidApplicationDocument['stage'] }) =>
@@ -64,7 +68,18 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
     },
   });
 
-  const application = data?.data;
+  // Runtime validation of API response
+  const application = data?.data
+    ? validateAidApplicationDocument(data.data)
+    : null;
+
+  // Log validation failures for debugging
+  if (data?.data && !application) {
+    logger.error('Invalid aid application data received from API', {
+      applicationId: id,
+      data: data.data,
+    });
+  }
 
   if (isLoading) {
     return (

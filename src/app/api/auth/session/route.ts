@@ -47,8 +47,8 @@ export async function GET(_request: NextRequest) {
         expiresAt: sessionData.expire,
       },
     });
-  } catch (error: unknown) {
-    logger.error('Session validation error', error, {
+  } catch (_error: unknown) {
+    logger.error('Session validation error', _error, {
       endpoint: '/api/auth/session',
       method: 'GET',
     });

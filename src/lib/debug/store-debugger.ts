@@ -365,7 +365,7 @@ class StoreDebuggerClass {
       console.log(`✅ Hydration test successful (${duration.toFixed(2)}ms)`);
       this.logStoreState(storeName);
     } catch (error) {
-      console.error('❌ Hydration test failed:', error);
+      console.error('❌ Hydration test failed:', _error);
     }
   }
 }

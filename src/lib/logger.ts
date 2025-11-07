@@ -43,6 +43,26 @@ const colors: Record<LogLevel, string> = {
 };
 const resetColor = '\x1b[0m';
 
+/**
+ * Mask TC number for display/logging
+ * Shows only first 3 and last 2 digits: 123*********
+ */
+function maskTcNumber(tcNo: string | null | undefined): string {
+  if (!tcNo || typeof tcNo !== 'string') {
+    return '***';
+  }
+  // Handle both plain TC numbers and hashed values
+  if (tcNo.length === 11 && /^\d{11}$/.test(tcNo)) {
+    return `${tcNo.substring(0, 3)}${'*'.repeat(6)}${tcNo.substring(9)}`;
+  }
+  // If it's a hash (64 hex chars), show first 8 and last 4
+  if (tcNo.length === 64 && /^[a-f0-9]{64}$/i.test(tcNo)) {
+    return `${tcNo.substring(0, 8)}...${tcNo.substring(60)}`;
+  }
+  // Otherwise, mask the whole value
+  return '***MASKED***';
+}
+
 function maskSensitive(obj: unknown): unknown {
   if (typeof obj !== 'object' || obj === null) return obj;
   
@@ -52,12 +72,22 @@ function maskSensitive(obj: unknown): unknown {
   
   const masked: Record<string, unknown> = { ...obj as Record<string, unknown> };
   for (const key in masked) {
+    const keyLower = key.toLowerCase();
     if (
-      key.toLowerCase().includes('password') ||
-      key.toLowerCase().includes('token') ||
-      key.toLowerCase().includes('apikey')
+      keyLower.includes('password') ||
+      keyLower.includes('token') ||
+      keyLower.includes('apikey')
     ) {
       masked[key] = '***MASKED***';
+    } else if (
+      keyLower.includes('tc_no') ||
+      keyLower.includes('tcno') ||
+      keyLower.includes('applicant_tc_no') ||
+      keyLower === 'tc' ||
+      keyLower === 'tcnumber'
+    ) {
+      // Mask TC numbers specifically
+      masked[key] = maskTcNumber(String(masked[key]));
     } else {
       masked[key] = maskSensitive(masked[key]);
     }

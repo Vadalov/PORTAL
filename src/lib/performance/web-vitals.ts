@@ -22,13 +22,14 @@ function sendToAnalytics(metric: Metric): void {
 
   // Log in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('Web Vital Metric:', {
+    const metricData = {
       name: metric.name,
-      value: metric.value,
+      value: Math.round(metric.value * 100) / 100, // Round to 2 decimal places
       id: metric.id,
-      delta: metric.delta,
+      delta: Math.round(metric.delta * 100) / 100,
       rating,
-    });
+    };
+    console.log(`📊 Web Vital: ${metricData.name} = ${metricData.value}ms (${metricData.rating})`, metricData);
   }
 
   // Send to Google Analytics 4 (if configured)

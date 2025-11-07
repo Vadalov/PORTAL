@@ -37,14 +37,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: message,
     });
-  } catch (error) {
-    logger.error('Get message error', error, {
+  } catch (_error) {
+    logger.error('Get message error', _error, {
       endpoint: '/api/messages/[id]',
       method: 'GET',
       messageId: id,
     });
     return NextResponse.json(
-      { success: false, error: 'Veri alınamadı' },
+      { success: false, _error: 'Veri alınamadı' },
       { status: 500 }
     );
   }
@@ -83,23 +83,23 @@ async function updateMessageHandler(
       data: updated,
       message: 'Mesaj başarıyla güncellendi',
     });
-  } catch (error) {
-    logger.error('Update message error', error, {
+  } catch (_error) {
+    logger.error('Update message error', _error, {
       endpoint: '/api/messages/[id]',
       method: 'PUT',
       messageId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
-        { success: false, error: 'Mesaj bulunamadı' },
+        { success: false, _error: 'Mesaj bulunamadı' },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { success: false, _error: 'Güncelleme işlemi başarısız' },
       { status: 500 }
     );
   }
@@ -120,23 +120,23 @@ async function deleteMessageHandler(
       success: true,
       message: 'Mesaj başarıyla silindi',
     });
-  } catch (error) {
-    logger.error('Delete message error', error, {
+  } catch (_error) {
+    logger.error('Delete message error', _error, {
       endpoint: '/api/messages/[id]',
       method: 'DELETE',
       messageId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
-        { success: false, error: 'Mesaj bulunamadı' },
+        { success: false, _error: 'Mesaj bulunamadı' },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Silme işlemi başarısız' },
+      { success: false, _error: 'Silme işlemi başarısız' },
       { status: 500 }
     );
   }
@@ -251,8 +251,8 @@ async function sendMessageHandler(
       data: updated,
       message: 'Mesaj gönderildi',
     });
-  } catch (error: unknown) {
-    logger.error('Send message error', error, {
+  } catch (_error: unknown) {
+    logger.error('Send message error', _error, {
       endpoint: '/api/messages/[id]',
       method: 'POST',
       messageId: id,

@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
       data: response.documents || [],
       total: response.total || 0,
     });
-  } catch (error: unknown) {
-    logger.error('List aid applications error', error, {
+  } catch (_error: unknown) {
+    logger.error('List aid applications error', _error, {
       endpoint: '/api/aid-applications',
       method: 'GET',
       params,
@@ -96,8 +96,8 @@ async function createApplicationHandler(request: NextRequest) {
       { success: true, data: response, message: 'Başvuru oluşturuldu' },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Create aid application error', error, {
+  } catch (_error: unknown) {
+    logger.error('Create aid application error', _error, {
       endpoint: '/api/aid-applications',
       method: 'POST',
       applicantName: body?.applicant_name,

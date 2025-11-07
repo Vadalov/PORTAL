@@ -52,14 +52,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: donation,
     });
-  } catch (error) {
-    logger.error('Get donation error', error, {
+  } catch (_error) {
+    logger.error('Get donation error', _error, {
       endpoint: '/api/donations/[id]',
       method: 'GET',
       donationId: id,
     });
     return NextResponse.json(
-      { success: false, error: 'Veri alınamadı' },
+      { success: false, _error: 'Veri alınamadı' },
       { status: 500 }
     );
   }
@@ -97,23 +97,23 @@ async function updateDonationHandler(
       data: updated,
       message: 'Bağış başarıyla güncellendi',
     });
-  } catch (error) {
-    logger.error('Update donation error', error, {
+  } catch (_error) {
+    logger.error('Update donation error', _error, {
       endpoint: '/api/donations/[id]',
       method: 'PUT',
       donationId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
-        { success: false, error: 'Bağış bulunamadı' },
+        { success: false, _error: 'Bağış bulunamadı' },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { success: false, _error: 'Güncelleme işlemi başarısız' },
       { status: 500 }
     );
   }
@@ -134,23 +134,23 @@ async function deleteDonationHandler(
       success: true,
       message: 'Bağış başarıyla silindi',
     });
-  } catch (error) {
-    logger.error('Delete donation error', error, {
+  } catch (_error) {
+    logger.error('Delete donation error', _error, {
       endpoint: '/api/donations/[id]',
       method: 'DELETE',
       donationId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
-        { success: false, error: 'Bağış bulunamadı' },
+        { success: false, _error: 'Bağış bulunamadı' },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Silme işlemi başarısız' },
+      { success: false, _error: 'Silme işlemi başarısız' },
       { status: 500 }
     );
   }

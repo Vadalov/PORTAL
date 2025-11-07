@@ -77,10 +77,12 @@
     "framer-motion": "^12.23.24",
     "immer": "^10.2.0",
     "isomorphic-dompurify": "^2.31.0",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
     "lucide-react": "^0.552.0",
-    "qrcode": "^1.5.4",
     "motion": "^12.23.24",
     "next": "^16.0.1",
+    "qrcode": "^1.5.4",
     "react": "19.2.0",
     "react-day-picker": "^9.11.1",
     "react-dom": "19.2.0",
@@ -103,6 +105,7 @@
     }
   },
   "devDependencies": {
+    "@convex-dev/eslint-plugin": "^1.0.0",
     "@next/bundle-analyzer": "^14.0.4",
     "@playwright/test": "^1.48.0",
     "@svgr/webpack": "^8.1.0",

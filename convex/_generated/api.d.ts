@@ -20,9 +20,11 @@ import type * as finance_records from "../finance_records.js";
 import type * as meetings from "../meetings.js";
 import type * as messages from "../messages.js";
 import type * as partners from "../partners.js";
+import type * as scholarships from "../scholarships.js";
 import type * as storage from "../storage.js";
 import type * as system_settings from "../system_settings.js";
 import type * as tasks from "../tasks.js";
+import type * as tc_security from "../tc_security.js";
 import type * as users from "../users.js";
 
 import type {
@@ -52,9 +54,11 @@ declare const fullApi: ApiFromModules<{
   meetings: typeof meetings;
   messages: typeof messages;
   partners: typeof partners;
+  scholarships: typeof scholarships;
   storage: typeof storage;
   system_settings: typeof system_settings;
   tasks: typeof tasks;
+  tc_security: typeof tc_security;
   users: typeof users;
 }>;
 declare const fullApiWithMounts: typeof fullApi;

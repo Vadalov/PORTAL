@@ -44,8 +44,10 @@ import {
   Clock,
   FileText,
   Download,
+  FileDown,
   Plus,
 } from 'lucide-react';
+import { generateAidListPDF } from '@/lib/utils/pdf-export';
 import { aidApplicationsApi } from '@/lib/api';
 import type { AidApplicationDocument } from '@/types/database';
 
@@ -154,6 +156,16 @@ export default function AidListPage() {
     toast.success('Yardım listesi Excel formatında indirildi');
   };
 
+  const handleExportPDF = () => {
+    try {
+      generateAidListPDF(applications);
+      toast.success('Yardım listesi PDF formatında indirildi');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.error('PDF oluşturulurken hata oluştu');
+    }
+  };
+
   const getTotalAidValue = (app: AidRecord): number => {
     return (
       (app.one_time_aid || 0) +
@@ -229,6 +241,10 @@ export default function AidListPage() {
               <Button onClick={handleExportExcel} className="w-full justify-start" variant="outline">
                 <Download className="h-4 w-4 mr-2" />
                 Excel (CSV) Olarak İndir
+              </Button>
+              <Button onClick={handleExportPDF} className="w-full justify-start" variant="outline">
+                <FileDown className="h-4 w-4 mr-2" />
+                PDF Olarak İndir
               </Button>
             </div>
           </DialogContent>

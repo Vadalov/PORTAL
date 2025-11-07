@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
       data: response.documents || [],
       total: response.total || 0,
     });
-  } catch (error: unknown) {
-    logger.error('List tasks error', error, {
+  } catch (_error: unknown) {
+    logger.error('List tasks error', _error, {
       endpoint: '/api/tasks',
       method: 'GET',
       params,
@@ -95,8 +95,8 @@ async function createTaskHandler(request: NextRequest) {
       { success: true, data: response, message: 'Görev başarıyla oluşturuldu' },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Create task error', error, {
+  } catch (_error: unknown) {
+    logger.error('Create task error', _error, {
       endpoint: '/api/tasks',
       method: 'POST',
       title: (body as Record<string, unknown>)?.title,

@@ -48,9 +48,9 @@ export async function GET(request: Request) {
   }
 
   // Run comprehensive checks
-  let connectivityReport = null;
-  let connectivityError = null;
-  let validationReport = null;
+  let connectivityReport: any = null;
+  let connectivityError: string | null = null;
+  let validationReport: any = null;
 
   if (provider === 'convex' && convexUrl) {
     try {
@@ -84,9 +84,9 @@ export async function GET(request: Request) {
         errors: [],
         warnings: convexUrl ? [] : ['NEXT_PUBLIC_CONVEX_URL is not set'],
       };
-    } catch (error: unknown) {
-      connectivityError = error instanceof Error ? error.message : 'Bilinmeyen hata';
-      logger.error('Convex connectivity test failed', error, {
+    } catch (_error: unknown) {
+      connectivityError = _error instanceof Error ? _error.message : 'Bilinmeyen hata';
+      logger.error('Convex connectivity test failed', _error, {
         endpoint: '/api/health',
         provider,
         detailed: true,

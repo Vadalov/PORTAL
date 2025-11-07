@@ -37,14 +37,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: application,
     });
-  } catch (error) {
-    logger.error('Get aid application error', error, {
+  } catch (_error) {
+    logger.error('Get aid application error', _error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'GET',
       applicationId: id,
     });
     return NextResponse.json(
-      { success: false, error: 'Veri alınamadı' },
+      { success: false, _error: 'Veri alınamadı' },
       { status: 500 }
     );
   }
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 /**
  * PATCH /api/aid-applications/[id]
  */
-async function updateApplicationHandler(
+async function _updateApplicationHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -94,14 +94,14 @@ async function updateApplicationHandler(
       data: updated,
       message: 'Başvuru başarıyla güncellendi',
     });
-  } catch (error) {
-    logger.error('Update aid application error', error, {
+  } catch (_error) {
+    logger.error('Update aid application error', _error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'PATCH',
       applicationId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
         { success: false, error: 'Başvuru bulunamadı' },
@@ -119,7 +119,7 @@ async function updateApplicationHandler(
 /**
  * DELETE /api/aid-applications/[id]
  */
-async function deleteApplicationHandler(
+async function _deleteApplicationHandler(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -131,14 +131,14 @@ async function deleteApplicationHandler(
       success: true,
       message: 'Başvuru başarıyla silindi',
     });
-  } catch (error) {
-    logger.error('Delete aid application error', error, {
+  } catch (_error) {
+    logger.error('Delete aid application error', _error, {
       endpoint: '/api/aid-applications/[id]',
       method: 'DELETE',
       applicationId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
         { success: false, error: 'Başvuru bulunamadı' },

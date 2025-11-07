@@ -86,10 +86,10 @@ export async function POST(request: NextRequest) {
         fileType: file.type,
       },
     });
-  } catch (error) {
-    console.error('File upload error:', error);
+  } catch (_error) {
+    console.error('File upload error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Dosya yükleme hatası' },
+      { error: _error instanceof Error ? _error.message : 'Dosya yükleme hatası' },
       { status: 500 }
     );
   }

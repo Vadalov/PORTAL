@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
       data: response.documents || [],
       total: response.total || 0,
     });
-  } catch (error: unknown) {
-    logger.error('List messages error', error, {
+  } catch (_error: unknown) {
+    logger.error('List messages error', _error, {
       endpoint: '/api/messages',
       method: 'GET',
       params,
@@ -94,8 +94,8 @@ async function createMessageHandler(request: NextRequest) {
       { success: true, data: response, message: 'Mesaj taslağı oluşturuldu' },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Create message error', error, {
+  } catch (_error: unknown) {
+    logger.error('Create message error', _error, {
       endpoint: '/api/messages',
       method: 'POST',
       messageType: (body as Record<string, unknown>)?.message_type,

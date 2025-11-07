@@ -365,4 +365,81 @@ export default defineSchema({
     .index('by_category', ['category'])
     .index('by_key', ['key'])
     .index('by_category_key', ['category', 'key']),
+
+  // Scholarships (Burs Programları)
+  scholarships: defineTable({
+    title: v.string(), // Burs programı adı
+    description: v.optional(v.string()), // Program açıklaması
+    amount: v.number(), // Burs miktarı
+    currency: v.union(v.literal('TRY'), v.literal('USD'), v.literal('EUR')),
+    duration_months: v.optional(v.number()), // Burs süresi (ay)
+    category: v.string(), // 'academic', 'sports', 'arts', 'need_based', 'orphan', 'other'
+    eligibility_criteria: v.optional(v.string()), // Uygunluk kriterleri
+    requirements: v.optional(v.array(v.string())), // Gerekli belgeler
+    application_start_date: v.string(), // Başvuru başlangıç tarihi
+    application_end_date: v.string(), // Başvuru bitiş tarihi
+    academic_year: v.optional(v.string()), // Akademik yıl
+    max_recipients: v.optional(v.number()), // Maksimum alıcı sayısı
+    is_active: v.boolean(), // Program aktif mi?
+    created_by: v.id('users'),
+    created_at: v.string(),
+  })
+    .index('by_category', ['category'])
+    .index('by_is_active', ['is_active'])
+    .index('by_application_dates', ['application_start_date', 'application_end_date']),
+
+  // Scholarship Applications (Burs Başvuruları)
+  scholarship_applications: defineTable({
+    scholarship_id: v.id('scholarships'), // Başvuru yapılan burs programı
+    student_id: v.optional(v.id('beneficiaries')), // Öğrenci (eğer kayıtlıysa)
+    created_by: v.optional(v.id('users')), // Application creator (staff/admin)
+    applicant_name: v.string(), // Başvuran adı
+    applicant_tc_no: v.string(), // TC Kimlik No
+    applicant_phone: v.string(), // Telefon
+    applicant_email: v.optional(v.string()), // Email
+    university: v.optional(v.string()), // Üniversite
+    department: v.optional(v.string()), // Bölüm
+    grade_level: v.optional(v.string()), // Sınıf düzeyi (1., 2., 3., 4.)
+    gpa: v.optional(v.number()), // GPA/Ortalama
+    academic_year: v.optional(v.string()), // Akademik yıl
+    monthly_income: v.optional(v.number()), // Aylık gelir
+    family_income: v.optional(v.number()), // Aile geliri
+    father_occupation: v.optional(v.string()), // Baba mesleği
+    mother_occupation: v.optional(v.string()), // Anne mesleği
+    sibling_count: v.optional(v.number()), // Kardeş sayısı
+    is_orphan: v.optional(v.boolean()), // Yetim mi?
+    has_disability: v.optional(v.boolean()), // Engelli mi?
+    essay: v.optional(v.string()), // Essay/motivasyon mektubu
+    status: v.union(v.literal('draft'), v.literal('submitted'), v.literal('under_review'), v.literal('approved'), v.literal('rejected'), v.literal('waitlisted')),
+    priority_score: v.optional(v.number()), // Öncelik puanı (otomatik hesaplanacak)
+    reviewer_notes: v.optional(v.string()), // İnceleyen notları
+    submitted_at: v.optional(v.string()), // Başvuru gönderim tarihi
+    reviewed_by: v.optional(v.id('users')), // İnceleyen
+    reviewed_at: v.optional(v.string()), // İnceleme tarihi
+    documents: v.optional(v.array(v.string())), // Yüklenen belge isimleri
+    created_at: v.string(),
+  })
+    .index('by_scholarship', ['scholarship_id'])
+    .index('by_status', ['status'])
+    .index('by_tc_no', ['applicant_tc_no'])
+    .index('by_submitted_at', ['submitted_at']),
+
+  // Scholarship Payments (Burs Ödemeleri)
+  scholarship_payments: defineTable({
+    application_id: v.id('scholarship_applications'), // Başvuru ID
+    payment_date: v.string(), // Ödeme tarihi
+    amount: v.number(), // Ödeme miktarı
+    currency: v.union(v.literal('TRY'), v.literal('USD'), v.literal('EUR')),
+    payment_method: v.string(), // Ödeme yöntemi
+    payment_reference: v.optional(v.string()), // Ödeme referansı
+    bank_account: v.optional(v.string()), // Banka hesabı
+    notes: v.optional(v.string()), // Notlar
+    status: v.union(v.literal('pending'), v.literal('paid'), v.literal('failed'), v.literal('cancelled')),
+    processed_by: v.optional(v.id('users')), // İşleyen kişi
+    receipt_file_id: v.optional(v.string()), // Makbuz dosya ID
+    created_at: v.string(),
+  })
+    .index('by_application', ['application_id'])
+    .index('by_payment_date', ['payment_date'])
+    .index('by_status', ['status']),
 });

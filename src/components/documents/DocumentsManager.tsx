@@ -44,8 +44,8 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
           beneficiaryId: beneficiaryId as any,
         });
         return docs as Document[];
-      } catch (error) {
-        console.error('Error fetching documents:', error);
+      } catch (_error) {
+        console.error('Error fetching documents:', _error);
         return [];
       }
     },
@@ -99,8 +99,8 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
 
       toast.success('Doküman başarıyla yüklendi');
       queryClient.invalidateQueries({ queryKey: ['documents', beneficiaryId] });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Dosya yükleme hatası');
+    } catch (_error) {
+      toast.error(_error instanceof Error ? _error.message : 'Dosya yükleme hatası');
     } finally {
       setUploading(false);
     }
@@ -133,7 +133,7 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
       window.document.body.appendChild(a);
       a.click();
       window.document.body.removeChild(a);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Dosya indirilemedi');
     }
   };

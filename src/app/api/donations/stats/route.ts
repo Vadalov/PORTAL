@@ -64,8 +64,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: stats,
     });
-  } catch (error: unknown) {
-    logger.error('Error fetching donation stats', error);
+  } catch (_error) {
+    logger.error('Error fetching donation stats', _error);
     return NextResponse.json(
       { success: false, error: 'İstatistikler getirilemedi' },
       { status: 500 }
@@ -125,7 +125,7 @@ function calculateOverviewStats(donations: DonationDocument[]) {
  */
 function calculateMonthlyStats(donations: DonationDocument[]) {
   const now = new Date();
-  const months = [];
+  const months: { month: string; amount: number; count: number }[] = [];
 
   // Get last 6 months
   for (let i = 5; i >= 0; i--) {

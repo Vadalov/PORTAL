@@ -166,8 +166,8 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
             const result = await response.json();
             uploadedFileId = result.data?.fileId;
           }
-        } catch (error) {
-          console.error('File upload error:', error);
+        } catch (_error) {
+          console.error('File upload error:', _error);
           // Continue without file if upload fails
         }
       }

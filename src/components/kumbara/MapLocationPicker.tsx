@@ -144,8 +144,8 @@ export function MapLocationPicker({
           title: 'Kumbara Konumu',
         });
       }
-    } catch (error) {
-      console.error('Error initializing map:', error);
+    } catch (_error) {
+      console.error('Error initializing map:', _error);
       toast.error('Harita başlatılırken hata oluştu');
       setIsLoading(false);
     }

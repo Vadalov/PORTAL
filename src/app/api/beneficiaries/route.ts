@@ -98,8 +98,8 @@ async function getBeneficiariesHandler(request: NextRequest) {
       total,
       message: `${total} kayıt bulundu`,
     });
-  } catch (error: unknown) {
-    logger.error('Beneficiaries list error', error, {
+  } catch (_error: unknown) {
+    logger.error('Beneficiaries list error', _error, {
       endpoint: '/api/beneficiaries',
       method: 'GET',
       params,
@@ -199,15 +199,15 @@ async function createBeneficiaryHandler(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Beneficiary creation error', error, {
+  } catch (_error: unknown) {
+    logger.error('Beneficiary creation error', _error, {
       endpoint: '/api/beneficiaries',
       method: 'POST',
       tcNo: `${body?.tc_no?.substring(0, 3)}***`, // Mask TC number for privacy
     });
 
     // Handle duplicate TC number
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('already exists') || errorMessage?.includes('duplicate')) {
       return NextResponse.json(
         { success: false, error: 'Bu TC Kimlik No zaten kayıtlı' },

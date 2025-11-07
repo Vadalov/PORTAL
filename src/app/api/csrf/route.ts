@@ -31,8 +31,8 @@ export async function GET(_request: NextRequest) {
       success: true,
       token: csrfToken,
     });
-  } catch (error) {
-    console.error('CSRF token generation error:', error);
+  } catch (_error) {
+    console.error('CSRF token generation error:', _error);
 
     return NextResponse.json(
       { success: false, error: 'Failed to generate CSRF token' },

@@ -20,6 +20,7 @@ import type {
   TaskDocument,
   MeetingDocument,
   MessageDocument,
+  AidApplicationDocument,
 } from '@/types/database';
 
 // Import caching utilities
@@ -415,6 +416,69 @@ export const convexApiClient = {
     },
     deletePartner: async (id: string): Promise<ConvexResponse<null>> => {
       return apiRequest<null>(`/api/partners/${id}`, {
+        method: 'DELETE',
+      });
+    },
+  },
+
+  // Aid Applications
+  aidApplications: {
+    getAidApplications: async (params?: QueryParams & {
+      filters?: {
+        stage?: string;
+        status?: string;
+        beneficiary_id?: string;
+      };
+    }): Promise<ConvexResponse<AidApplicationDocument[]>> => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set('page', params.page.toString());
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.search) searchParams.set('search', params.search);
+      if (params?.filters?.stage) searchParams.set('stage', params.filters.stage);
+      if (params?.filters?.status) searchParams.set('status', params.filters.status);
+      if (params?.filters?.beneficiary_id) searchParams.set('beneficiary_id', params.filters.beneficiary_id);
+
+      const endpoint = `/api/aid-applications?${searchParams.toString()}`;
+      const cacheKey = `aid-applications:${searchParams.toString()}`;
+
+      return apiRequest<AidApplicationDocument[]>(
+        endpoint,
+        undefined,
+        cacheKey,
+        'default'
+      );
+    },
+    getAidApplication: async (id: string): Promise<ConvexResponse<AidApplicationDocument | null>> => {
+      return apiRequest<AidApplicationDocument | null>(`/api/aid-applications/${id}`);
+    },
+    createAidApplication: async (
+      data: CreateDocumentData<AidApplicationDocument>
+    ): Promise<ConvexResponse<AidApplicationDocument>> => {
+      return apiRequest<AidApplicationDocument>('/api/aid-applications', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateAidApplication: async (
+      id: string,
+      data: UpdateDocumentData<AidApplicationDocument>
+    ): Promise<ConvexResponse<AidApplicationDocument>> => {
+      return apiRequest<AidApplicationDocument>(`/api/aid-applications/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      });
+    },
+    updateStage: async (
+      id: string,
+      stage: AidApplicationDocument['stage']
+    ): Promise<ConvexResponse<AidApplicationDocument>> => {
+      return apiRequest<AidApplicationDocument>(`/api/aid-applications/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ stage }),
+      });
+    },
+    deleteAidApplication: async (id: string): Promise<ConvexResponse<null>> => {
+      return apiRequest<null>(`/api/aid-applications/${id}`, {
         method: 'DELETE',
       });
     },

@@ -124,9 +124,9 @@ export async function GET(request: NextRequest) {
           timestamp: new Date().toISOString(),
         });
     }
-  } catch (error: unknown) {
-    console.error('Rate limit monitoring API error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  } catch (_error: unknown) {
+    console.error('Rate limit monitoring API error:', _error);
+    const errorMessage = _error instanceof Error ? _error.message : 'Unknown error';
     return NextResponse.json(
       {
         success: false,
@@ -180,9 +180,9 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (error: unknown) {
-    console.error('Rate limit monitoring POST error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+  } catch (_error: unknown) {
+    console.error('Rate limit monitoring POST error:', _error);
+    const errorMessage = _error instanceof Error ? _error.message : 'Unknown error';
     return NextResponse.json(
       {
         success: false,

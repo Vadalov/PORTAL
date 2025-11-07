@@ -71,7 +71,7 @@ const createConvexClient = () => {
     if (isBuildTime) {
       console.warn('🔧 Convex client creation skipped during build time');
     } else {
-      console.error('Failed to initialize Convex client:', error);
+      console.error('Failed to initialize Convex client:', _error);
     }
     return null;
   }
@@ -95,10 +95,10 @@ export const getConvexUrl = (): string => {
   return convexUrl;
 };
 
-// Log configuration status (only in development or when configured)
-if (process.env.NODE_ENV !== 'production' || shouldUseConvex()) {
+// Log configuration status (only in development)
+if (process.env.NODE_ENV === 'development') {
   if (shouldUseConvex()) {
-    console.warn('✅ Convex client initialized successfully');
+    console.log('✅ Convex client initialized successfully');
   } else if (isBuildTime) {
     // Silent during build - this is expected
   } else {

@@ -92,8 +92,8 @@ async function getPartnerHandler(
       data: partner,
       message: 'Partner bulundu',
     });
-  } catch (error: unknown) {
-    logger.error('Get partner error', error, {
+  } catch (_error: unknown) {
+    logger.error('Get partner error', _error, {
       endpoint: `/api/partners/${(await params).id}`,
       method: 'GET',
     });
@@ -160,8 +160,8 @@ async function updatePartnerHandler(
       data: response,
       message: 'Partner başarıyla güncellendi',
     });
-  } catch (error: unknown) {
-    logger.error('Update partner error', error, {
+  } catch (_error: unknown) {
+    logger.error('Update partner error', _error, {
       endpoint: `/api/partners/${(await params).id}`,
       method: 'PUT',
       partnerName: body?.name,
@@ -201,8 +201,8 @@ async function deletePartnerHandler(
       success: true,
       message: 'Partner başarıyla silindi',
     });
-  } catch (error: unknown) {
-    logger.error('Delete partner error', error, {
+  } catch (_error: unknown) {
+    logger.error('Delete partner error', _error, {
       endpoint: `/api/partners/${(await params).id}`,
       method: 'DELETE',
     });

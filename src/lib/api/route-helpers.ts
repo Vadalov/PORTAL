@@ -93,8 +93,8 @@ export async function handleGetById<T>(
     }
 
     return successResponse(response.data as T);
-  } catch (error: unknown) {
-    console.error(`Get ${resourceName} error:`, error);
+  } catch (_error: unknown) {
+    console.error(`Get ${resourceName} error:`, _error);
     return errorResponse('Veri alınamadı', 500) as any;
   }
 }
@@ -132,7 +132,7 @@ export async function handleUpdate<T, U = unknown>(
 
     return successResponse(response.data as T, `${resourceName} güncellendi`);
   } catch (error: unknown) {
-    console.error(`Update ${resourceName} error:`, error);
+    console.error(`Update ${resourceName} error:`, _error);
     return errorResponse('Güncelleme işlemi başarısız', 500) as any;
   }
 }
@@ -161,7 +161,7 @@ export async function handleDelete(
 
     return successResponse(null, `${resourceName} silindi`);
   } catch (error: unknown) {
-    console.error(`Delete ${resourceName} error:`, error);
+    console.error(`Delete ${resourceName} error:`, _error);
     return errorResponse('Silme işlemi başarısız', 500) as any;
   }
 }

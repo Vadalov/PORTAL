@@ -31,8 +31,8 @@ export async function POST(_request: NextRequest) {
       success: true,
       message: 'Başarıyla çıkış yapıldı',
     });
-  } catch (error: unknown) {
-    logger.error('Logout error', error, {
+  } catch (_error: unknown) {
+    logger.error('Logout error', _error, {
       endpoint: '/api/auth/logout',
       method: 'POST',
     });

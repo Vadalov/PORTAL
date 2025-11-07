@@ -31,8 +31,8 @@ export async function GET(
       );
     }
     return NextResponse.redirect(file.url);
-  } catch (error) {
-    console.error('File retrieval error:', error);
+  } catch (_error) {
+    console.error('File retrieval error:', _error);
     return NextResponse.json(
       { error: 'Dosya alınamadı' },
       { status: 500 }
@@ -54,8 +54,8 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('File deletion error:', error);
+  } catch (_error) {
+    console.error('File deletion error:', _error);
     return NextResponse.json(
       { error: 'Dosya silinemedi' },
       { status: 500 }

@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run lint)",
+      "Bash(node:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(npm --version:*)",
+      "Bash(source:*)",
+      "Bash(nvm:*)",
+      "Bash(curl:*)",
+      "Bash(sudo:*)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(bash:*)",
+      "Bash(export:*)",
+      "Bash([:*)",
+      "Bash(. \"$NVM_DIR/nvm.sh\":*)",
+      "Bash(wget:*)",
+      "Bash(npm install)",
+      "Bash(npm run lint:fix)",
+      "Bash(npm run build)",
+      "Bash(npm run test:run)",
+      "Bash(npm install jspdf jspdf-autotable)",
+      "Bash(npm uninstall:*)",
+      "Bash(find:*)",
+      "Bash(xargs -0 sed -i:*)",
+      "Bash(xargs sed -i 's/console\\.error(\\([^,]\\+,\\s*\\)error\\s*)/console.error(\\1_error)/g' find:*)",
+      "Bash(xargs sed:*)",
+      "Bash(while:*)",
+      "Bash(do sed -i 's/console\\.error(\\([^,]\\+,\\s*\\)error\\s*)/console.error(\\1_error)/g' \"$file\":*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

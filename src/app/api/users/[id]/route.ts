@@ -39,14 +39,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: user,
     });
-  } catch (error) {
-    logger.error('Get user error', error, {
+  } catch (_error) {
+    logger.error('Get user error', _error, {
       endpoint: '/api/users/[id]',
       method: 'GET',
       userId: id,
     });
     return NextResponse.json(
-      { success: false, error: 'Veri alınamadı' },
+      { success: false, _error: 'Veri alınamadı' },
       { status: 500 }
     );
   }
@@ -102,23 +102,23 @@ async function updateUserHandler(
       data: updated,
       message: 'Kullanıcı başarıyla güncellendi',
     });
-  } catch (error) {
-    logger.error('Update user error', error, {
+  } catch (_error) {
+    logger.error('Update user error', _error, {
       endpoint: '/api/users/[id]',
       method: 'PATCH',
       userId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
-        { success: false, error: 'Kullanıcı bulunamadı' },
+        { success: false, _error: 'Kullanıcı bulunamadı' },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { success: false, _error: 'Güncelleme işlemi başarısız' },
       { status: 500 }
     );
   }
@@ -139,23 +139,23 @@ async function deleteUserHandler(
       success: true,
       message: 'Kullanıcı başarıyla silindi',
     });
-  } catch (error) {
-    logger.error('Delete user error', error, {
+  } catch (_error) {
+    logger.error('Delete user error', _error, {
       endpoint: '/api/users/[id]',
       method: 'DELETE',
       userId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
-        { success: false, error: 'Kullanıcı bulunamadı' },
+        { success: false, _error: 'Kullanıcı bulunamadı' },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Silme işlemi başarısız' },
+      { success: false, _error: 'Silme işlemi başarısız' },
       { status: 500 }
     );
   }

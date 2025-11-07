@@ -49,8 +49,8 @@ export async function GET(request: NextRequest) {
       data: response.documents || [],
       total: response.total || 0,
     });
-  } catch (error: unknown) {
-    logger.error('List meetings error', error, {
+  } catch (_error: unknown) {
+    logger.error('List meetings error', _error, {
       endpoint: '/api/meetings',
       method: 'GET',
       params,
@@ -93,8 +93,8 @@ async function createMeetingHandler(request: NextRequest) {
       { success: true, data: response, message: 'Toplantı başarıyla oluşturuldu' },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Create meeting error', error, {
+  } catch (_error: unknown) {
+    logger.error('Create meeting error', _error, {
       endpoint: '/api/meetings',
       method: 'POST',
       title: (body as Record<string, unknown>)?.title,

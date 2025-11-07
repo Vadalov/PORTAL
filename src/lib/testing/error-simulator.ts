@@ -211,7 +211,7 @@ export class ErrorSimulator {
         }
         // For synchronous errors, if we reach here, recovery worked
         resolve(true);
-      } catch (error) {
+      } catch (_error) {
         // Error thrown, but in test context, this might be expected
         resolve(false);
       }

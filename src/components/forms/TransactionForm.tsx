@@ -132,7 +132,7 @@ export default function TransactionForm({
 
     try {
       await onSubmit(formData);
-    } catch (error) {
+    } catch (_error) {
       // Error handled by mutation's onError callback
     }
   };

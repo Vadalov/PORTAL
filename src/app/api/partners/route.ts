@@ -113,8 +113,8 @@ async function getPartnersHandler(request: NextRequest) {
       total,
       message: `${total} partner bulundu`,
     });
-  } catch (error: unknown) {
-    logger.error('Partners list error', error, {
+  } catch (_error: unknown) {
+    logger.error('Partners list error', _error, {
       endpoint: '/api/partners',
       method: 'GET',
       params,
@@ -180,8 +180,8 @@ async function createPartnerHandler(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Partner creation error', error, {
+  } catch (_error: unknown) {
+    logger.error('Partner creation error', _error, {
       endpoint: '/api/partners',
       method: 'POST',
       partnerName: body?.name,

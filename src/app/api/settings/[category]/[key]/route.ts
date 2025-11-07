@@ -20,10 +20,10 @@ export async function GET(
       success: true,
       data: { category, key, value },
     });
-  } catch (error) {
-    console.error('Setting GET error:', error);
+  } catch (_error) {
+    console.error('Setting GET error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Ayar alınırken hata oluştu' },
+      { error: _error instanceof Error ? _error.message : 'Ayar alınırken hata oluştu' },
       { status: 500 }
     );
   }
@@ -57,10 +57,10 @@ export async function PUT(
       success: true,
       message: 'Ayar başarıyla güncellendi',
     });
-  } catch (error) {
-    console.error('Setting PUT error:', error);
+  } catch (_error) {
+    console.error('Setting PUT error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Ayar güncellenirken hata oluştu' },
+      { error: _error instanceof Error ? _error.message : 'Ayar güncellenirken hata oluştu' },
       { status: 500 }
     );
   }

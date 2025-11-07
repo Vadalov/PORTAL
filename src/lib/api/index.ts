@@ -6,6 +6,7 @@
  */
 
 import { convexApiClient } from './convex-api-client';
+import type { AidApplicationDocument } from '@/types/database';
 
 // Export as default for backward compatibility
 const api = convexApiClient;
@@ -24,9 +25,11 @@ export const parametersApi = {
   getParametersByCategory: async (_category?: string) => ({ success: true, data: [], error: null }),
 };
 
+// Re-export aidApplications API from convexApiClient
 export const aidApplicationsApi = {
-  getAidApplication: async (_id?: string) => ({ success: true, data: null, error: null }),
-  updateStage: async (_id?: string, _stage?: string) => ({ success: true, data: null, error: null }),
-  getAidApplications: async (_params?: any) => ({ success: true, data: [], total: 0, error: null }),
-  createAidApplication: async (_data?: any) => ({ success: true, data: null, error: null }),
+  getAidApplication: (id: string) => api.aidApplications.getAidApplication(id),
+  updateStage: (id: string, stage: AidApplicationDocument['stage']) => 
+    api.aidApplications.updateStage(id, stage),
+  getAidApplications: (params?: any) => api.aidApplications.getAidApplications(params),
+  createAidApplication: (data: any) => api.aidApplications.createAidApplication(data),
 };

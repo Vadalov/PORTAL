@@ -44,6 +44,7 @@ import {
   FileSpreadsheet,
   FileDown,
 } from 'lucide-react';
+import { generateDonationPDF } from '@/lib/utils/pdf-export';
 import api from '@/lib/api';
 
 interface DonationReport {
@@ -252,7 +253,14 @@ export default function DonationReportsPage() {
   };
 
   const handleExportPDF = () => {
-    toast.info('PDF raporu yakında eklenecek');
+    if (!reportData) return;
+    try {
+      generateDonationPDF(reportData);
+      toast.success('Rapor PDF formatında indirildi');
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.error('PDF oluşturulurken hata oluştu');
+    }
   };
 
   if (isLoading) {
@@ -326,9 +334,9 @@ export default function DonationReportsPage() {
                 <FileSpreadsheet className="h-4 w-4 mr-2" />
                 Excel (CSV) Olarak İndir
               </Button>
-              <Button onClick={handleExportPDF} className="w-full justify-start" variant="outline" disabled>
+              <Button onClick={handleExportPDF} className="w-full justify-start" variant="outline">
                 <FileDown className="h-4 w-4 mr-2" />
-                PDF Olarak İndir (Yakında)
+                PDF Olarak İndir
               </Button>
             </div>
           </DialogContent>

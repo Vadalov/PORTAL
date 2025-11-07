@@ -291,8 +291,8 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
         }
 
         createKumbaraDonation(finalData);
-      } catch (error) {
-        console.error('Error creating kumbara donation:', error);
+      } catch (_error) {
+        console.error('Error creating kumbara donation:', _error);
         toast.error('Bir hata oluştu. Lütfen tekrar deneyin.');
       }
     },

@@ -34,14 +34,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       success: true,
       data: meeting,
     });
-  } catch (error) {
-    logger.error('Get meeting error', error, {
+  } catch (_error) {
+    logger.error('Get meeting error', _error, {
       endpoint: '/api/meetings/[id]',
       method: 'GET',
       meetingId: id,
     });
     return NextResponse.json(
-      { success: false, error: 'Veri alınamadı' },
+      { success: false, _error: 'Veri alınamadı' },
       { status: 500 }
     );
   }
@@ -84,23 +84,23 @@ async function updateMeetingHandler(
       data: updated,
       message: 'Toplantı başarıyla güncellendi',
     });
-  } catch (error) {
-    logger.error('Update meeting error', error, {
+  } catch (_error) {
+    logger.error('Update meeting error', _error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
       meetingId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
-        { success: false, error: 'Toplantı bulunamadı' },
+        { success: false, _error: 'Toplantı bulunamadı' },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Güncelleme işlemi başarısız' },
+      { success: false, _error: 'Güncelleme işlemi başarısız' },
       { status: 500 }
     );
   }
@@ -121,23 +121,23 @@ async function deleteMeetingHandler(
       success: true,
       message: 'Toplantı başarıyla silindi',
     });
-  } catch (error) {
-    logger.error('Delete meeting error', error, {
+  } catch (_error) {
+    logger.error('Delete meeting error', _error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
       meetingId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
-        { success: false, error: 'Toplantı bulunamadı' },
+        { success: false, _error: 'Toplantı bulunamadı' },
         { status: 404 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Silme işlemi başarısız' },
+      { success: false, _error: 'Silme işlemi başarısız' },
       { status: 500 }
     );
   }

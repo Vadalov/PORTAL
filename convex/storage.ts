@@ -5,10 +5,13 @@ import { v } from "convex/values";
  * Generate upload URL for Convex fileStorage
  * This action generates a signed URL that can be used to upload files directly
  */
-export const generateUploadUrl = action(async (ctx) => {
-  // Generate upload URL using Convex fileStorage
-  // Note: This requires Convex fileStorage to be enabled
-  return await ctx.storage.generateUploadUrl();
+export const generateUploadUrl = action({
+  args: {},
+  handler: async (ctx) => {
+    // Generate upload URL using Convex fileStorage
+    // Note: This requires Convex fileStorage to be enabled
+    return await ctx.storage.generateUploadUrl();
+  },
 });
 
 /**

@@ -166,8 +166,8 @@ export default function InvoiceForm({
 
     try {
       await onSubmit(updatedFormData);
-    } catch (error) {
-      console.error('Form submission error:', error);
+    } catch (_error) {
+      console.error('Form submission error:', _error);
     }
   };
 

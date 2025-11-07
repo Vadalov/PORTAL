@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
       success: true,
       data: settings,
     });
-  } catch (error) {
-    console.error('Settings GET error:', error);
+  } catch (_error) {
+    console.error('Settings GET error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Ayarlar alınırken hata oluştu' },
+      { error: _error instanceof Error ? _error.message : 'Ayarlar alınırken hata oluştu' },
       { status: 500 }
     );
   }
@@ -54,10 +54,10 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Ayarlar başarıyla kaydedildi',
     });
-  } catch (error) {
-    console.error('Settings POST error:', error);
+  } catch (_error) {
+    console.error('Settings POST error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Ayarlar kaydedilirken hata oluştu' },
+      { error: _error instanceof Error ? _error.message : 'Ayarlar kaydedilirken hata oluştu' },
       { status: 500 }
     );
   }
@@ -92,10 +92,10 @@ export async function PUT(request: NextRequest) {
       success: true,
       message: 'Tüm ayarlar başarıyla güncellendi',
     });
-  } catch (error) {
-    console.error('Settings PUT error:', error);
+  } catch (_error) {
+    console.error('Settings PUT error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Ayarlar güncellenirken hata oluştu' },
+      { error: _error instanceof Error ? _error.message : 'Ayarlar güncellenirken hata oluştu' },
       { status: 500 }
     );
   }
@@ -116,10 +116,10 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: category ? `${category} kategorisi sıfırlandı` : 'Tüm ayarlar sıfırlandı',
     });
-  } catch (error) {
-    console.error('Settings DELETE error:', error);
+  } catch (_error) {
+    console.error('Settings DELETE error:', _error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Ayarlar sıfırlanırken hata oluştu' },
+      { error: _error instanceof Error ? _error.message : 'Ayarlar sıfırlanırken hata oluştu' },
       { status: 500 }
     );
   }

@@ -91,8 +91,8 @@ async function getBeneficiaryHandler(
       success: true,
       data: beneficiary,
     });
-  } catch (error: unknown) {
-    logger.error('Get beneficiary error', error, {
+  } catch (_error: unknown) {
+    logger.error('Get beneficiary error', _error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,
       beneficiaryId: id,
@@ -133,14 +133,14 @@ async function updateBeneficiaryHandler(
       data: updated,
       message: 'İhtiyaç sahibi başarıyla güncellendi',
     });
-  } catch (error: unknown) {
-    logger.error('Update beneficiary error', error, {
+  } catch (_error: unknown) {
+    logger.error('Update beneficiary error', _error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,
       beneficiaryId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
         { success: false, error: 'İhtiyaç sahibi bulunamadı' },
@@ -172,14 +172,14 @@ async function deleteBeneficiaryHandler(
       success: true,
       message: 'İhtiyaç sahibi başarıyla silindi',
     });
-  } catch (error: unknown) {
-    logger.error('Delete beneficiary error', error, {
+  } catch (_error: unknown) {
+    logger.error('Delete beneficiary error', _error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,
       beneficiaryId: id,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
         { success: false, error: 'İhtiyaç sahibi bulunamadı' },

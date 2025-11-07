@@ -61,8 +61,8 @@ export async function GET(request: NextRequest) {
       data: response.documents || [],
       total: response.total || 0,
     });
-  } catch (error: unknown) {
-    logger.error('List donations error', error, {
+  } catch (_error: unknown) {
+    logger.error('List donations error', _error, {
       endpoint: '/api/donations',
       method: 'GET',
       params,
@@ -108,8 +108,8 @@ async function createDonationHandler(request: NextRequest) {
       { success: true, data: response, message: 'Bağış başarıyla oluşturuldu' },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Create donation error', error, {
+  } catch (_error: unknown) {
+    logger.error('Create donation error', _error, {
       endpoint: '/api/donations',
       method: 'POST',
       donorName: (body as Record<string, unknown>)?.donor_name,

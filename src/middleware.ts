@@ -127,7 +127,7 @@ async function getAuthSession(
       userId: sessionData.userId,
       sessionId: sessionData.sessionId,
     };
-  } catch (error) {
+  } catch (_error) {
     logger.error('Session validation error', error, {
       context: 'middleware',
       function: 'getAuthSession',
@@ -197,7 +197,7 @@ async function getUserFromSession(
       role,
       permissions: ROLE_PERMISSIONS[role] || [],
     };
-  } catch (error) {
+  } catch (_error) {
     logger.error('User data retrieval error', error, {
       context: 'middleware',
       function: 'getUserFromSession',

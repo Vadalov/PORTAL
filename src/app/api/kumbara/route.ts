@@ -236,8 +236,8 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(result.total / limitNum),
       },
     });
-  } catch (error: unknown) {
-    logger.error('Error fetching kumbara donations', error);
+  } catch (_error: unknown) {
+    logger.error('Error fetching kumbara donations', _error);
     return NextResponse.json(
       { success: false, error: 'Kumbara bağışları getirilemedi' },
       { status: 500 }
@@ -283,8 +283,8 @@ export async function GET_STATS(request: NextRequest) {
     // Default overview stats
     const stats = calculateOverviewStats(donations);
     return NextResponse.json(stats);
-  } catch (error: unknown) {
-    logger.error('Error fetching kumbara stats', error);
+  } catch (_error: unknown) {
+    logger.error('Error fetching kumbara stats', _error);
     return NextResponse.json(
       { success: false, error: 'İstatistikler getirilemedi' },
       { status: 500 }
@@ -349,7 +349,7 @@ function calculateOverviewStats(donations: any[]) {
  */
 function calculateMonthlyStats(donations: any[]) {
   const now = new Date();
-  const months = [];
+  const months: { month: string; amount: any; count: number }[] = [];
 
   // Get last 6 months
   for (let i = 5; i >= 0; i--) {
@@ -471,8 +471,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Error creating kumbara donation', error);
+  } catch (_error: unknown) {
+    logger.error('Error creating kumbara donation', _error);
     return NextResponse.json(
       { success: false, error: 'Kumbara bağışı oluşturulamadı' },
       { status: 500 }

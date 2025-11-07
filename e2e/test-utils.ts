@@ -23,7 +23,7 @@ export async function testConvexConnection(): Promise<boolean> {
     });
     const data = await response.json();
     return data.status === 'connected' || data.success === true;
-  } catch (error) {
+  } catch (_error) {
     console.warn('Convex connection test failed:', error);
     return false;
   }
@@ -87,7 +87,7 @@ export async function safeClick(page: Page, selectors: string[]): Promise<boolea
         await element.click();
         return true;
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn(
         `Failed to click ${selector}:`,
         error instanceof Error ? error.message : String(error)
@@ -121,7 +121,7 @@ export async function safeFill(page: Page, selectors: string[], text: string): P
           return true;
         }
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn(
         `Failed to fill ${selector}:`,
         error instanceof Error ? error.message : String(error)
@@ -159,7 +159,7 @@ export async function safeSelect(
           return true;
         }
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn(
         `Failed to select ${optionText} from ${selector}:`,
         error instanceof Error ? error.message : String(error)
@@ -310,7 +310,7 @@ export class TestDataManager {
 
       this.createdUsers.push(userData.email);
       return userData.email;
-    } catch (error) {
+    } catch (_error) {
       console.error('Failed to create test user:', error);
       throw new Error(
         `User creation failed: ${error instanceof Error ? error.message : String(error)}`
@@ -323,7 +323,7 @@ export class TestDataManager {
       try {
         await this.deleteUserByEmail(page, email);
         await page.waitForTimeout(1000); // Rate limiting
-      } catch (error) {
+      } catch (_error) {
         console.warn(`Failed to cleanup user ${email}:`, error);
       }
     }
@@ -367,7 +367,7 @@ export class TestDataManager {
           await page.waitForTimeout(1500);
         }
       }
-    } catch (error) {
+    } catch (_error) {
       console.warn(`User deletion failed for ${email}:`, error);
     }
   }
@@ -382,7 +382,7 @@ export class TestDataManager {
     for (const task of cleanupTasks) {
       try {
         await task();
-      } catch (error) {
+      } catch (_error) {
         console.warn('Cleanup task failed:', error);
       }
     }
@@ -445,7 +445,7 @@ export async function getCSRFToken(page: Page): Promise<string> {
     }
 
     return data.token;
-  } catch (error) {
+  } catch (_error) {
     console.warn('Failed to get CSRF token, generating mock token:', error);
     return generateMockCSRFToken();
   }
@@ -497,7 +497,7 @@ export async function loginAsAdmin(page: Page): Promise<void> {
 
     // Verify successful login
     await waitForElement(page, 'text=/Hoş geldiniz|Dashboard|Genel/i', TEST_CONFIG.SHORT_TIMEOUT);
-  } catch (error) {
+  } catch (_error) {
     console.error('Login attempt failed:', error);
     throw new Error(
       `Admin login failed: ${error instanceof Error ? error.message : String(error)}`
@@ -540,7 +540,7 @@ export async function loginAsUser(page: Page, email: string, password: string): 
 
     await page.waitForURL('/genel', { timeout: TEST_CONFIG.LONG_TIMEOUT });
     await waitForElement(page, 'text=/Hoş geldiniz|Dashboard|Genel/i', TEST_CONFIG.SHORT_TIMEOUT);
-  } catch (error) {
+  } catch (_error) {
     console.error('User login failed:', error);
     throw new Error(`User login failed: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -568,7 +568,7 @@ export async function logout(page: Page): Promise<void> {
     // Navigate to login
     await page.goto('/login');
     await waitForElement(page, 'input[type="email"]', TEST_CONFIG.SHORT_TIMEOUT);
-  } catch (error) {
+  } catch (_error) {
     console.error('Logout failed:', error);
     // Force navigation to login even if logout fails
     await page.goto('/login');
@@ -641,7 +641,7 @@ export async function authenticatedRequest(
 
       // Return failed response for handling by caller
       return response;
-    } catch (error) {
+    } catch (_error) {
       if (attempt === retries + 1) {
         throw new Error(
           `Request failed after ${retries + 1} attempts: ${error instanceof Error ? error.message : String(error)}`

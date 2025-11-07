@@ -48,8 +48,8 @@ export async function GET(_request: NextRequest) {
       data: response || [],
       total: Array.isArray(response) ? response.length : 0,
     });
-  } catch (error: unknown) {
-    logger.error('List users error', error, {
+  } catch (_error: unknown) {
+    logger.error('List users error', _error, {
       endpoint: '/api/users',
       method: 'GET',
     });
@@ -103,14 +103,14 @@ async function createUserHandler(request: NextRequest) {
       { success: true, data: response, message: 'Kullanıcı oluşturuldu' },
       { status: 201 }
     );
-  } catch (error: unknown) {
-    logger.error('Create user error', error, {
+  } catch (_error: unknown) {
+    logger.error('Create user error', _error, {
       endpoint: '/api/users',
       method: 'POST',
       email: (body as Record<string, unknown>)?.email,
     });
     
-    const errorMessage = error instanceof Error ? error.message : '';
+    const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('already exists') || errorMessage?.includes('duplicate')) {
       return NextResponse.json(
         { success: false, error: 'Bu e-posta zaten kayıtlı' },

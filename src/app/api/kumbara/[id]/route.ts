@@ -78,8 +78,8 @@ export async function GET(
       success: true,
       data: donation,
     });
-  } catch (error: unknown) {
-    logger.error('Error fetching kumbara donation', error);
+  } catch (_error: unknown) {
+    logger.error('Error fetching kumbara donation', _error);
     return NextResponse.json(
       { success: false, error: 'Kumbara bağışı getirilemedi' },
       { status: 500 }
@@ -147,8 +147,8 @@ export async function PUT(
       success: true,
       message: 'Kumbara bağışı başarıyla güncellendi',
     });
-  } catch (error: unknown) {
-    logger.error('Error updating kumbara donation', error);
+  } catch (_error: unknown) {
+    logger.error('Error updating kumbara donation', _error);
     return NextResponse.json(
       { success: false, error: 'Kumbara bağışı güncellenemedi' },
       { status: 500 }
@@ -203,8 +203,8 @@ export async function DELETE(
       success: true,
       message: 'Kumbara bağışı başarıyla silindi',
     });
-  } catch (error: unknown) {
-    logger.error('Error deleting kumbara donation', error);
+  } catch (_error: unknown) {
+    logger.error('Error deleting kumbara donation', _error);
     return NextResponse.json(
       { success: false, error: 'Kumbara bağışı silinemedi' },
       { status: 500 }
