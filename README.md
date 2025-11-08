@@ -154,9 +154,7 @@ For detailed production deployment instructions, see [DEPLOYMENT.md](./DEPLOYMEN
 **Quick Start:**
 1. Set up environment variables (see `.env.production.example`)
 2. Deploy Convex backend: `npx convex deploy --prod`
-3. Run pre-deployment checks: `./scripts/pre-deploy-check.sh`
-4. Build and deploy to your platform
-5. Run post-deployment verification: `./scripts/post-deploy-check.sh https://your-domain.com`
+3. Build and deploy to your platform
 
 **Supported Platforms:**
 - **Vercel** (recommended for Next.js)
@@ -165,11 +163,14 @@ For detailed production deployment instructions, see [DEPLOYMENT.md](./DEPLOYMEN
 - **Self-hosted** (Docker/standalone mode)
 
 **Documentation:**
-- [Kapsamlı Dokümantasyon](./DOCUMENTATION.md) - Tüm teknik detaylar ve deployment rehberi
+- [Kapsamlı Dokümantasyon](./docs/DOCUMENTATION.md) - Tüm teknik detaylar ve deployment rehberi
 
 ## 📚 Documentation
 
-- **[Kapsamlı Dokümantasyon](./DOCUMENTATION.md)**: Tüm teknik detaylar, API dokümantasyonu, veritabanı şeması ve daha fazlası
+- **[Kapsamlı Dokümantasyon](./docs/DOCUMENTATION.md)**: Tüm teknik detaylar, API dokümantasyonu, veritabanı şeması ve daha fazlası
+- **[Agent Guidelines](./docs/CLAUDE.md)**: AI agent davranış kuralları ve geliştirme rehberi
+- **[KVKK/GDPR Uyumluluk](./docs/KVKK_GDPR_COMPLIANCE.md)**: Gizlilik ve veri güvenliği politikaları
+- **[Next.js Optimizasyonları](./docs/NEXTJS_OPTIMIZATION.md)**: Performans optimizasyonları ve caching stratejileri
 - **Database Schema**: See `convex/schema.ts`
 - **Convex Backend**: See `convex/README.md`
 

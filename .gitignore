@@ -56,6 +56,13 @@ next-env.d.ts
 # code quality reports
 /jscpd-report/
 
+# lint output files (temporary files created by IDE or tools)
+lint-*.txt
+lint-output.txt
+lint-current.txt
+*-output.txt
+*-current.txt
+
 # temporary documentation files
 .analysis-progress.md
 .devam-progress.md

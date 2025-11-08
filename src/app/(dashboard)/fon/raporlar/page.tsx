@@ -36,7 +36,6 @@ import {
   Download,
   TrendingUp,
   TrendingDown,
-  Calendar,
   DollarSign,
   BarChart3,
   PieChart,
@@ -55,11 +54,7 @@ interface ReportData {
   statusData: { status: string; amount: number; count: number }[];
 }
 
-const CURRENCY_LABELS = {
-  TRY: 'TL',
-  USD: 'USD',
-  EUR: 'EUR',
-};
+// Currency labels defined but not used in current implementation
 
 export default function FundReportsPage() {
   const [dateRange, setDateRange] = useState('all');

@@ -13,14 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+// Table component not used in this view - using custom card layout instead
 import {
   Dialog,
   DialogContent,
@@ -39,13 +32,10 @@ import {
   TrendingDown,
   Plus,
   Calendar,
-  PieChart,
-  BarChart3,
   FileText,
   Download,
   Eye,
   Edit,
-  Trash2,
   ArrowUpCircle,
   ArrowDownCircle,
 } from 'lucide-react';
@@ -68,39 +58,7 @@ interface FinanceRecord {
   _creationTime: string;
 }
 
-const CATEGORY_OPTIONS = {
-  income: [
-    'Bağış Gelirleri',
-    'Kurs Gelirleri',
-    'Etkinlik Gelirleri',
-    'Sponsorluk',
-    'Hibe Gelirleri',
-    'Diğer Gelirler'
-  ],
-  expense: [
-    'Burs Ödemeleri',
-    'İhtiyaç Sahibi Yardımları',
-    'Ofis Giderleri',
-    'Personel Giderleri',
-    'Etkinlik Giderleri',
-    'Seyahat Giderleri',
-    'Kira ve Faturalar',
-    'Büro Malzemeleri',
-    'Ulaşım Giderleri',
-    'Diğer Giderler'
-  ]
-};
-
-const PAYMENT_METHODS = [
-  'Nakit',
-  'Banka Transferi',
-  'Havale',
-  'Kredi Kartı',
-  'Debit Kartı',
-  'Otomatik Ödeme',
-  'Çek',
-  'Diğer'
-];
+// Category options and payment methods moved to form component (currently not used here)
 
 const STATUS_LABELS = {
   pending: { label: 'Beklemede', color: 'bg-yellow-100 text-yellow-700' },

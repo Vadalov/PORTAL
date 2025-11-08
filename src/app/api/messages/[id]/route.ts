@@ -264,3 +264,7 @@ async function sendMessageHandler(
   }
 }
 
+export const PUT = updateMessageHandler;
+export const DELETE = deleteMessageHandler;
+export const POST = sendMessageHandler;
+

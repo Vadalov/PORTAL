@@ -330,8 +330,7 @@ PORTAL/
 │
 ├── docs/                           # Documentation (legacy)
 ├── scripts/                        # Utility scripts
-│   ├── pre-deploy-check.sh
-│   └── post-deploy-check.sh
+│   └── start-dev.mjs              # Development server script
 │
 ├── public/                         # Static files
 ├── package.json                    # Dependencies
@@ -1416,25 +1415,13 @@ NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
 npx convex deploy --prod
 ```
 
-#### 3. Pre-Deployment Checks
-
-```bash
-./scripts/pre-deploy-check.sh
-```
-
-Kontrol edilenler:
-- Environment variables
-- TypeScript errors
-- Build errors
-- Test failures
-
-#### 4. Build
+#### 3. Build
 
 ```bash
 npm run build
 ```
 
-#### 5. Deploy
+#### 4. Deploy
 
 **Vercel (Önerilen):**
 ```bash
@@ -1448,12 +1435,6 @@ vercel --prod
 **Self-Hosted:**
 ```bash
 npm run start
-```
-
-#### 6. Post-Deployment Verification
-
-```bash
-./scripts/post-deploy-check.sh https://your-domain.com
 ```
 
 ---

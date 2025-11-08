@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -13,14 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+// Table component not used - using custom card layout instead
 import {
   Dialog,
   DialogContent,
@@ -40,12 +32,9 @@ import {
   Stethoscope,
   Users,
   Calendar,
-  CheckCircle,
-  Clock,
   FileText,
   Download,
   FileDown,
-  Plus,
 } from 'lucide-react';
 import { generateAidListPDF } from '@/lib/utils/pdf-export';
 import { aidApplicationsApi } from '@/lib/api';
@@ -84,13 +73,12 @@ export default function AidListPage() {
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const limit = 50;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['aid-list', page, search, stageFilter, statusFilter, typeFilter],
+    queryKey: ['aid-list', page, search, stageFilter, statusFilter],
     queryFn: () =>
       aidApplicationsApi.getAidApplications({
         page,

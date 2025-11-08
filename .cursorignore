@@ -1,1 +1,50 @@
 # Add directories or file patterns to ignore during indexing (e.g. foo/ or *.csv)
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Generated files
+convex/_generated/
+*.tsbuildinfo
+next-env.d.ts
+
+# Log files
+*.log
+*-output.txt
+*-output.log
+*-current.txt
+build-output.log
+full-test-output.txt
+lint-*.txt
+lint-output.txt
+lint-current.txt
+lint-investigation.txt
+test-*.txt
+typecheck-*.txt
+
+# Test results
+coverage/
+test-results/
+*.test-results
+
+# Temporary files
+optimization-t
+PERFORMANCE-OPTIMIZATION-FINAL-RE
+
+# IDE and environment
+.vscode/
+.vercel/
+.env.local
+.env*.local
+
+# Cache directories
+.cache/
+.turbo/

@@ -161,3 +161,6 @@ async function deleteUserHandler(
   }
 }
 
+export const PUT = updateUserHandler;
+export const DELETE = deleteUserHandler;
+

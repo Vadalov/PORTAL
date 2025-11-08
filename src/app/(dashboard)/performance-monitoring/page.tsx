@@ -4,12 +4,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  PerformanceMonitor, 
-  usePerformanceMonitor, 
+import {
+  PerformanceMonitor,
+  usePerformanceMonitor,
   useFPSMonitor,
-  perfLog,
-  usePerformanceTracking 
+  perfLog
 } from '@/lib/performance-monitor';
 import { 
   Activity, 
@@ -27,10 +26,17 @@ export default function PerformanceMonitoringPage() {
   const [routeMetrics, setRouteMetrics] = useState<any>({});
   const [isMonitoring, setIsMonitoring] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  
-  const { trackRouteTransition, trackModalPerformance, getMetrics } = usePerformanceMonitor('performance-dashboard');
+
+  const { getMetrics } = usePerformanceMonitor('performance-dashboard');
   const { getFPS, isGoodPerformance } = useFPSMonitor(isMonitoring);
-  const { getMemoryUsage } = usePerformanceTracking();
+
+  // Get memory usage directly from performance API
+  const getMemoryUsage = () => {
+    if (typeof window !== 'undefined' && 'memory' in performance) {
+      return (performance as any).memory?.usedJSHeapSize || 0;
+    }
+    return 0;
+  };
 
   // Real-time monitoring
   useEffect(() => {
@@ -40,7 +46,7 @@ export default function PerformanceMonitoringPage() {
       const fps = getFPS();
       const memory = getMemoryUsage();
       const metrics = getMetrics();
-      
+
       setRouteMetrics({
         fps,
         memory,
@@ -51,7 +57,7 @@ export default function PerformanceMonitoringPage() {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isMonitoring, getFPS, getMemoryUsage, getMetrics]);
+  }, [isMonitoring, getFPS, getMetrics]);
 
   const toggleMonitoring = () => {
     setIsMonitoring(!isMonitoring);
@@ -290,16 +296,16 @@ export default function PerformanceMonitoringPage() {
             <div className="space-y-2">
               <h4 className="font-semibold text-sm">Metrik Hedefleri</h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• FPS: 55+ (İyi), 30-54 (Orta), {'<'} 30 (Zayıf)</li>
-                <li>• LCP: {'<'} 2.5s (İyi), 2.5-4s (Orta), {'>'} 4s (Zayıf)</li>
-                <li>• FID: {'<'} 100ms (İyi), 100-300ms (Orta), {'>'} 300ms (Zayıf)</li>
-                <li>• CLS: {'<'} 0.1 (İyi), 0.1-0.25 (Orta), {'>'} 0.25 (Zayıf)</li>
+                <li>• FPS: 55+ (İyi), 30-54 (Orta), &lt; 30 (Zayıf)</li>
+                <li>• LCP: &lt; 2.5s (İyi), 2.5-4s (Orta), &gt; 4s (Zayıf)</li>
+                <li>• FID: &lt; 100ms (İyi), 100-300ms (Orta), &gt; 300ms (Zayıf)</li>
+                <li>• CLS: &lt; 0.1 (İyi), 0.1-0.25 (Orta), &gt; 0.25 (Zayıf)</li>
               </ul>
             </div>
             <div className="space-y-2">
               <h4 className="font-semibold text-sm">Optimizasyon Önerileri</h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
-                <li>• Component'ları React.memo ile optimize edin</li>
+                <li>• Component&apos;ları React.memo ile optimize edin</li>
                 <li>• useMemo ve useCallback kullanın</li>
                 <li>• Lazy loading ile bundle boyutunu azaltın</li>
                 <li>• Image optimization yapın</li>

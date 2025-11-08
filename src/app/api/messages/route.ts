@@ -110,3 +110,5 @@ async function createMessageHandler(request: NextRequest) {
   }
 }
 
+export const POST = createMessageHandler;
+

@@ -11,19 +11,17 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import type { BeneficiaryDocument } from '@/types/database';
 import { toast } from 'sonner';
-import { ArrowUpRight, Download, Plus, Loader2 } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowUpRight, Download, Plus } from 'lucide-react';
 
 // Performance monitoring imports
-import { usePerformanceMonitor, useFPSMonitor } from '@/lib/performance-monitor';
+import { useFPSMonitor } from '@/lib/performance-monitor';
 import { useCachedQuery, usePrefetchWithCache } from '@/lib/api-cache';
-import { SmartRouteWrapper } from '@/lib/route-splitting';
 
 // Optimized skeleton
 import { TableSkeleton } from '@/components/ui/skeleton-optimized';
 
 // Stub function for beneficiary export
-const exportBeneficiaries = async (params: { search?: string; beneficiaries?: BeneficiaryDocument[]; format?: 'csv' | 'excel' | 'pdf' }) => {
+const exportBeneficiaries = async (_params: { search?: string; beneficiaries?: BeneficiaryDocument[]; format?: 'csv' | 'excel' | 'pdf' }) => {
   toast.info('Dışa aktarma özelliği yakında eklenecek');
   return Promise.resolve({ success: true, data: null, error: null });
 };
@@ -37,9 +35,8 @@ const BeneficiaryQuickAddModal = lazy(() =>
 
 export default function BeneficiariesPage() {
   const router = useRouter();
-  
+
   // Performance monitoring
-  const { trackRouteTransition, getMetrics } = usePerformanceMonitor('beneficiaries');
   const { getFPS, isGoodPerformance } = useFPSMonitor();
   
   // Smart caching
@@ -74,7 +71,6 @@ export default function BeneficiariesPage() {
   });
 
   const beneficiaries = (cachedData?.data || fallbackQuery.data?.data || []) as BeneficiaryDocument[];
-  const total = cachedData?.total || fallbackQuery.data?.total || 0;
 
   // Memoized handlers
   const handleModalClose = useCallback(() => {
@@ -189,23 +185,22 @@ export default function BeneficiariesPage() {
   ], []);
 
   return (
-    <SmartRouteWrapper chunkName="beneficiaries" priority="high" loadingType="table">
-      <PageLayout
-        title="İhtiyaç Sahipleri"
-        description="Kayıtlı ihtiyaç sahiplerini görüntüleyin ve yönetin"
-        actions={
-          <>
-            <Button variant="outline" onClick={handleExport} className="gap-2">
-              <Download className="h-4 w-4" />
-              Dışa Aktar
-            </Button>
-            <Button onClick={handleShowModal} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Yeni Ekle
-            </Button>
-          </>
-        }
-      >
+    <PageLayout
+      title="İhtiyaç Sahipleri"
+      description="Kayıtlı ihtiyaç sahiplerini görüntüleyin ve yönetin"
+      actions={
+        <>
+          <Button variant="outline" onClick={handleExport} className="gap-2">
+            <Download className="h-4 w-4" />
+            Dışa Aktar
+          </Button>
+          <Button onClick={handleShowModal} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Yeni Ekle
+          </Button>
+        </>
+      }
+    >
         {showQuickAddModal && (
           <Suspense fallback={
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -240,6 +235,5 @@ export default function BeneficiariesPage() {
           containerHeight={600}
         />
       </PageLayout>
-    </SmartRouteWrapper>
   );
 }

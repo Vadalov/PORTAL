@@ -125,3 +125,5 @@ async function createUserHandler(request: NextRequest) {
   }
 }
 
+export const POST = createUserHandler;
+

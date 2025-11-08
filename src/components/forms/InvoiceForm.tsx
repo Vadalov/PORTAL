@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -64,6 +64,23 @@ export default function InvoiceForm({
     status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
     notes?: string;
   }>(() => {
+    if (invoice && mode === 'edit') {
+      return {
+        clientName: invoice.clientName,
+        clientEmail: invoice.clientEmail,
+        clientAddress: invoice.clientAddress || '',
+        items: invoice.items.map((item) => ({
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          total: item.total,
+        })),
+        issueDate: invoice.issueDate.toISOString().split('T')[0],
+        dueDate: invoice.dueDate.toISOString().split('T')[0],
+        status: invoice.status,
+        notes: invoice.notes || '',
+      };
+    }
     const today = new Date();
     const thirtyDaysLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
     return {
@@ -78,37 +95,15 @@ export default function InvoiceForm({
     };
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [items, setItems] = useState<InvoiceItem[]>([
-    { id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 },
-  ]);
-
-  // Initialize form data when invoice changes
-  useEffect(() => {
+  const [items, setItems] = useState<InvoiceItem[]>(() => {
     if (invoice && mode === 'edit') {
-      setFormData({
-        clientName: invoice.clientName,
-        clientEmail: invoice.clientEmail,
-        clientAddress: invoice.clientAddress || '',
-        items: invoice.items.map((item) => ({
-          description: item.description,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          total: item.total,
-        })),
-        issueDate: invoice.issueDate.toISOString().split('T')[0],
-        dueDate: invoice.dueDate.toISOString().split('T')[0],
-        status: invoice.status,
-        notes: invoice.notes || '',
-      });
-
-      setItems(
-        invoice.items.map((item, index) => ({
-          id: (index + 1).toString(),
-          ...item,
-        }))
-      );
+      return invoice.items.map((item, index) => ({
+        id: (index + 1).toString(),
+        ...item,
+      }));
     }
-  }, [invoice, mode]);
+    return [{ id: '1', description: '', quantity: 1, unitPrice: 0, total: 0 }];
+  });
 
   // Validate form data
   const validateForm = (): boolean => {

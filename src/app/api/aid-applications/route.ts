@@ -110,3 +110,5 @@ async function createApplicationHandler(request: NextRequest) {
   }
 }
 
+export const POST = createApplicationHandler;
+
