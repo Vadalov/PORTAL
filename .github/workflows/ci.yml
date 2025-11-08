@@ -65,7 +65,6 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-        continue-on-error: true
 
       - name: Upload ESLint results
         if: always()
@@ -95,7 +94,6 @@ jobs:
 
       - name: Run TypeScript compiler
         run: npm run typecheck
-        continue-on-error: true
 
   test:
     name: Unit & Integration Tests

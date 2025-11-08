@@ -132,7 +132,7 @@ export async function handleUpdate<T, U = unknown>(
 
     return successResponse(response.data as T, `${resourceName} güncellendi`);
   } catch (error: unknown) {
-    console.error(`Update ${resourceName} error:`, _error);
+    console.error(`Update ${resourceName} error:`, error);
     return errorResponse('Güncelleme işlemi başarısız', 500) as any;
   }
 }
@@ -161,7 +161,7 @@ export async function handleDelete(
 
     return successResponse(null, `${resourceName} silindi`);
   } catch (error: unknown) {
-    console.error(`Delete ${resourceName} error:`, _error);
+    console.error(`Delete ${resourceName} error:`, error);
     return errorResponse('Silme işlemi başarısız', 500) as any;
   }
 }

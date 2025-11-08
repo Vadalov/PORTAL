@@ -1,7 +1,7 @@
 // Performance-enhanced DataTable with Virtual Scrolling
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect, memo, useCallback } from 'react';
+import React, { useState, useMemo, useRef, memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -61,7 +61,7 @@ function VirtualizedDataTable<T extends Record<string, any>>({
     const visibleItemCount = Math.ceil(containerHeight / rowHeight);
     const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - 5);
     const endIndex = Math.min(data.length - 1, startIndex + visibleItemCount + 10);
-    
+
     return {
       startIndex,
       endIndex,
@@ -76,14 +76,14 @@ function VirtualizedDataTable<T extends Record<string, any>>({
   }, []);
 
   // Memoized row renderer
-  const RowRenderer = memo(function RowRenderer({ 
-    item, 
-    index, 
-    style 
-  }: { 
-    item: T; 
-    index: number; 
-    style: React.CSSProperties; 
+  const RowRenderer = memo(function RowRenderer({
+    item,
+    index,
+    style,
+  }: {
+    item: T;
+    index: number;
+    style: React.CSSProperties;
   }) {
     return (
       <div
@@ -93,11 +93,15 @@ function VirtualizedDataTable<T extends Record<string, any>>({
           onRowClick && 'cursor-pointer'
         )}
         onClick={() => onRowClick?.(item)}
+        role="row"
+        aria-rowindex={index + 2}
       >
         {columns.map((column) => (
           <div
             key={column.key}
             className={cn('flex-1 py-3 px-2', column.className)}
+            role="cell"
+            aria-colindex={columns.findIndex((col) => col.key === column.key) + 1}
           >
             {column.render ? column.render(item) : item[column.key] || '-'}
           </div>
@@ -125,8 +129,18 @@ function VirtualizedDataTable<T extends Record<string, any>>({
     return (
       <div className="text-center py-12">
         <div className="text-red-500 mb-4">
-          <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
+          <svg
+            className="w-12 h-12 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"
+            />
           </svg>
           <p className="text-lg font-medium">Veri yüklenirken hata oluştu</p>
           <p className="text-sm text-slate-500 mt-2">{error.message}</p>
@@ -146,7 +160,12 @@ function VirtualizedDataTable<T extends Record<string, any>>({
       <div className="text-center py-12">
         <div className="text-slate-400 mb-4">
           <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-4-4 4-4-4" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-4-4 4-4-4"
+            />
           </svg>
         </div>
         <h3 className="text-lg font-medium text-slate-900">{emptyMessage}</h3>
@@ -168,8 +187,18 @@ function VirtualizedDataTable<T extends Record<string, any>>({
               onChange={(e) => onSearchChange?.(e.target.value)}
               className="w-full h-9 pl-9 pr-3 text-sm bg-white border border-slate-200 rounded-lg text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
             />
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </div>
         </div>
@@ -181,19 +210,25 @@ function VirtualizedDataTable<T extends Record<string, any>>({
         className="border border-slate-200 rounded-lg overflow-auto bg-white"
         style={{ height: containerHeight }}
         onScroll={handleScroll}
+        role="table"
+        aria-rowcount={data.length + 1}
+        aria-colcount={columns.length}
       >
         {/* Header */}
-        <div 
+        <div
           className="flex items-center px-4 border-b border-slate-200 bg-slate-50/80 font-medium text-sm text-slate-600 sticky top-0 z-10"
-          style={{ 
+          style={{
             height: rowHeight,
             willChange: 'transform',
           }}
+          role="row"
         >
-          {columns.map((column) => (
+          {columns.map((column, columnIndex) => (
             <div
               key={column.key}
               className={cn('flex-1 py-3 px-2', column.className)}
+              role="columnheader"
+              aria-colindex={columnIndex + 1}
             >
               {column.label}
             </div>
@@ -242,7 +277,7 @@ function VirtualizedDataTable<T extends Record<string, any>>({
                 return (
                   <Button
                     key={page}
-                    variant={page === pagination.page ? "default" : "outline"}
+                    variant={page === pagination.page ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => pagination.onPageChange(page)}
                   >

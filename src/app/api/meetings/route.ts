@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexMeetings, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
+import { Permission } from '@/types/auth';
+import {
+  requireAuthenticatedUser,
+  verifyCsrfToken,
+  buildErrorResponse,
+} from '@/lib/api/auth-utils';
 
 function validateMeeting(data: Record<string, unknown>): {
   isValid: boolean;
@@ -15,7 +21,10 @@ function validateMeeting(data: Record<string, unknown>): {
   if (!data.meeting_date) {
     errors.push('Toplantı tarihi zorunludur');
   }
-  if (data.status && !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status as string)) {
+  if (
+    data.status &&
+    !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status as string)
+  ) {
     errors.push('Geçersiz durum');
   }
 
@@ -35,13 +44,17 @@ function validateMeeting(data: Record<string, unknown>): {
  * GET /api/meetings
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const params = normalizeQueryParams(searchParams);
-
   try {
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DASHBOARD_READ,
+    });
+
+    const { searchParams } = new URL(request.url);
+    const params = normalizeQueryParams(searchParams);
+
     const response = await convexMeetings.list({
       ...params,
-      organizer: searchParams.get('organizer') as Id<"users"> | undefined,
+      organizer: searchParams.get('organizer') as Id<'users'> | undefined,
     });
 
     return NextResponse.json({
@@ -50,10 +63,14 @@ export async function GET(request: NextRequest) {
       total: response.total || 0,
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('List meetings error', _error, {
       endpoint: '/api/meetings',
       method: 'GET',
-      params,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -65,6 +82,15 @@ export async function GET(request: NextRequest) {
 async function createMeetingHandler(request: NextRequest) {
   let body: unknown = null;
   try {
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredAnyPermission: [
+        Permission.DONATIONS_CREATE,
+        Permission.BENEFICIARIES_CREATE,
+        Permission.AID_REQUESTS_CREATE,
+      ],
+    });
+
     body = await request.json();
     const validation = validateMeeting(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
@@ -79,10 +105,18 @@ async function createMeetingHandler(request: NextRequest) {
       description: validation.normalizedData.description as string | undefined,
       meeting_date: validation.normalizedData.meeting_date as string,
       location: validation.normalizedData.location as string | undefined,
-      organizer: validation.normalizedData.organizer as Id<"users">,
-      participants: (validation.normalizedData.participants as Id<"users">[]) || [],
-      status: (validation.normalizedData.status || 'scheduled') as 'scheduled' | 'ongoing' | 'completed' | 'cancelled',
-      meeting_type: (validation.normalizedData.meeting_type || 'general') as 'general' | 'committee' | 'board' | 'other',
+      organizer: validation.normalizedData.organizer as Id<'users'>,
+      participants: (validation.normalizedData.participants as Id<'users'>[]) || [],
+      status: (validation.normalizedData.status || 'scheduled') as
+        | 'scheduled'
+        | 'ongoing'
+        | 'completed'
+        | 'cancelled',
+      meeting_type: (validation.normalizedData.meeting_type || 'general') as
+        | 'general'
+        | 'committee'
+        | 'board'
+        | 'other',
       agenda: validation.normalizedData.agenda as string | undefined,
       notes: validation.normalizedData.notes as string | undefined,
     };
@@ -94,6 +128,11 @@ async function createMeetingHandler(request: NextRequest) {
       { status: 201 }
     );
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Create meeting error', _error, {
       endpoint: '/api/meetings',
       method: 'POST',
@@ -107,3 +146,4 @@ async function createMeetingHandler(request: NextRequest) {
   }
 }
 
+export const POST = createMeetingHandler;

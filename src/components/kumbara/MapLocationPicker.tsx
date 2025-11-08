@@ -24,7 +24,7 @@ interface MapLocationPickerProps {
 
 declare global {
   interface Window {
-    google: any;
+    google: typeof google;
   }
 }
 
@@ -36,14 +36,14 @@ export function MapLocationPicker({
   className,
 }: MapLocationPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const directionsServiceRef = useRef<google.maps.DirectionsService | null>(null);
+  const directionsRendererRef = useRef<google.maps.DirectionsRenderer | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [routePoints, setRoutePoints] = useState<MapLocation[]>([]);
-  const [directionsService, setDirectionsService] = useState<any>(null);
-  const [directionsRenderer, setDirectionsRenderer] = useState<any>(null);
-  const [currentLocation, setCurrentLocation] = useState<MapLocation | null>(initialLocation || null);
   const [addressInput, setAddressInput] = useState('');
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const isLoading = !isMapLoaded && !loadError;
 
   // Load Google Maps script
   useEffect(() => {
@@ -53,6 +53,7 @@ export function MapLocationPicker({
       // Check if Google Maps is already loaded
       if (window.google && window.google.maps) {
         setIsMapLoaded(true);
+        setLoadError(false);
         return;
       }
 
@@ -62,8 +63,16 @@ export function MapLocationPicker({
           if (window.google && window.google.maps) {
             clearInterval(checkInterval);
             setIsMapLoaded(true);
+            setLoadError(false);
           }
         }, 100);
+        return;
+      }
+
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        setLoadError(true);
+        setIsMapLoaded(false);
         return;
       }
 
@@ -71,11 +80,14 @@ export function MapLocationPicker({
       script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&libraries=places`;
       script.async = true;
       script.defer = true;
-      script.onload = () => setIsMapLoaded(true);
+      script.onload = () => {
+        setIsMapLoaded(true);
+        setLoadError(false);
+      };
       script.onerror = () => {
         console.error('Failed to load Google Maps');
         toast.error('Harita yüklenemedi. Lütfen API anahtarınızı kontrol edin.');
-        setIsLoading(false);
+        setLoadError(true);
       };
       document.head.appendChild(script);
     };
@@ -83,16 +95,92 @@ export function MapLocationPicker({
     loadGoogleMaps();
   }, []);
 
+  // Calculate and display route between points
+  const calculateAndDisplayRoute = useCallback(
+    (points: MapLocation[]) => {
+      const service = directionsServiceRef.current;
+      const renderer = directionsRendererRef.current;
+
+      if (!service || !renderer || points.length < 2) return;
+
+      if (points.length === 2) {
+        // Simple route between two points
+        service.route(
+          {
+            origin: points[0],
+            destination: points[1],
+            travelMode: window.google.maps.TravelMode.DRIVING,
+          },
+          (result: google.maps.DirectionsResult | null, status: google.maps.DirectionsStatus) => {
+            if (status === 'OK' && result) {
+              renderer.setDirections(result);
+              if (onRouteUpdate) {
+                onRouteUpdate(points);
+              }
+            }
+          }
+        );
+      } else {
+        // Route with multiple waypoints
+        const waypoints = points.slice(1, -1).map((point) => ({
+          location: point,
+          stopover: true,
+        }));
+
+        service.route(
+          {
+            origin: points[0],
+            destination: points[points.length - 1],
+            waypoints,
+            travelMode: window.google.maps.TravelMode.DRIVING,
+            optimizeWaypoints: true,
+          },
+          (result: google.maps.DirectionsResult | null, status: google.maps.DirectionsStatus) => {
+            if (status === 'OK' && result) {
+              renderer.setDirections(result);
+              if (onRouteUpdate) {
+                onRouteUpdate(points);
+              }
+            }
+          }
+        );
+      }
+    },
+    [onRouteUpdate]
+  );
+
+  // Add a point to the route
+  const addRoutePoint = useCallback(
+    (point: MapLocation) => {
+      setRoutePoints((prev) => {
+        const newPoints = [...prev, point];
+        calculateAndDisplayRoute(newPoints);
+        toast.success(`${newPoints.length}. nokta rotaya eklendi`);
+        return newPoints;
+      });
+
+      if (onLocationSelect) {
+        onLocationSelect(point);
+      }
+    },
+    [onLocationSelect, calculateAndDisplayRoute]
+  );
+
+  const addRoutePointRef = useRef(addRoutePoint);
+  useEffect(() => {
+    addRoutePointRef.current = addRoutePoint;
+  }, [addRoutePoint]);
+
   // Initialize Google Map when loaded
   useEffect(() => {
-    if (!isMapLoaded || !mapRef.current) return;
+    if (!isMapLoaded || !mapRef.current || mapInstanceRef.current) return;
 
     try {
       // Default center (Istanbul, Turkey)
       const defaultCenter = { lat: 41.0082, lng: 28.9784 };
 
       const googleMap = new window.google.maps.Map(mapRef.current, {
-        center: currentLocation || defaultCenter,
+        center: initialLocation || defaultCenter,
         zoom: 13,
         mapTypeControl: true,
         streetViewControl: true,
@@ -110,15 +198,20 @@ export function MapLocationPicker({
       });
 
       directionsRnd.setMap(googleMap);
-      setDirectionsService(directionsSvc);
-      setDirectionsRenderer(directionsRnd);
-      setMap(googleMap);
-      setIsLoading(false);
+      directionsServiceRef.current = directionsSvc;
+      directionsRendererRef.current = directionsRnd;
+      mapInstanceRef.current = googleMap;
 
       // Add click listener for adding route points
-      googleMap.addListener('click', (event: any) => {
-        const lat = event.latLng.lat();
-        const lng = event.latLng.lng();
+      googleMap.addListener('click', (event: google.maps.MapMouseEvent) => {
+        const clickedLocation = event.latLng;
+        if (!clickedLocation) {
+          toast.error('Konum alınamadı');
+          return;
+        }
+
+        const lat = clickedLocation.lat();
+        const lng = clickedLocation.lng();
 
         const newPoint: MapLocation = { lat, lng };
 
@@ -126,12 +219,12 @@ export function MapLocationPicker({
         const geocoder = new window.google.maps.Geocoder();
         geocoder.geocode(
           { location: { lat, lng } },
-          (results: any, status: string) => {
+          (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
             if (status === 'OK' && results && results[0]) {
               newPoint.address = results[0].formatted_address;
             }
 
-            addRoutePoint(newPoint);
+            addRoutePointRef.current?.(newPoint);
           }
         );
       });
@@ -147,85 +240,21 @@ export function MapLocationPicker({
     } catch (_error) {
       console.error('Error initializing map:', _error);
       toast.error('Harita başlatılırken hata oluştu');
-      setIsLoading(false);
     }
   }, [isMapLoaded, initialLocation]);
-
-  // Add a point to the route
-  const addRoutePoint = useCallback((point: MapLocation) => {
-    setRoutePoints((prev) => {
-      const newPoints = [...prev, point];
-      calculateAndDisplayRoute(newPoints);
-      return newPoints;
-    });
-
-    if (onLocationSelect) {
-      onLocationSelect(point);
-    }
-
-    toast.success(`${routePoints.length + 1}. nokta rotaya eklendi`);
-  }, [onLocationSelect, routePoints.length]);
-
-  // Calculate and display route between points
-  const calculateAndDisplayRoute = useCallback((points: MapLocation[]) => {
-    if (!directionsService || !directionsRenderer || points.length < 2) return;
-
-    if (points.length === 2) {
-      // Simple route between two points
-      directionsService.route(
-        {
-          origin: points[0],
-          destination: points[1],
-          travelMode: window.google.maps.TravelMode.DRIVING,
-        },
-        (result: any, status: string) => {
-          if (status === 'OK' && result) {
-            directionsRenderer.setDirections(result);
-            if (onRouteUpdate) {
-              onRouteUpdate(points);
-            }
-          }
-        }
-      );
-    } else {
-      // Route with multiple waypoints
-      const waypoints = points.slice(1, -1).map((point) => ({
-        location: point,
-        stopover: true,
-      }));
-
-      directionsService.route(
-        {
-          origin: points[0],
-          destination: points[points.length - 1],
-          waypoints,
-          travelMode: window.google.maps.TravelMode.DRIVING,
-          optimizeWaypoints: true,
-        },
-        (result: any, status: string) => {
-          if (status === 'OK' && result) {
-            directionsRenderer.setDirections(result);
-            if (onRouteUpdate) {
-              onRouteUpdate(points);
-            }
-          }
-        }
-      );
-    }
-  }, [directionsService, directionsRenderer, onRouteUpdate]);
 
   // Clear all route points
   const clearRoute = useCallback(() => {
     setRoutePoints([]);
-    if (directionsRenderer) {
-      directionsRenderer.setDirections({ routes: [] } as any);
+    if (directionsRendererRef.current) {
+      directionsRendererRef.current.setDirections(null);
     }
     toast.success('Rota temizlendi');
-  }, [directionsRenderer]);
+  }, []);
 
   // Get user's current location
   const getCurrentLocation = useCallback(() => {
-    if (!map) return;
+    if (!mapInstanceRef.current) return;
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -235,10 +264,9 @@ export function MapLocationPicker({
             lng: position.coords.longitude,
           };
 
-          map.setCenter(pos);
-          map.setZoom(15);
+          mapInstanceRef.current?.setCenter(pos);
+          mapInstanceRef.current?.setZoom(15);
 
-          setCurrentLocation(pos);
           if (onLocationSelect) {
             onLocationSelect(pos);
           }
@@ -253,43 +281,45 @@ export function MapLocationPicker({
     } else {
       toast.error('Tarayıcınız konum desteklemiyor');
     }
-  }, [map, onLocationSelect]);
+  }, [onLocationSelect]);
 
   // Search address
   const searchAddress = useCallback(async () => {
-    if (!map || !addressInput.trim()) return;
+    if (!mapInstanceRef.current || !addressInput.trim()) return;
 
     const geocoder = new window.google.maps.Geocoder();
 
-    geocoder.geocode({ address: addressInput }, (results: any, status: string) => {
-      if (status === 'OK' && results && results[0]) {
-        const location = results[0].geometry.location;
-        const pos = {
-          lat: location.lat(),
-          lng: location.lng(),
-        };
+    geocoder.geocode(
+      { address: addressInput },
+      (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+        if (status === 'OK' && results && results[0]) {
+          const location = results[0].geometry.location;
+          const pos = {
+            lat: location.lat(),
+            lng: location.lng(),
+          };
 
-        map.setCenter(pos);
-        map.setZoom(15);
+          mapInstanceRef.current?.setCenter(pos);
+          mapInstanceRef.current?.setZoom(15);
 
-        // Add marker for searched location
-        new window.google.maps.Marker({
-          position: pos,
-          map,
-          title: results[0].formatted_address,
-        });
+          // Add marker for searched location
+          new window.google.maps.Marker({
+            position: pos,
+            map: mapInstanceRef.current,
+            title: results[0].formatted_address,
+          });
 
-        setCurrentLocation(pos);
-        if (onLocationSelect) {
-          onLocationSelect({ ...pos, address: results[0].formatted_address });
+          if (onLocationSelect) {
+            onLocationSelect({ ...pos, address: results[0].formatted_address });
+          }
+
+          toast.success('Konum bulundu');
+        } else {
+          toast.error('Adres bulunamadı');
         }
-
-        toast.success('Konum bulundu');
-      } else {
-        toast.error('Adres bulunamadı');
       }
-    });
-  }, [map, addressInput, onLocationSelect]);
+    );
+  }, [addressInput, onLocationSelect]);
 
   if (isLoading) {
     return (
@@ -299,9 +329,31 @@ export function MapLocationPicker({
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-sm text-muted-foreground">Harita yükleniyor...</p>
             <p className="text-xs text-muted-foreground mt-2">
-              Google Maps API anahtarınızı .env.local dosyasında NEXT_PUBLIC_GOOGLE_MAPS_API_KEY olarak ayarlayın
+              Google Maps API anahtarınızı .env.local dosyasında NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+              olarak ayarlayın
             </p>
           </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Card className={className}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Harita kullanılamıyor
+          </CardTitle>
+          <CardDescription>
+            Google Maps API anahtarı bulunamadı. Lütfen{' '}
+            <code className="font-mono">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> değerini .env
+            dosyanıza ekleyin.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          Harita özellikleri devre dışı bırakıldı.
         </CardContent>
       </Card>
     );
@@ -315,7 +367,8 @@ export function MapLocationPicker({
           Kumbara Konumu ve Rota
         </CardTitle>
         <CardDescription>
-          Haritaya tıklayarak rota noktaları ekleyin. İlk nokta başlangıç, son nokta varış noktası olacaktır.
+          Haritaya tıklayarak rota noktaları ekleyin. İlk nokta başlangıç, son nokta varış noktası
+          olacaktır.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -344,11 +397,7 @@ export function MapLocationPicker({
         </div>
 
         {/* Map Container */}
-        <div
-          ref={mapRef}
-          style={{ height }}
-          className="w-full rounded-lg border"
-        />
+        <div ref={mapRef} style={{ height }} className="w-full rounded-lg border" />
 
         {/* Route Controls */}
         <div className="flex items-center justify-between gap-2">

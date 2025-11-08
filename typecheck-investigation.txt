@@ -1,0 +1,20 @@
+npm warn Unknown project config "auto-install-peers". This will stop working in the next major version of npm.
+
+> dernek-nextjs@0.1.0 typecheck
+> tsc --noEmit
+
+src/app/(dashboard)/ayarlar/parametreler/page.tsx(68,38): error TS2554: Expected 0 arguments, but got 1.
+src/app/(dashboard)/ayarlar/parametreler/page.tsx(78,23): error TS2352: Conversion of type '{ category: string; key: string; value: unknown; }[]' to type '{ _id: string; category: string; name_tr: string; value: string; order: number; is_active: boolean; }[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ category: string; key: string; value: unknown; }' is missing the following properties from type '{ _id: string; category: string; name_tr: string; value: string; order: number; is_active: boolean; }': _id, name_tr, order, is_active
+src/app/(dashboard)/ayarlar/parametreler/page.tsx(90,43): error TS2353: Object literal may only specify known properties, and 'is_active' does not exist in type '{ category?: string | undefined; key?: string | undefined; value?: unknown; updatedBy?: string | undefined; }'.
+src/app/(dashboard)/ayarlar/parametreler/page.tsx(102,63): error TS2559: Type 'string' has no properties in common with type '{ category?: string | undefined; key?: string | undefined; updatedBy?: string | undefined; }'.
+src/app/(dashboard)/burs/ogrenciler/page.tsx(108,38): error TS2552: Cannot find name 'studentsData'. Did you mean 'students'?
+src/app/(dashboard)/burs/ogrenciler/page.tsx(109,17): error TS2552: Cannot find name 'studentsData'. Did you mean 'students'?
+src/app/(dashboard)/burs/ogrenciler/page.tsx(113,53): error TS2552: Cannot find name 'studentsData'. Did you mean 'students'?
+src/app/api/meetings/route.ts(138,14): error TS2451: Cannot redeclare block-scoped variable 'POST'.
+src/app/api/meetings/route.ts(140,14): error TS2451: Cannot redeclare block-scoped variable 'POST'.
+src/lib/auth/session.ts(100,9): error TS2322: Type '"ADMIN"' is not assignable to type 'UserRole'.
+src/lib/auth/session.ts(105,9): error TS2322: Type '"ADMIN"' is not assignable to type 'UserRole'.
+src/lib/auth/session.ts(110,9): error TS2322: Type '"MANAGER"' is not assignable to type 'UserRole'.
+src/lib/auth/session.ts(115,9): error TS2322: Type '"MEMBER"' is not assignable to type 'UserRole'.
+src/lib/auth/session.ts(120,9): error TS2322: Type '"VIEWER"' is not assignable to type 'UserRole'.

@@ -22,6 +22,8 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { aidApplicationsApi } from '@/lib/api';
+import type { AidApplicationDocument } from '@/types/database';
 import {
   Search,
   Filter,
@@ -89,135 +91,77 @@ export default function StudentsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const limit = 50;
 
-  // Mock data for demonstration - in real app, this would come from API
-  const { data: studentsData, isLoading } = useQuery({
-    queryKey: ['scholarship-students', page, search, statusFilter, gradeFilter],
-    queryFn: () => {
-      // Mock data structure
-      const mockStudents: StudentRecord[] = [
-        {
-          _id: '1',
-          applicant_name: 'Ahmet Yılmaz',
-          applicant_tc_no: '12345678901',
-          applicant_phone: '5551234567',
-          applicant_email: 'ahmet.yilmaz@email.com',
-          university: 'İstanbul Üniversitesi',
-          department: 'Bilgisayar Mühendisliği',
-          grade_level: '3',
-          gpa: 3.4,
-          academic_year: '2024-2025',
-          monthly_income: 1500,
-          family_income: 3500,
-          father_occupation: 'İşçi',
-          mother_occupation: 'Temizlik Görevlisi',
-          sibling_count: 2,
-          is_orphan: false,
-          has_disability: false,
-          status: 'approved',
-          priority_score: 78,
-          submitted_at: '2024-09-15T10:00:00Z',
-          scholarship_id: 'scholarship_1',
-          scholarship_title: 'Akademik Başarı Bursu',
-          scholarship_amount: 2500,
-          total_paid: 5000,
-          last_payment_date: '2024-12-01T00:00:00Z',
+  const { data: applicationsResponse, isLoading } = useQuery({
+    queryKey: ['scholarship-students', page, search, statusFilter],
+    queryFn: async () => {
+      const response = await aidApplicationsApi.getAidApplications({
+        page,
+        limit,
+        search,
+        filters: {
+          stage: statusFilter !== 'all' ? statusFilter : undefined,
         },
-        {
-          _id: '2',
-          applicant_name: 'Fatma Kaya',
-          applicant_tc_no: '98765432109',
-          applicant_phone: '5559876543',
-          applicant_email: 'fatma.kaya@email.com',
-          university: 'ODTÜ',
-          department: 'Matematik',
-          grade_level: '2',
-          gpa: 3.8,
-          academic_year: '2024-2025',
-          monthly_income: 800,
-          family_income: 2800,
-          father_occupation: 'Emekli',
-          mother_occupation: 'Ev Hanımı',
-          sibling_count: 1,
-          is_orphan: false,
-          has_disability: false,
-          status: 'approved',
-          priority_score: 85,
-          submitted_at: '2024-08-20T14:30:00Z',
-          scholarship_id: 'scholarship_2',
-          scholarship_title: 'İhtiyaç Bazlı Burs',
-          scholarship_amount: 2000,
-          total_paid: 4000,
-          last_payment_date: '2024-11-30T00:00:00Z',
-        },
-        {
-          _id: '3',
-          applicant_name: 'Mehmet Demir',
-          applicant_tc_no: '56789012345',
-          applicant_phone: '5555678901',
-          university: 'Boğaziçi Üniversitesi',
-          department: 'Makine Mühendisliği',
-          grade_level: '4',
-          gpa: 3.2,
-          academic_year: '2024-2025',
-          monthly_income: 2000,
-          family_income: 4500,
-          father_occupation: 'Memur',
-          mother_occupation: 'Öğretmen',
-          sibling_count: 0,
-          is_orphan: false,
-          has_disability: false,
-          status: 'under_review',
-          priority_score: 65,
-          submitted_at: '2024-10-01T09:15:00Z',
-          scholarship_id: 'scholarship_1',
-          scholarship_title: 'Akademik Başarı Bursu',
-          scholarship_amount: 2500,
-          total_paid: 0,
-          last_payment_date: undefined,
-        },
-      ];
-
-      // Ensure sensible defaults
-      const currentPage = Math.max(1, page || 1);
-      const currentLimit = Math.max(1, limit || 50);
-
-      // Filter students first
-      const filtered = mockStudents.filter(student => {
-        const matchesSearch = !search ||
-          student.applicant_name.toLowerCase().includes(search.toLowerCase()) ||
-          student.applicant_tc_no.includes(search) ||
-          student.university?.toLowerCase().includes(search.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || student.status === statusFilter;
-        const matchesGrade = gradeFilter === 'all' || student.grade_level === gradeFilter;
-        return matchesSearch && matchesStatus && matchesGrade;
       });
-
-      // Calculate pagination bounds
-      const start = Math.max(0, (currentPage - 1) * currentLimit);
-      const end = Math.min(filtered.length, start + currentLimit);
-
-      return Promise.resolve({
-        data: filtered.slice(start, end),
-        total: filtered.length,
-      });
+      return response;
     },
   });
 
-  const students: StudentRecord[] = (studentsData?.data as StudentRecord[]) || [];
-  const total = studentsData?.total || 0;
-  const totalPages = Math.ceil(total / limit);
+  const applications = (applicationsResponse?.data ?? []) as AidApplicationDocument[];
+  const total = applicationsResponse?.total ?? applications.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  // Memoize students to avoid dependency issues
-  const memoizedStudents = useMemo(() => students, [studentsData?.data]);
+  const memoizedStudents: StudentRecord[] = useMemo(() => {
+    const normalized: StudentRecord[] = applications.map((application) => ({
+      _id: application._id,
+      applicant_name: application.applicant_name,
+      applicant_tc_no: '',
+      applicant_phone: '',
+      applicant_email: undefined,
+      university: undefined,
+      department: undefined,
+      grade_level: undefined,
+      gpa: undefined,
+      academic_year: undefined,
+      monthly_income: application.regular_financial_aid,
+      family_income: undefined,
+      father_occupation: undefined,
+      mother_occupation: undefined,
+      sibling_count: undefined,
+      is_orphan: undefined,
+      has_disability: undefined,
+      status: application.stage,
+      priority_score: undefined,
+      submitted_at: application.application_date,
+      scholarship_id: application.beneficiary_id || '',
+      scholarship_title: undefined,
+      scholarship_amount: application.one_time_aid,
+      total_paid: undefined,
+      last_payment_date: application.completed_at,
+    }));
+
+    return normalized.filter((student) => {
+      const matchesGrade = gradeFilter === 'all' || student.grade_level === gradeFilter;
+      const matchesStatus = statusFilter === 'all' || student.status === statusFilter;
+      const matchesSearch =
+        !search || student.applicant_name.toLowerCase().includes(search.toLowerCase());
+      return matchesGrade && matchesStatus && matchesSearch;
+    });
+  }, [applications, gradeFilter, statusFilter, search]);
+
+  const visibleTotal = memoizedStudents.length;
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const approvedStudents = memoizedStudents.filter(s => s.status === 'approved');
-    const totalScholarshipAmount = approvedStudents.reduce((sum, s) => sum + (s.scholarship_amount || 0), 0);
+    const approvedStudents = memoizedStudents.filter((s) => s.status === 'approved');
+    const totalScholarshipAmount = approvedStudents.reduce(
+      (sum, s) => sum + (s.scholarship_amount || 0),
+      0
+    );
     const totalPaid = approvedStudents.reduce((sum, s) => sum + (s.total_paid || 0), 0);
-    const averageGPA = approvedStudents.length > 0
-      ? approvedStudents.reduce((sum, s) => sum + (s.gpa || 0), 0) / approvedStudents.length
-      : 0;
+    const averageGPA =
+      approvedStudents.length > 0
+        ? approvedStudents.reduce((sum, s) => sum + (s.gpa || 0), 0) / approvedStudents.length
+        : 0;
 
     return {
       totalStudents: total,
@@ -225,7 +169,7 @@ export default function StudentsPage() {
       totalScholarshipAmount,
       totalPaid,
       averageGPA: averageGPA.toFixed(2),
-      pendingReview: memoizedStudents.filter(s => s.status === 'under_review').length,
+      pendingReview: memoizedStudents.filter((s) => s.status === 'under_review').length,
     };
   }, [memoizedStudents, total]);
 
@@ -235,8 +179,21 @@ export default function StudentsPage() {
       ['Tarih', new Date().toLocaleDateString('tr-TR')],
       [''],
       ['ÖĞRENCI LİSTESİ'],
-      ['Ad Soyad', 'TC No', 'Telefon', 'Email', 'Üniversite', 'Bölüm', 'Sınıf', 'GPA', 'Durum', 'Puan', 'Burs Tutarı', 'Ödenen'],
-      ...memoizedStudents.map(student => [
+      [
+        'Ad Soyad',
+        'TC No',
+        'Telefon',
+        'Email',
+        'Üniversite',
+        'Bölüm',
+        'Sınıf',
+        'GPA',
+        'Durum',
+        'Puan',
+        'Burs Tutarı',
+        'Ödenen',
+      ],
+      ...memoizedStudents.map((student) => [
         student.applicant_name,
         student.applicant_tc_no,
         student.applicant_phone,
@@ -252,7 +209,7 @@ export default function StudentsPage() {
       ]),
     ];
 
-    const csv = csvContent.map(row => row.join(',')).join('\n');
+    const csv = csvContent.map((row) => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -267,7 +224,9 @@ export default function StudentsPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Öğrenci Listesi</h1>
-          <p className="text-muted-foreground mt-2">Burs alan öğrencileri görüntüleyin ve yönetin</p>
+          <p className="text-muted-foreground mt-2">
+            Burs alan öğrencileri görüntüleyin ve yönetin
+          </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -291,7 +250,9 @@ export default function StudentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Öğrenci Listesi</h1>
-          <p className="text-muted-foreground mt-2">Burs alan öğrencileri görüntüleyin ve yönetin</p>
+          <p className="text-muted-foreground mt-2">
+            Burs alan öğrencileri görüntüleyin ve yönetin
+          </p>
         </div>
 
         <div className="flex gap-2">
@@ -309,9 +270,7 @@ export default function StudentsPage() {
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Yeni Öğrenci Ekle</DialogTitle>
-                <DialogDescription>
-                  Burs başvurusu yapan yeni bir öğrenci ekleyin
-                </DialogDescription>
+                <DialogDescription>Burs başvurusu yapan yeni bir öğrenci ekleyin</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <p className="text-center text-muted-foreground py-8">
@@ -356,9 +315,7 @@ export default function StudentsPage() {
             <div className="text-2xl font-bold">
               {stats.totalScholarshipAmount.toLocaleString('tr-TR')} ₺
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Aylık toplam
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Aylık toplam</p>
           </CardContent>
         </Card>
 
@@ -434,7 +391,7 @@ export default function StudentsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Öğrenci Listesi</CardTitle>
-          <CardDescription>Toplam {total} öğrenci kaydı</CardDescription>
+          <CardDescription>Toplam {visibleTotal} öğrenci kaydı</CardDescription>
         </CardHeader>
         <CardContent>
           {memoizedStudents.length === 0 ? (
@@ -456,15 +413,15 @@ export default function StudentsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <h3 className="font-semibold text-lg">{student.applicant_name}</h3>
-                        <Badge className={STATUS_LABELS[student.status as keyof typeof STATUS_LABELS]?.color}>
+                        <Badge
+                          className={
+                            STATUS_LABELS[student.status as keyof typeof STATUS_LABELS]?.color
+                          }
+                        >
                           {STATUS_LABELS[student.status as keyof typeof STATUS_LABELS]?.label}
                         </Badge>
-                        {student.is_orphan && (
-                          <Badge variant="secondary">Yetim</Badge>
-                        )}
-                        {student.has_disability && (
-                          <Badge variant="secondary">Engelli</Badge>
-                        )}
+                        {student.is_orphan && <Badge variant="secondary">Yetim</Badge>}
+                        {student.has_disability && <Badge variant="secondary">Engelli</Badge>}
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -517,7 +474,9 @@ export default function StudentsPage() {
                             </div>
                             {(student.total_paid ?? 0) > 0 && (
                               <div className="text-right">
-                                <p className="text-sm text-green-600 dark:text-green-300">Toplam Ödenen</p>
+                                <p className="text-sm text-green-600 dark:text-green-300">
+                                  Toplam Ödenen
+                                </p>
                                 <p className="font-semibold text-green-800 dark:text-green-200">
                                   {(student.total_paid ?? 0).toLocaleString('tr-TR')} ₺
                                 </p>

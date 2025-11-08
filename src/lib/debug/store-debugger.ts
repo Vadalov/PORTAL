@@ -188,8 +188,8 @@ class StoreDebuggerClass {
         if (sessionValue) {
           console.log('Auth Session:', JSON.parse(sessionValue));
         }
-      } catch (_error) {
-        console.error('❌ Failed to read localStorage:', _error);
+      } catch (error) {
+        console.error('❌ Failed to read localStorage:', error);
       }
     }
 
@@ -365,7 +365,7 @@ class StoreDebuggerClass {
       console.log(`✅ Hydration test successful (${duration.toFixed(2)}ms)`);
       this.logStoreState(storeName);
     } catch (error) {
-      console.error('❌ Hydration test failed:', _error);
+      console.error('❌ Hydration test failed:', error);
     }
   }
 }

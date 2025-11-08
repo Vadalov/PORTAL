@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexBeneficiaries, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import type { QueryParams } from '@/types/database';
+import { Permission } from '@/types/auth';
+import {
+  requireAuthenticatedUser,
+  verifyCsrfToken,
+  buildErrorResponse,
+} from '@/lib/api/auth-utils';
 
 // TypeScript interfaces
 interface BeneficiaryFilters {
@@ -11,7 +17,6 @@ interface BeneficiaryFilters {
   city?: string;
 }
 
- 
 interface _ParsedQueryParams extends Omit<QueryParams, 'filters'> {
   filters?: BeneficiaryFilters;
 }
@@ -34,7 +39,6 @@ interface ValidationResult {
   isValid: boolean;
   errors: string[];
 }
-
 
 /**
  * Validate beneficiary data
@@ -80,10 +84,14 @@ function validateBeneficiaryData(data: BeneficiaryData): ValidationResult {
  * List beneficiaries with pagination and filters
  */
 async function getBeneficiariesHandler(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const params = normalizeQueryParams(searchParams);
-  
   try {
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.BENEFICIARIES_READ,
+    });
+
+    const { searchParams } = new URL(request.url);
+    const params = normalizeQueryParams(searchParams);
+
     const response = await convexBeneficiaries.list({
       ...params,
       city: searchParams.get('city') || undefined,
@@ -99,10 +107,14 @@ async function getBeneficiariesHandler(request: NextRequest) {
       message: `${total} kayıt bulundu`,
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Beneficiaries list error', _error, {
       endpoint: '/api/beneficiaries',
       method: 'GET',
-      params,
     });
 
     return NextResponse.json(
@@ -119,6 +131,11 @@ async function getBeneficiariesHandler(request: NextRequest) {
 async function createBeneficiaryHandler(request: NextRequest) {
   let body: BeneficiaryData | null = null;
   try {
+    await verifyCsrfToken(request);
+    const { user } = await requireAuthenticatedUser({
+      requiredPermission: Permission.BENEFICIARIES_CREATE,
+    });
+
     body = (await request.json()) as BeneficiaryData;
 
     // Validate input
@@ -145,7 +162,7 @@ async function createBeneficiaryHandler(request: NextRequest) {
       district: body.district || '',
       neighborhood: body.neighborhood || '',
       family_size: body.family_size || 1,
-      status: (body.status as "TASLAK" | "AKTIF" | "PASIF" | "SILINDI") || "TASLAK" as const,
+      status: (body.status as 'TASLAK' | 'AKTIF' | 'PASIF' | 'SILINDI') || ('TASLAK' as const),
       email: body.email,
       birth_date: body.birth_date,
       gender: body.gender,
@@ -184,12 +201,14 @@ async function createBeneficiaryHandler(request: NextRequest) {
       other_organization_aid: body.other_organization_aid,
       emergency: body.emergency,
       contact_preference: body.contact_preference,
-      approval_status: body.approval_status as "pending" | "approved" | "rejected" | undefined,
+      approval_status: body.approval_status as 'pending' | 'approved' | 'rejected' | undefined,
       approved_by: body.approved_by,
       approved_at: body.approved_at,
     };
 
-    const response = await convexBeneficiaries.create(beneficiaryData);
+    const response = await convexBeneficiaries.create(beneficiaryData, {
+      auth: { userId: user.id, role: user.role },
+    });
 
     return NextResponse.json(
       {
@@ -200,6 +219,11 @@ async function createBeneficiaryHandler(request: NextRequest) {
       { status: 201 }
     );
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Beneficiary creation error', _error, {
       endpoint: '/api/beneficiaries',
       method: 'POST',
@@ -224,3 +248,4 @@ async function createBeneficiaryHandler(request: NextRequest) {
 
 // Export handlers with CSRF protection
 export const GET = getBeneficiariesHandler;
+export const POST = createBeneficiaryHandler;

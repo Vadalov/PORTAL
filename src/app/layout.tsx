@@ -3,8 +3,7 @@ import { Inter, Poppins, Montserrat } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils';
-import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics';
-import { WebVitalsTracker } from '@/components/analytics/WebVitalsTracker';
+import { lazyLoadComponent } from '@/lib/performance';
 
 // Optimized font loading with subset optimization
 const inter = Inter({
@@ -16,6 +15,7 @@ const inter = Inter({
   adjustFontFallback: true, // Adjust font metrics for better CLS
 });
 
+// Lazy load secondary fonts for better initial load performance
 const poppins = Poppins({
   subsets: ['latin', 'latin-ext'],
   weight: ['400', '500', '600', '700', '800'],
@@ -36,6 +36,23 @@ const montserrat = Montserrat({
   adjustFontFallback: true,
 });
 
+// Lazy load analytics components for better initial page load
+const LazyGoogleAnalytics = lazyLoadComponent(
+  () =>
+    import('@/components/analytics/GoogleAnalytics').then((mod) => ({
+      default: mod.GoogleAnalytics,
+    })),
+  () => <div>Loading analytics...</div>
+);
+
+const LazyWebVitalsTracker = lazyLoadComponent(
+  () =>
+    import('@/components/analytics/WebVitalsTracker').then((mod) => ({
+      default: mod.WebVitalsTracker,
+    })),
+  () => <div>Loading performance tracker...</div>
+);
+
 export const metadata: Metadata = {
   title: 'Dernek Yönetim Sistemi',
   description: 'Modern dernek yönetim sistemi',
@@ -49,11 +66,11 @@ export default function RootLayout({
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
-        <GoogleAnalytics />
+        <LazyGoogleAnalytics />
       </head>
       <body className={cn(inter.variable, poppins.variable, montserrat.variable, inter.className)}>
         <Providers>
-          <WebVitalsTracker />
+          <LazyWebVitalsTracker />
           {children}
         </Providers>
       </body>

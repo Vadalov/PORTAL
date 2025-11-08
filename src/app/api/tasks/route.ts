@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexTasks, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
+import { Permission } from '@/types/auth';
+import {
+  requireAuthenticatedUser,
+  verifyCsrfToken,
+  buildErrorResponse,
+} from '@/lib/api/auth-utils';
 
 function validateTask(data: Record<string, unknown>): {
   isValid: boolean;
@@ -15,7 +21,10 @@ function validateTask(data: Record<string, unknown>): {
   if (data.priority && !['low', 'normal', 'high', 'urgent'].includes(data.priority as string)) {
     errors.push('Geçersiz öncelik değeri');
   }
-  if (data.status && !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status as string)) {
+  if (
+    data.status &&
+    !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status as string)
+  ) {
     errors.push('Geçersiz durum');
   }
 
@@ -36,14 +45,18 @@ function validateTask(data: Record<string, unknown>): {
  * GET /api/tasks
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const params = normalizeQueryParams(searchParams);
-
   try {
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DASHBOARD_READ,
+    });
+
+    const { searchParams } = new URL(request.url);
+    const params = normalizeQueryParams(searchParams);
+
     const response = await convexTasks.list({
       ...params,
-      assigned_to: searchParams.get('assigned_to') as Id<"users"> | undefined,
-      created_by: searchParams.get('created_by') as Id<"users"> | undefined,
+      assigned_to: searchParams.get('assigned_to') as Id<'users'> | undefined,
+      created_by: searchParams.get('created_by') as Id<'users'> | undefined,
     });
 
     return NextResponse.json({
@@ -52,10 +65,14 @@ export async function GET(request: NextRequest) {
       total: response.total || 0,
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('List tasks error', _error, {
       endpoint: '/api/tasks',
       method: 'GET',
-      params,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -64,9 +81,18 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/tasks
  */
-async function createTaskHandler(request: NextRequest) {
+export async function POST(request: NextRequest) {
   let body: unknown = null;
   try {
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredAnyPermission: [
+        Permission.DONATIONS_CREATE,
+        Permission.BENEFICIARIES_CREATE,
+        Permission.AID_REQUESTS_CREATE,
+      ],
+    });
+
     body = await request.json();
     const validation = validateTask(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
@@ -79,10 +105,18 @@ async function createTaskHandler(request: NextRequest) {
     const taskData = {
       title: validation.normalizedData.title || '',
       description: validation.normalizedData.description,
-      assigned_to: validation.normalizedData.assigned_to as Id<"users"> | undefined,
-      created_by: validation.normalizedData.created_by as Id<"users">,
-      priority: (validation.normalizedData.priority || 'normal') as 'low' | 'normal' | 'high' | 'urgent',
-      status: (validation.normalizedData.status || 'pending') as 'pending' | 'in_progress' | 'completed' | 'cancelled',
+      assigned_to: validation.normalizedData.assigned_to as Id<'users'> | undefined,
+      created_by: validation.normalizedData.created_by as Id<'users'>,
+      priority: (validation.normalizedData.priority || 'normal') as
+        | 'low'
+        | 'normal'
+        | 'high'
+        | 'urgent',
+      status: (validation.normalizedData.status || 'pending') as
+        | 'pending'
+        | 'in_progress'
+        | 'completed'
+        | 'cancelled',
       due_date: validation.normalizedData.due_date,
       category: validation.normalizedData.category,
       tags: validation.normalizedData.tags,
@@ -96,6 +130,11 @@ async function createTaskHandler(request: NextRequest) {
       { status: 201 }
     );
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Create task error', _error, {
       endpoint: '/api/tasks',
       method: 'POST',
@@ -107,4 +146,3 @@ async function createTaskHandler(request: NextRequest) {
     );
   }
 }
-

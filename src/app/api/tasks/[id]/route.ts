@@ -3,6 +3,12 @@ import { convexTasks } from '@/lib/convex/api';
 import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
+import { Permission } from '@/types/auth';
+import {
+  requireAuthenticatedUser,
+  verifyCsrfToken,
+  buildErrorResponse,
+} from '@/lib/api/auth-utils';
 
 function validateTaskUpdate(data: Record<string, unknown>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
@@ -12,7 +18,10 @@ function validateTaskUpdate(data: Record<string, unknown>): { isValid: boolean; 
   if (data.priority && !['low', 'normal', 'high', 'urgent'].includes(data.priority as string)) {
     errors.push('Geçersiz öncelik değeri');
   }
-  if (data.status && !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status as string)) {
+  if (
+    data.status &&
+    !['pending', 'in_progress', 'completed', 'cancelled'].includes(data.status as string)
+  ) {
     errors.push('Geçersiz durum');
   }
   return { isValid: errors.length === 0, errors };
@@ -24,13 +33,14 @@ function validateTaskUpdate(data: Record<string, unknown>): { isValid: boolean; 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
   try {
-    const task = await convexTasks.get(id as Id<"tasks">);
-    
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DASHBOARD_READ,
+    });
+
+    const task = await convexTasks.get(id as Id<'tasks'>);
+
     if (!task) {
-      return NextResponse.json(
-        { success: false, error: 'Görev bulunamadı' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Görev bulunamadı' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -38,29 +48,37 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       data: task,
     });
   } catch (_error) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Get task error', _error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
     });
-    return NextResponse.json(
-      { success: false, error: 'Veri alınamadı' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
 }
 
 /**
  * PUT /api/tasks/[id]
  */
-async function updateTaskHandler(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
   try {
-    const body = await request.json() as Record<string, unknown>;
-    
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredAnyPermission: [
+        Permission.DONATIONS_CREATE,
+        Permission.BENEFICIARIES_CREATE,
+        Permission.AID_REQUESTS_CREATE,
+      ],
+    });
+
+    const body = (await request.json()) as Record<string, unknown>;
+
     const validation = validateTaskUpdate(body);
     if (!validation.isValid) {
       return NextResponse.json(
@@ -72,7 +90,7 @@ async function updateTaskHandler(
     const taskData: Parameters<typeof convexTasks.update>[1] = {
       title: body.title as string | undefined,
       description: body.description as string | undefined,
-      assigned_to: body.assigned_to as Id<"users"> | undefined,
+      assigned_to: body.assigned_to as Id<'users'> | undefined,
       priority: body.priority as 'low' | 'normal' | 'high' | 'urgent' | undefined,
       status: body.status as 'pending' | 'in_progress' | 'completed' | 'cancelled' | undefined,
       due_date: body.due_date as string | undefined,
@@ -80,7 +98,7 @@ async function updateTaskHandler(
       is_read: body.is_read as boolean | undefined,
     };
 
-    const updated = await convexTasks.update(id as Id<"tasks">, taskData);
+    const updated = await convexTasks.update(id as Id<'tasks'>, taskData);
 
     return NextResponse.json({
       success: true,
@@ -88,18 +106,20 @@ async function updateTaskHandler(
       message: 'Görev başarıyla güncellendi',
     });
   } catch (_error) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Update task error', _error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
     });
-    
+
     const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
-      return NextResponse.json(
-        { success: false, error: 'Görev bulunamadı' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Görev bulunamadı' }, { status: 404 });
     }
 
     return NextResponse.json(
@@ -112,37 +132,44 @@ async function updateTaskHandler(
 /**
  * DELETE /api/tasks/[id]
  */
-async function deleteTaskHandler(
+export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await extractParams(params);
   try {
-    await convexTasks.remove(id as Id<"tasks">);
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredAnyPermission: [
+        Permission.DONATIONS_CREATE,
+        Permission.BENEFICIARIES_CREATE,
+        Permission.AID_REQUESTS_CREATE,
+      ],
+    });
+
+    await convexTasks.remove(id as Id<'tasks'>);
 
     return NextResponse.json({
       success: true,
       message: 'Görev başarıyla silindi',
     });
   } catch (_error) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Delete task error', _error, {
       endpoint: '/api/tasks/[id]',
       method: request.method,
       taskId: id,
     });
-    
+
     const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
-      return NextResponse.json(
-        { success: false, error: 'Görev bulunamadı' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Görev bulunamadı' }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { success: false, error: 'Silme işlemi başarısız' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Silme işlemi başarısız' }, { status: 500 });
   }
 }
-

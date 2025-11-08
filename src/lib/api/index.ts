@@ -6,29 +6,129 @@
  */
 
 import { convexApiClient } from './convex-api-client';
+import { convexSystemSettings } from '@/lib/convex/api';
 import type { AidApplicationDocument } from '@/types/database';
+import type { Id } from '@/convex/_generated/dataModel';
 
 // Export as default for backward compatibility
 const api = convexApiClient;
 
 export default api;
 export { convexApiClient as api };
-export type { ConvexResponse, QueryParams, CreateDocumentData, UpdateDocumentData } from '@/types/database';
+export type {
+  ConvexResponse,
+  QueryParams,
+  CreateDocumentData,
+  UpdateDocumentData,
+} from '@/types/database';
 
 // Export empty objects for removed APIs to prevent import errors
 // TODO: Implement these or remove usage from components
 export const parametersApi = {
-  getAllParameters: async (_params?: any) => ({ success: true, data: [], total: 0, error: null }),
-  updateParameter: async (_id?: string, _data?: any) => ({ success: true, error: null }),
-  deleteParameter: async (_id?: string) => ({ success: true, error: null }),
-  createParameter: async (_data?: any) => ({ success: true, error: null }),
-  getParametersByCategory: async (_category?: string) => ({ success: true, data: [], error: null }),
+  getAllParameters: async () => {
+    try {
+      const settings = await convexSystemSettings.getAll();
+      const flattened = Object.entries(settings).flatMap(([category, entries]) =>
+        Object.entries(entries as Record<string, unknown>).map(([key, value]) => ({
+          category,
+          key,
+          value,
+        }))
+      );
+
+      return {
+        success: true,
+        data: flattened,
+        total: flattened.length,
+        error: null,
+      };
+    } catch (error) {
+      return { success: false, data: [], total: 0, error };
+    }
+  },
+  getParametersByCategory: async (category?: string) => {
+    if (!category) {
+      return { success: false, data: [], error: 'Kategori gereklidir' };
+    }
+
+    try {
+      const settings = await convexSystemSettings.getByCategory(category);
+      const items = Object.entries(settings as Record<string, unknown>).map(([key, value]) => ({
+        category,
+        key,
+        value,
+      }));
+
+      return { success: true, data: items, error: null };
+    } catch (error) {
+      return { success: false, data: [], error };
+    }
+  },
+  createParameter: async (data?: {
+    category?: string;
+    key?: string;
+    value?: unknown;
+    updatedBy?: string;
+  }) => {
+    if (!data?.category || !data?.key) {
+      return { success: false, error: 'Kategori ve anahtar gereklidir' };
+    }
+
+    try {
+      await convexSystemSettings.updateSetting(
+        data.category,
+        data.key,
+        data.value,
+        data.updatedBy as Id<'users'> | undefined
+      );
+      return { success: true, error: null };
+    } catch (error) {
+      return { success: false, error };
+    }
+  },
+  updateParameter: async (
+    _id: string | undefined,
+    data?: { category?: string; key?: string; value?: unknown; updatedBy?: string }
+  ) => {
+    if (!data?.category || !data?.key) {
+      return { success: false, error: 'Kategori ve anahtar gereklidir' };
+    }
+
+    try {
+      await convexSystemSettings.updateSetting(
+        data.category,
+        data.key,
+        data.value,
+        data.updatedBy as Id<'users'> | undefined
+      );
+      return { success: true, error: null };
+    } catch (error) {
+      return { success: false, error };
+    }
+  },
+  deleteParameter: async (data?: { category?: string; key?: string; updatedBy?: string }) => {
+    if (!data?.category || !data?.key) {
+      return { success: false, error: 'Kategori ve anahtar gereklidir' };
+    }
+
+    try {
+      await convexSystemSettings.updateSetting(
+        data.category,
+        data.key,
+        null,
+        data.updatedBy as Id<'users'> | undefined
+      );
+      return { success: true, error: null };
+    } catch (error) {
+      return { success: false, error };
+    }
+  },
 };
 
 // Re-export aidApplications API from convexApiClient
 export const aidApplicationsApi = {
   getAidApplication: (id: string) => api.aidApplications.getAidApplication(id),
-  updateStage: (id: string, stage: AidApplicationDocument['stage']) => 
+  updateStage: (id: string, stage: AidApplicationDocument['stage']) =>
     api.aidApplications.updateStage(id, stage),
   getAidApplications: (params?: any) => api.aidApplications.getAidApplications(params),
   createAidApplication: (data: any) => api.aidApplications.createAidApplication(data),

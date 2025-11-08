@@ -29,7 +29,10 @@
       "Bash(xargs sed -i 's/console\\.error(\\([^,]\\+,\\s*\\)error\\s*)/console.error(\\1_error)/g' find:*)",
       "Bash(xargs sed:*)",
       "Bash(while:*)",
-      "Bash(do sed -i 's/console\\.error(\\([^,]\\+,\\s*\\)error\\s*)/console.error(\\1_error)/g' \"$file\":*)"
+      "Bash(do sed -i 's/console\\.error(\\([^,]\\+,\\s*\\)error\\s*)/console.error(\\1_error)/g' \"$file\":*)",
+      "Bash(tee:*)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,11 +1,20 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
 import { ModernSidebar } from '@/components/ui/modern-sidebar';
-import { LogOut, Menu, ChevronDown, Settings, Building2, PanelLeftClose, PanelLeftOpen, Search } from 'lucide-react';
+import {
+  LogOut,
+  Menu,
+  ChevronDown,
+  Settings,
+  Building2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { LoadingOverlay } from '@/components/ui/loading-overlay';
@@ -30,16 +39,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { isAuthenticated, isInitialized, user, logout, initializeAuth } = useAuthStore();
 
   // Performance monitoring
-  const handlePerformanceMetrics = useCallback((metrics: unknown) => {
-    // Log performance metrics in development
-    if (process.env.NODE_ENV === 'development') {
-      logger.debug('Performance metrics', { route: pathname, ...(metrics as Record<string, unknown>) });
-    }
+  const handlePerformanceMetrics = useCallback(
+    (metrics: unknown) => {
+      // Log performance metrics in development
+      if (process.env.NODE_ENV === 'development') {
+        logger.debug('Performance metrics', {
+          route: pathname,
+          ...(metrics as Record<string, unknown>),
+        });
+      }
 
-    // You can send metrics to analytics service here
-    // Example: sendToAnalytics(metrics);
-  }, [pathname]);
-  
+      // You can send metrics to analytics service here
+      // Example: sendToAnalytics(metrics);
+    },
+    [pathname]
+  );
+
   // Memoized state management to prevent unnecessary re-renders
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -60,24 +75,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return name.substring(0, 2).toUpperCase();
   }, []);
 
-  const getRoleBadgeVariant = useCallback((
-    role: UserRole
-  ): 'default' | 'secondary' | 'destructive' | 'outline' => {
-    switch (role) {
-      case UserRole.SUPER_ADMIN:
-      case UserRole.ADMIN:
-        return 'destructive';
-      case UserRole.MANAGER:
-        return 'default';
-      case UserRole.MEMBER:
-      case UserRole.VOLUNTEER:
-        return 'secondary';
-      case UserRole.VIEWER:
-        return 'outline';
-      default:
-        return 'default';
-    }
-  }, []);
+  const getRoleBadgeVariant = useCallback(
+    (role: UserRole): 'default' | 'secondary' | 'destructive' | 'outline' => {
+      switch (role) {
+        case UserRole.SUPER_ADMIN:
+        case UserRole.ADMIN:
+          return 'destructive';
+        case UserRole.MANAGER:
+          return 'default';
+        case UserRole.MEMBER:
+        case UserRole.VOLUNTEER:
+          return 'secondary';
+        case UserRole.VIEWER:
+          return 'outline';
+        default:
+          return 'default';
+      }
+    },
+    []
+  );
 
   // Initialize auth on mount (only once)
   useEffect(() => {
@@ -88,11 +104,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Dashboard: Initializing auth', { isInitialized, isAuthenticated });
-      logger.debug('Dashboard: LocalStorage check', { 
-        hasSession: !!localStorage.getItem('auth-session') 
+      logger.debug('Dashboard: LocalStorage check', {
+        hasSession: !!localStorage.getItem('auth-session'),
       });
-      logger.debug('Dashboard: Hydration status', { 
-        hydrated: useAuthStore.persist?.hasHydrated?.() 
+      logger.debug('Dashboard: Hydration status', {
+        hydrated: useAuthStore.persist?.hasHydrated?.(),
       });
     }
 
@@ -138,12 +154,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       // Cache the DOM queries
       const scrollY = window.scrollY;
       const threshold = 20;
-      
+
       // Batch updates using requestAnimationFrame
       if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
       }
-      
+
       rafIdRef.current = requestAnimationFrame(() => {
         const shouldShowShadow = scrollY > threshold;
         setIsScrolled(shouldShowShadow);
@@ -250,7 +266,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => clearTimeout(timeoutId);
   }, [pathname, isAuthenticated, isInitialized, queryClient]);
 
-
   if (!isInitialized || !isAuthenticated) {
     if (process.env.NODE_ENV === 'development') {
       logger.debug('Dashboard: Loading state', { isInitialized, isAuthenticated });
@@ -260,7 +275,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50/50">
-
       {/* Premium Header */}
       <header
         className={cn(
@@ -300,7 +314,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 via-blue-600 to-blue-700 flex items-center justify-center shadow-md shadow-blue-500/20">
                 <Building2 className="w-4.5 h-4.5 text-white" />
               </div>
-              <h1 className="hidden md:block text-lg font-semibold text-slate-800 tracking-tight">Dernek Yönetim Sistemi</h1>
+              <h1 className="hidden md:block text-lg font-semibold text-slate-800 tracking-tight">
+                Dernek Yönetim Sistemi
+              </h1>
             </div>
           </div>
 
@@ -326,7 +342,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       {user?.name ? getInitials(user.name) : 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <ChevronDown className={cn('h-4 w-4 text-slate-500 transition-transform duration-200', isUserMenuOpen && 'rotate-180')} />
+                  <ChevronDown
+                    className={cn(
+                      'h-4 w-4 text-slate-500 transition-transform duration-200',
+                      isUserMenuOpen && 'rotate-180'
+                    )}
+                  />
                 </button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-0 border-slate-200/60 shadow-xl" align="end">
@@ -339,9 +360,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-slate-900 truncate">{user?.name || 'Kullanıcı'}</p>
+                      <p className="font-semibold text-sm text-slate-900 truncate">
+                        {user?.name || 'Kullanıcı'}
+                      </p>
                       <p className="text-xs text-slate-500 truncate mt-0.5">{user?.email || ''}</p>
-                      <Badge variant={getRoleBadgeVariant(user?.role || UserRole.VIEWER)} className="text-xs mt-2">
+                      <Badge
+                        variant={getRoleBadgeVariant(user?.role || UserRole.VIEWER)}
+                        className="text-xs mt-2"
+                      >
                         {user?.role || 'Viewer'}
                       </Badge>
                     </div>
@@ -386,7 +412,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Spacer for fixed sidebar */}
         <div
-          className={cn('hidden lg:block transition-all duration-300', isSidebarCollapsed ? 'w-16' : 'w-64')}
+          className={cn(
+            'hidden lg:block transition-all duration-300',
+            isSidebarCollapsed ? 'w-16' : 'w-64'
+          )}
         />
 
         {/* Main Content - OPTIMIZED PAGE TRANSITIONS */}

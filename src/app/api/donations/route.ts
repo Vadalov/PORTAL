@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexDonations, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import type { DonationDocument, Document } from '@/types/database';
+import { Permission } from '@/types/auth';
+import {
+  requireAuthenticatedUser,
+  verifyCsrfToken,
+  buildErrorResponse,
+} from '@/lib/api/auth-utils';
 
 /**
  * Validate donation payload
@@ -47,10 +53,14 @@ function validateDonation(data: Partial<DonationDocument>): {
  * List donations
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const params = normalizeQueryParams(searchParams);
-
   try {
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DONATIONS_READ,
+    });
+
+    const { searchParams } = new URL(request.url);
+    const params = normalizeQueryParams(searchParams);
+
     const response = await convexDonations.list({
       ...params,
       donor_email: searchParams.get('donor_email') || undefined,
@@ -62,10 +72,14 @@ export async function GET(request: NextRequest) {
       total: response.total || 0,
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('List donations error', _error, {
       endpoint: '/api/donations',
       method: 'GET',
-      params,
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -78,6 +92,11 @@ export async function GET(request: NextRequest) {
 async function createDonationHandler(request: NextRequest) {
   let body: unknown = null;
   try {
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DONATIONS_CREATE,
+    });
+
     body = await request.json();
     const validation = validateDonation(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
@@ -99,7 +118,10 @@ async function createDonationHandler(request: NextRequest) {
       notes: validation.normalizedData.notes,
       receipt_number: validation.normalizedData.receipt_number || '',
       receipt_file_id: validation.normalizedData.receipt_file_id,
-      status: (validation.normalizedData.status || 'pending') as 'pending' | 'completed' | 'cancelled',
+      status: (validation.normalizedData.status || 'pending') as
+        | 'pending'
+        | 'completed'
+        | 'cancelled',
     };
 
     const response = await convexDonations.create(donationData);
@@ -109,6 +131,11 @@ async function createDonationHandler(request: NextRequest) {
       { status: 201 }
     );
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Create donation error', _error, {
       endpoint: '/api/donations',
       method: 'POST',
@@ -122,3 +149,4 @@ async function createDonationHandler(request: NextRequest) {
   }
 }
 
+export const POST = createDonationHandler;

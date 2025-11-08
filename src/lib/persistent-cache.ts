@@ -144,7 +144,7 @@ export class PersistentCache {
           request.onsuccess = () => resolve();
           request.onerror = () => reject(request.error);
         });
-      } catch (error) {
+      } catch (_error) {
         console.error('[Cache] IndexedDB set error:', _error);
         this.metrics.errors++;
         // Continue even if IndexedDB fails - we have memory cache
@@ -186,7 +186,7 @@ export class PersistentCache {
         if (entry) {
           this.memoryCache.set(key, entry);
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('[Cache] IndexedDB get error:', _error);
         this.metrics.errors++;
       }
@@ -248,7 +248,7 @@ export class PersistentCache {
           request.onsuccess = () => resolve();
           request.onerror = () => reject(request.error);
         });
-      } catch (error) {
+      } catch (_error) {
         console.error('[Cache] IndexedDB delete error:', _error);
         this.metrics.errors++;
       }
@@ -275,7 +275,7 @@ export class PersistentCache {
           request.onsuccess = () => resolve();
           request.onerror = () => reject(request.error);
         });
-      } catch (error) {
+      } catch (_error) {
         console.error('[Cache] IndexedDB clear error:', _error);
         this.metrics.errors++;
       }
@@ -341,7 +341,7 @@ export class PersistentCache {
 
           cleanedCount += expiredKeys.length;
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('[Cache] IndexedDB cleanup error:', _error);
         this.metrics.errors++;
       }
@@ -393,7 +393,7 @@ export class PersistentCache {
           request.onsuccess = () => resolve(request.result);
           request.onerror = () => reject(request.error);
         });
-      } catch (error) {
+      } catch (_error) {
         console.error('[Cache] IndexedDB size query error:', _error);
         this.metrics.errors++;
       }
@@ -427,7 +427,7 @@ export class PersistentCache {
           const { key, ...cacheEntry } = entry;
           exported[key] = cacheEntry;
         });
-      } catch (error) {
+      } catch (_error) {
         console.error('[Cache] IndexedDB export error:', _error);
         this.metrics.errors++;
       }

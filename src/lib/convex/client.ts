@@ -71,7 +71,7 @@ const createConvexClient = () => {
     if (isBuildTime) {
       console.warn('🔧 Convex client creation skipped during build time');
     } else {
-      console.error('Failed to initialize Convex client:', _error);
+      console.error('Failed to initialize Convex client:', error);
     }
     return null;
   }

@@ -3,13 +3,25 @@ import { convexMeetings } from '@/lib/convex/api';
 import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
+import { Permission } from '@/types/auth';
+import {
+  requireAuthenticatedUser,
+  verifyCsrfToken,
+  buildErrorResponse,
+} from '@/lib/api/auth-utils';
 
-function validateMeetingUpdate(data: Record<string, unknown>): { isValid: boolean; errors: string[] } {
+function validateMeetingUpdate(data: Record<string, unknown>): {
+  isValid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
   if (data.title && typeof data.title === 'string' && data.title.trim().length < 3) {
     errors.push('Toplantı başlığı en az 3 karakter olmalıdır');
   }
-  if (data.status && !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status as string)) {
+  if (
+    data.status &&
+    !['scheduled', 'ongoing', 'completed', 'cancelled'].includes(data.status as string)
+  ) {
     errors.push('Geçersiz durum');
   }
   return { isValid: errors.length === 0, errors };
@@ -21,13 +33,14 @@ function validateMeetingUpdate(data: Record<string, unknown>): { isValid: boolea
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
   try {
-    const meeting = await convexMeetings.get(id as Id<"meetings">);
-    
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DASHBOARD_READ,
+    });
+
+    const meeting = await convexMeetings.get(id as Id<'meetings'>);
+
     if (!meeting) {
-      return NextResponse.json(
-        { success: false, error: 'Toplantı bulunamadı' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Toplantı bulunamadı' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -35,15 +48,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       data: meeting,
     });
   } catch (_error) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Get meeting error', _error, {
       endpoint: '/api/meetings/[id]',
       method: 'GET',
       meetingId: id,
     });
-    return NextResponse.json(
-      { success: false, _error: 'Veri alınamadı' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, _error: 'Veri alınamadı' }, { status: 500 });
   }
 }
 
@@ -56,8 +71,17 @@ async function updateMeetingHandler(
 ) {
   const { id } = await extractParams(params);
   try {
-    const body = await request.json() as Record<string, unknown>;
-    
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredAnyPermission: [
+        Permission.DONATIONS_CREATE,
+        Permission.BENEFICIARIES_CREATE,
+        Permission.AID_REQUESTS_CREATE,
+      ],
+    });
+
+    const body = (await request.json()) as Record<string, unknown>;
+
     const validation = validateMeetingUpdate(body);
     if (!validation.isValid) {
       return NextResponse.json(
@@ -71,13 +95,13 @@ async function updateMeetingHandler(
       description: body.description as string | undefined,
       meeting_date: body.meeting_date as string | undefined,
       location: body.location as string | undefined,
-      participants: body.participants as Id<"users">[] | undefined,
+      participants: body.participants as Id<'users'>[] | undefined,
       status: body.status as 'scheduled' | 'ongoing' | 'completed' | 'cancelled' | undefined,
       agenda: body.agenda as string | undefined,
       notes: body.notes as string | undefined,
     };
 
-    const updated = await convexMeetings.update(id as Id<"meetings">, meetingData);
+    const updated = await convexMeetings.update(id as Id<'meetings'>, meetingData);
 
     return NextResponse.json({
       success: true,
@@ -85,18 +109,20 @@ async function updateMeetingHandler(
       message: 'Toplantı başarıyla güncellendi',
     });
   } catch (_error) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Update meeting error', _error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
       meetingId: id,
     });
-    
+
     const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
-      return NextResponse.json(
-        { success: false, _error: 'Toplantı bulunamadı' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, _error: 'Toplantı bulunamadı' }, { status: 404 });
     }
 
     return NextResponse.json(
@@ -115,31 +141,41 @@ async function deleteMeetingHandler(
 ) {
   const { id } = await extractParams(params);
   try {
-    await convexMeetings.remove(id as Id<"meetings">);
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredAnyPermission: [
+        Permission.DONATIONS_CREATE,
+        Permission.BENEFICIARIES_CREATE,
+        Permission.AID_REQUESTS_CREATE,
+      ],
+    });
+
+    await convexMeetings.remove(id as Id<'meetings'>);
 
     return NextResponse.json({
       success: true,
       message: 'Toplantı başarıyla silindi',
     });
   } catch (_error) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Delete meeting error', _error, {
       endpoint: '/api/meetings/[id]',
       method: request.method,
       meetingId: id,
     });
-    
+
     const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
-      return NextResponse.json(
-        { success: false, _error: 'Toplantı bulunamadı' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, _error: 'Toplantı bulunamadı' }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { success: false, _error: 'Silme işlemi başarısız' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, _error: 'Silme işlemi başarısız' }, { status: 500 });
   }
 }
 
+export const PUT = updateMeetingHandler;
+export const DELETE = deleteMeetingHandler;

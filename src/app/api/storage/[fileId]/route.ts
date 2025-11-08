@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getConvexHttp } from '@/lib/convex/server';
 import { api } from '@/convex/_generated/api';
-import { v } from 'convex/values';
 
 export async function GET(
   request: NextRequest,
@@ -17,26 +16,17 @@ export async function GET(
     });
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'Dosya bulunamadı' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Dosya bulunamadı' }, { status: 404 });
     }
 
     // Redirect to the file URL from Convex storage
     if (!file.url) {
-      return NextResponse.json(
-        { error: 'Dosya URL\'si bulunamadı' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Dosya URL'si bulunamadı" }, { status: 500 });
     }
     return NextResponse.redirect(file.url);
   } catch (_error) {
     console.error('File retrieval error:', _error);
-    return NextResponse.json(
-      { error: 'Dosya alınamadı' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Dosya alınamadı' }, { status: 500 });
   }
 }
 
@@ -56,10 +46,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (_error) {
     console.error('File deletion error:', _error);
-    return NextResponse.json(
-      { error: 'Dosya silinemedi' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Dosya silinemedi' }, { status: 500 });
   }
 }
-

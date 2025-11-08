@@ -42,10 +42,7 @@ function validateKumbaraUpdate(data: Partial<DonationDocument>): {
  * GET /api/kumbara/[id]
  * Get single kumbara donation
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 
@@ -57,7 +54,7 @@ export async function GET(
     }
 
     // Fetch donation from Convex
-    const donation = await convexDonations.get(id as Id<"donations">);
+    const donation = await convexDonations.get(id as Id<'donations'>);
 
     if (!donation) {
       return NextResponse.json(
@@ -91,10 +88,7 @@ export async function GET(
  * PUT /api/kumbara/[id]
  * Update kumbara donation
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = (await request.json()) as Partial<DonationDocument>;
@@ -107,7 +101,7 @@ export async function PUT(
     }
 
     // First, check if donation exists and is a kumbara donation
-    const existingDonation = await convexDonations.get(id as Id<"donations">);
+    const existingDonation = await convexDonations.get(id as Id<'donations'>);
     if (!existingDonation) {
       return NextResponse.json(
         { success: false, error: 'Kumbara bağışı bulunamadı' },
@@ -136,7 +130,9 @@ export async function PUT(
     }
 
     // Update donation in Convex
-    await convexDonations.update(id as Id<"donations">, validation.normalizedData);
+    if (validation.normalizedData) {
+      await convexDonations.update(id as Id<'donations'>, validation.normalizedData);
+    }
 
     logger.info('Updated kumbara donation', {
       donationId: id,
@@ -175,7 +171,7 @@ export async function DELETE(
     }
 
     // First, check if donation exists and is a kumbara donation
-    const existingDonation = await convexDonations.get(id as Id<"donations">);
+    const existingDonation = await convexDonations.get(id as Id<'donations'>);
     if (!existingDonation) {
       return NextResponse.json(
         { success: false, error: 'Kumbara bağışı bulunamadı' },
@@ -191,7 +187,7 @@ export async function DELETE(
     }
 
     // Delete donation from Convex
-    await convexDonations.remove(id as Id<"donations">);
+    await convexDonations.remove(id as Id<'donations'>);
 
     logger.info('Deleted kumbara donation', {
       donationId: id,

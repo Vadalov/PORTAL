@@ -4,6 +4,12 @@ import logger from '@/lib/logger';
 import { BeneficiaryFormData } from '@/types/beneficiary';
 import { extractParams } from '@/lib/api/route-helpers';
 import { Id } from '@/convex/_generated/dataModel';
+import { Permission } from '@/types/auth';
+import {
+  requireAuthenticatedUser,
+  verifyCsrfToken,
+  buildErrorResponse,
+} from '@/lib/api/auth-utils';
 
 /**
  * Validate beneficiary data for updates
@@ -78,8 +84,12 @@ async function getBeneficiaryHandler(
   const { id } = await extractParams(params);
 
   try {
-    const beneficiary = await convexBeneficiaries.get(id as Id<"beneficiaries">);
-    
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.BENEFICIARIES_READ,
+    });
+
+    const beneficiary = await convexBeneficiaries.get(id as Id<'beneficiaries'>);
+
     if (!beneficiary) {
       return NextResponse.json(
         { success: false, error: 'İhtiyaç sahibi bulunamadı' },
@@ -92,16 +102,18 @@ async function getBeneficiaryHandler(
       data: beneficiary,
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Get beneficiary error', _error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,
       beneficiaryId: id,
     });
-    
-    return NextResponse.json(
-      { success: false, error: 'Veri alınamadı' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
 }
 
@@ -116,6 +128,11 @@ async function updateBeneficiaryHandler(
   const { id } = await extractParams(params);
 
   try {
+    await verifyCsrfToken(request);
+    const { user } = await requireAuthenticatedUser({
+      requiredPermission: Permission.BENEFICIARIES_UPDATE,
+    });
+
     const body = (await request.json()) as Partial<BeneficiaryFormData>;
 
     const validation = validateBeneficiaryUpdate(body);
@@ -126,7 +143,9 @@ async function updateBeneficiaryHandler(
       );
     }
 
-    const updated = await convexBeneficiaries.update(id as Id<"beneficiaries">, body);
+    const updated = await convexBeneficiaries.update(id as Id<'beneficiaries'>, body, {
+      auth: { userId: user.id, role: user.role },
+    });
 
     return NextResponse.json({
       success: true,
@@ -134,12 +153,17 @@ async function updateBeneficiaryHandler(
       message: 'İhtiyaç sahibi başarıyla güncellendi',
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Update beneficiary error', _error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,
       beneficiaryId: id,
     });
-    
+
     const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
@@ -166,19 +190,29 @@ async function deleteBeneficiaryHandler(
   const { id } = await extractParams(params);
 
   try {
-    await convexBeneficiaries.remove(id as Id<"beneficiaries">);
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.BENEFICIARIES_DELETE,
+    });
+
+    await convexBeneficiaries.remove(id as Id<'beneficiaries'>);
 
     return NextResponse.json({
       success: true,
       message: 'İhtiyaç sahibi başarıyla silindi',
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Delete beneficiary error', _error, {
       endpoint: '/api/beneficiaries/[id]',
       method: request.method,
       beneficiaryId: id,
     });
-    
+
     const errorMessage = _error instanceof Error ? _error.message : '';
     if (errorMessage?.includes('not found')) {
       return NextResponse.json(
@@ -187,12 +221,11 @@ async function deleteBeneficiaryHandler(
       );
     }
 
-    return NextResponse.json(
-      { success: false, error: 'Silme işlemi başarısız' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Silme işlemi başarısız' }, { status: 500 });
   }
 }
 
 // Export handlers with CSRF protection for state-changing operations
 export const GET = getBeneficiaryHandler;
+export const PUT = updateBeneficiaryHandler;
+export const DELETE = deleteBeneficiaryHandler;

@@ -3,6 +3,12 @@ import { convexDonations } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import QRCode from 'qrcode';
 import type { DonationDocument } from '@/types/database';
+import { Permission } from '@/types/auth';
+import {
+  requireAuthenticatedUser,
+  verifyCsrfToken,
+  buildErrorResponse,
+} from '@/lib/api/auth-utils';
 
 // Type for QR data
 interface QRData {
@@ -118,10 +124,16 @@ function validateKumbaraDonation(data: Partial<DonationDocument>): ValidationRes
   }
 
   // Validate route metrics (optional)
-  if (data.route_distance !== undefined && (typeof data.route_distance !== 'number' || data.route_distance < 0)) {
+  if (
+    data.route_distance !== undefined &&
+    (typeof data.route_distance !== 'number' || data.route_distance < 0)
+  ) {
     errors.push('Rota mesafesi pozitif bir sayı olmalıdır');
   }
-  if (data.route_duration !== undefined && (typeof data.route_duration !== 'number' || data.route_duration < 0)) {
+  if (
+    data.route_duration !== undefined &&
+    (typeof data.route_duration !== 'number' || data.route_duration < 0)
+  ) {
     errors.push('Rota süresi pozitif bir sayı olmalıdır');
   }
 
@@ -157,6 +169,10 @@ function validateKumbaraDonation(data: Partial<DonationDocument>): ValidationRes
  */
 export async function GET(request: NextRequest) {
   try {
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DONATIONS_READ,
+    });
+
     const { searchParams } = new URL(request.url);
     const {
       location,
@@ -183,29 +199,43 @@ export async function GET(request: NextRequest) {
 
     // Filter by search and additional filters if provided
     let filteredData = result.documents;
-    
+
     // Apply client-side filters
     if (search && search.trim()) {
       const searchLower = search.toLowerCase();
       filteredData = filteredData.filter(
         (donation) =>
-          (donation as unknown as DonationDocument).donor_name?.toLowerCase().includes(searchLower) ||
-          (donation as unknown as DonationDocument).kumbara_location?.toLowerCase().includes(searchLower) ||
-          (donation as unknown as DonationDocument).kumbara_institution?.toLowerCase().includes(searchLower) ||
-          (donation as unknown as DonationDocument).receipt_number?.toLowerCase().includes(searchLower)
+          (donation as unknown as DonationDocument).donor_name
+            ?.toLowerCase()
+            .includes(searchLower) ||
+          (donation as unknown as DonationDocument).kumbara_location
+            ?.toLowerCase()
+            .includes(searchLower) ||
+          (donation as unknown as DonationDocument).kumbara_institution
+            ?.toLowerCase()
+            .includes(searchLower) ||
+          (donation as unknown as DonationDocument).receipt_number
+            ?.toLowerCase()
+            .includes(searchLower)
       );
     }
 
     if (location && location !== 'all') {
-      filteredData = filteredData.filter((d) => (d as unknown as DonationDocument).kumbara_location === location);
+      filteredData = filteredData.filter(
+        (d) => (d as unknown as DonationDocument).kumbara_location === location
+      );
     }
 
     if (status && status !== 'all') {
-      filteredData = filteredData.filter((d) => (d as unknown as DonationDocument).status === status);
+      filteredData = filteredData.filter(
+        (d) => (d as unknown as DonationDocument).status === status
+      );
     }
 
     if (currency && currency !== 'all') {
-      filteredData = filteredData.filter((d) => (d as unknown as DonationDocument).currency === currency);
+      filteredData = filteredData.filter(
+        (d) => (d as unknown as DonationDocument).currency === currency
+      );
     }
 
     // Date range filtering
@@ -237,6 +267,11 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Error fetching kumbara donations', _error);
     return NextResponse.json(
       { success: false, error: 'Kumbara bağışları getirilemedi' },
@@ -251,6 +286,10 @@ export async function GET(request: NextRequest) {
  */
 export async function GET_STATS(request: NextRequest) {
   try {
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DONATIONS_READ,
+    });
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'overview';
 
@@ -284,6 +323,11 @@ export async function GET_STATS(request: NextRequest) {
     const stats = calculateOverviewStats(donations);
     return NextResponse.json(stats);
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Error fetching kumbara stats', _error);
     return NextResponse.json(
       { success: false, error: 'İstatistikler getirilemedi' },
@@ -304,9 +348,7 @@ function calculateOverviewStats(donations: any[]) {
   const total_amount = donations.reduce((sum, d) => sum + (d.amount || 0), 0);
 
   // Active locations (unique locations)
-  const uniqueLocations = new Set(
-    donations.map((d) => d.kumbara_location).filter(Boolean)
-  );
+  const uniqueLocations = new Set(donations.map((d) => d.kumbara_location).filter(Boolean));
   const active_locations = uniqueLocations.size;
 
   // This month stats
@@ -325,9 +367,8 @@ function calculateOverviewStats(donations: any[]) {
   });
   const last_month_amount = lastMonthDonations.reduce((sum, d) => sum + (d.amount || 0), 0);
 
-  const monthly_growth = last_month_amount > 0
-    ? ((this_month_amount - last_month_amount) / last_month_amount) * 100
-    : 0;
+  const monthly_growth =
+    last_month_amount > 0 ? ((this_month_amount - last_month_amount) / last_month_amount) * 100 : 0;
 
   // Collection status
   const pending_collections = donations.filter((d) => d.status === 'pending').length;
@@ -425,6 +466,11 @@ function calculatePaymentStats(donations: any[]) {
  */
 export async function POST(request: NextRequest) {
   try {
+    await verifyCsrfToken(request);
+    await requireAuthenticatedUser({
+      requiredPermission: Permission.DONATIONS_CREATE,
+    });
+
     const body = (await request.json()) as Partial<DonationDocument>;
 
     // Validate kumbara donation
@@ -441,7 +487,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create donation in Convex
-    const donationId = await convexDonations.create(validation.normalizedData);
+    const donationId = await convexDonations.create(validation.normalizedData || {});
 
     // Generate QR code for the kumbara
     const qrCode = await generateKumbaraQR({
@@ -472,6 +518,11 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Error creating kumbara donation', _error);
     return NextResponse.json(
       { success: false, error: 'Kumbara bağışı oluşturulamadı' },

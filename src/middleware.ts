@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { UserRole, Permission, ROLE_PERMISSIONS } from '@/types/auth';
+import { UserRole, Permission } from '@/types/auth';
 import logger from '@/lib/logger';
-import { convexHttp } from '@/lib/convex/server';
-import { api } from '@/convex/_generated/api';
+import {
+  getAuthSessionFromRequest,
+  getUserFromSession as loadSessionUser,
+  type SessionUser,
+} from '@/lib/auth/session';
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -17,7 +20,7 @@ const publicRoutes = [
 ];
 
 // Auth routes that should redirect to dashboard if already authenticated
- 
+
 const _authRoutes = ['/login', '/auth'];
 
 // API routes that require authentication (protected endpoints)
@@ -94,126 +97,9 @@ const protectedRoutes: RouteRule[] = [
 ];
 
 /**
- * Get user session from auth cookie
- */
-async function getAuthSession(
-  request: NextRequest
-): Promise<{ userId: string; sessionId: string } | null> {
-  const sessionCookie = request.cookies.get('auth-session');
-  try {
-    if (!sessionCookie) {
-      return null;
-    }
-
-    const sessionData = JSON.parse(sessionCookie.value);
-
-    if (!sessionData.userId || !sessionData.sessionId) {
-      return null;
-    }
-
-    // Validate session by checking expiration
-    if (sessionData.expire) {
-      const expireDate = new Date(sessionData.expire);
-      if (expireDate < new Date()) {
-        logger.warn('Session expired', {
-          context: 'middleware',
-          function: 'getAuthSession',
-        });
-        return null;
-      }
-    }
-
-    return {
-      userId: sessionData.userId,
-      sessionId: sessionData.sessionId,
-    };
-  } catch (_error) {
-    logger.error('Session validation error', error, {
-      context: 'middleware',
-      function: 'getAuthSession',
-      hasCookie: !!sessionCookie,
-    });
-    return null;
-  }
-}
-
-/**
- * Get user data from Convex using session
- */
-async function getUserFromSession(
-  session: { userId: string; sessionId: string } | null
-): Promise<{
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  permissions: string[];
-} | null> {
-  try {
-    if (!session || !session.userId) {
-      return null;
-    }
-
-    // Handle mock sessions (development)
-    if (session.userId.startsWith('mock-')) {
-      // Map mock user IDs to mock users
-      const mockUserMap: { [key: string]: { email: string; name: string; role: string } } = {
-        'mock-admin-1': { email: 'admin@test.com', name: 'Admin User', role: 'ADMIN' },
-        'mock-admin-2': { email: 'admin@portal.com', name: 'Admin User', role: 'ADMIN' },
-        'mock-manager-1': { email: 'manager@test.com', name: 'Manager User', role: 'MANAGER' },
-        'mock-member-1': { email: 'member@test.com', name: 'Member User', role: 'MEMBER' },
-        'mock-viewer-1': { email: 'viewer@test.com', name: 'Viewer User', role: 'VIEWER' },
-      };
-
-      const mockUser = mockUserMap[session.userId];
-      if (!mockUser) {
-        return null;
-      }
-
-      const role = mockUser.role as UserRole;
-      return {
-        id: session.userId,
-        email: mockUser.email,
-        name: mockUser.name,
-        role,
-        permissions: ROLE_PERMISSIONS[role] || [],
-      };
-    }
-
-    // Get user from Convex for real sessions
-    const user = await convexHttp.query(api.users.get, { id: session.userId as any });
-
-    if (!user || !user.isActive) {
-      return null;
-    }
-
-    // Map Convex user to our user format
-    const role = (user.role || 'MEMBER') as UserRole;
-
-    return {
-      id: user._id,
-      email: user.email || '',
-      name: user.name || '',
-      role,
-      permissions: ROLE_PERMISSIONS[role] || [],
-    };
-  } catch (_error) {
-    logger.error('User data retrieval error', error, {
-      context: 'middleware',
-      function: 'getUserFromSession',
-      sessionId: session?.sessionId,
-    });
-    return null;
-  }
-}
-
-/**
  * Check if user has required permission
  */
-function hasRequiredPermission(
-  user: { id: string; email: string; name: string; role: string; permissions: string[] } | null,
-  route: RouteRule
-): boolean {
+function hasRequiredPermission(user: SessionUser | null, route: RouteRule): boolean {
   if (!user) return false;
 
   // Check role requirement first
@@ -232,9 +118,7 @@ function hasRequiredPermission(
 
   // Check any permission requirement
   if (route.requiredAnyPermission && route.requiredAnyPermission.length > 0) {
-    const hasAny = route.requiredAnyPermission.some((perm) =>
-      user.permissions.includes(perm)
-    );
+    const hasAny = route.requiredAnyPermission.some((perm) => user.permissions.includes(perm));
     if (!hasAny) {
       return false;
     }
@@ -269,7 +153,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Get user session
-  const session = await getAuthSession(request);
+  const session = getAuthSessionFromRequest(request);
 
   // If no session, redirect to login (for pages) or return 401 (for API)
   if (!session) {
@@ -283,7 +167,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Get user data
-  const user = await getUserFromSession(session);
+  const user = await loadSessionUser(session);
 
   if (!user) {
     if (isProtectedApiRoute) {

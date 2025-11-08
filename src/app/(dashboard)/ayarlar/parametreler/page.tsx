@@ -64,30 +64,22 @@ export default function ParametersPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['parameters', search, categoryFilter, statusFilter],
-    queryFn: () =>
-      parametersApi.getAllParameters({
-        search,
-        filters: {
-          category: categoryFilter === 'all' ? undefined : categoryFilter,
-          is_active:
-            statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined,
-        },
-      }),
+    queryFn: () => parametersApi.getAllParameters(),
   });
 
-  const parameters = ((data?.data || []) as Array<{
+  const parameters = (data?.data || []) as unknown as Array<{
     _id: string;
     category: string;
     name_tr: string;
     value: string;
     order: number;
     is_active: boolean;
-  }>) || [];
+  }>;
   const total = data?.total || 0;
 
   const toggleStatusMutation = useMutation({
-    mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
-      parametersApi.updateParameter(id, { is_active }),
+    mutationFn: ({ category, key, value }: { category: string; key: string; value: unknown }) =>
+      parametersApi.updateParameter(undefined, { category, key, value }),
     onSuccess: () => {
       toast.success('Parametre durumu güncellendi');
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
@@ -99,7 +91,8 @@ export default function ParametersPage() {
   });
 
   const deleteParameterMutation = useMutation({
-    mutationFn: (id: string) => parametersApi.deleteParameter(id),
+    mutationFn: ({ category, key }: { category: string; key: string }) =>
+      parametersApi.deleteParameter({ category, key, updatedBy: '' }),
     onSuccess: () => {
       toast.success('Parametre silindi');
       queryClient.invalidateQueries({ queryKey: ['parameters'] });
@@ -241,7 +234,11 @@ export default function ParametersPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        toggleStatusMutation.mutate({ id: param._id, is_active: !param.is_active })
+                        toggleStatusMutation.mutate({
+                          category: param.category,
+                          key: param._id,
+                          value: !param.is_active,
+                        })
                       }
                     >
                       {param.is_active ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
@@ -251,7 +248,10 @@ export default function ParametersPage() {
                       size="sm"
                       onClick={() => {
                         if (confirm('Bu parametreyi silmek istediğinizden emin misiniz?')) {
-                          deleteParameterMutation.mutate(param._id);
+                          deleteParameterMutation.mutate({
+                            category: param.category,
+                            key: param._id,
+                          });
                         }
                       }}
                     >

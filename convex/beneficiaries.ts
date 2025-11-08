@@ -1,6 +1,13 @@
-import { query, mutation } from "./_generated/server";
-import { v } from "convex/values";
-import { hashTcNumber, requireTcNumberAccess, maskTcNumber, validateTcNumber, logTcNumberAccess } from "./tc_security";
+import { query, mutation } from './_generated/server';
+import { v } from 'convex/values';
+import {
+  hashTcNumber,
+  requireTcNumberAccess,
+  maskTcNumber,
+  validateTcNumber,
+  logTcNumberAccess,
+  canAccessTcNumber,
+} from './tc_security';
 
 // List beneficiaries with pagination and filters
 export const list = query({
@@ -13,19 +20,21 @@ export const list = query({
   },
   handler: async (ctx, args) => {
     let beneficiaries;
-    
+
     if (args.status) {
       beneficiaries = await ctx.db
-        .query("beneficiaries")
-        .withIndex("by_status", (q) => q.eq("status", args.status as "TASLAK" | "AKTIF" | "PASIF" | "SILINDI"))
+        .query('beneficiaries')
+        .withIndex('by_status', (q) =>
+          q.eq('status', args.status as 'TASLAK' | 'AKTIF' | 'PASIF' | 'SILINDI')
+        )
         .collect();
     } else if (args.city) {
       beneficiaries = await ctx.db
-        .query("beneficiaries")
-        .withIndex("by_city", (q) => q.eq("city", args.city!))
+        .query('beneficiaries')
+        .withIndex('by_city', (q) => q.eq('city', args.city!))
         .collect();
     } else {
-      beneficiaries = await ctx.db.query("beneficiaries").collect();
+      beneficiaries = await ctx.db.query('beneficiaries').collect();
     }
 
     // Apply search filter if provided
@@ -41,7 +50,7 @@ export const list = query({
           // Invalid TC number format, skip hashing
         }
       }
-      
+
       filtered = beneficiaries.filter(
         (b) =>
           b.name.toLowerCase().includes(searchLower) ||
@@ -66,7 +75,7 @@ export const list = query({
 
 // Get beneficiary by ID
 export const get = query({
-  args: { id: v.id("beneficiaries") },
+  args: { id: v.id('beneficiaries') },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
   },
@@ -79,40 +88,40 @@ export const getByTcNo = query({
   handler: async (ctx, args) => {
     // Require authentication and proper role
     const userInfo = await requireTcNumberAccess(ctx);
-    
+
     // Validate TC number format
     if (!validateTcNumber(args.tc_no)) {
-      throw new Error("Invalid TC number format");
+      throw new Error('Invalid TC number format');
     }
-    
+
     // Hash TC number for lookup
     const hashedTc = await hashTcNumber(ctx, args.tc_no);
-    
+
     // Log access for audit trail
-    logTcNumberAccess("TC number lookup", userInfo, maskTcNumber(args.tc_no));
-    
+    logTcNumberAccess('TC number lookup', userInfo, maskTcNumber(args.tc_no));
+
     // Search using hashed value
     // Note: For migration, we check both hashed and plain values
     const beneficiary = await ctx.db
-      .query("beneficiaries")
-      .withIndex("by_tc_no", (q) => q.eq("tc_no", hashedTc))
+      .query('beneficiaries')
+      .withIndex('by_tc_no', (q) => q.eq('tc_no', hashedTc))
       .first();
-    
+
     // If not found with hash, try plain (for backward compatibility during migration)
     // Note: Migration to hashed values should be done via a separate migration script
     // For now, we just return null if not found with hash
     if (!beneficiary) {
       const plainBeneficiary = await ctx.db
-        .query("beneficiaries")
-        .withIndex("by_tc_no", (q) => q.eq("tc_no", args.tc_no))
+        .query('beneficiaries')
+        .withIndex('by_tc_no', (q) => q.eq('tc_no', args.tc_no))
         .first();
-      
+
       // Return plain beneficiary if found (migration will happen separately)
       if (plainBeneficiary) {
         return plainBeneficiary;
       }
     }
-    
+
     return beneficiary;
   },
 });
@@ -167,45 +176,60 @@ export const create = mutation({
     emergency: v.optional(v.boolean()),
     contact_preference: v.optional(v.string()),
     status: v.union(
-      v.literal("TASLAK"),
-      v.literal("AKTIF"),
-      v.literal("PASIF"),
-      v.literal("SILINDI")
+      v.literal('TASLAK'),
+      v.literal('AKTIF'),
+      v.literal('PASIF'),
+      v.literal('SILINDI')
     ),
     approval_status: v.optional(
-      v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"))
+      v.union(v.literal('pending'), v.literal('approved'), v.literal('rejected'))
     ),
     approved_by: v.optional(v.string()),
     approved_at: v.optional(v.string()),
+    auth: v.optional(
+      v.object({
+        userId: v.string(),
+        role: v.string(),
+      })
+    ),
   },
   handler: async (ctx, args) => {
+    const { auth, ...payload } = args;
+
     // Require authentication and proper role for TC number access
-    const userInfo = await requireTcNumberAccess(ctx);
-    
+    const userInfo = auth
+      ? (() => {
+          if (!canAccessTcNumber(auth.role)) {
+            throw new Error('Unauthorized: Insufficient permissions to access TC number data');
+          }
+          return auth;
+        })()
+      : await requireTcNumberAccess(ctx);
+
     // Validate TC number format
-    if (!validateTcNumber(args.tc_no)) {
-      throw new Error("Invalid TC number format");
+    if (!validateTcNumber(payload.tc_no)) {
+      throw new Error('Invalid TC number format');
     }
-    
+
     // Hash TC number before storing
-    const hashedTc = await hashTcNumber(ctx, args.tc_no);
-    
+    const hashedTc = await hashTcNumber(ctx, payload.tc_no);
+
     // Log access for audit trail
-    logTcNumberAccess("Beneficiary creation with TC number", userInfo, maskTcNumber(args.tc_no));
-    
+    logTcNumberAccess('Beneficiary creation with TC number', userInfo, maskTcNumber(payload.tc_no));
+
     // Check if TC number already exists (using hashed value)
     const existing = await ctx.db
-      .query("beneficiaries")
-      .withIndex("by_tc_no", (q) => q.eq("tc_no", hashedTc))
+      .query('beneficiaries')
+      .withIndex('by_tc_no', (q) => q.eq('tc_no', hashedTc))
       .first();
 
     if (existing) {
-      throw new Error("Beneficiary with this TC number already exists");
+      throw new Error('Beneficiary with this TC number already exists');
     }
 
     // Insert with hashed TC number
-    return await ctx.db.insert("beneficiaries", {
-      ...args,
+    return await ctx.db.insert('beneficiaries', {
+      ...payload,
       tc_no: hashedTc,
     });
   },
@@ -214,54 +238,64 @@ export const create = mutation({
 // Update beneficiary
 export const update = mutation({
   args: {
-    id: v.id("beneficiaries"),
+    id: v.id('beneficiaries'),
     name: v.optional(v.string()),
     tc_no: v.optional(v.string()),
     phone: v.optional(v.string()),
     email: v.optional(v.string()),
     status: v.optional(
-      v.union(
-        v.literal("TASLAK"),
-        v.literal("AKTIF"),
-        v.literal("PASIF"),
-        v.literal("SILINDI")
-      )
+      v.union(v.literal('TASLAK'), v.literal('AKTIF'), v.literal('PASIF'), v.literal('SILINDI'))
+    ),
+    auth: v.optional(
+      v.object({
+        userId: v.string(),
+        role: v.string(),
+      })
     ),
     // Add other optional fields as needed
   },
   handler: async (ctx, args) => {
+    const { id, auth, ...rawUpdates } = args;
+
     // Require authentication and proper role for TC number access
-    const userInfo = await requireTcNumberAccess(ctx);
-    
-    const { id, ...updates } = args;
+    const userInfo = auth
+      ? (() => {
+          if (!canAccessTcNumber(auth.role)) {
+            throw new Error('Unauthorized: Insufficient permissions to access TC number data');
+          }
+          return auth;
+        })()
+      : await requireTcNumberAccess(ctx);
+
+    const updates = { ...rawUpdates };
     const beneficiary = await ctx.db.get(id);
     if (!beneficiary) {
-      throw new Error("Beneficiary not found");
+      throw new Error('Beneficiary not found');
     }
 
     // If TC number is being updated, validate and hash it
     if (updates.tc_no) {
       if (!validateTcNumber(updates.tc_no)) {
-        throw new Error("Invalid TC number format");
+        throw new Error('Invalid TC number format');
       }
-      
+
       const hashedTc = await hashTcNumber(ctx, updates.tc_no);
-      
+
       // Log access for audit trail
-      logTcNumberAccess("Beneficiary TC number update", userInfo, maskTcNumber(updates.tc_no));
-      
+      logTcNumberAccess('Beneficiary TC number update', userInfo, maskTcNumber(updates.tc_no));
+
       // Check for duplicates using hashed value
       if (hashedTc !== beneficiary.tc_no) {
         const existing = await ctx.db
-          .query("beneficiaries")
-          .withIndex("by_tc_no", (q) => q.eq("tc_no", hashedTc))
+          .query('beneficiaries')
+          .withIndex('by_tc_no', (q) => q.eq('tc_no', hashedTc))
           .first();
 
         if (existing) {
-          throw new Error("Beneficiary with this TC number already exists");
+          throw new Error('Beneficiary with this TC number already exists');
         }
       }
-      
+
       // Replace with hashed value
       updates.tc_no = hashedTc;
     }
@@ -273,14 +307,13 @@ export const update = mutation({
 
 // Delete beneficiary
 export const remove = mutation({
-  args: { id: v.id("beneficiaries") },
+  args: { id: v.id('beneficiaries') },
   handler: async (ctx, args) => {
     const beneficiary = await ctx.db.get(args.id);
     if (!beneficiary) {
-      throw new Error("Beneficiary not found");
+      throw new Error('Beneficiary not found');
     }
     await ctx.db.delete(args.id);
     return { success: true };
   },
 });
-
