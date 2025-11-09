@@ -3,6 +3,18 @@ import { act, renderHook } from '@testing-library/react';
 import { useAuthStore } from '../authStore';
 import { MODULE_PERMISSIONS, SPECIAL_PERMISSIONS } from '@/types/permissions';
 
+// Mock UserRole enum
+vi.mock('@/types/auth', () => ({
+  UserRole: {
+    SUPER_ADMIN: 'SUPER_ADMIN',
+    ADMIN: 'ADMIN',
+    MANAGER: 'MANAGER',
+    MEMBER: 'MEMBER',
+    VIEWER: 'VIEWER',
+    VOLUNTEER: 'VOLUNTEER',
+  },
+}));
+
 // Mock permissions to ensure they are always defined
 vi.mock('@/types/permissions', () => ({
   MODULE_PERMISSIONS: {
