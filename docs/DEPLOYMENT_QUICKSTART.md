@@ -11,6 +11,7 @@ npm run deploy:vercel
 ```
 
 Bu script:
+
 - Convex production deployment yapar
 - Security secrets oluşturur
 - Vercel için gerekli ortam değişkenlerini hazırlar
@@ -28,6 +29,7 @@ Bu script:
 `.env.vercel` dosyasındaki değişkenleri Vercel Dashboard → Settings → Environment Variables'a kopyala:
 
 **Zorunlu Değişkenler:**
+
 ```bash
 NEXT_PUBLIC_CONVEX_URL=https://your-project.convex.cloud
 BACKEND_PROVIDER=convex
@@ -83,13 +85,13 @@ Deploy sırasında veya sonra ortam değişkenlerini ekle.
 
 ### Zorunlu
 
-| Değişken | Açıklama | Örnek |
-|----------|----------|-------|
-| `NEXT_PUBLIC_CONVEX_URL` | Convex production URL | `https://able-mantis-123.convex.cloud` |
-| `BACKEND_PROVIDER` | Backend tipi (sabit) | `convex` |
-| `NEXT_PUBLIC_BACKEND_PROVIDER` | Public backend tipi | `convex` |
-| `CSRF_SECRET` | CSRF token için secret (32+ char) | `a1b2c3d4e5f6...` |
-| `SESSION_SECRET` | Session için secret (32+ char) | `z9y8x7w6v5u4...` |
+| Değişken                       | Açıklama                          | Örnek                                  |
+| ------------------------------ | --------------------------------- | -------------------------------------- |
+| `NEXT_PUBLIC_CONVEX_URL`       | Convex production URL             | `https://able-mantis-123.convex.cloud` |
+| `BACKEND_PROVIDER`             | Backend tipi (sabit)              | `convex`                               |
+| `NEXT_PUBLIC_BACKEND_PROVIDER` | Public backend tipi               | `convex`                               |
+| `CSRF_SECRET`                  | CSRF token için secret (32+ char) | `a1b2c3d4e5f6...`                      |
+| `SESSION_SECRET`               | Session için secret (32+ char)    | `z9y8x7w6v5u4...`                      |
 
 ### Opsiyonel (İhtiyaca Göre)
 
@@ -124,6 +126,7 @@ curl https://your-project.vercel.app/api/health?detailed=true
 ```
 
 Beklenen yanıt:
+
 ```json
 {
   "status": "healthy",
@@ -165,6 +168,7 @@ VERCEL_PROJECT_ID=your-project-id
 ```
 
 Bu değerleri almak için:
+
 ```bash
 vercel link
 cat .vercel/project.json
@@ -186,6 +190,7 @@ const nextConfig = {
 ### Convex Bağlantı Hatası
 
 **Kontroller:**
+
 1. ✅ `NEXT_PUBLIC_CONVEX_URL` doğru mu?
 2. ✅ Convex production deploy yapıldı mı?
 3. ✅ Convex dashboard'da schema var mı?
@@ -193,6 +198,7 @@ const nextConfig = {
 ### CSRF Token Hatası
 
 **Kontroller:**
+
 1. ✅ `CSRF_SECRET` ayarlandı mı?
 2. ✅ `SESSION_SECRET` ayarlandı mı?
 3. ✅ Vercel'de secrets doğru mu?

@@ -22,6 +22,7 @@ npm run e2e              # Playwright E2E tests
 **Testing**: Vitest (unit), Playwright (E2E)
 
 **Key Folders**:
+
 - `src/app/` - Next.js App Router + API routes
 - `src/components/` - React components (UI, forms, layouts)
 - `src/lib/` - Utilities (convex client/server, validations, sanitization)
@@ -46,7 +47,7 @@ npm run e2e              # Playwright E2E tests
 
 **Client SDK** (`src/lib/convex/client.ts`): React components, 'use client' required
 **Server SDK** (`src/lib/convex/server.ts`): API routes, server components, admin access
-**Pattern**: Import `api` from '@/convex/_generated/api' to call functions
+**Pattern**: Import `api` from '@/convex/\_generated/api' to call functions
 **Collections**: users, beneficiaries, donations, scholarships, tasks, meetings, messages, aid_applications, finance_records, partners, consents, bank_accounts, dependents, documents, system_settings
 **No SQL**: Use Convex query API (`ctx.db.query()`, `.withIndex()`, `.filter()`)
 
@@ -54,7 +55,7 @@ npm run e2e              # Playwright E2E tests
 
 ```bash
 npm run typecheck  # Must pass with 0 errors
-npm run lint       # Must pass with 0 errors  
+npm run lint       # Must pass with 0 errors
 npm run test:run   # 146+ tests should pass
 ```
 

@@ -17,6 +17,7 @@ VERCEL_ORG_ID=GEgdQAxD3RqU4MBVBloio1lm
 🔗 Direkt link: https://github.com/Vadalov/PORTAL/settings/secrets/actions
 
 veya:
+
 1. https://github.com/Vadalov/PORTAL adresine git
 2. **Settings** sekmesine tıkla
 3. Sol menüden **Secrets and variables** → **Actions** seç
@@ -58,24 +59,29 @@ Repository secrets
 Secrets eklendikten sonra:
 
 ### Otomatik Production Deploy
+
 ```bash
 git add .
 git commit -m "feat: vercel deployment setup"
 git push origin main
 ```
+
 → `.github/workflows/vercel-production.yml` otomatik çalışacak
 
 ### Otomatik Preview Deploy (PR'larda)
+
 ```bash
 git checkout -b feature/test
 git push origin feature/test
 # GitHub'da PR aç
 ```
+
 → `.github/workflows/vercel-preview.yml` otomatik çalışacak
 
 ## 🔍 GitHub Actions'ı İzle
 
 Deploy durumunu görmek için:
+
 1. https://github.com/Vadalov/PORTAL/actions
 2. Son workflow run'ı seç
 3. Log'ları kontrol et
@@ -83,18 +89,21 @@ Deploy durumunu görmek için:
 ## ⚠️ Önemli Notlar
 
 ### Security Best Practices
+
 - ✅ Secrets asla kod içinde saklanmaz
 - ✅ GitHub secrets şifrelenmiş olarak saklanır
 - ✅ Logs'larda secrets `***` olarak maskelenir
 - ⚠️ Secrets'ı asla commit etmeyin!
 
 ### Token Yönetimi
+
 - **VERCEL_TOKEN**: Vercel Dashboard'dan oluşturulur
   - Scope: Full Access veya Deploy Hooks
   - Expiration: No expiration (önerilir) veya Custom
   - 🔗 Oluşturmak için: https://vercel.com/account/tokens
 
 ### Project ID & Org ID
+
 - **VERCEL_PROJECT_ID**: Her Vercel projesi için unique
 - **VERCEL_ORG_ID**: Vercel team veya kişisel hesap ID'si
 - Bu değerler public olmayan bir bilgidir, güvende tutun
@@ -102,22 +111,28 @@ Deploy durumunu görmek için:
 ## 🐛 Sorun Giderme
 
 ### "Resource not accessible by integration"
+
 **Sebep:** GitHub Actions permissions yetersiz
-**Çözüm:** 
+**Çözüm:**
+
 1. Repository Settings → Actions → General
 2. "Workflow permissions" → "Read and write permissions" seç
 3. "Allow GitHub Actions to create and approve pull requests" aktif et
 
 ### "Invalid token"
+
 **Sebep:** Token yanlış veya expire olmuş
 **Çözüm:**
+
 1. Vercel Dashboard → Settings → Tokens
 2. Yeni token oluştur
 3. GitHub secrets'ta güncelle
 
 ### "Project not found"
+
 **Sebep:** Project ID yanlış veya erişim yok
 **Çözüm:**
+
 1. Vercel Dashboard'da project seç
 2. Settings → General → Project ID kontrol et
 3. GitHub secrets'ta güncelle
