@@ -20,7 +20,10 @@ const logger = createLogger('api:errors:detail');
  * GET /api/errors/[id]
  * Get error details by ID
  */
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const { id } = params;
 
@@ -60,7 +63,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
  * PATCH /api/errors/[id]
  * Update error details
  */
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const { id } = params;
     const body = await request.json();

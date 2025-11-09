@@ -77,13 +77,13 @@ export function convertOptionalIds<T extends Record<string, string | undefined |
   tableNames: { [K in keyof T]: string }
 ): { [K in keyof T]: Id<string> | undefined } {
   const result: any = {};
-
+  
   for (const key in ids) {
     const tableName = tableNames[key];
     if (tableName) {
       result[key] = toOptionalConvexId(ids[key], tableName);
     }
   }
-
+  
   return result;
 }

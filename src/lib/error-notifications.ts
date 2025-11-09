@@ -23,7 +23,9 @@ export interface ErrorNotificationOptions {
  * Create notification for error
  * Sends to admins for critical/high severity errors
  */
-export async function createErrorNotification(options: ErrorNotificationOptions): Promise<void> {
+export async function createErrorNotification(
+  options: ErrorNotificationOptions
+): Promise<void> {
   const { errorId, errorCode, title, severity, category, component, url } = options;
 
   // Only create notifications for critical and high severity
@@ -142,7 +144,9 @@ function getCategoryLabel(category: string): string {
  * Send email notification for critical errors
  * (Placeholder - would integrate with email service)
  */
-export async function sendCriticalErrorEmail(options: ErrorNotificationOptions): Promise<void> {
+export async function sendCriticalErrorEmail(
+  options: ErrorNotificationOptions
+): Promise<void> {
   if (options.severity !== 'critical') {
     return;
   }

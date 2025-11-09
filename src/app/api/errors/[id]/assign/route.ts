@@ -21,7 +21,10 @@ const assignSchema = z.object({
  * POST /api/errors/[id]/assign
  * Assign error to user and optionally create a task
  */
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const { id } = params;
     const body = await request.json();
