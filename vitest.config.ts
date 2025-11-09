@@ -1,7 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
-import path from 'path';
+import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
@@ -33,7 +33,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': resolve(__dirname, './src'),
+      '@/convex': resolve(__dirname, './convex'),
+      '@/convex/_generated/api': resolve(__dirname, './src/__tests__/mocks/convex-api.ts'),
+      '../../convex/_generated/api': resolve(__dirname, './src/__tests__/mocks/convex-api.ts'),
     },
   },
 });

@@ -6,16 +6,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
-// Mock Convex API
-vi.mock('@/convex/_generated/api', () => ({
-  api: {
-    auth: {
-      getUserByEmail: 'auth:getUserByEmail',
-      updateLastLogin: 'auth:updateLastLogin',
-    },
-  },
-}));
-
 // Mock Convex functions
 vi.mock('@/lib/convex/server', () => ({
   convexHttp: {
@@ -61,7 +51,7 @@ describe('Auth API Routes', () => {
   describe('POST /api/auth/login', () => {
     it('should reject request without email', async () => {
       const { POST } = await import('@/app/api/auth/login/route');
-      
+
       const request = new NextRequest('http://localhost/api/auth/login', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -78,7 +68,7 @@ describe('Auth API Routes', () => {
 
     it('should reject request without password', async () => {
       const { POST } = await import('@/app/api/auth/login/route');
-      
+
       const request = new NextRequest('http://localhost/api/auth/login', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -95,7 +85,7 @@ describe('Auth API Routes', () => {
 
     it('should reject invalid email format', async () => {
       const { POST } = await import('@/app/api/auth/login/route');
-      
+
       const request = new NextRequest('http://localhost/api/auth/login', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -112,7 +102,7 @@ describe('Auth API Routes', () => {
     it('should reject non-existent user', async () => {
       const { POST } = await import('@/app/api/auth/login/route');
       const { convexHttp } = await import('@/lib/convex/server');
-      
+
       vi.mocked(convexHttp.query).mockResolvedValue(null);
 
       const request = new NextRequest('http://localhost/api/auth/login', {
@@ -132,7 +122,7 @@ describe('Auth API Routes', () => {
     it('should reject inactive user', async () => {
       const { POST } = await import('@/app/api/auth/login/route');
       const { convexHttp } = await import('@/lib/convex/server');
-      
+
       vi.mocked(convexHttp.query).mockResolvedValue({
         _id: 'user-id',
         email: 'test@example.com',
@@ -161,7 +151,7 @@ describe('Auth API Routes', () => {
   describe('POST /api/auth/logout', () => {
     it('should handle logout request', async () => {
       const { POST } = await import('@/app/api/auth/logout/route');
-      
+
       const request = new NextRequest('http://localhost/api/auth/logout', {
         method: 'POST',
       });
@@ -174,4 +164,3 @@ describe('Auth API Routes', () => {
     });
   });
 });
-

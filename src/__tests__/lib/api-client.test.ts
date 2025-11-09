@@ -26,10 +26,11 @@ describe('Convex API Client', () => {
     vi.clearAllMocks();
     mockFetch.mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({
-        success: true,
-        data: { _id: 'test-id', name: 'Test' },
-      }),
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: { _id: 'test-id', name: 'Test' },
+        }),
     });
   });
 
@@ -49,17 +50,17 @@ describe('Convex API Client', () => {
       const result = await convexApiClient.beneficiaries.getBeneficiary('test-id');
 
       expect(result.data).toEqual({ _id: 'test-id', name: 'Test' });
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/api/beneficiaries/test-id',
-        expect.objectContaining({
-          method: 'GET',
-        })
-      );
+      expect(mockFetch).toHaveBeenCalledWith('/api/beneficiaries/test-id', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     });
 
     it('should create beneficiary', async () => {
-      const testData = { 
-        name: 'New Beneficiary', 
+      const testData = {
+        name: 'New Beneficiary',
         email: 'test@example.com',
         tc_no: '12345678901',
         phone: '5551234567',
@@ -97,6 +98,11 @@ describe('Convex API Client', () => {
     });
 
     it('should delete beneficiary', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true, data: null }),
+      });
+
       const result = await convexApiClient.beneficiaries.deleteBeneficiary('test-id');
 
       expect(result.data).toBeNull();
@@ -113,13 +119,14 @@ describe('Convex API Client', () => {
     beforeEach(() => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: [
-            { _id: 'partner-1', name: 'Partner 1', type: 'organization' },
-            { _id: 'partner-2', name: 'Partner 2', type: 'individual' },
-          ],
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: [
+              { _id: 'partner-1', name: 'Partner 1', type: 'organization' },
+              { _id: 'partner-2', name: 'Partner 2', type: 'individual' },
+            ],
+          }),
       });
     });
 
@@ -143,10 +150,11 @@ describe('Convex API Client', () => {
     it('should get single partner', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: { _id: 'partner-1', name: 'Partner 1', type: 'organization' },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: { _id: 'partner-1', name: 'Partner 1', type: 'organization' },
+          }),
       });
 
       const result = await convexApiClient.partners.getPartner('partner-1');
@@ -159,6 +167,11 @@ describe('Convex API Client', () => {
     });
 
     it('should create partner', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ success: true, data: { _id: 'test-id', name: 'Test' } }),
+      });
+
       const partnerData = {
         name: 'New Partner',
         type: 'organization' as const,
@@ -182,32 +195,32 @@ describe('Convex API Client', () => {
   describe('Cache Utils', () => {
     it('should invalidate cache for specific data type', () => {
       cacheUtils.invalidateCache('beneficiaries');
-      
+
       // The mock cache should have been cleared
       expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it('should invalidate multiple caches', () => {
       cacheUtils.invalidateCaches(['beneficiaries', 'donations']);
-      
+
       expect(mockFetch).not.toHaveBeenCalled();
     });
 
     it('should get cache stats', () => {
       const stats = cacheUtils.getCacheStats('beneficiaries');
-      
+
       expect(stats).toEqual({ hits: 10, misses: 2, size: 5 });
     });
 
     it('should get cache size', () => {
       const size = cacheUtils.getCacheSize('beneficiaries');
-      
+
       expect(size).toBe(5);
     });
 
     it('should clear all caches', () => {
       cacheUtils.clearAllCaches();
-      
+
       expect(mockFetch).not.toHaveBeenCalled();
     });
   });
@@ -217,10 +230,11 @@ describe('Convex API Client', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 404,
-        json: () => Promise.resolve({
-          success: false,
-          error: 'Not found',
-        }),
+        json: () =>
+          Promise.resolve({
+            success: false,
+            error: 'Not found',
+          }),
       });
 
       const result = await convexApiClient.beneficiaries.getBeneficiary('nonexistent');

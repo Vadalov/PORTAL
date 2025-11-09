@@ -2,7 +2,7 @@
  * Tests for persistent cache
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PersistentCache, getCacheHitRate } from '@/lib/persistent-cache';
 import { CACHE_TIMES } from '@/lib/cache-config';
 
@@ -135,12 +135,17 @@ describe('PersistentCache', () => {
 
   describe('cleanup', () => {
     it('should remove expired entries', async () => {
+      vi.useFakeTimers(); // Use fake timers
+
+      const initialTime = Date.now();
+      vi.setSystemTime(initialTime);
+
       await cache.set('keep', 'value', CACHE_TIMES.LONG);
       await cache.set('expire1', 'value', 50);
       await cache.set('expire2', 'value', 50);
 
-      // Wait for expiration
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Advance time past expiration
+      vi.setSystemTime(initialTime + 100);
 
       const cleaned = await cache.cleanup();
 
@@ -148,6 +153,8 @@ describe('PersistentCache', () => {
       expect(await cache.get('keep')).not.toBeNull();
       expect(await cache.get('expire1')).toBeNull();
       expect(await cache.get('expire2')).toBeNull();
+
+      vi.useRealTimers(); // Restore real timers
     });
 
     it('should return 0 when no entries to clean', async () => {

@@ -88,3 +88,6 @@ testsprite_tests/
 
 # YoYo AI version control directory
 .yoyo/
+
+.gemini/
+gha-creds-*.json

@@ -87,9 +87,14 @@ function VirtualizedDataTable<T extends Record<string, any>>({
   }) {
     return (
       <div
-        style={style}
+        style={{
+          ...style,
+          display: 'flex',
+          alignItems: 'center',
+          boxSizing: 'border-box',
+        }}
         className={cn(
-          'flex items-center px-4 border-b border-slate-100 hover:bg-slate-50/80 transition-colors duration-150',
+          'px-4 border-b border-slate-100 hover:bg-slate-50/80 transition-colors duration-150',
           onRowClick && 'cursor-pointer'
         )}
         onClick={() => onRowClick?.(item)}
@@ -99,7 +104,7 @@ function VirtualizedDataTable<T extends Record<string, any>>({
         {columns.map((column) => (
           <div
             key={column.key}
-            className={cn('flex-1 py-3 px-2', column.className)}
+            className={cn('flex-1 px-2 overflow-hidden', column.className)}
             role="cell"
             aria-colindex={columns.findIndex((col) => col.key === column.key) + 1}
           >
@@ -220,13 +225,16 @@ function VirtualizedDataTable<T extends Record<string, any>>({
           style={{
             height: rowHeight,
             willChange: 'transform',
+            boxSizing: 'border-box',
+            display: 'flex',
+            alignItems: 'center',
           }}
           role="row"
         >
           {columns.map((column, columnIndex) => (
             <div
               key={column.key}
-              className={cn('flex-1 py-3 px-2', column.className)}
+              className={cn('flex-1 px-2 overflow-hidden', column.className)}
               role="columnheader"
               aria-colindex={columnIndex + 1}
             >

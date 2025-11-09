@@ -15,34 +15,37 @@ export const list = query({
   handler: async (ctx, args) => {
     let beneficiaries;
 
-    if (args.status) {
+    if (args.search) {
       beneficiaries = await ctx.db
         .query('beneficiaries')
-        .withIndex('by_status', (q) =>
-          q.eq('status', args.status as 'TASLAK' | 'AKTIF' | 'PASIF' | 'SILINDI')
-        )
-        .collect();
-    } else if (args.city) {
-      beneficiaries = await ctx.db
-        .query('beneficiaries')
-        .withIndex('by_city', (q) => q.eq('city', args.city!))
+        .withSearchIndex('by_search', (q) => q.search('name', args.search!))
         .collect();
     } else {
-      beneficiaries = await ctx.db.query('beneficiaries').collect();
+      if (args.status) {
+        beneficiaries = await ctx.db
+          .query('beneficiaries')
+          .withIndex('by_status', (q) =>
+            q.eq('status', args.status as 'TASLAK' | 'AKTIF' | 'PASIF' | 'SILINDI')
+          )
+          .collect();
+      } else if (args.city) {
+        beneficiaries = await ctx.db
+          .query('beneficiaries')
+          .withIndex('by_city', (q) => q.eq('city', args.city!))
+          .collect();
+      } else {
+        beneficiaries = await ctx.db.query('beneficiaries').collect();
+      }
     }
 
-    // Apply search filter if provided
     let filtered = beneficiaries;
     if (args.search) {
-      const searchLower = args.search.toLowerCase();
-
-      filtered = beneficiaries.filter(
-        (b) =>
-          b.name.toLowerCase().includes(searchLower) ||
-          b.tc_no.includes(searchLower) ||
-          b.phone.includes(searchLower) ||
-          (b.email && b.email.toLowerCase().includes(searchLower))
-      );
+      if (args.status) {
+        filtered = filtered.filter((b) => b.status === args.status);
+      }
+      if (args.city) {
+        filtered = filtered.filter((b) => b.city === args.city);
+      }
     }
 
     // Apply pagination

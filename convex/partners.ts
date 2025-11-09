@@ -8,8 +8,12 @@ export const getPartners = query({
     search: v.optional(v.string()),
     filters: v.optional(
       v.object({
-        type: v.optional(v.union(v.literal('organization'), v.literal('individual'), v.literal('sponsor'))),
-        status: v.optional(v.union(v.literal('active'), v.literal('inactive'), v.literal('pending'))),
+        type: v.optional(
+          v.union(v.literal('organization'), v.literal('individual'), v.literal('sponsor'))
+        ),
+        status: v.optional(
+          v.union(v.literal('active'), v.literal('inactive'), v.literal('pending'))
+        ),
         partnership_type: v.optional(
           v.union(
             v.literal('donor'),
@@ -25,33 +29,26 @@ export const getPartners = query({
   handler: async (ctx, args) => {
     const { page = 1, limit = 50, search, filters } = args;
 
-    let partnersQuery = ctx.db.query('partners');
+    let allPartners;
 
-    // Apply filters
+    if (search && search.trim()) {
+      allPartners = await ctx.db
+        .query('partners')
+        .withSearchIndex('by_search', (q) => q.search('name', search))
+        .collect();
+    } else {
+      allPartners = await ctx.db.query('partners').collect();
+    }
+
+    // Apply filters in-memory
     if (filters?.type) {
-      partnersQuery = partnersQuery.filter((q) => q.eq(q.field('type'), filters.type));
+      allPartners = allPartners.filter((p) => p.type === filters.type);
     }
     if (filters?.status) {
-      partnersQuery = partnersQuery.filter((q) => q.eq(q.field('status'), filters.status));
+      allPartners = allPartners.filter((p) => p.status === filters.status);
     }
     if (filters?.partnership_type) {
-      partnersQuery = partnersQuery.filter((q) =>
-        q.eq(q.field('partnership_type'), filters.partnership_type)
-      );
-    }
-
-    // Get all matching records
-    let allPartners = await partnersQuery.collect();
-
-    // Apply search filter if provided
-    if (search && search.trim()) {
-      const searchLower = search.toLowerCase();
-      allPartners = allPartners.filter(
-        (p) =>
-          p.name.toLowerCase().includes(searchLower) ||
-          (p.contact_person && p.contact_person.toLowerCase().includes(searchLower)) ||
-          (p.email && p.email.toLowerCase().includes(searchLower))
-      );
+      allPartners = allPartners.filter((p) => p.partnership_type === filters.partnership_type);
     }
 
     // Sort by name
@@ -64,7 +61,10 @@ export const getPartners = query({
 
     // Calculate stats
     const total = sortedPartners.length;
-    const totalContribution = sortedPartners.reduce((sum, p) => sum + (p.total_contribution || 0), 0);
+    const totalContribution = sortedPartners.reduce(
+      (sum, p) => sum + (p.total_contribution || 0),
+      0
+    );
     const activePartners = sortedPartners.filter((p) => p.status === 'active').length;
 
     return {
@@ -128,7 +128,9 @@ export const updatePartner = mutation({
   args: {
     id: v.id('partners'),
     name: v.optional(v.string()),
-    type: v.optional(v.union(v.literal('organization'), v.literal('individual'), v.literal('sponsor'))),
+    type: v.optional(
+      v.union(v.literal('organization'), v.literal('individual'), v.literal('sponsor'))
+    ),
     contact_person: v.optional(v.string()),
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
@@ -194,17 +196,17 @@ export const updateContribution = mutation({
       throw new Error('Partner not found');
     }
 
-    // BEST PRACTICE: Instead of maintaining a counter here, 
+    // BEST PRACTICE: Instead of maintaining a counter here,
     // calculate totals from the donations table where partner contributions are recorded.
     // This avoids OCC conflicts when multiple donations happen simultaneously.
     // For now, we'll use a safer approach:
-    
+
     // Query all donations for this partner to get accurate totals
     const partnerDonations = await ctx.db
       .query('donations')
       .filter((q) => q.eq(q.field('donor_name'), partner.name))
       .collect();
-    
+
     const totalContribution = partnerDonations.reduce((sum, d) => sum + d.amount, 0);
     const contributionCount = partnerDonations.length;
 

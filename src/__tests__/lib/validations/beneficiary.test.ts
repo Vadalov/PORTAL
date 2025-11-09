@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { beneficiarySchema } from '@/lib/validations/beneficiary';
-import { BeneficiaryCategory, FundRegion, FileConnection } from '@/types/beneficiary';
+import { BeneficiaryCategory, FundRegion, FileConnection, City } from '@/types/beneficiary';
 
 describe('Beneficiary Validations', () => {
   describe('Quick Add Schema', () => {
@@ -12,10 +12,7 @@ describe('Beneficiary Validations', () => {
         nationality: 'Türkiye',
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.BAGIMSIZ,
-        fileNumber: 'F2024001', // Fixed: only uppercase letters and numbers
-        birthDate: '2000-01-01',
-        city: 'ISTANBUL', // Fixed: uppercase city name
-        district: 'Kadıköy',
+        fileNumber: 'F2024001',
       };
 
       const result = beneficiarySchema.safeParse(validData);
@@ -58,12 +55,17 @@ describe('Beneficiary Validations', () => {
         nationality: 'Türkiye',
         fundRegion: FundRegion.SERBEST,
         fileConnection: FileConnection.BAGIMSIZ,
-        fileNumber: 'F2024001', // Fixed: only uppercase letters and numbers
+        fileNumber: 'F2024001',
         birthDate: '2000-01-01',
-        city: 'ISTANBUL', // Fixed: uppercase city name
-        district: 'Kadıköy',
-        identityNumber: '12345678910', // Valid TC Kimlik No with correct checksum
+        // Optional fields with valid formats
+        identityNumber: '11111111110', // Valid TC (passes algorithm check)
         mernisCheck: true,
+        mobilePhone: '5551234567', // Valid Turkish mobile (without +90)
+        email: 'ahmet@example.com',
+        city: City.ISTANBUL,
+        district: 'Kadıköy',
+        fatherName: 'Mehmet',
+        motherName: 'Ayşe',
       };
 
       const result = beneficiarySchema.safeParse(validData);

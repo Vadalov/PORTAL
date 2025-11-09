@@ -1,5 +1,5 @@
-import { query, mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { query, mutation } from './_generated/server';
+import { v } from 'convex/values';
 
 // List messages with filters
 export const list = query({
@@ -7,9 +7,9 @@ export const list = query({
     limit: v.optional(v.number()),
     skip: v.optional(v.number()),
     status: v.optional(v.string()),
-    sender: v.optional(v.id("users")),
-    recipient: v.optional(v.id("users")),
-    message_type: v.optional(v.union(v.literal("sms"), v.literal("email"), v.literal("internal"))),
+    sender: v.optional(v.id('users')),
+    recipient: v.optional(v.id('users')),
+    message_type: v.optional(v.union(v.literal('sms'), v.literal('email'), v.literal('internal'))),
     search: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -21,19 +21,36 @@ export const list = query({
         : undefined;
     const searchTerm = args.search?.trim().toLowerCase() || '';
 
-    const senderIndexQuery = args.sender
-      ? ctx.db.query("messages").withIndex("by_sender", (q) => q.eq("sender", args.sender!))
-      : null;
+    let messages;
 
-    const statusIndexQuery =
-      !senderIndexQuery && normalizedStatus
-        ? ctx.db.query("messages").withIndex("by_status", (q) => q.eq("status", normalizedStatus))
-        : null;
+    if (searchTerm.length > 0) {
+      messages = await ctx.db
+        .query('messages')
+        .withSearchIndex('by_search', (q) => q.search('subject', searchTerm))
+        .collect();
+    } else {
+      if (args.sender) {
+        messages = await ctx.db
+          .query('messages')
+          .withIndex('by_sender', (q) => q.eq('sender', args.sender!))
+          .collect();
+      } else if (normalizedStatus) {
+        messages = await ctx.db
+          .query('messages')
+          .withIndex('by_status', (q) => q.eq('status', normalizedStatus))
+          .collect();
+      } else {
+        messages = await ctx.db.query('messages').collect();
+      }
+    }
 
-    let messages = await (senderIndexQuery ?? statusIndexQuery ?? ctx.db.query("messages")).collect();
-
-    if (normalizedStatus) {
-      messages = messages.filter((message) => message.status === normalizedStatus);
+    if (searchTerm.length > 0) {
+      if (normalizedStatus) {
+        messages = messages.filter((message) => message.status === normalizedStatus);
+      }
+      if (args.sender) {
+        messages = messages.filter((message) => message.sender === args.sender);
+      }
     }
 
     if (args.message_type) {
@@ -42,14 +59,6 @@ export const list = query({
 
     if (args.recipient) {
       messages = messages.filter((message) => message.recipients.includes(args.recipient!));
-    }
-
-    if (searchTerm.length > 0) {
-      messages = messages.filter((message) => {
-        const subject = message.subject?.toLowerCase() || "";
-        const content = message.content.toLowerCase();
-        return subject.includes(searchTerm) || content.includes(searchTerm);
-      });
     }
 
     const total = messages.length;
@@ -64,7 +73,7 @@ export const list = query({
 
 // Get message by ID
 export const get = query({
-  args: { id: v.id("messages") },
+  args: { id: v.id('messages') },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
   },
@@ -73,27 +82,19 @@ export const get = query({
 // Create message
 export const create = mutation({
   args: {
-    message_type: v.union(
-      v.literal("sms"),
-      v.literal("email"),
-      v.literal("internal")
-    ),
-    sender: v.id("users"),
-    recipients: v.array(v.id("users")),
+    message_type: v.union(v.literal('sms'), v.literal('email'), v.literal('internal')),
+    sender: v.id('users'),
+    recipients: v.array(v.id('users')),
     subject: v.optional(v.string()),
     content: v.string(),
-    status: v.union(
-      v.literal("draft"),
-      v.literal("sent"),
-      v.literal("failed")
-    ),
+    status: v.union(v.literal('draft'), v.literal('sent'), v.literal('failed')),
     is_bulk: v.boolean(),
     template_id: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const messageId = await ctx.db.insert("messages", {
+    const messageId = await ctx.db.insert('messages', {
       ...args,
-      sent_at: args.status === "sent" ? new Date().toISOString() : undefined,
+      sent_at: args.status === 'sent' ? new Date().toISOString() : undefined,
     });
     return messageId;
   },
@@ -102,27 +103,21 @@ export const create = mutation({
 // Update message
 export const update = mutation({
   args: {
-    id: v.id("messages"),
+    id: v.id('messages'),
     subject: v.optional(v.string()),
     content: v.optional(v.string()),
-    status: v.optional(
-      v.union(
-        v.literal("draft"),
-        v.literal("sent"),
-        v.literal("failed")
-      )
-    ),
+    status: v.optional(v.union(v.literal('draft'), v.literal('sent'), v.literal('failed'))),
     sent_at: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
     const message = await ctx.db.get(id);
     if (!message) {
-      throw new Error("Message not found");
+      throw new Error('Message not found');
     }
 
     // Auto-set sent_at when status changes to sent
-    if (updates.status === "sent" && !updates.sent_at) {
+    if (updates.status === 'sent' && !updates.sent_at) {
       updates.sent_at = new Date().toISOString();
     }
 
@@ -133,11 +128,11 @@ export const update = mutation({
 
 // Delete message
 export const remove = mutation({
-  args: { id: v.id("messages") },
+  args: { id: v.id('messages') },
   handler: async (ctx, args) => {
     const message = await ctx.db.get(args.id);
     if (!message) {
-      throw new Error("Message not found");
+      throw new Error('Message not found');
     }
     await ctx.db.delete(args.id);
     return { success: true };

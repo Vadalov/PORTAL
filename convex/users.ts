@@ -1,5 +1,5 @@
-import { query, mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { query, mutation } from './_generated/server';
+import { v } from 'convex/values';
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
@@ -13,76 +13,58 @@ export const list = query({
   },
   handler: async (ctx, args) => {
     const limit = Math.min(args.limit ?? 50, 100);
+    let users;
 
-    const roleIndexQuery = args.role
-      ? ctx.db.query("users").withIndex("by_role", (q) => q.eq("role", args.role!))
-      : null;
+    if (args.search) {
+      users = await ctx.db
+        .query('users')
+        .withSearchIndex('by_search', (q) => q.search('name', args.search!))
+        .collect();
+    } else {
+      if (args.role) {
+        users = await ctx.db
+          .query('users')
+          .withIndex('by_role', (q) => q.eq('role', args.role!))
+          .collect();
+      } else if (args.isActive !== undefined) {
+        users = await ctx.db
+          .query('users')
+          .withIndex('by_is_active', (q) => q.eq('isActive', args.isActive!))
+          .collect();
+      } else {
+        users = await ctx.db.query('users').collect();
+      }
+    }
 
-    const activeIndexQuery =
-      !roleIndexQuery && args.isActive !== undefined
-        ? ctx.db.query("users").withIndex("by_is_active", (q) => q.eq("isActive", args.isActive!))
-        : null;
-
-    const queryForPage = roleIndexQuery ?? activeIndexQuery ?? ctx.db.query("users");
-
-    const result = await queryForPage.order("desc").paginate({
-      numItems: limit,
-      cursor: args.cursor ?? null,
-    });
-
-    let filtered = result.page;
-
-    if (args.isActive !== undefined && roleIndexQuery) {
+    let filtered = users;
+    if (args.search) {
+      if (args.role) {
+        filtered = filtered.filter((user) => user.role === args.role);
+      }
+      if (args.isActive !== undefined) {
+        filtered = filtered.filter((user) => user.isActive === args.isActive);
+      }
+    } else if (args.role && args.isActive !== undefined) {
       filtered = filtered.filter((user) => user.isActive === args.isActive);
     }
 
-    if (args.search) {
-      const term = args.search.toLowerCase();
-      filtered = filtered.filter(
-        (user) =>
-          user.name.toLowerCase().includes(term) ||
-          user.email.toLowerCase().includes(term) ||
-          (user.phone ? user.phone.includes(term) : false)
-      );
-    }
+    const total = filtered.length;
 
-    let totalCandidates = roleIndexQuery
-      ? await ctx.db
-          .query("users")
-          .withIndex("by_role", (q) => q.eq("role", args.role!))
-          .collect()
-      : activeIndexQuery
-        ? await ctx.db
-            .query("users")
-            .withIndex("by_is_active", (q) => q.eq("isActive", args.isActive!))
-            .collect()
-        : await ctx.db.query("users").collect();
-
-    if (args.isActive !== undefined && roleIndexQuery) {
-      totalCandidates = totalCandidates.filter((user) => user.isActive === args.isActive);
-    }
-
-    if (args.search) {
-      const term = args.search.toLowerCase();
-      totalCandidates = totalCandidates.filter(
-        (user) =>
-          user.name.toLowerCase().includes(term) ||
-          user.email.toLowerCase().includes(term) ||
-          (user.phone ? user.phone.includes(term) : false)
-      );
-    }
+    const cursor = args.cursor ? parseInt(args.cursor, 10) : 0;
+    const paginated = filtered.slice(cursor, cursor + limit);
+    const continueCursor = cursor + paginated.length < total ? (cursor + limit).toString() : null;
 
     return {
-      documents: filtered,
-      total: totalCandidates.length,
-      continueCursor: result.continueCursor,
-      isDone: result.isDone,
+      documents: paginated,
+      total,
+      continueCursor,
+      isDone: !continueCursor,
     };
   },
 });
 
 export const get = query({
-  args: { id: v.id("users") },
+  args: { id: v.id('users') },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.id);
   },
@@ -93,8 +75,8 @@ export const getByEmail = query({
   handler: async (ctx, args) => {
     const normalized = normalizeEmail(args.email);
     return await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", normalized))
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', normalized))
       .first();
   },
 });
@@ -115,15 +97,15 @@ export const create = mutation({
     const normalizedEmail = normalizeEmail(args.email);
 
     const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .query('users')
+      .withIndex('by_email', (q) => q.eq('email', normalizedEmail))
       .first();
 
     if (existingUser) {
-      throw new Error("Bu e-posta adresi zaten kullanılıyor");
+      throw new Error('Bu e-posta adresi zaten kullanılıyor');
     }
 
-    return await ctx.db.insert("users", {
+    return await ctx.db.insert('users', {
       name: args.name.trim(),
       email: normalizedEmail,
       role: args.role.trim(),
@@ -141,7 +123,7 @@ export const create = mutation({
 
 export const update = mutation({
   args: {
-    id: v.id("users"),
+    id: v.id('users'),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
     role: v.optional(v.string()),
@@ -156,7 +138,7 @@ export const update = mutation({
     const { id, ...updates } = args;
     const user = await ctx.db.get(id);
     if (!user) {
-      throw new Error("Kullanıcı bulunamadı");
+      throw new Error('Kullanıcı bulunamadı');
     }
 
     const patch: {
@@ -180,12 +162,12 @@ export const update = mutation({
       const normalizedEmail = normalizeEmail(updates.email);
       if (normalizedEmail !== user.email) {
         const existingUser = await ctx.db
-          .query("users")
-          .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+          .query('users')
+          .withIndex('by_email', (q) => q.eq('email', normalizedEmail))
           .first();
 
         if (existingUser && existingUser._id !== id) {
-          throw new Error("Bu e-posta adresi başka bir kullanıcı tarafından kullanılıyor");
+          throw new Error('Bu e-posta adresi başka bir kullanıcı tarafından kullanılıyor');
         }
       }
       patch.email = normalizedEmail;
@@ -225,14 +207,13 @@ export const update = mutation({
 });
 
 export const remove = mutation({
-  args: { id: v.id("users") },
+  args: { id: v.id('users') },
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.id);
     if (!user) {
-      throw new Error("Kullanıcı bulunamadı");
+      throw new Error('Kullanıcı bulunamadı');
     }
     await ctx.db.delete(args.id);
     return { success: true };
   },
 });
-

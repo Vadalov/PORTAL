@@ -35,48 +35,34 @@ describe('Environment Validation', () => {
   });
 
   describe('Server Environment Validation', () => {
+    let originalWindow: typeof window;
+
+    beforeEach(() => {
+      vi.unstubAllEnvs(); // Clear stubs from previous tests
+      vi.stubEnv('NEXT_PUBLIC_CONVEX_URL', 'https://test-project.convex.cloud');
+
+      // Mock window to be undefined for server-side validation
+      originalWindow = global.window;
+      (global as any).window = undefined;
+    });
+
+    afterEach(() => {
+      (global as any).window = originalWindow; // Restore original window
+    });
+
     it('should validate server env variables', async () => {
-      // Set Convex URL (optional but recommended)
-      process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
-      // In development, secrets are optional
-      Object.defineProperty(process.env, 'NODE_ENV', {
-        value: 'development',
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(process.env, 'CSRF_SECRET', {
-        value: 'a'.repeat(32),
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(process.env, 'SESSION_SECRET', {
-        value: 'b'.repeat(32),
-        writable: true,
-        configurable: true,
-      });
+      vi.stubEnv('NODE_ENV', 'development');
+      vi.stubEnv('CSRF_SECRET', 'a'.repeat(32));
+      vi.stubEnv('SESSION_SECRET', 'b'.repeat(32));
 
       const { validateServerEnv } = await import('@/lib/env-validation');
       expect(() => validateServerEnv()).not.toThrow();
     });
 
     it('should validate secret length in production', async () => {
-      process.env.NEXT_PUBLIC_CONVEX_URL = 'https://test-project.convex.cloud';
-
-      Object.defineProperty(process.env, 'NODE_ENV', {
-        value: 'production',
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(process.env, 'CSRF_SECRET', {
-        value: 'too-short', // Less than 32 chars
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(process.env, 'SESSION_SECRET', {
-        value: 'b'.repeat(32),
-        writable: true,
-        configurable: true,
-      });
+      vi.stubEnv('NODE_ENV', 'production');
+      vi.stubEnv('CSRF_SECRET', 'too-short'); // Less than 32 chars
+      vi.stubEnv('SESSION_SECRET', 'b'.repeat(32));
 
       const { validateServerEnv } = await import('@/lib/env-validation');
       expect(() => validateServerEnv()).toThrow();
