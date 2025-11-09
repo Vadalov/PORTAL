@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexMessages, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
+import { buildErrorResponse, verifyCsrfToken, requireModuleAccess } from '@/lib/api/auth-utils';
 
 function validateMessage(data: Record<string, unknown>): {
   isValid: boolean;
@@ -11,9 +12,6 @@ function validateMessage(data: Record<string, unknown>): {
   const errors: string[] = [];
   if (!data.message_type || !['sms', 'email', 'internal'].includes(data.message_type as string)) {
     errors.push('Geçersiz mesaj türü');
-  }
-  if (!data.sender) {
-    errors.push('Gönderen zorunludur');
   }
   if (!Array.isArray(data.recipients) || data.recipients.length === 0) {
     errors.push('En az bir alıcı seçilmelidir');
@@ -40,12 +38,70 @@ function validateMessage(data: Record<string, unknown>): {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const params = normalizeQueryParams(searchParams);
-
+  let currentUserId: string | undefined;
   try {
-    const response = await convexMessages.list({
-      ...params,
-      sender: searchParams.get('sender') as Id<"users"> | undefined,
-    });
+    const { user } = await requireModuleAccess('messages');
+
+    currentUserId = user.id;
+    const authenticatedUserId = user.id as Id<'users'>;
+    const tab = searchParams.get('tab');
+    const canViewAllMessages = user.permissions.includes('users:manage');
+
+    const parseUserIdParam = (value: string | null): Id<"users"> | undefined =>
+      value && value.length > 0 ? (value as Id<"users">) : undefined;
+
+    const requestedSender = parseUserIdParam(searchParams.get('sender'));
+    const requestedRecipient = parseUserIdParam(searchParams.get('recipient'));
+
+    if (
+      !canViewAllMessages &&
+      ((requestedSender && requestedSender !== authenticatedUserId) ||
+        (requestedRecipient && requestedRecipient !== authenticatedUserId))
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Bu kayıtlara erişim yetkiniz bulunmuyor' },
+        { status: 403 }
+      );
+    }
+
+    let response;
+
+    if (tab === 'inbox') {
+      // Inbox: messages where current user is recipient
+      response = await convexMessages.list({
+        ...params,
+        recipient: authenticatedUserId,
+        message_type: 'internal',
+      });
+    } else if (tab === 'sent') {
+      // Sent: messages where current user is sender
+      response = await convexMessages.list({
+        ...params,
+        sender: authenticatedUserId,
+        message_type: 'internal',
+      });
+    } else if (tab === 'drafts') {
+      // Drafts: draft messages where current user is sender
+      response = await convexMessages.list({
+        ...params,
+        sender: authenticatedUserId,
+        status: 'draft',
+        message_type: 'internal',
+      });
+    } else {
+      // Default: use provided filters
+      const senderFilter = canViewAllMessages
+        ? requestedSender
+        : authenticatedUserId;
+      const recipientFilter = canViewAllMessages ? requestedRecipient : undefined;
+
+      response = await convexMessages.list({
+        ...params,
+        sender: senderFilter,
+        recipient: recipientFilter,
+        message_type: searchParams.get('message_type') as 'sms' | 'email' | 'internal' | undefined,
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -53,10 +109,17 @@ export async function GET(request: NextRequest) {
       total: response.total || 0,
     });
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('List messages error', _error, {
       endpoint: '/api/messages',
       method: 'GET',
       params,
+      userId: currentUserId,
+      tab: searchParams.get('tab'),
     });
     return NextResponse.json({ success: false, error: 'Veri alınamadı' }, { status: 500 });
   }
@@ -67,7 +130,12 @@ export async function GET(request: NextRequest) {
  */
 async function createMessageHandler(request: NextRequest) {
   let body: unknown = null;
+  let currentUserId: string | undefined;
   try {
+    await verifyCsrfToken(request);
+    const { user } = await requireModuleAccess('messages');
+    currentUserId = user.id;
+
     body = await request.json();
     const validation = validateMessage(body as Record<string, unknown>);
     if (!validation.isValid || !validation.normalizedData) {
@@ -79,7 +147,7 @@ async function createMessageHandler(request: NextRequest) {
 
     const messageData = {
       message_type: validation.normalizedData.message_type as 'sms' | 'email' | 'internal',
-      sender: validation.normalizedData.sender as Id<"users">,
+      sender: user.id as Id<"users">,
       recipients: validation.normalizedData.recipients as Id<"users">[],
       subject: validation.normalizedData.subject as string | undefined,
       content: validation.normalizedData.content as string,
@@ -88,6 +156,16 @@ async function createMessageHandler(request: NextRequest) {
       template_id: validation.normalizedData.template_id as string | undefined,
     };
 
+    if (
+      messageData.is_bulk &&
+      !user.permissions.includes('users:manage')
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Toplu mesaj göndermek için yetkiniz bulunmuyor' },
+        { status: 403 }
+      );
+    }
+
     const response = await convexMessages.create(messageData);
 
     return NextResponse.json(
@@ -95,10 +173,16 @@ async function createMessageHandler(request: NextRequest) {
       { status: 201 }
     );
   } catch (_error: unknown) {
+    const authError = buildErrorResponse(_error);
+    if (authError) {
+      return NextResponse.json(authError.body, { status: authError.status });
+    }
+
     logger.error('Create message error', _error, {
       endpoint: '/api/messages',
       method: 'POST',
       messageType: (body as Record<string, unknown>)?.message_type,
+      userId: currentUserId,
       recipientCount: Array.isArray((body as Record<string, unknown>)?.recipients)
         ? ((body as Record<string, unknown>)?.recipients as unknown[]).length
         : 0,

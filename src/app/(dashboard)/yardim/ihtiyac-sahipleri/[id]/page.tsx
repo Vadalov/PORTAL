@@ -56,7 +56,7 @@ import {
 } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 
-import api from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import type { AidApplicationDocument } from '@/types/database';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';

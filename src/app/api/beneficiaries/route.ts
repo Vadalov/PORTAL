@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexBeneficiaries, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import type { QueryParams } from '@/types/database';
-import { Permission } from '@/types/auth';
 import {
   requireAuthenticatedUser,
   verifyCsrfToken,
   buildErrorResponse,
+  requireModuleAccess,
 } from '@/lib/api/auth-utils';
 
 // TypeScript interfaces
@@ -85,9 +85,7 @@ function validateBeneficiaryData(data: BeneficiaryData): ValidationResult {
  */
 async function getBeneficiariesHandler(request: NextRequest) {
   try {
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.BENEFICIARIES_READ,
-    });
+    await requireModuleAccess('beneficiaries');
 
     const { searchParams } = new URL(request.url);
     const params = normalizeQueryParams(searchParams);
@@ -132,9 +130,7 @@ async function createBeneficiaryHandler(request: NextRequest) {
   let body: BeneficiaryData | null = null;
   try {
     await verifyCsrfToken(request);
-    const { user } = await requireAuthenticatedUser({
-      requiredPermission: Permission.BENEFICIARIES_CREATE,
-    });
+    const { user } = await requireModuleAccess('beneficiaries');
 
     body = (await request.json()) as BeneficiaryData;
 
@@ -207,7 +203,7 @@ async function createBeneficiaryHandler(request: NextRequest) {
     };
 
     const response = await convexBeneficiaries.create(beneficiaryData, {
-      auth: { userId: user.id, role: user.role },
+      auth: { userId: user.id, role: user.role ?? 'Personel' },
     });
 
     return NextResponse.json(

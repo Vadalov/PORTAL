@@ -1,15 +1,86 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-// Get all users
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
 export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("users").collect();
+  args: {
+    search: v.optional(v.string()),
+    role: v.optional(v.string()),
+    isActive: v.optional(v.boolean()),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = Math.min(args.limit ?? 50, 100);
+
+    const roleIndexQuery = args.role
+      ? ctx.db.query("users").withIndex("by_role", (q) => q.eq("role", args.role!))
+      : null;
+
+    const activeIndexQuery =
+      !roleIndexQuery && args.isActive !== undefined
+        ? ctx.db.query("users").withIndex("by_is_active", (q) => q.eq("isActive", args.isActive!))
+        : null;
+
+    const queryForPage = roleIndexQuery ?? activeIndexQuery ?? ctx.db.query("users");
+
+    const result = await queryForPage.order("desc").paginate({
+      numItems: limit,
+      cursor: args.cursor ?? null,
+    });
+
+    let filtered = result.page;
+
+    if (args.isActive !== undefined && roleIndexQuery) {
+      filtered = filtered.filter((user) => user.isActive === args.isActive);
+    }
+
+    if (args.search) {
+      const term = args.search.toLowerCase();
+      filtered = filtered.filter(
+        (user) =>
+          user.name.toLowerCase().includes(term) ||
+          user.email.toLowerCase().includes(term) ||
+          (user.phone ? user.phone.includes(term) : false)
+      );
+    }
+
+    let totalCandidates = roleIndexQuery
+      ? await ctx.db
+          .query("users")
+          .withIndex("by_role", (q) => q.eq("role", args.role!))
+          .collect()
+      : activeIndexQuery
+        ? await ctx.db
+            .query("users")
+            .withIndex("by_is_active", (q) => q.eq("isActive", args.isActive!))
+            .collect()
+        : await ctx.db.query("users").collect();
+
+    if (args.isActive !== undefined && roleIndexQuery) {
+      totalCandidates = totalCandidates.filter((user) => user.isActive === args.isActive);
+    }
+
+    if (args.search) {
+      const term = args.search.toLowerCase();
+      totalCandidates = totalCandidates.filter(
+        (user) =>
+          user.name.toLowerCase().includes(term) ||
+          user.email.toLowerCase().includes(term) ||
+          (user.phone ? user.phone.includes(term) : false)
+      );
+    }
+
+    return {
+      documents: filtered,
+      total: totalCandidates.length,
+      continueCursor: result.continueCursor,
+      isDone: result.isDone,
+    };
   },
 });
 
-// Get user by ID
 export const get = query({
   args: { id: v.id("users") },
   handler: async (ctx, args) => {
@@ -17,86 +88,148 @@ export const get = query({
   },
 });
 
-// Get user by email
 export const getByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {
+    const normalized = normalizeEmail(args.email);
     return await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .withIndex("by_email", (q) => q.eq("email", normalized))
       .first();
   },
 });
 
-// Create user
 export const create = mutation({
-args: {
-  name: v.string(),
-  email: v.string(),
-  role: v.string(),
-  avatar: v.optional(v.string()),
-  isActive: v.boolean(),
-  labels: v.optional(v.array(v.string())),
-  createdAt: v.optional(v.string()),
-  lastLogin: v.optional(v.string()),
-  passwordHash: v.optional(v.string()),
-},
-handler: async (ctx, args) => {
-  const existingUser = await ctx.db
-    .query("users")
-    .withIndex("by_email", (q) => q.eq("email", args.email))
-    .first();
+  args: {
+    name: v.string(),
+    email: v.string(),
+    role: v.string(),
+    permissions: v.array(v.string()),
+    passwordHash: v.string(),
+    isActive: v.boolean(),
+    phone: v.optional(v.string()),
+    avatar: v.optional(v.string()),
+    labels: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const normalizedEmail = normalizeEmail(args.email);
 
-  if (existingUser) {
-    throw new Error("User with this email already exists");
-  }
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .first();
 
-  return await ctx.db.insert("users", {
-    name: args.name,
-    email: args.email,
-    role: args.role,
-    avatar: args.avatar,
-    isActive: args.isActive,
-    labels: args.labels,
-    createdAt: args.createdAt,
-    lastLogin: args.lastLogin,
-    passwordHash: args.passwordHash,
-  });
-},
+    if (existingUser) {
+      throw new Error("Bu e-posta adresi zaten kullanılıyor");
+    }
+
+    return await ctx.db.insert("users", {
+      name: args.name.trim(),
+      email: normalizedEmail,
+      role: args.role.trim(),
+      permissions: args.permissions,
+      passwordHash: args.passwordHash,
+      isActive: args.isActive,
+      phone: args.phone?.trim(),
+      avatar: args.avatar,
+      labels: args.labels,
+      createdAt: new Date().toISOString(),
+      lastLogin: undefined,
+    });
+  },
 });
 
-// Update user
 export const update = mutation({
-args: {
-  id: v.id("users"),
-  name: v.optional(v.string()),
-  email: v.optional(v.string()),
-  role: v.optional(v.string()),
-  avatar: v.optional(v.string()),
-  isActive: v.optional(v.boolean()),
-  labels: v.optional(v.array(v.string())),
-  createdAt: v.optional(v.string()),
-  lastLogin: v.optional(v.string()),
-  passwordHash: v.optional(v.string()),
-},
-handler: async (ctx, args) => {
-  const { id, ...updates } = args;
-  const user = await ctx.db.get(id);
-  if (!user) {
-    throw new Error("User not found");
-  }
-  await ctx.db.patch(id, updates);
-  return await ctx.db.get(id);
-},
+  args: {
+    id: v.id("users"),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    role: v.optional(v.string()),
+    permissions: v.optional(v.array(v.string())),
+    passwordHash: v.optional(v.string()),
+    isActive: v.optional(v.boolean()),
+    phone: v.optional(v.string()),
+    avatar: v.optional(v.string()),
+    labels: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    const user = await ctx.db.get(id);
+    if (!user) {
+      throw new Error("Kullanıcı bulunamadı");
+    }
+
+    const patch: {
+      name?: string;
+      email?: string;
+      role?: string;
+      permissions?: string[];
+      passwordHash?: string;
+      isActive?: boolean;
+      phone?: string;
+      avatar?: string;
+      labels?: string[];
+      lastLogin?: string;
+    } = {};
+
+    if (updates.name !== undefined) {
+      patch.name = updates.name.trim();
+    }
+
+    if (updates.email !== undefined) {
+      const normalizedEmail = normalizeEmail(updates.email);
+      if (normalizedEmail !== user.email) {
+        const existingUser = await ctx.db
+          .query("users")
+          .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+          .first();
+
+        if (existingUser && existingUser._id !== id) {
+          throw new Error("Bu e-posta adresi başka bir kullanıcı tarafından kullanılıyor");
+        }
+      }
+      patch.email = normalizedEmail;
+    }
+
+    if (updates.role !== undefined) {
+      patch.role = updates.role.trim();
+    }
+
+    if (updates.permissions !== undefined) {
+      patch.permissions = updates.permissions;
+    }
+
+    if (updates.passwordHash !== undefined) {
+      patch.passwordHash = updates.passwordHash;
+    }
+
+    if (updates.isActive !== undefined) {
+      patch.isActive = updates.isActive;
+    }
+
+    if (updates.phone !== undefined) {
+      patch.phone = updates.phone?.trim();
+    }
+
+    if (updates.avatar !== undefined) {
+      patch.avatar = updates.avatar;
+    }
+
+    if (updates.labels !== undefined) {
+      patch.labels = updates.labels;
+    }
+
+    await ctx.db.patch(id, patch);
+    return await ctx.db.get(id);
+  },
 });
 
-// Delete user
 export const remove = mutation({
   args: { id: v.id("users") },
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.id);
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("Kullanıcı bulunamadı");
     }
     await ctx.db.delete(args.id);
     return { success: true };

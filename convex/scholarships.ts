@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { hashTcNumber, requireTcNumberAccess, maskTcNumber, validateTcNumber, logTcNumberAccess } from "./tc_security";
+
+const isValidTcNumber = (value: string): boolean => /^\d{11}$/.test(value);
 
 // Scholarships - Scholarship Programs
 
@@ -129,27 +130,16 @@ export const listApplications = query({
     tc_no: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // If searching by TC number, require authentication and proper role
     if (args.tc_no) {
-      const userInfo = await requireTcNumberAccess(ctx);
-      
-      // Validate TC number format
-      if (!validateTcNumber(args.tc_no)) {
+      if (!isValidTcNumber(args.tc_no)) {
         throw new Error("Invalid TC number format");
       }
-      
-      // Hash TC number for lookup
-      const hashedTc = await hashTcNumber(ctx, args.tc_no);
-      
-      // Log access for audit trail
-      logTcNumberAccess("Scholarship application TC number search", userInfo, maskTcNumber(args.tc_no));
-      
-      // Search using hashed value
+
       const applications = await ctx.db
         .query("scholarship_applications")
-        .withIndex("by_tc_no", (q) => q.eq("applicant_tc_no", hashedTc))
+        .withIndex("by_tc_no", (q) => q.eq("applicant_tc_no", args.tc_no!))
         .collect();
-      
+
       const skip = args.skip || 0;
       const limit = args.limit || 50;
       const paginated = applications.slice(skip, skip + limit);
@@ -159,8 +149,7 @@ export const listApplications = query({
         total: applications.length,
       };
     }
-    
-    // For other queries, no special access control needed (no TC number access)
+
     let applications;
     
     if (args.scholarship_id) {
@@ -193,17 +182,7 @@ export const listApplications = query({
 export const getApplication = query({
   args: { id: v.id("scholarship_applications") },
   handler: async (ctx, args) => {
-    // Require authentication and proper role to access TC number
-    const userInfo = await requireTcNumberAccess(ctx);
-    
-    const application = await ctx.db.get(args.id);
-    
-    if (application) {
-      // Log access for audit trail
-      logTcNumberAccess("Scholarship application access", userInfo, "***", `Application ID: ${args.id}`);
-    }
-    
-    return application;
+    return await ctx.db.get(args.id);
   },
 });
 
@@ -232,26 +211,15 @@ export const createApplication = mutation({
     documents: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    // Require authentication and proper role for TC number access
-    const userInfo = await requireTcNumberAccess(ctx);
-    
-    // Validate TC number format
-    if (!validateTcNumber(args.applicant_tc_no)) {
+    if (!isValidTcNumber(args.applicant_tc_no)) {
       throw new Error("Invalid TC number format");
     }
-    
-    // Hash TC number before storing
-    const hashedTc = await hashTcNumber(ctx, args.applicant_tc_no);
-    
-    // Log access for audit trail
-    logTcNumberAccess("Scholarship application creation with TC number", userInfo, maskTcNumber(args.applicant_tc_no));
-    
-    // Calculate priority score
+
     const priorityScore = calculatePriorityScore(args);
 
     return await ctx.db.insert("scholarship_applications", {
       ...args,
-      applicant_tc_no: hashedTc,
+      applicant_tc_no: args.applicant_tc_no,
       priority_score: priorityScore,
       status: "draft",
       created_at: new Date().toISOString(),
@@ -271,19 +239,12 @@ export const updateApplication = mutation({
     submitted_at: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Require authentication and proper role to access TC number
-    const userInfo = await requireTcNumberAccess(ctx);
-    
     const { id, ...updates } = args;
     const application = await ctx.db.get(id);
     if (!application) {
       throw new Error("Application not found");
     }
 
-    // Log access for audit trail
-    logTcNumberAccess("Scholarship application update", userInfo, "***", `Application ID: ${id}`);
-
-    // Auto-set submitted_at when status changes to submitted
     if (updates.status === "submitted" && !updates.submitted_at) {
       (updates as any).submitted_at = new Date().toISOString();
     }
@@ -298,9 +259,6 @@ export const updateApplication = mutation({
 export const submitApplication = mutation({
   args: { id: v.id("scholarship_applications") },
   handler: async (ctx, args) => {
-    // Require authentication and proper role to access TC number
-    const userInfo = await requireTcNumberAccess(ctx);
-    
     const application = await ctx.db.get(args.id);
     if (!application) {
       throw new Error("Application not found");
@@ -309,9 +267,6 @@ export const submitApplication = mutation({
     if (application.status !== "draft") {
       throw new Error("Only draft applications can be submitted");
     }
-
-    // Log access for audit trail
-    logTcNumberAccess("Scholarship application submission", userInfo, "***", `Application ID: ${args.id}`);
 
     await ctx.db.patch(args.id, {
       status: "submitted",

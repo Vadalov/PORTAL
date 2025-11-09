@@ -3,12 +3,7 @@ import { convexDonations } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import QRCode from 'qrcode';
 import type { DonationDocument } from '@/types/database';
-import { Permission } from '@/types/auth';
-import {
-  requireAuthenticatedUser,
-  verifyCsrfToken,
-  buildErrorResponse,
-} from '@/lib/api/auth-utils';
+import { verifyCsrfToken, buildErrorResponse, requireModuleAccess } from '@/lib/api/auth-utils';
 
 // Type for QR data
 interface QRData {
@@ -169,9 +164,7 @@ function validateKumbaraDonation(data: Partial<DonationDocument>): ValidationRes
  */
 export async function GET(request: NextRequest) {
   try {
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DONATIONS_READ,
-    });
+    await requireModuleAccess('donations');
 
     const { searchParams } = new URL(request.url);
     const {
@@ -286,9 +279,7 @@ export async function GET(request: NextRequest) {
  */
 export async function GET_STATS(request: NextRequest) {
   try {
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DONATIONS_READ,
-    });
+    await requireModuleAccess('donations');
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') || 'overview';
@@ -467,9 +458,7 @@ function calculatePaymentStats(donations: any[]) {
 export async function POST(request: NextRequest) {
   try {
     await verifyCsrfToken(request);
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DONATIONS_CREATE,
-    });
+    await requireModuleAccess('donations');
 
     const body = (await request.json()) as Partial<DonationDocument>;
 

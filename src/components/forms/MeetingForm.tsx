@@ -21,7 +21,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import { Badge } from '@/components/ui/badge';
 
-import api from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { useAuthStore } from '@/stores/authStore';
 import { useFormMutation } from '@/hooks/useFormMutation';
 import { toast } from 'sonner';

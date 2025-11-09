@@ -3,12 +3,7 @@ import { convexDonations } from '@/lib/convex/api';
 import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
-import { Permission } from '@/types/auth';
-import {
-  requireAuthenticatedUser,
-  verifyCsrfToken,
-  buildErrorResponse,
-} from '@/lib/api/auth-utils';
+import { verifyCsrfToken, buildErrorResponse, requireModuleAccess } from '@/lib/api/auth-utils';
 
 function validateDonationUpdate(data: Record<string, unknown>): {
   isValid: boolean;
@@ -56,9 +51,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   try {
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DONATIONS_READ,
-    });
+    await requireModuleAccess('donations');
 
     const donation = await convexDonations.get(id as Id<'donations'>);
 
@@ -95,9 +88,7 @@ async function updateDonationHandler(
   const { id } = await extractParams(params);
   try {
     await verifyCsrfToken(request);
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DONATIONS_UPDATE,
-    });
+    await requireModuleAccess('donations');
 
     const body = (await request.json()) as Record<string, unknown>;
 
@@ -156,9 +147,7 @@ async function deleteDonationHandler(
   const { id } = await extractParams(params);
   try {
     await verifyCsrfToken(request);
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DONATIONS_DELETE,
-    });
+    await requireModuleAccess('donations');
 
     await convexDonations.remove(id as Id<'donations'>);
 

@@ -16,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { DatePicker } from '@/components/ui/date-picker';
 import { useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { useAuthStore } from '@/stores/authStore';
 import { Loader2, X, AlertCircle, User } from 'lucide-react';
 import {
@@ -164,15 +164,25 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
   const onSubmit = async (data: TaskFormData) => {
     setIsSubmitting(true);
     try {
+      const normalizedAssignedTo =
+        typeof data.assigned_to === 'string' && data.assigned_to.trim().length > 0
+          ? data.assigned_to
+          : undefined;
+
+      const payload: TaskFormData = {
+        ...data,
+        assigned_to: normalizedAssignedTo,
+      };
+
       // Auto-set completed_at when status becomes 'completed'
-      if (data.status === 'completed' && !data.completed_at) {
-        data.completed_at = new Date().toISOString();
+      if (payload.status === 'completed' && !payload.completed_at) {
+        payload.completed_at = new Date().toISOString();
       }
 
       if (isEditMode) {
-        await updateTaskMutation.mutateAsync(data);
+        await updateTaskMutation.mutateAsync(payload);
       } else {
-        await createTaskMutation.mutateAsync(data);
+        await createTaskMutation.mutateAsync(payload);
       }
     } finally {
       setIsSubmitting(false);
@@ -223,14 +233,14 @@ export function TaskForm({ onSuccess, onCancel, initialData, taskId }: TaskFormP
           <div className="space-y-2">
             <Label htmlFor="assigned_to">Atanan Kişi</Label>
             <Select
-              value={watch('assigned_to')}
-              onValueChange={(value) => setValue('assigned_to', value)}
+              value={(watch('assigned_to') ?? '') === '' ? 'unassigned' : (watch('assigned_to') as string)}
+              onValueChange={(value) => setValue('assigned_to', value === 'unassigned' ? '' : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Kişi seçin veya boş bırakın" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Atanmadı</SelectItem>
+                <SelectItem value="unassigned">Atanmadı</SelectItem>
                 {users.map((user: UserDocument) => (
                   <SelectItem key={user._id} value={user._id}>
                     <div className="flex items-center gap-2">

@@ -18,7 +18,7 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';

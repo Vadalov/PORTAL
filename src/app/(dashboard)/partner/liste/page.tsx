@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ import { toast } from 'sonner';
 import {
   Plus,
   Search,
-  Edit,
+  Edit as EditIcon,
   Trash2,
   Handshake,
   Users,
@@ -42,7 +42,7 @@ import {
   User,
   Star,
 } from 'lucide-react';
-import api from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 
 interface Partner {
   _id: string;
@@ -198,7 +198,7 @@ export default function PartnersPage() {
       await api.partners.updatePartner(partnerId, { status: newStatus });
       toast.success('Partner durumu güncellendi');
       refetch();
-    } catch (error) {
+    } catch {
       toast.error('Durum güncellenirken hata oluştu');
     }
   };
@@ -492,11 +492,11 @@ export default function PartnersPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditPartner(partner)}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditPartner(partner)}
                         >
-                          <Edit className="w-4 h-4" />
+                        <EditIcon className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="outline"

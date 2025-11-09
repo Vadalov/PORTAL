@@ -4,6 +4,8 @@ import './globals.css';
 import { Providers } from './providers';
 import { cn } from '@/lib/utils';
 import { lazyLoadComponent } from '@/lib/performance';
+import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/react';
 
 // Optimized font loading with subset optimization
 const inter = Inter({
@@ -73,6 +75,8 @@ export default function RootLayout({
           <LazyWebVitalsTracker />
           {children}
         </Providers>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

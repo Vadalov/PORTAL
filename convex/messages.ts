@@ -8,31 +8,56 @@ export const list = query({
     skip: v.optional(v.number()),
     status: v.optional(v.string()),
     sender: v.optional(v.id("users")),
+    recipient: v.optional(v.id("users")),
+    message_type: v.optional(v.union(v.literal("sms"), v.literal("email"), v.literal("internal"))),
+    search: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    let messages;
-    
-    if (args.status) {
-      messages = await ctx.db
-        .query("messages")
-        .withIndex("by_status", (q) => q.eq("status", args.status as "draft" | "sent" | "failed"))
-        .collect();
-    } else if (args.sender) {
-      messages = await ctx.db
-        .query("messages")
-        .withIndex("by_sender", (q) => q.eq("sender", args.sender!))
-        .collect();
-    } else {
-      messages = await ctx.db.query("messages").collect();
+    const limit = Math.min(args.limit ?? 50, 100);
+    const skip = Math.max(args.skip ?? 0, 0);
+    const normalizedStatus =
+      args.status && ['draft', 'sent', 'failed'].includes(args.status)
+        ? (args.status as 'draft' | 'sent' | 'failed')
+        : undefined;
+    const searchTerm = args.search?.trim().toLowerCase() || '';
+
+    const senderIndexQuery = args.sender
+      ? ctx.db.query("messages").withIndex("by_sender", (q) => q.eq("sender", args.sender!))
+      : null;
+
+    const statusIndexQuery =
+      !senderIndexQuery && normalizedStatus
+        ? ctx.db.query("messages").withIndex("by_status", (q) => q.eq("status", normalizedStatus))
+        : null;
+
+    let messages = await (senderIndexQuery ?? statusIndexQuery ?? ctx.db.query("messages")).collect();
+
+    if (normalizedStatus) {
+      messages = messages.filter((message) => message.status === normalizedStatus);
     }
 
-    const skip = args.skip || 0;
-    const limit = args.limit || 50;
+    if (args.message_type) {
+      messages = messages.filter((message) => message.message_type === args.message_type);
+    }
+
+    if (args.recipient) {
+      messages = messages.filter((message) => message.recipients.includes(args.recipient!));
+    }
+
+    if (searchTerm.length > 0) {
+      messages = messages.filter((message) => {
+        const subject = message.subject?.toLowerCase() || "";
+        const content = message.content.toLowerCase();
+        return subject.includes(searchTerm) || content.includes(searchTerm);
+      });
+    }
+
+    const total = messages.length;
     const paginated = messages.slice(skip, skip + limit);
 
     return {
       documents: paginated,
-      total: messages.length,
+      total,
     };
   },
 });
@@ -118,4 +143,3 @@ export const remove = mutation({
     return { success: true };
   },
 });
-

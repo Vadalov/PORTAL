@@ -6,7 +6,9 @@ export default defineSchema({
   users: defineTable({
     name: v.string(),
     email: v.string(),
-    role: v.string(), // UserRole enum
+    role: v.string(),
+    permissions: v.optional(v.array(v.string())),
+    phone: v.optional(v.string()),
     avatar: v.optional(v.string()),
     isActive: v.boolean(),
     labels: v.optional(v.array(v.string())),
@@ -15,7 +17,8 @@ export default defineSchema({
     passwordHash: v.optional(v.string()),
   })
     .index('by_email', ['email'])
-    .index('by_role', ['role']),
+    .index('by_role', ['role'])
+    .index('by_is_active', ['isActive']),
 
   // Beneficiaries Collection
   beneficiaries: defineTable({
@@ -166,6 +169,97 @@ export default defineSchema({
     .index('by_organizer', ['organizer'])
     .index('by_status', ['status'])
     .index('by_meeting_date', ['meeting_date']),
+
+  // Meeting Decisions Collection
+  meeting_decisions: defineTable({
+    meeting_id: v.id('meetings'),
+    title: v.string(),
+    summary: v.optional(v.string()),
+    owner: v.optional(v.id('users')),
+    created_by: v.id('users'),
+    created_at: v.string(),
+    status: v.union(
+      v.literal('acik'),
+      v.literal('devam'),
+      v.literal('kapatildi')
+    ),
+    tags: v.optional(v.array(v.string())),
+    due_date: v.optional(v.string()),
+  })
+    .index('by_meeting', ['meeting_id'])
+    .index('by_owner', ['owner'])
+    .index('by_status', ['status']),
+
+  // Meeting Action Items Collection
+  meeting_action_items: defineTable({
+    meeting_id: v.id('meetings'),
+    decision_id: v.optional(v.id('meeting_decisions')),
+    title: v.string(),
+    description: v.optional(v.string()),
+    assigned_to: v.id('users'),
+    created_by: v.id('users'),
+    created_at: v.string(),
+    status: v.union(
+      v.literal('beklemede'),
+      v.literal('devam'),
+      v.literal('hazir'),
+      v.literal('iptal')
+    ),
+    due_date: v.optional(v.string()),
+    completed_at: v.optional(v.string()),
+    status_history: v.optional(
+      v.array(
+        v.object({
+          status: v.union(
+            v.literal('beklemede'),
+            v.literal('devam'),
+            v.literal('hazir'),
+            v.literal('iptal')
+          ),
+          changed_at: v.string(),
+          changed_by: v.id('users'),
+          note: v.optional(v.string()),
+        })
+      )
+    ),
+    notes: v.optional(v.array(v.string())),
+    reminder_scheduled_at: v.optional(v.string()),
+  })
+    .index('by_meeting', ['meeting_id'])
+    .index('by_assigned_to', ['assigned_to'])
+    .index('by_status', ['status']),
+
+  // Workflow Notifications Collection
+  workflow_notifications: defineTable({
+    recipient: v.id('users'),
+    triggered_by: v.optional(v.id('users')),
+    category: v.union(
+      v.literal('meeting'),
+      v.literal('gorev'),
+      v.literal('rapor'),
+      v.literal('hatirlatma')
+    ),
+    title: v.string(),
+    body: v.optional(v.string()),
+    status: v.union(v.literal('beklemede'), v.literal('gonderildi'), v.literal('okundu')),
+    created_at: v.string(),
+    sent_at: v.optional(v.string()),
+    read_at: v.optional(v.string()),
+    reference: v.optional(
+      v.object({
+        type: v.union(
+          v.literal('meeting_action_item'),
+          v.literal('meeting'),
+          v.literal('meeting_decision')
+        ),
+        id: v.string(),
+      })
+    ),
+    metadata: v.optional(v.any()),
+  })
+    .index('by_recipient', ['recipient'])
+    .index('by_status', ['status'])
+    .index('by_category', ['category']),
 
   // Messages Collection
   messages: defineTable({

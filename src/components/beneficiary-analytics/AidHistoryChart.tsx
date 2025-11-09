@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
-import api from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 
 interface AidHistoryChartProps {
   beneficiaryId: string;

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { UserRole, Permission } from '@/types/auth';
 import logger from '@/lib/logger';
 import {
   getAuthSessionFromRequest,
   getUserFromSession as loadSessionUser,
   type SessionUser,
 } from '@/lib/auth/session';
+import { MODULE_PERMISSIONS, SPECIAL_PERMISSIONS, type PermissionValue } from '@/types/permissions';
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -38,62 +38,63 @@ const protectedApiRoutes = [
 // Route definitions for role-based access control
 interface RouteRule {
   path: string;
-  requiredPermission?: Permission;
-  requiredRole?: UserRole;
-  requiredAnyPermission?: Permission[];
+  requiredPermission?: PermissionValue;
+  requiredRole?: string;
+  requiredAnyPermission?: PermissionValue[];
 }
 
 // Protected routes with their permission requirements
 const protectedRoutes: RouteRule[] = [
   // Dashboard routes
-  { path: '/genel', requiredPermission: Permission.DASHBOARD_READ },
-  { path: '/financial-dashboard', requiredPermission: Permission.FINANCIAL_READ },
+  { path: '/genel' },
+  { path: '/financial-dashboard', requiredPermission: MODULE_PERMISSIONS.FINANCE },
 
   // User management
-  { path: '/kullanici', requiredPermission: Permission.USERS_READ },
+  { path: '/kullanici', requiredPermission: SPECIAL_PERMISSIONS.USERS_MANAGE },
 
   // Beneficiaries
-  { path: '/yardim', requiredPermission: Permission.BENEFICIARIES_READ },
-  { path: '/yardim/basvurular', requiredPermission: Permission.AID_REQUESTS_READ },
-  { path: '/yardim/liste', requiredPermission: Permission.BENEFICIARIES_READ },
-  { path: '/yardim/nakdi-vezne', requiredPermission: Permission.BENEFICIARIES_CREATE },
-  { path: '/yardim/ihtiyac-sahipleri', requiredPermission: Permission.BENEFICIARIES_READ },
+  { path: '/yardim', requiredPermission: MODULE_PERMISSIONS.BENEFICIARIES },
+  { path: '/yardim/basvurular', requiredPermission: MODULE_PERMISSIONS.AID_APPLICATIONS },
+  { path: '/yardim/liste', requiredPermission: MODULE_PERMISSIONS.BENEFICIARIES },
+  { path: '/yardim/nakdi-vezne', requiredPermission: MODULE_PERMISSIONS.BENEFICIARIES },
+  { path: '/yardim/ihtiyac-sahipleri', requiredPermission: MODULE_PERMISSIONS.BENEFICIARIES },
 
   // Donations
-  { path: '/bagis', requiredPermission: Permission.DONATIONS_READ },
-  { path: '/bagis/liste', requiredPermission: Permission.DONATIONS_READ },
-  { path: '/bagis/kumbara', requiredPermission: Permission.DONATIONS_CREATE },
-  { path: '/bagis/raporlar', requiredPermission: Permission.REPORTS_READ },
+  { path: '/bagis', requiredPermission: MODULE_PERMISSIONS.DONATIONS },
+  { path: '/bagis/liste', requiredPermission: MODULE_PERMISSIONS.DONATIONS },
+  { path: '/bagis/kumbara', requiredPermission: MODULE_PERMISSIONS.DONATIONS },
+  { path: '/bagis/raporlar', requiredPermission: MODULE_PERMISSIONS.REPORTS },
 
   // Scholarships
-  { path: '/burs', requiredPermission: Permission.SCHOLARSHIPS_READ },
-  { path: '/burs/basvurular', requiredPermission: Permission.SCHOLARSHIPS_READ },
-  { path: '/burs/ogrenciler', requiredPermission: Permission.SCHOLARSHIPS_READ },
-  { path: '/burs/yetim', requiredPermission: Permission.SCHOLARSHIPS_READ },
+  { path: '/burs', requiredPermission: MODULE_PERMISSIONS.SCHOLARSHIPS },
+  { path: '/burs/basvurular', requiredPermission: MODULE_PERMISSIONS.SCHOLARSHIPS },
+  { path: '/burs/ogrenciler', requiredPermission: MODULE_PERMISSIONS.SCHOLARSHIPS },
+  { path: '/burs/yetim', requiredPermission: MODULE_PERMISSIONS.SCHOLARSHIPS },
 
   // Tasks & Meetings
-  { path: '/is', requiredPermission: Permission.DASHBOARD_READ },
-  { path: '/is/gorevler', requiredPermission: Permission.DASHBOARD_READ },
-  { path: '/is/toplantilar', requiredPermission: Permission.DASHBOARD_READ },
+  { path: '/is', requiredPermission: MODULE_PERMISSIONS.WORKFLOW },
+  { path: '/is/yonetim', requiredPermission: MODULE_PERMISSIONS.WORKFLOW },
+  { path: '/is/gorevler', requiredPermission: MODULE_PERMISSIONS.WORKFLOW },
+  { path: '/is/toplantilar', requiredPermission: MODULE_PERMISSIONS.WORKFLOW },
 
   // Messaging
-  { path: '/mesaj', requiredPermission: Permission.MESSAGING_READ },
-  { path: '/mesaj/kurum-ici', requiredPermission: Permission.MESSAGING_READ },
-  { path: '/mesaj/toplu', requiredPermission: Permission.MESSAGING_BULK },
+  { path: '/mesaj', requiredPermission: MODULE_PERMISSIONS.MESSAGES },
+  { path: '/mesaj/kurum-ici', requiredPermission: MODULE_PERMISSIONS.MESSAGES },
+  { path: '/mesaj/toplu', requiredPermission: MODULE_PERMISSIONS.MESSAGES },
 
   // Partners
-  { path: '/partner', requiredPermission: Permission.PARTNERS_READ },
-  { path: '/partner/liste', requiredPermission: Permission.PARTNERS_READ },
+  { path: '/partner', requiredPermission: MODULE_PERMISSIONS.PARTNERS },
+  { path: '/partner/liste', requiredPermission: MODULE_PERMISSIONS.PARTNERS },
 
   // Financial
-  { path: '/fon', requiredPermission: Permission.FINANCIAL_READ },
-  { path: '/fon/gelir-gider', requiredPermission: Permission.FINANCIAL_READ },
-  { path: '/fon/raporlar', requiredPermission: Permission.REPORTS_READ },
+  { path: '/fon', requiredPermission: MODULE_PERMISSIONS.FINANCE },
+  { path: '/fon/gelir-gider', requiredPermission: MODULE_PERMISSIONS.FINANCE },
+  { path: '/fon/raporlar', requiredPermission: MODULE_PERMISSIONS.REPORTS },
 
   // Settings (require admin role)
-  { path: '/settings', requiredRole: UserRole.ADMIN },
-  { path: '/ayarlar', requiredRole: UserRole.ADMIN },
-  { path: '/ayarlar/parametreler', requiredRole: UserRole.ADMIN },
+  { path: '/settings', requiredPermission: MODULE_PERMISSIONS.SETTINGS },
+  { path: '/ayarlar', requiredPermission: MODULE_PERMISSIONS.SETTINGS },
+  { path: '/ayarlar/parametreler', requiredPermission: MODULE_PERMISSIONS.SETTINGS },
 ];
 
 /**
@@ -104,7 +105,7 @@ function hasRequiredPermission(user: SessionUser | null, route: RouteRule): bool
 
   // Check role requirement first
   if (route.requiredRole) {
-    if (user.role !== route.requiredRole && user.role !== UserRole.SUPER_ADMIN) {
+    if (!user.role || user.role.toLowerCase() !== route.requiredRole.toLowerCase()) {
       return false;
     }
   }
@@ -118,7 +119,9 @@ function hasRequiredPermission(user: SessionUser | null, route: RouteRule): bool
 
   // Check any permission requirement
   if (route.requiredAnyPermission && route.requiredAnyPermission.length > 0) {
-    const hasAny = route.requiredAnyPermission.some((perm) => user.permissions.includes(perm));
+    const hasAny = route.requiredAnyPermission.some((perm) =>
+      user.permissions.includes(perm as PermissionValue)
+    );
     if (!hasAny) {
       return false;
     }
@@ -198,8 +201,8 @@ export async function middleware(request: NextRequest) {
   if (isProtectedApiRoute) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-user-id', user.id);
-    requestHeaders.set('x-user-role', user.role);
-    requestHeaders.set('x-user-permissions', user.permissions.join(','));
+    requestHeaders.set('x-user-role', user.role ?? '');
+    requestHeaders.set('x-user-permissions', (user.permissions ?? []).join(','));
 
     return NextResponse.next({
       request: {

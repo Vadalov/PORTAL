@@ -37,7 +37,7 @@ import {
   FileDown,
 } from 'lucide-react';
 import { generateAidListPDF } from '@/lib/utils/pdf-export';
-import { aidApplicationsApi } from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import type { AidApplicationDocument } from '@/types/database';
 
 interface AidRecord extends AidApplicationDocument {
@@ -80,7 +80,7 @@ export default function AidListPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['aid-list', page, search, stageFilter, statusFilter],
     queryFn: () =>
-      aidApplicationsApi.getAidApplications({
+      api.aidApplications.getAidApplications({
         page,
         limit,
         search,

@@ -22,17 +22,34 @@ export interface ConvexQueryParams {
 export function normalizeQueryParams(searchParams: URLSearchParams): ConvexQueryParams {
   const params: ConvexQueryParams = {};
 
-  const limit = searchParams.get('limit');
-  const skip = searchParams.get('skip') || searchParams.get('page');
+  const limitParam = searchParams.get('limit');
+  const skipParam = searchParams.get('skip');
+  const pageParam = searchParams.get('page');
   const search = searchParams.get('search');
   const status = searchParams.get('status');
 
-  if (limit) params.limit = Math.min(parseInt(limit, 10), 100);
-  if (skip) {
-    const page = parseInt(skip, 10);
-    const limitNum = params.limit || 20;
-    params.skip = (page - 1) * limitNum;
+  if (limitParam) {
+    const parsedLimit = parseInt(limitParam, 10);
+    if (!Number.isNaN(parsedLimit) && parsedLimit > 0) {
+      params.limit = Math.min(parsedLimit, 100);
+    }
   }
+
+  if (skipParam) {
+    const parsedSkip = parseInt(skipParam, 10);
+    if (!Number.isNaN(parsedSkip) && parsedSkip >= 0) {
+      params.skip = parsedSkip;
+    }
+  }
+
+  if (pageParam && params.skip === undefined) {
+    const parsedPage = parseInt(pageParam, 10);
+    if (!Number.isNaN(parsedPage) && parsedPage > 0) {
+      const limit = params.limit ?? 20;
+      params.skip = (parsedPage - 1) * limit;
+    }
+  }
+
   if (search) params.search = search;
   if (status) params.status = status;
 
@@ -160,10 +177,100 @@ export const convexMeetings = {
 };
 
 /**
+ * Meeting Decisions API
+ */
+export const convexMeetingDecisions = {
+  list: async (
+    params?: {
+      meeting_id?: Id<'meetings'>;
+      owner?: Id<'users'>;
+      status?: 'acik' | 'devam' | 'kapatildi';
+    }
+  ) => {
+    return await convexHttp.query(api.meeting_decisions.list, params || {});
+  },
+  get: async (id: Id<'meeting_decisions'>) => {
+    return await convexHttp.query(api.meeting_decisions.get, { id });
+  },
+  create: async (data: any) => {
+    return await convexHttp.mutation(api.meeting_decisions.create, data);
+  },
+  update: async (id: Id<'meeting_decisions'>, data: any) => {
+    return await convexHttp.mutation(api.meeting_decisions.update, { id, ...data });
+  },
+  remove: async (id: Id<'meeting_decisions'>) => {
+    return await convexHttp.mutation(api.meeting_decisions.remove, { id });
+  },
+};
+
+/**
+ * Meeting Action Items API
+ */
+export const convexMeetingActionItems = {
+  list: async (
+    params?: {
+      meeting_id?: Id<'meetings'>;
+      assigned_to?: Id<'users'>;
+      status?: 'beklemede' | 'devam' | 'hazir' | 'iptal';
+    }
+  ) => {
+    return await convexHttp.query(api.meeting_action_items.list, params || {});
+  },
+  get: async (id: Id<'meeting_action_items'>) => {
+    return await convexHttp.query(api.meeting_action_items.get, { id });
+  },
+  create: async (data: any) => {
+    return await convexHttp.mutation(api.meeting_action_items.create, data);
+  },
+  update: async (id: Id<'meeting_action_items'>, data: any) => {
+    return await convexHttp.mutation(api.meeting_action_items.update, { id, ...data });
+  },
+  updateStatus: async (
+    id: Id<'meeting_action_items'>,
+    payload: { status: 'beklemede' | 'devam' | 'hazir' | 'iptal'; changed_by: Id<'users'>; note?: string }
+  ) => {
+    return await convexHttp.mutation(api.meeting_action_items.updateStatus, { id, ...payload });
+  },
+  remove: async (id: Id<'meeting_action_items'>) => {
+    return await convexHttp.mutation(api.meeting_action_items.remove, { id });
+  },
+};
+
+/**
+ * Workflow Notifications API
+ */
+export const convexWorkflowNotifications = {
+  list: async (
+    params?: {
+      recipient?: Id<'users'>;
+      status?: 'beklemede' | 'gonderildi' | 'okundu';
+      category?: 'meeting' | 'gorev' | 'rapor' | 'hatirlatma';
+    }
+  ) => {
+    return await convexHttp.query(api.workflow_notifications.list, params || {});
+  },
+  get: async (id: Id<'workflow_notifications'>) => {
+    return await convexHttp.query(api.workflow_notifications.get, { id });
+  },
+  create: async (data: any) => {
+    return await convexHttp.mutation(api.workflow_notifications.create, data);
+  },
+  markAsSent: async (id: Id<'workflow_notifications'>, sent_at?: string) => {
+    return await convexHttp.mutation(api.workflow_notifications.markAsSent, { id, sent_at });
+  },
+  markAsRead: async (id: Id<'workflow_notifications'>, read_at?: string) => {
+    return await convexHttp.mutation(api.workflow_notifications.markAsRead, { id, read_at });
+  },
+  remove: async (id: Id<'workflow_notifications'>) => {
+    return await convexHttp.mutation(api.workflow_notifications.remove, { id });
+  },
+};
+
+/**
  * Messages API
  */
 export const convexMessages = {
-  list: async (params?: ConvexQueryParams & { sender?: Id<'users'> }) => {
+  list: async (params?: ConvexQueryParams & { sender?: Id<'users'>; recipient?: Id<'users'> }) => {
     return await convexHttp.query(api.messages.list, params || {});
   },
   get: async (id: Id<'messages'>) => {
@@ -184,8 +291,16 @@ export const convexMessages = {
  * Users API
  */
 export const convexUsers = {
-  list: async () => {
-    return await convexHttp.query(api.users.list, {});
+  list: async (
+    params?: {
+      search?: string;
+      role?: string;
+      isActive?: boolean;
+      limit?: number;
+      cursor?: string;
+    }
+  ) => {
+    return await convexHttp.query(api.users.list, params || {});
   },
   get: async (id: Id<'users'>) => {
     return await convexHttp.query(api.users.get, { id });

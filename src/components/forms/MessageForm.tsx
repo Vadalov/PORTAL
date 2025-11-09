@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useQueryClient } from '@tanstack/react-query';
-import api from '@/lib/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { useAuthStore } from '@/stores/authStore';
 import { Loader2, X, MessageSquare, Mail, Users, Send, Save, Phone, AtSign } from 'lucide-react';
 import {
@@ -62,6 +62,7 @@ export function MessageForm({
     initialData?.template_id || null
   );
   const [showPreview, setShowPreview] = useState(false);
+  const previousMessageTypeRef = useRef<string | null>(null);
 
   const {
     register,
@@ -88,13 +89,28 @@ export function MessageForm({
   const content = watch('content');
   const subject = watch('subject');
 
-  // Fetch users for internal message recipient selection
-  // Fetch users for recipient selection - disabled for now
-  // const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
-  //   queryKey: ['users'],
-  //   queryFn: () => api.users.getUsers({ limit: 100 }),
-  // });
-  const _users: UserDocument[] = []; // Empty for now
+  useEffect(() => {
+    if (previousMessageTypeRef.current === null) {
+      previousMessageTypeRef.current = messageType;
+      return;
+    }
+
+    if (previousMessageTypeRef.current === messageType) {
+      return;
+    }
+
+    setSelectedRecipients([]);
+    setRecipientInput('');
+    setValue('recipients', []);
+    previousMessageTypeRef.current = messageType;
+  }, [messageType, setValue]);
+
+  // Fetch users for recipient selection (used for internal messaging)
+  const { data: usersResponse, isLoading: isLoadingUsers } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => api.users.getUsers({ limit: 200 }),
+  });
+  const users: UserDocument[] = usersResponse?.data || [];
 
   useEffect(() => {
     if (initialData) {
@@ -104,6 +120,9 @@ export function MessageForm({
       if (initialData.subject) setValue('subject', initialData.subject);
       if (initialData.content) setValue('content', initialData.content);
       if (initialData.message_type) setValue('message_type', initialData.message_type);
+      if (initialData.message_type) {
+        previousMessageTypeRef.current = initialData.message_type;
+      }
     }
   }, [initialData, setValue]);
 
@@ -151,28 +170,58 @@ export function MessageForm({
   });
 
   const handleAddRecipient = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && recipientInput.trim() !== '') {
-      e.preventDefault();
-      const newRecipient = recipientInput.trim();
+    if (e.key !== 'Enter') return;
 
-      // Validate recipient format based on message type
-      const validationErrors = validateRecipients([newRecipient], messageType);
-      if (validationErrors.length > 0) {
-        toast.error(validationErrors[0]);
+    const rawInput = recipientInput.trim();
+    if (!rawInput) {
+      return;
+    }
+
+    e.preventDefault();
+
+    let recipientValue = rawInput;
+
+    if (messageType === 'internal') {
+      if (isLoadingUsers) {
+        toast.info('Kullanıcı listesi yükleniyor, lütfen bekleyin.');
         return;
       }
 
-      if (!selectedRecipients.includes(newRecipient) && selectedRecipients.length < 100) {
-        const updatedRecipients = [...selectedRecipients, newRecipient];
-        setSelectedRecipients(updatedRecipients);
-        setValue('recipients', updatedRecipients);
-        setRecipientInput('');
-      } else if (selectedRecipients.includes(newRecipient)) {
-        toast.warning('Bu alıcı zaten eklenmiş.');
-      } else if (selectedRecipients.length >= 100) {
-        toast.warning('En fazla 100 alıcı ekleyebilirsiniz.');
+      const matchedUser = users.find((u) => {
+        const email = u.email?.toLowerCase();
+        const name = u.name?.toLowerCase();
+        const normalized = rawInput.toLowerCase();
+        return email === normalized || name === normalized;
+      });
+
+      if (!matchedUser) {
+        toast.error('Kullanıcı bulunamadı. Lütfen kullanıcı adı veya e-postasını doğru girin.');
+        return;
       }
+
+      recipientValue = matchedUser._id;
     }
+
+    const validationErrors = validateRecipients([recipientValue], messageType);
+    if (validationErrors.length > 0) {
+      toast.error(validationErrors[0]);
+      return;
+    }
+
+    if (selectedRecipients.includes(recipientValue)) {
+      toast.warning('Bu alıcı zaten eklenmiş.');
+      return;
+    }
+
+    if (selectedRecipients.length >= 100) {
+      toast.warning('En fazla 100 alıcı ekleyebilirsiniz.');
+      return;
+    }
+
+    const updatedRecipients = [...selectedRecipients, recipientValue];
+    setSelectedRecipients(updatedRecipients);
+    setValue('recipients', updatedRecipients);
+    setRecipientInput('');
   };
 
   const handleRemoveRecipient = (recipientToRemove: string) => {
@@ -251,7 +300,7 @@ export function MessageForm({
       case 'email':
         return 'E-posta adresi girin';
       case 'internal':
-        return 'Kullanıcı adı girin';
+        return 'Kullanıcı e-posta adresi veya adını girin';
       default:
         return 'Alıcı girin';
     }
@@ -268,6 +317,25 @@ export function MessageForm({
       default:
         return <MessageSquare className="h-4 w-4" />;
     }
+  };
+
+  const getRecipientLabel = (recipient: string) => {
+    if (messageType === 'internal') {
+      const matchedUser = users.find((u) => u._id === recipient);
+      if (matchedUser) {
+        if (matchedUser.name && matchedUser.email) {
+          return `${matchedUser.name} (${matchedUser.email})`;
+        }
+        return matchedUser.name || matchedUser.email || matchedUser._id;
+      }
+      return recipient;
+    }
+
+    if (messageType === 'sms') {
+      return formatPhoneNumber(recipient);
+    }
+
+    return recipient;
   };
 
   const getContentPlaceholder = () => {
@@ -363,15 +431,21 @@ export function MessageForm({
                 onKeyDown={handleAddRecipient}
                 placeholder={getRecipientPlaceholder()}
                 className="h-9 pl-10"
+                disabled={messageType === 'internal' && isLoadingUsers}
               />
             </div>
             {errors.recipients && (
               <p className="text-sm text-red-600">{errors.recipients.message}</p>
             )}
+            {messageType === 'internal' && selectedRecipients.length === 0 && !isLoadingUsers && users.length === 0 && (
+              <p className="text-sm text-gray-500">
+                Kayıtlı kullanıcı bulunamadı. Kurum içi mesaj göndermek için önce kullanıcı ekleyin.
+              </p>
+            )}
             <div className="flex flex-wrap gap-2 mt-2">
               {selectedRecipients.map((recipient, index) => (
                 <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {messageType === 'sms' ? formatPhoneNumber(recipient) : recipient}
+                  {getRecipientLabel(recipient)}
                   <X
                     className="h-3 w-3 cursor-pointer"
                     onClick={() => handleRemoveRecipient(recipient)}

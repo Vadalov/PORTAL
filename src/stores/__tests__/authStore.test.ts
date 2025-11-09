@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi, beforeAll } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { useAuthStore } from '../authStore';
-import { Permission, UserRole } from '@/types/auth';
+import { MODULE_PERMISSIONS, SPECIAL_PERMISSIONS } from '@/types/permissions';
 
 // Mock fetch globally
 const fetchMock = vi.fn();
@@ -74,11 +74,12 @@ describe('AuthStore', () => {
                   id: 'user-123',
                   name: 'Test Admin',
                   email: 'admin@test.com',
-                  role: UserRole.ADMIN,
+                  role: 'Dernek Başkanı',
                   permissions: [
-                    Permission.BENEFICIARIES_READ,
-                    Permission.USERS_READ,
-                    Permission.BENEFICIARIES_UPDATE,
+                    MODULE_PERMISSIONS.BENEFICIARIES,
+                    MODULE_PERMISSIONS.DONATIONS,
+                    MODULE_PERMISSIONS.AID_APPLICATIONS,
+                    SPECIAL_PERMISSIONS.USERS_MANAGE,
                   ],
                   avatar: null,
                   isActive: true,
@@ -181,8 +182,8 @@ describe('AuthStore', () => {
         await result.current.login('admin@test.com', 'admin123');
       });
 
-      expect(result.current.hasPermission(Permission.BENEFICIARIES_READ)).toBe(true);
-      expect(result.current.hasRole(UserRole.ADMIN)).toBe(true);
+      expect(result.current.hasPermission(MODULE_PERMISSIONS.BENEFICIARIES)).toBe(true);
+      expect(result.current.hasRole('Dernek Başkanı')).toBe(true);
     });
   });
 

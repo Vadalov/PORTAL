@@ -3,12 +3,7 @@ import { convexMeetings } from '@/lib/convex/api';
 import { extractParams } from '@/lib/api/route-helpers';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
-import { Permission } from '@/types/auth';
-import {
-  requireAuthenticatedUser,
-  verifyCsrfToken,
-  buildErrorResponse,
-} from '@/lib/api/auth-utils';
+import { verifyCsrfToken, buildErrorResponse, requireModuleAccess } from '@/lib/api/auth-utils';
 
 function validateMeetingUpdate(data: Record<string, unknown>): {
   isValid: boolean;
@@ -33,9 +28,7 @@ function validateMeetingUpdate(data: Record<string, unknown>): {
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await extractParams(params);
   try {
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DASHBOARD_READ,
-    });
+    await requireModuleAccess('workflow');
 
     const meeting = await convexMeetings.get(id as Id<'meetings'>);
 
@@ -72,13 +65,7 @@ async function updateMeetingHandler(
   const { id } = await extractParams(params);
   try {
     await verifyCsrfToken(request);
-    await requireAuthenticatedUser({
-      requiredAnyPermission: [
-        Permission.DONATIONS_CREATE,
-        Permission.BENEFICIARIES_CREATE,
-        Permission.AID_REQUESTS_CREATE,
-      ],
-    });
+    await requireModuleAccess('workflow');
 
     const body = (await request.json()) as Record<string, unknown>;
 
@@ -142,13 +129,7 @@ async function deleteMeetingHandler(
   const { id } = await extractParams(params);
   try {
     await verifyCsrfToken(request);
-    await requireAuthenticatedUser({
-      requiredAnyPermission: [
-        Permission.DONATIONS_CREATE,
-        Permission.BENEFICIARIES_CREATE,
-        Permission.AID_REQUESTS_CREATE,
-      ],
-    });
+    await requireModuleAccess('workflow');
 
     await convexMeetings.remove(id as Id<'meetings'>);
 

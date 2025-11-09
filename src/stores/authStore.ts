@@ -8,7 +8,8 @@
 import { create } from 'zustand';
 import { devtools, persist, subscribeWithSelector, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { User, UserRole, Permission, ROLE_PERMISSIONS } from '@/types/auth';
+import { User } from '@/types/auth';
+import type { PermissionValue } from '@/types/permissions';
 
 interface Session {
   userId: string;
@@ -38,10 +39,10 @@ interface AuthActions {
   initializeAuth: () => void;
 
   // Permission helpers
-  hasPermission: (permission: Permission) => boolean;
-  hasRole: (role: UserRole) => boolean;
-  hasAnyPermission: (permissions: Permission[]) => boolean;
-  hasAllPermissions: (permissions: Permission[]) => boolean;
+  hasPermission: (permission: PermissionValue | string) => boolean;
+  hasRole: (role: string) => boolean;
+  hasAnyPermission: (permissions: Array<PermissionValue | string>) => boolean;
+  hasAllPermissions: (permissions: Array<PermissionValue | string>) => boolean;
 
   // UI actions
   setShowLoginModal: (show: boolean) => void;
@@ -63,23 +64,26 @@ export const backendUserToStoreUser = (backendUser: {
   email: string;
   name: string;
   role?: string;
-  avatar?: string;
+  avatar?: string | null;
+  permissions?: PermissionValue[];
+  isActive?: boolean;
+  phone?: string;
+  labels?: string[];
   createdAt?: string;
   updatedAt?: string;
-}): User => {
-  const role = (backendUser.role?.toUpperCase() || 'MEMBER') as UserRole;
-  return {
-    id: backendUser.id,
-    email: backendUser.email,
-    name: backendUser.name,
-    role,
-    avatar: backendUser.avatar,
-    permissions: ROLE_PERMISSIONS[role] || [],
-    isActive: true,
-    createdAt: backendUser.createdAt || new Date().toISOString(),
-    updatedAt: backendUser.updatedAt || new Date().toISOString(),
-  };
-};
+}): User => ({
+  id: backendUser.id,
+  email: backendUser.email,
+  name: backendUser.name,
+  role: backendUser.role,
+  avatar: backendUser.avatar ?? null,
+  permissions: backendUser.permissions ?? [],
+  isActive: backendUser.isActive ?? true,
+  phone: backendUser.phone,
+  labels: backendUser.labels,
+  createdAt: backendUser.createdAt || new Date().toISOString(),
+  updatedAt: backendUser.updatedAt || new Date().toISOString(),
+});
 
 export const useAuthStore = create<AuthStore>()(
   devtools(
@@ -111,8 +115,8 @@ export const useAuthStore = create<AuthStore>()(
                       email: sessionData.email,
                       name: sessionData.name,
                       role: sessionData.role,
-                      permissions: [],
-                      avatar: null,
+                      permissions: sessionData.permissions ?? [],
+                      avatar: sessionData.avatar ?? null,
                       isActive: true,
                       createdAt: new Date().toISOString(),
                       updatedAt: new Date().toISOString(),
@@ -200,6 +204,8 @@ export const useAuthStore = create<AuthStore>()(
                   email: user.email,
                   name: user.name,
                   role: user.role,
+                  permissions: user.permissions ?? [],
+                  avatar: user.avatar ?? null,
                 })
               );
 
@@ -266,28 +272,33 @@ export const useAuthStore = create<AuthStore>()(
           },
 
           // Permission helpers
-          hasPermission: (permission: Permission) => {
+          hasPermission: (permission: PermissionValue | string) => {
             const { user, isAuthenticated } = get();
             if (!user || !isAuthenticated) return false;
-            return user.permissions.includes(permission);
+            return (user.permissions || []).includes(permission as PermissionValue);
           },
 
-          hasRole: (role: UserRole) => {
+          hasRole: (role: string) => {
             const { user, isAuthenticated } = get();
             if (!user || !isAuthenticated) return false;
-            return user.role === role;
+            if (!role) return false;
+            return (user.role || '').toLowerCase() === role.toLowerCase();
           },
 
-          hasAnyPermission: (permissions: Permission[]) => {
+          hasAnyPermission: (permissions: Array<PermissionValue | string>) => {
             const { user, isAuthenticated } = get();
             if (!user || !isAuthenticated) return false;
-            return permissions.some((permission) => user.permissions.includes(permission));
+            return permissions.some((permission) =>
+              (user.permissions || []).includes(permission as PermissionValue)
+            );
           },
 
-          hasAllPermissions: (permissions: Permission[]) => {
+          hasAllPermissions: (permissions: Array<PermissionValue | string>) => {
             const { user, isAuthenticated } = get();
             if (!user || !isAuthenticated) return false;
-            return permissions.every((permission) => user.permissions.includes(permission));
+            return permissions.every((permission) =>
+              (user.permissions || []).includes(permission as PermissionValue)
+            );
           },
 
           // UI actions

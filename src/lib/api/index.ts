@@ -133,3 +133,10 @@ export const aidApplicationsApi = {
   getAidApplications: (params?: any) => api.aidApplications.getAidApplications(params),
   createAidApplication: (data: any) => api.aidApplications.createAidApplication(data),
 };
+
+// Export scholarship APIs
+export {
+  scholarshipsApi,
+  scholarshipApplicationsApi,
+  scholarshipPaymentsApi,
+} from './scholarships';

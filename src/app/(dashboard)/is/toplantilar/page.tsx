@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { api } from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { useAuthStore } from '@/stores/authStore';
 import dynamic from 'next/dynamic';
 

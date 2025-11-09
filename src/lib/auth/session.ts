@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import type { Id } from '@/convex/_generated/dataModel';
 import { convexHttp } from '@/lib/convex/server';
 import { api } from '@/convex/_generated/api';
-import { ROLE_PERMISSIONS, UserRole, type Permission } from '@/types/auth';
+import { MODULE_PERMISSIONS, SPECIAL_PERMISSIONS, type PermissionValue } from '@/types/permissions';
 
 export interface AuthSession {
   sessionId: string;
@@ -15,8 +15,8 @@ export interface SessionUser {
   id: string;
   email: string;
   name: string;
-  role: UserRole;
-  permissions: Permission[];
+  role?: string;
+  permissions: PermissionValue[];
   isActive: boolean;
   labels?: string[];
 }
@@ -80,31 +80,49 @@ export async function getUserFromSession(session: AuthSession | null): Promise<S
 
   // Handle development mock sessions
   if (session.userId.startsWith('mock-')) {
-    const mockUserMap: Record<string, { email: string; name: string; role: UserRole }> = {
+    const baseModulePermissions = Object.values(MODULE_PERMISSIONS);
+
+    const mockUserMap: Record<
+      string,
+      { email: string; name: string; role: string; permissions: PermissionValue[] }
+    > = {
       'mock-admin-1': {
         email: 'admin@test.com',
-        name: 'Admin User',
-        role: UserRole.ADMIN,
+        name: 'Dernek Başkanı',
+        role: 'Dernek Başkanı',
+        permissions: [...baseModulePermissions, SPECIAL_PERMISSIONS.USERS_MANAGE],
       },
       'mock-admin-2': {
         email: 'admin@portal.com',
-        name: 'Admin User',
-        role: UserRole.ADMIN,
+        name: 'Dernek Başkanı',
+        role: 'Dernek Başkanı',
+        permissions: [...baseModulePermissions, SPECIAL_PERMISSIONS.USERS_MANAGE],
       },
       'mock-manager-1': {
         email: 'manager@test.com',
-        name: 'Manager User',
-        role: UserRole.MANAGER,
+        name: 'Yönetici Kullanıcı',
+        role: 'Yönetici',
+        permissions: baseModulePermissions,
       },
       'mock-member-1': {
         email: 'member@test.com',
-        name: 'Member User',
-        role: UserRole.MEMBER,
+        name: 'Üye Kullanıcı',
+        role: 'Üye',
+        permissions: [
+          MODULE_PERMISSIONS.BENEFICIARIES,
+          MODULE_PERMISSIONS.AID_APPLICATIONS,
+          MODULE_PERMISSIONS.MESSAGES,
+        ],
       },
       'mock-viewer-1': {
         email: 'viewer@test.com',
-        name: 'Viewer User',
-        role: UserRole.VIEWER,
+        name: 'İzleyici Kullanıcı',
+        role: 'Görüntüleyici',
+        permissions: [
+          MODULE_PERMISSIONS.BENEFICIARIES,
+          MODULE_PERMISSIONS.DONATIONS,
+          MODULE_PERMISSIONS.REPORTS,
+        ],
       },
     };
 
@@ -113,13 +131,12 @@ export async function getUserFromSession(session: AuthSession | null): Promise<S
       return null;
     }
 
-    const role = mockUser.role as UserRole;
     return {
       id: session.userId,
       email: mockUser.email,
       name: mockUser.name,
-      role,
-      permissions: ROLE_PERMISSIONS[role] || [],
+      role: mockUser.role,
+      permissions: mockUser.permissions,
       isActive: true,
       labels: [],
     };
@@ -134,14 +151,14 @@ export async function getUserFromSession(session: AuthSession | null): Promise<S
       return null;
     }
 
-    const role = (user.role || 'MEMBER') as UserRole;
-
     return {
       id: user._id,
       email: user.email || '',
       name: user.name || '',
-      role,
-      permissions: ROLE_PERMISSIONS[role] || [],
+      role: user.role || 'Personel',
+      permissions: Array.isArray(user.permissions)
+        ? (user.permissions as PermissionValue[])
+        : [],
       isActive: user.isActive,
       labels: user.labels || [],
     };

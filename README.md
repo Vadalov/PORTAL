@@ -2,6 +2,8 @@
 
 **PORTAL** is a comprehensive Turkish non-profit association management system (Dernek Yönetim Sistemi) built with Next.js 16, TypeScript, and Convex backend.
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Vadalov/PORTAL)
+
 ## 🎯 Quick Start
 
 ```bash
@@ -15,6 +17,22 @@ cp .env.example .env.local
 npm run dev
 ```
 
+## 🚀 Deploy to Production
+
+**3-Adımda Deployment:**
+
+```bash
+# 1. Pre-deployment validation
+npm run validate:deploy
+
+# 2. Otomatik Convex + Vercel deployment
+npm run deploy:vercel
+
+# 3. Vercel Dashboard'da environment variables ekle ve deploy!
+```
+
+📖 **[Deployment Rehberi](./DEPLOYMENT_QUICKSTART.md)** | **[Detaylı Dokümantasyon](./docs/VERCEL_DEPLOYMENT.md)**
+
 ## 🏗️ Architecture
 
 - **Frontend**: Next.js 16 with TypeScript
@@ -22,6 +40,7 @@ npm run dev
 - **UI**: Tailwind CSS + shadcn/ui components
 - **State Management**: Zustand + TanStack Query
 - **Forms**: React Hook Form + Zod validation
+- **Analytics**: Vercel Analytics + Speed Insights
 
 ## 🚀 Features
 
@@ -149,18 +168,54 @@ npm run clean:all        # Clean all build artifacts
 
 ### Production Deployment
 
-For detailed production deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md).
+#### Hızlı Vercel + Convex Deploy
 
-**Quick Start:**
-1. Set up environment variables (see `.env.production.example`)
-2. Deploy Convex backend: `npx convex deploy --prod`
-3. Build and deploy to your platform
+```bash
+# Otomatik deployment scripti (önerilen)
+npm run deploy:vercel
+```
 
-**Supported Platforms:**
-- **Vercel** (recommended for Next.js)
-- **Railway** (nixpacks.toml included)
-- **Netlify**
-- **Self-hosted** (Docker/standalone mode)
+Bu script:
+- ✅ Convex backend'i production'a deploy eder
+- ✅ Security secrets oluşturur
+- ✅ Vercel ortam değişkenlerini hazırlar
+- ✅ Deploy için talimatlar verir
+
+**Manuel Deploy:**
+
+1. **Convex Backend Deploy:**
+   ```bash
+   npx convex deploy --prod
+   ```
+   Production URL'i not alın.
+
+2. **Vercel Deploy:**
+   ```bash
+   vercel --prod
+   ```
+
+3. **Ortam Değişkenlerini Ayarlayın:**
+   - `NEXT_PUBLIC_CONVEX_URL` - Convex production URL
+   - `CSRF_SECRET` - 32+ karakter random secret
+   - `SESSION_SECRET` - 32+ karakter random secret
+
+**Detaylı Rehber:**
+- 📖 **[Vercel Deployment Guide](./docs/VERCEL_DEPLOYMENT.md)** - Adım adım deployment talimatları
+- 📖 **[Complete Documentation](./docs/DOCUMENTATION.md)** - Tüm teknik detaylar
+
+**Desteklenen Platformlar:**
+- ✅ **Vercel** (önerilen - otomatik CI/CD)
+- ✅ **Railway** (nixpacks.toml dahil)
+- ✅ **Netlify**
+- ✅ **Self-hosted** (Docker/standalone mode)
+
+**Deployment Scriptleri:**
+```bash
+npm run deploy:vercel    # Otomatik Vercel + Convex deploy
+npm run vercel:prod      # Production deploy
+npm run vercel:preview   # Preview deploy
+npm run convex:deploy    # Sadece Convex deploy
+```
 
 **Documentation:**
 - [Kapsamlı Dokümantasyon](./docs/DOCUMENTATION.md) - Tüm teknik detaylar ve deployment rehberi

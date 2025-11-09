@@ -77,6 +77,20 @@ describe('Cache Configuration', () => {
         refetchOnWindowFocus: true,
         refetchOnReconnect: true,
       });
+
+      expect(CACHE_STRATEGIES.MEETING_ACTION_ITEMS).toMatchObject({
+        staleTime: CACHE_TIMES.REAL_TIME,
+        gcTime: GC_TIMES.REAL_TIME,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+      });
+
+      expect(CACHE_STRATEGIES.WORKFLOW_NOTIFICATIONS).toMatchObject({
+        staleTime: CACHE_TIMES.REAL_TIME,
+        gcTime: GC_TIMES.REAL_TIME,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+      });
     });
 
     it('should define strategy for beneficiaries', () => {
@@ -106,6 +120,9 @@ describe('Cache Configuration', () => {
       expect(CACHE_KEYS.DONATIONS).toBe('donations');
       expect(CACHE_KEYS.TASKS).toBe('tasks');
       expect(CACHE_KEYS.MEETINGS).toBe('meetings');
+      expect(CACHE_KEYS.MEETING_DECISIONS).toBe('meeting-decisions');
+      expect(CACHE_KEYS.MEETING_ACTION_ITEMS).toBe('meeting-action-items');
+      expect(CACHE_KEYS.WORKFLOW_NOTIFICATIONS).toBe('workflow-notifications');
       expect(CACHE_KEYS.MESSAGES).toBe('messages');
       expect(CACHE_KEYS.PARAMETERS).toBe('parameters');
       expect(CACHE_KEYS.STATISTICS).toBe('statistics');
@@ -117,6 +134,15 @@ describe('Cache Configuration', () => {
       expect(getCacheStrategy([CACHE_KEYS.PARAMETERS])).toEqual(CACHE_STRATEGIES.PARAMETERS);
       expect(getCacheStrategy([CACHE_KEYS.BENEFICIARIES])).toEqual(CACHE_STRATEGIES.BENEFICIARIES);
       expect(getCacheStrategy([CACHE_KEYS.TASKS])).toEqual(CACHE_STRATEGIES.TASKS);
+      expect(getCacheStrategy([CACHE_KEYS.MEETING_DECISIONS])).toEqual(
+        CACHE_STRATEGIES.MEETING_DECISIONS
+      );
+      expect(getCacheStrategy([CACHE_KEYS.MEETING_ACTION_ITEMS])).toEqual(
+        CACHE_STRATEGIES.MEETING_ACTION_ITEMS
+      );
+      expect(getCacheStrategy([CACHE_KEYS.WORKFLOW_NOTIFICATIONS])).toEqual(
+        CACHE_STRATEGIES.WORKFLOW_NOTIFICATIONS
+      );
     });
 
     it('should return standard strategy for unknown keys', () => {
@@ -150,6 +176,19 @@ describe('Cache Configuration', () => {
 
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [CACHE_KEYS.DONATIONS] });
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [CACHE_KEYS.STATISTICS] });
+    });
+
+    it('should invalidate meeting workflow caches when action items change', () => {
+      const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+
+      invalidateRelatedCaches(queryClient, 'MEETING_ACTION_ITEMS');
+
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [CACHE_KEYS.MEETING_ACTION_ITEMS] });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [CACHE_KEYS.MEETING_DECISIONS] });
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [CACHE_KEYS.MEETINGS] });
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: [CACHE_KEYS.WORKFLOW_NOTIFICATIONS],
+      });
     });
 
     it('should invalidate only entity cache for unknown entities', () => {

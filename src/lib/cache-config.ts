@@ -132,6 +132,30 @@ export const CACHE_STRATEGIES = {
     refetchOnReconnect: true,
   },
 
+  /** Meeting decisions */
+  MEETING_DECISIONS: {
+    staleTime: CACHE_TIMES.STANDARD,
+    gcTime: GC_TIMES.STANDARD,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+  },
+
+  /** Meeting action items */
+  MEETING_ACTION_ITEMS: {
+    staleTime: CACHE_TIMES.REAL_TIME,
+    gcTime: GC_TIMES.REAL_TIME,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  },
+
+  /** Workflow notifications */
+  WORKFLOW_NOTIFICATIONS: {
+    staleTime: CACHE_TIMES.REAL_TIME,
+    gcTime: GC_TIMES.REAL_TIME,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+  },
+
   /** Messages (real-time) */
   MESSAGES: {
     staleTime: CACHE_TIMES.REAL_TIME,
@@ -171,6 +195,9 @@ export const CACHE_KEYS = {
   PARAMETERS: 'parameters',
   TASKS: 'tasks',
   MEETINGS: 'meetings',
+  MEETING_DECISIONS: 'meeting-decisions',
+  MEETING_ACTION_ITEMS: 'meeting-action-items',
+  WORKFLOW_NOTIFICATIONS: 'workflow-notifications',
   MESSAGES: 'messages',
   STATISTICS: 'statistics',
   REPORTS: 'reports',
@@ -204,6 +231,27 @@ export function invalidateRelatedCaches(
     case 'TASKS':
       // When tasks change, invalidate task-related caches
       invalidations.push([CACHE_KEYS.TASKS], [CACHE_KEYS.STATISTICS]);
+      break;
+
+    case 'MEETING_DECISIONS':
+      invalidations.push(
+        [CACHE_KEYS.MEETING_DECISIONS],
+        [CACHE_KEYS.MEETING_ACTION_ITEMS],
+        [CACHE_KEYS.MEETINGS]
+      );
+      break;
+
+    case 'MEETING_ACTION_ITEMS':
+      invalidations.push(
+        [CACHE_KEYS.MEETING_ACTION_ITEMS],
+        [CACHE_KEYS.MEETING_DECISIONS],
+        [CACHE_KEYS.MEETINGS],
+        [CACHE_KEYS.WORKFLOW_NOTIFICATIONS]
+      );
+      break;
+
+    case 'WORKFLOW_NOTIFICATIONS':
+      invalidations.push([CACHE_KEYS.WORKFLOW_NOTIFICATIONS]);
       break;
 
     case 'MEETINGS':
@@ -381,6 +429,12 @@ export function getCacheStrategy(
       return CACHE_STRATEGIES.TASKS;
     case CACHE_KEYS.MEETINGS:
       return CACHE_STRATEGIES.MEETINGS;
+    case CACHE_KEYS.MEETING_DECISIONS:
+      return CACHE_STRATEGIES.MEETING_DECISIONS;
+    case CACHE_KEYS.MEETING_ACTION_ITEMS:
+      return CACHE_STRATEGIES.MEETING_ACTION_ITEMS;
+    case CACHE_KEYS.WORKFLOW_NOTIFICATIONS:
+      return CACHE_STRATEGIES.WORKFLOW_NOTIFICATIONS;
     case CACHE_KEYS.MESSAGES:
       return CACHE_STRATEGIES.MESSAGES;
     case CACHE_KEYS.STATISTICS:

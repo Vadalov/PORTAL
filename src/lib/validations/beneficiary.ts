@@ -352,7 +352,7 @@ export const beneficiarySchema = z
   .refine(
     (data) => {
       // Kimlik No ve Mernis kontrolü uyumu
-      if (data.identityNumber && !data.mernisCheck) {
+      if (data.identityNumber && data.identityNumber.length === 11 && !data.mernisCheck) {
         return false; // TC Kimlik No varsa Mernis kontrolü yapılmalı
       }
       return true;

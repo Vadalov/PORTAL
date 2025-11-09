@@ -3,7 +3,7 @@
  * TypeScript definitions for Convex documents
  */
 
-import { UserRole } from '@/types/auth';
+import type { PermissionValue } from '@/types/permissions';
 
 // Base Convex Document type
 export interface Document {
@@ -20,10 +20,14 @@ export interface Document {
 export interface UserDocument extends Document {
   name: string;
   email: string;
-  role: UserRole;
+  role: string;
+  permissions: PermissionValue[];
   avatar?: string;
   isActive: boolean;
   labels?: string[];
+  phone?: string;
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 // Parameter Categories (Portal Plus)
@@ -253,6 +257,56 @@ export interface MeetingDocument extends Document {
   notes?: string;
 }
 
+export interface MeetingDecisionDocument extends Document {
+  meeting_id: string;
+  title: string;
+  summary?: string;
+  owner?: string;
+  created_by: string;
+  created_at?: string;
+  status: 'acik' | 'devam' | 'kapatildi';
+  tags?: string[];
+  due_date?: string;
+}
+
+export interface MeetingActionItemDocument extends Document {
+  meeting_id: string;
+  decision_id?: string;
+  title: string;
+  description?: string;
+  assigned_to: string;
+  created_by: string;
+  created_at?: string;
+  status: 'beklemede' | 'devam' | 'hazir' | 'iptal';
+  due_date?: string;
+  completed_at?: string;
+  status_history?: {
+    status: 'beklemede' | 'devam' | 'hazir' | 'iptal';
+    changed_at: string;
+    changed_by: string;
+    note?: string;
+  }[];
+  notes?: string[];
+  reminder_scheduled_at?: string;
+}
+
+export interface WorkflowNotificationDocument extends Document {
+  recipient: string;
+  triggered_by?: string;
+  category: 'meeting' | 'gorev' | 'rapor' | 'hatirlatma';
+  title: string;
+  body?: string;
+  status: 'beklemede' | 'gonderildi' | 'okundu';
+  created_at?: string;
+  sent_at?: string;
+  read_at?: string;
+  reference?: {
+    type: 'meeting_action_item' | 'meeting' | 'meeting_decision';
+    id: string;
+  };
+  metadata?: unknown;
+}
+
 // Messages Collection (SMS & E-posta)
 export interface MessageDocument extends Document {
   message_type: 'sms' | 'email' | 'internal';
@@ -458,6 +512,9 @@ export type CollectionName =
   | 'tasks'
   | 'meetings'
   | 'messages'
+  | 'meeting_decisions'
+  | 'meeting_action_items'
+  | 'workflow_notifications'
   | 'finance_records'
   | 'orphans'
   | 'sponsors'
@@ -476,6 +533,9 @@ export type DocumentByCollection = {
   tasks: TaskDocument;
   meetings: MeetingDocument;
   messages: MessageDocument;
+  meeting_decisions: MeetingDecisionDocument;
+  meeting_action_items: MeetingActionItemDocument;
+  workflow_notifications: WorkflowNotificationDocument;
   finance_records: FinanceRecordDocument;
   orphans: OrphanDocument;
   sponsors: SponsorDocument;

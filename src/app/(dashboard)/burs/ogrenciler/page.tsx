@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { aidApplicationsApi } from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import type { AidApplicationDocument } from '@/types/database';
 import {
   Search,
@@ -94,7 +94,7 @@ export default function StudentsPage() {
   const { data: applicationsResponse, isLoading } = useQuery({
     queryKey: ['scholarship-students', page, search, statusFilter],
     queryFn: async () => {
-      const response = await aidApplicationsApi.getAidApplications({
+      const response = await api.aidApplications.getAidApplications({
         page,
         limit,
         search,

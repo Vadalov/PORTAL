@@ -10,11 +10,6 @@ import { perfLog } from '@/lib/performance-monitor';
 // Mock performance.now
 const mockNow = vi.fn();
 
-// Create minimal performance interface for testing
-interface MinimalPerformance {
-  now: () => number;
-}
-
 global.performance = {
   now: mockNow,
 } as unknown as Performance;

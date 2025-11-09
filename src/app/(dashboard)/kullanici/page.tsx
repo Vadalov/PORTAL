@@ -1,10 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { Plus, Search } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -12,293 +16,228 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
-import { Plus, Search, Edit, Trash2, UserCheck, UserX } from 'lucide-react';
+import { UsersTable, type UsersTableItem } from '@/components/tables/users-table';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
+import { useAuthStore } from '@/stores/authStore';
+import type { PermissionValue } from '@/types/permissions';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: 'active' | 'inactive';
-  createdAt: string;
-}
+type StatusFilter = 'all' | 'active' | 'inactive';
+type UsersListResponse = Awaited<ReturnType<(typeof api)['users']['getUsers']>>;
 
-export default function UserManagementPage() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      name: 'Admin User',
-      email: 'admin@test.com',
-      role: 'ADMIN',
-      status: 'active',
-      createdAt: '2024-01-01',
-    },
-    {
-      id: '2',
-      name: 'Manager User',
-      email: 'manager@test.com',
-      role: 'MANAGER',
-      status: 'active',
-      createdAt: '2024-01-02',
-    },
-    {
-      id: '3',
-      name: 'Member User',
-      email: 'member@test.com',
-      role: 'MEMBER',
-      status: 'inactive',
-      createdAt: '2024-01-03',
-    },
-  ]);
+const buildQueryParams = (search: string, roleFilter: string, statusFilter: StatusFilter) => {
+  const params = new URLSearchParams();
+  if (search.trim()) params.set('search', search.trim());
+  if (roleFilter !== 'all') params.set('role', roleFilter);
+  if (statusFilter !== 'all') params.set('isActive', String(statusFilter === 'active'));
+  return params;
+};
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    role: 'MEMBER',
+export default function UsersPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const userPermissions = useAuthStore((state) => state.user?.permissions ?? []);
+
+  const initialSearch = searchParams.get('search') ?? '';
+  const initialRole = searchParams.get('role') ?? 'all';
+  const initialStatus = searchParams.get('isActive') ?? 'all';
+
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [roleFilter, setRoleFilter] = useState(initialRole);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    initialStatus === 'true' ? 'active' : initialStatus === 'false' ? 'inactive' : 'all'
+  );
+
+  const canManageUsers = useMemo(
+    () => userPermissions.includes('users:manage'),
+    [userPermissions]
+  );
+
+  const { data, isLoading, isFetching } = useQuery<UsersListResponse>({
+    queryKey: ['users', searchTerm, roleFilter, statusFilter],
+    queryFn: async () => {
+      const response = await api.users.getUsers({
+        search: searchTerm || undefined,
+        filters: {
+          role: roleFilter !== 'all' ? roleFilter : undefined,
+          isActive: statusFilter === 'all' ? undefined : statusFilter === 'active',
+        },
+        page: 1,
+        limit: 100,
+      });
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      return response;
+    },
   });
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
+  const users = useMemo<UsersTableItem[]>(
+    () =>
+      (data?.data ?? []).map((user) => ({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        permissions: (user.permissions ?? []) as PermissionValue[],
+        isActive: user.isActive ?? true,
+        phone: user.phone ?? undefined,
+        createdAt: user.createdAt ?? undefined,
+      })),
+    [data]
+  );
 
-    return matchesSearch && matchesRole && matchesStatus;
+  const toggleActiveMutation = useMutation({
+    mutationFn: async (user: UsersTableItem) => {
+      const response = await api.users.updateUser(user._id, {
+        isActive: !user.isActive,
+      });
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Kullanıcı durumu güncellendi');
+    },
+    onError: (error: unknown) => {
+      toast.error(error instanceof Error ? error.message : 'Durum güncellenemedi');
+    },
   });
 
-  const handleCreateUser = () => {
-    if (!formData.name || !formData.email) {
-      toast.error('Ad ve e-posta alanları zorunludur');
+  const deleteMutation = useMutation({
+    mutationFn: async (user: UsersTableItem) => {
+      const response = await api.users.deleteUser(user._id);
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast.success('Kullanıcı silindi');
+    },
+    onError: (error: unknown) => {
+      toast.error(error instanceof Error ? error.message : 'Kullanıcı silinemedi');
+    },
+  });
+
+  const handleToggleActive = (user: UsersTableItem) => {
+    toggleActiveMutation.mutate(user);
+  };
+
+  const handleDelete = (user: UsersTableItem) => {
+    if (!window.confirm(`${user.name} kullanıcısını silmek istediğinize emin misiniz?`)) {
       return;
     }
-
-    const newUser: User = {
-      id: Date.now().toString(),
-      name: formData.name,
-      email: formData.email,
-      role: formData.role,
-      status: 'active',
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-
-    setUsers((prev) => [...prev, newUser]);
-    setFormData({ name: '', email: '', role: 'MEMBER' });
-    setIsCreateModalOpen(false);
-    toast.success('Kullanıcı başarıyla oluşturuldu');
+    deleteMutation.mutate(user);
   };
 
-  const handleEditUser = (user: User) => {
-    setEditingUser(user);
-    setFormData({
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    });
-    setIsEditModalOpen(true);
+  const handleEdit = (user: UsersTableItem) => {
+    router.push(`/kullanici/${user._id}/duzenle`);
   };
 
-  const handleUpdateUser = () => {
-    if (!editingUser || !formData.name) {
-      toast.error('Ad alanı zorunludur');
-      return;
-    }
-
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === editingUser.id ? { ...user, name: formData.name, role: formData.role } : user
-      )
-    );
-
-    setIsEditModalOpen(false);
-    setEditingUser(null);
-    toast.success('Kullanıcı başarıyla güncellendi');
+  const updateQueryString = (nextSearch: string, nextRole: string, nextStatus: StatusFilter) => {
+    const params = buildQueryParams(nextSearch, nextRole, nextStatus);
+    const url = params.toString() ? `/kullanici?${params.toString()}` : '/kullanici';
+    router.replace(url);
   };
 
-  const handleToggleStatus = (userId: string) => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
-          : user
-      )
-    );
-    toast.success('Kullanıcı durumu güncellendi');
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    updateQueryString(value, roleFilter, statusFilter);
   };
 
-  const handleDeleteUser = (userId: string) => {
-    setUsers((prev) => prev.filter((user) => user.id !== userId));
-    toast.success('Kullanıcı başarıyla silindi');
+  const handleRoleChange = (value: string) => {
+    setRoleFilter(value);
+    updateQueryString(searchTerm, value, statusFilter);
   };
 
-  const getRoleBadgeVariant = (role: string) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'destructive';
-      case 'MANAGER':
-        return 'default';
-      case 'MEMBER':
-        return 'secondary';
-      default:
-        return 'outline';
-    }
-  };
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'Yönetici';
-      case 'MANAGER':
-        return 'Müdür';
-      case 'MEMBER':
-        return 'Üye';
-      case 'VIEWER':
-        return 'Görüntüleyici';
-      case 'VOLUNTEER':
-        return 'Gönüllü';
-      default:
-        return role;
-    }
+  const handleStatusChange = (value: string) => {
+    const status = value as StatusFilter;
+    setStatusFilter(status);
+    updateQueryString(searchTerm, roleFilter, status);
   };
 
   return (
-    <div data-testid="users-page" className="container mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Kullanıcı Yönetimi</h1>
-        <p className="text-muted-foreground">Kullanıcıları ve yetkileri yönetin</p>
+    <div className="space-y-6" data-testid="users-page">
+      <div className="space-y-1">
+        <h1 className="text-3xl font-bold tracking-tight">Kullanıcı Yönetimi</h1>
+        <p className="text-sm text-muted-foreground">
+          Dernek personel hesaplarını oluşturun, yetkilerini yönetin ve erişimleri denetleyin.
+        </p>
       </div>
 
       <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Kullanıcılar</CardTitle>
-              <CardDescription>Toplam {filteredUsers.length} kullanıcı</CardDescription>
-            </div>
-            <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
-              <DialogTrigger asChild>
-                <Button data-testid="users-create">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Yeni Kullanıcı
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Yeni Kullanıcı Oluştur</DialogTitle>
-                  <DialogDescription>Yeni kullanıcı bilgilerini girin</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="create-name">Ad Soyad *</Label>
-                    <Input
-                      id="create-name"
-                      data-testid="user-form-name"
-                      value={formData.name}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="create-email">E-posta *</Label>
-                    <Input
-                      id="create-email"
-                      data-testid="user-form-email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="create-role">Rol</Label>
-                    <Select
-                      value={formData.role}
-                      onValueChange={(value) => setFormData((prev) => ({ ...prev, role: value }))}
-                    >
-                      <SelectTrigger data-testid="user-form-role">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="MEMBER">Üye</SelectItem>
-                        <SelectItem value="MANAGER">Müdür</SelectItem>
-                        <SelectItem value="ADMIN">Yönetici</SelectItem>
-                        <SelectItem value="VIEWER">Görüntüleyici</SelectItem>
-                        <SelectItem value="VOLUNTEER">Gönüllü</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
-                      İptal
-                    </Button>
-                    <Button data-testid="user-form-submit" onClick={handleCreateUser}>
-                      Oluştur
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+        <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <CardTitle>Kullanıcılar</CardTitle>
+            <CardDescription>
+              Toplam {data?.total ?? users.length} kullanıcı kayıtlı. Arama ve filtreleme ile hızla
+              bulun.
+            </CardDescription>
           </div>
+
+          {canManageUsers ? (
+            <Button asChild data-testid="users-create">
+              <Link href="/kullanici/yeni">
+                <Plus className="mr-2 h-4 w-4" />
+                Yeni Kullanıcı
+              </Link>
+            </Button>
+          ) : null}
         </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex space-x-4">
-            <div className="flex-1">
-              <Label htmlFor="search">Ara</Label>
-              <div className="relative">
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            <div className="md:col-span-2">
+              <label htmlFor="users-search" className="text-sm font-medium leading-none">
+                Ara
+              </label>
+              <div className="relative mt-2">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="search"
+                  id="users-search"
                   data-testid="users-search"
-                  placeholder="Ad veya e-posta ile ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Ad, e-posta veya telefon ile ara..."
                   className="pl-10"
+                  value={searchTerm}
+                  onChange={(event) => handleSearchChange(event.target.value)}
                 />
               </div>
             </div>
+
             <div>
-              <Label htmlFor="role-filter">Rol</Label>
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger data-testid="users-filter-role" className="w-40">
-                  <SelectValue />
+              <label htmlFor="users-role-filter" className="text-sm font-medium leading-none">
+                Görev
+              </label>
+              <Select value={roleFilter} onValueChange={handleRoleChange}>
+                <SelectTrigger id="users-role-filter" data-testid="users-filter-role" className="mt-2">
+                  <SelectValue placeholder="Tümü" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tümü</SelectItem>
-                  <SelectItem value="ADMIN">Yönetici</SelectItem>
-                  <SelectItem value="MANAGER">Müdür</SelectItem>
-                  <SelectItem value="MEMBER">Üye</SelectItem>
-                  <SelectItem value="VIEWER">Görüntüleyici</SelectItem>
-                  <SelectItem value="VOLUNTEER">Gönüllü</SelectItem>
+                  <SelectItem value="Dernek Başkanı">Dernek Başkanı</SelectItem>
+                  <SelectItem value="Muhasebe">Muhasebe</SelectItem>
+                  <SelectItem value="Sosyal Yardım">Sosyal Yardım</SelectItem>
+                  <SelectItem value="Gönüllü">Gönüllü</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
             <div>
-              <Label htmlFor="status-filter">Durum</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger data-testid="users-filter-status" className="w-40">
-                  <SelectValue />
+              <label htmlFor="users-status-filter" className="text-sm font-medium leading-none">
+                Durum
+              </label>
+              <Select value={statusFilter} onValueChange={handleStatusChange}>
+                <SelectTrigger
+                  id="users-status-filter"
+                  data-testid="users-filter-status"
+                  className="mt-2"
+                >
+                  <SelectValue placeholder="Tümü" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tümü</SelectItem>
@@ -309,130 +248,28 @@ export default function UserManagementPage() {
             </div>
           </div>
 
-          <Table data-testid="users-table">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Ad Soyad</TableHead>
-                <TableHead>E-posta</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Durum</TableHead>
-                <TableHead>Oluşturulma</TableHead>
-                <TableHead className="text-right">İşlemler</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <TableRow key={user.id} data-testid={`user-row-${user.id}`}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={getRoleBadgeVariant(user.role)}>
-                      {getRoleLabel(user.role)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
-                      {user.status === 'active' ? 'Aktif' : 'Pasif'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{user.createdAt}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        data-testid={`user-edit-${user.id}`}
-                        onClick={() => handleEditUser(user)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        data-testid={`user-toggle-${user.id}`}
-                        onClick={() => handleToggleStatus(user.id)}
-                        disabled={user.email === 'admin@test.com'}
-                      >
-                        {user.status === 'active' ? (
-                          <UserX className="w-4 h-4" />
-                        ) : (
-                          <UserCheck className="w-4 h-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        data-testid={`user-delete-${user.id}`}
-                        onClick={() => handleDeleteUser(user.id)}
-                        disabled={user.email === 'admin@test.com'}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <UsersTable
+            users={users}
+            loading={isLoading || isFetching}
+            onEdit={canManageUsers ? handleEdit : undefined}
+            onDelete={canManageUsers ? handleDelete : undefined}
+            onToggleActive={canManageUsers ? handleToggleActive : undefined}
+            emptyState={
+              <div className="space-y-2">
+                <p className="font-medium">Kullanıcı bulunamadı</p>
+                <p className="text-sm text-muted-foreground">
+                  Filtreleri değiştirmeyi deneyin veya yeni kullanıcı oluşturun.
+                </p>
+                {canManageUsers ? (
+                  <Button size="sm" asChild>
+                    <Link href="/kullanici/yeni">Yeni kullanıcı oluştur</Link>
+                  </Button>
+                ) : null}
+              </div>
+            }
+          />
         </CardContent>
       </Card>
-
-      {/* Edit User Modal */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Kullanıcı Düzenle</DialogTitle>
-            <DialogDescription>Kullanıcı bilgilerini güncelleyin</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="edit-name">Ad Soyad *</Label>
-              <Input
-                id="edit-name"
-                data-testid="user-form-name"
-                value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-email">E-posta</Label>
-              <Input
-                id="edit-email"
-                data-testid="user-form-email"
-                type="email"
-                value={formData.email}
-                disabled
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-role">Rol</Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value) => setFormData((prev) => ({ ...prev, role: value }))}
-              >
-                <SelectTrigger data-testid="user-form-role">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="MEMBER">Üye</SelectItem>
-                  <SelectItem value="MANAGER">Müdür</SelectItem>
-                  <SelectItem value="ADMIN">Yönetici</SelectItem>
-                  <SelectItem value="VIEWER">Görüntüleyici</SelectItem>
-                  <SelectItem value="VOLUNTEER">Gönüllü</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
-                İptal
-              </Button>
-              <Button data-testid="user-form-submit" onClick={handleUpdateUser}>
-                Güncelle
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

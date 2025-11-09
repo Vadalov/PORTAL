@@ -33,18 +33,21 @@ export const createBankAccount = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // IMPROVED: Batch updates to reduce OCC conflicts
     // If this is primary, unset other primary accounts
     if (args.isPrimary) {
       const existingAccounts = await ctx.db
         .query("bank_accounts")
         .withIndex("by_beneficiary", (q) => q.eq("beneficiary_id", args.beneficiaryId))
+        .filter((q) => q.eq(q.field("is_primary"), true))
         .collect();
       
-      for (const account of existingAccounts) {
-        if (account.is_primary) {
-          await ctx.db.patch(account._id, { is_primary: false });
-        }
-      }
+      // Use Promise.all to update in parallel (safer than sequential)
+      await Promise.all(
+        existingAccounts.map((account) => 
+          ctx.db.patch(account._id, { is_primary: false })
+        )
+      );
     }
 
     const accountId = await ctx.db.insert("bank_accounts", {
@@ -85,6 +88,7 @@ export const updateBankAccount = mutation({
   handler: async (ctx, args) => {
     const { accountId, isPrimary, ...updates } = args;
     
+    // IMPROVED: Use Promise.all for parallel updates to reduce OCC conflicts
     // If setting as primary, unset other primary accounts
     if (isPrimary) {
       const account = await ctx.db.get(accountId);
@@ -92,13 +96,18 @@ export const updateBankAccount = mutation({
         const existingAccounts = await ctx.db
           .query("bank_accounts")
           .withIndex("by_beneficiary", (q) => q.eq("beneficiary_id", account.beneficiary_id))
+          .filter((q) => q.and(
+            q.neq(q.field("_id"), accountId),
+            q.eq(q.field("is_primary"), true)
+          ))
           .collect();
         
-        for (const acc of existingAccounts) {
-          if (acc._id !== accountId && acc.is_primary) {
-            await ctx.db.patch(acc._id, { is_primary: false });
-          }
-        }
+        // Parallel updates to avoid sequential conflicts
+        await Promise.all(
+          existingAccounts.map((acc) => 
+            ctx.db.patch(acc._id, { is_primary: false })
+          )
+        );
       }
       await ctx.db.patch(accountId, { ...updates, is_primary: true });
     } else {

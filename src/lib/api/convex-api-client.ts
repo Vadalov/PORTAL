@@ -8,10 +8,10 @@
 
 import type {
   QueryParams,
-  CreateDocumentData,
-  UpdateDocumentData,
   ConvexResponse,
   PartnerDocument,
+  CreateDocumentData,
+  UpdateDocumentData,
 } from '@/types/database';
 import type {
   BeneficiaryDocument,
@@ -19,9 +19,13 @@ import type {
   DonationDocument,
   TaskDocument,
   MeetingDocument,
+  MeetingDecisionDocument,
+  MeetingActionItemDocument,
+  WorkflowNotificationDocument,
   MessageDocument,
   AidApplicationDocument,
 } from '@/types/database';
+import type { PermissionValue } from '@/types/permissions';
 
 // Import caching utilities
 import { getCache } from '@/lib/api-cache';
@@ -294,6 +298,187 @@ export const convexApiClient = {
     },
   },
 
+  // Meeting Decisions
+  meetingDecisions: {
+    getDecisions: async (
+      params?: QueryParams
+    ): Promise<ConvexResponse<MeetingDecisionDocument[]>> => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set('page', params.page.toString());
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.filters?.meeting_id) {
+        searchParams.set('meeting_id', String(params.filters.meeting_id));
+      }
+      if (params?.filters?.owner) {
+        searchParams.set('owner', String(params.filters.owner));
+      }
+      if (params?.filters?.status) {
+        searchParams.set('status', String(params.filters.status));
+      }
+
+      return apiRequest<MeetingDecisionDocument[]>(
+        `/api/meeting-decisions?${searchParams.toString()}`
+      );
+    },
+    getDecision: async (
+      id: string
+    ): Promise<ConvexResponse<MeetingDecisionDocument>> => {
+      return apiRequest<MeetingDecisionDocument>(`/api/meeting-decisions/${id}`);
+    },
+    createDecision: async (
+      data: CreateDocumentData<MeetingDecisionDocument>
+    ): Promise<ConvexResponse<MeetingDecisionDocument>> => {
+      return apiRequest<MeetingDecisionDocument>('/api/meeting-decisions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateDecision: async (
+      id: string,
+      data: UpdateDocumentData<MeetingDecisionDocument>
+    ): Promise<ConvexResponse<MeetingDecisionDocument>> => {
+      return apiRequest<MeetingDecisionDocument>(`/api/meeting-decisions/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    deleteDecision: async (id: string): Promise<ConvexResponse<null>> => {
+      return apiRequest<null>(`/api/meeting-decisions/${id}`, {
+        method: 'DELETE',
+      });
+    },
+  },
+
+  // Meeting Action Items
+  meetingActionItems: {
+    getActionItems: async (
+      params?: QueryParams
+    ): Promise<ConvexResponse<MeetingActionItemDocument[]>> => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set('page', params.page.toString());
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.filters?.meeting_id) {
+        searchParams.set('meeting_id', String(params.filters.meeting_id));
+      }
+      if (params?.filters?.assigned_to) {
+        searchParams.set('assigned_to', String(params.filters.assigned_to));
+      }
+      if (params?.filters?.status) {
+        searchParams.set('status', String(params.filters.status));
+      }
+
+      return apiRequest<MeetingActionItemDocument[]>(
+        `/api/meeting-action-items?${searchParams.toString()}`
+      );
+    },
+    getActionItem: async (
+      id: string
+    ): Promise<ConvexResponse<MeetingActionItemDocument>> => {
+      return apiRequest<MeetingActionItemDocument>(
+        `/api/meeting-action-items/${id}`
+      );
+    },
+    createActionItem: async (
+      data: CreateDocumentData<MeetingActionItemDocument>
+    ): Promise<ConvexResponse<MeetingActionItemDocument>> => {
+      return apiRequest<MeetingActionItemDocument>('/api/meeting-action-items', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    updateActionItem: async (
+      id: string,
+      data: UpdateDocumentData<MeetingActionItemDocument>
+    ): Promise<ConvexResponse<MeetingActionItemDocument>> => {
+      return apiRequest<MeetingActionItemDocument>(`/api/meeting-action-items/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+    },
+    updateActionItemStatus: async (
+      id: string,
+      payload: { status: MeetingActionItemDocument['status']; changed_by: string; note?: string }
+    ): Promise<ConvexResponse<MeetingActionItemDocument>> => {
+      return apiRequest<MeetingActionItemDocument>(`/api/meeting-action-items/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+      });
+    },
+    deleteActionItem: async (id: string): Promise<ConvexResponse<null>> => {
+      return apiRequest<null>(`/api/meeting-action-items/${id}`, {
+        method: 'DELETE',
+      });
+    },
+  },
+
+  // Workflow Notifications
+  workflowNotifications: {
+    getNotifications: async (
+      params?: QueryParams
+    ): Promise<ConvexResponse<WorkflowNotificationDocument[]>> => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set('page', params.page.toString());
+      if (params?.limit) searchParams.set('limit', params.limit.toString());
+      if (params?.filters?.recipient) {
+        searchParams.set('recipient', String(params.filters.recipient));
+      }
+      if (params?.filters?.status) {
+        searchParams.set('status', String(params.filters.status));
+      }
+      if (params?.filters?.category) {
+        searchParams.set('category', String(params.filters.category));
+      }
+
+      return apiRequest<WorkflowNotificationDocument[]>(
+        `/api/workflow-notifications?${searchParams.toString()}`
+      );
+    },
+    getNotification: async (
+      id: string
+    ): Promise<ConvexResponse<WorkflowNotificationDocument>> => {
+      return apiRequest<WorkflowNotificationDocument>(
+        `/api/workflow-notifications/${id}`
+      );
+    },
+    createNotification: async (
+      data: CreateDocumentData<WorkflowNotificationDocument>
+    ): Promise<ConvexResponse<WorkflowNotificationDocument>> => {
+      return apiRequest<WorkflowNotificationDocument>('/api/workflow-notifications', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    markNotificationSent: async (
+      id: string,
+      sent_at?: string
+    ): Promise<ConvexResponse<WorkflowNotificationDocument>> => {
+      return apiRequest<WorkflowNotificationDocument>(
+        `/api/workflow-notifications/${id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'gonderildi', sent_at }),
+        }
+      );
+    },
+    markNotificationRead: async (
+      id: string,
+      read_at?: string
+    ): Promise<ConvexResponse<WorkflowNotificationDocument>> => {
+      return apiRequest<WorkflowNotificationDocument>(
+        `/api/workflow-notifications/${id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ status: 'okundu', read_at }),
+        }
+      );
+    },
+    deleteNotification: async (id: string): Promise<ConvexResponse<null>> => {
+      return apiRequest<null>(`/api/workflow-notifications/${id}`, {
+        method: 'DELETE',
+      });
+    },
+  },
+
   // Messages
   messages: {
     getMessages: async (params?: QueryParams): Promise<ConvexResponse<MessageDocument[]>> => {
@@ -301,6 +486,13 @@ export const convexApiClient = {
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.search) searchParams.set('search', params.search);
+      if (params?.filters) {
+        Object.entries(params.filters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            searchParams.set(key, String(value));
+          }
+        });
+      }
 
       return apiRequest<MessageDocument[]>(`/api/messages?${searchParams.toString()}`);
     },
@@ -348,20 +540,39 @@ export const convexApiClient = {
 
   // Users
   users: {
-    getUsers: async (params?: QueryParams): Promise<ConvexResponse<UserDocument[]>> => {
+    getUsers: async (params?: {
+      search?: string;
+      page?: number;
+      limit?: number;
+      filters?: {
+        role?: string;
+        isActive?: boolean;
+      };
+    }): Promise<ConvexResponse<UserDocument[]>> => {
       const searchParams = new URLSearchParams();
       if (params?.page) searchParams.set('page', params.page.toString());
       if (params?.limit) searchParams.set('limit', params.limit.toString());
       if (params?.search) searchParams.set('search', params.search);
+      if (params?.filters?.role) searchParams.set('role', params.filters.role);
+      if (params?.filters?.isActive !== undefined) {
+        searchParams.set('isActive', String(params.filters.isActive));
+      }
 
-      return apiRequest<UserDocument[]>(`/api/users?${searchParams.toString()}`);
+      const query = searchParams.toString();
+      return apiRequest<UserDocument[]>(`/api/users${query ? `?${query}` : ''}`);
     },
     getUser: async (id: string): Promise<ConvexResponse<UserDocument>> => {
       return apiRequest<UserDocument>(`/api/users/${id}`);
     },
-    createUser: async (
-      data: CreateDocumentData<UserDocument>
-    ): Promise<ConvexResponse<UserDocument>> => {
+    createUser: async (data: {
+      name: string;
+      email: string;
+      role: string;
+      permissions: PermissionValue[];
+      password?: string;
+      isActive: boolean;
+      phone?: string;
+    }): Promise<ConvexResponse<UserDocument>> => {
       return apiRequest<UserDocument>('/api/users', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -369,7 +580,7 @@ export const convexApiClient = {
     },
     updateUser: async (
       id: string,
-      data: UpdateDocumentData<UserDocument>
+      data: Record<string, unknown>
     ): Promise<ConvexResponse<UserDocument>> => {
       return apiRequest<UserDocument>(`/api/users/${id}`, {
         method: 'PATCH',

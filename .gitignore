@@ -40,6 +40,12 @@ yarn-error.log*
 
 # vercel
 .vercel
+.vercel.json
+
+# deployment artifacts
+.env.vercel
+.env.production
+.vercel-build-output/
 
 # typescript
 *.tsbuildinfo
@@ -79,3 +85,6 @@ README_TR.md
 SECURITY.md
 TESTING-CHECKLIST.md
 testsprite_tests/
+
+# YoYo AI version control directory
+.yoyo/

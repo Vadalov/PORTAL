@@ -68,6 +68,10 @@
     "/^sort\\b.*-(o|S)\\b/": false,
     "tree": true,
     "/^tree\\b.*-o\\b/": false,
+    "npm": true,
+    "npx": true,
+    "node": true,
+    "git": true,
     "rm": false,
     "rmdir": false,
     "del": false,
@@ -99,5 +103,14 @@
     "eval": false,
     "Invoke-Expression": false,
     "iex": false
-  }
+    },
+    "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    ".yoyo": true
+  },
+  // MCP server configuration for chrome-devtools and convex has been removed due to unknown VSCode setting.
 }

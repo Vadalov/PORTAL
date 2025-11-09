@@ -1,165 +1,369 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { LucideIcon, TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import {
+  cloneElement,
+  forwardRef,
+  isValidElement,
+  type ElementType,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
+
+type StatCardVariant =
+  | 'default'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'info'
+  | 'blue'
+  | 'red'
+  | 'green'
+  | 'purple';
+
+type StatCardIcon =
+  | LucideIcon
+  | ElementType
+  | ReactElement
+  | ReactNode
+  | string
+  | number
+  | null;
 
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
-  trend?: {
-    value: string;
-    direction?: 'up' | 'down' | 'neutral';
-  };
+  unit?: string;
   description?: string;
-  variant?: 'blue' | 'red' | 'green' | 'purple' | 'orange' | 'cyan';
-  progress?: number; // 0-100 for progress bar
-  sparkles?: boolean; // Add sparkles effect
+  trend?: {
+    value: number;
+    label: string;
+    isPositive: boolean;
+  };
+  icon?: StatCardIcon;
+  variant?: StatCardVariant;
+  loading?: boolean;
+  onClick?: () => void;
   className?: string;
 }
 
-const variantStyles = {
+const variantStyles: Record<
+  StatCardVariant,
+  {
+    bg: string;
+    border: string;
+    text: string;
+    icon: string;
+  }
+> = {
+  default: {
+    bg: 'bg-slate-50',
+    border: 'border-slate-200',
+    text: 'text-slate-900',
+    icon: 'text-slate-600',
+  },
+  success: {
+    bg: 'bg-green-50',
+    border: 'border-green-200',
+    text: 'text-green-900',
+    icon: 'text-green-600',
+  },
+  warning: {
+    bg: 'bg-amber-50',
+    border: 'border-amber-200',
+    text: 'text-amber-900',
+    icon: 'text-amber-600',
+  },
+  error: {
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+    text: 'text-red-900',
+    icon: 'text-red-600',
+  },
+  info: {
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+    text: 'text-blue-900',
+    icon: 'text-blue-600',
+  },
   blue: {
-    gradient: 'from-blue-500/15 via-blue-500/8 to-transparent',
-    iconBg: 'bg-blue-500/12',
-    iconColor: 'text-blue-600 dark:text-blue-400',
-    borderColor: 'border-blue-500/15 hover:border-blue-500/30',
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+    text: 'text-blue-900',
+    icon: 'text-blue-600',
   },
   red: {
-    gradient: 'from-red-500/15 via-red-500/8 to-transparent',
-    iconBg: 'bg-red-500/12',
-    iconColor: 'text-red-600 dark:text-red-400',
-    borderColor: 'border-red-500/15 hover:border-red-500/30',
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+    text: 'text-red-900',
+    icon: 'text-red-600',
   },
   green: {
-    gradient: 'from-emerald-500/15 via-emerald-500/8 to-transparent',
-    iconBg: 'bg-emerald-500/12',
-    iconColor: 'text-emerald-600 dark:text-emerald-400',
-    borderColor: 'border-emerald-500/15 hover:border-emerald-500/30',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-200',
+    text: 'text-emerald-900',
+    icon: 'text-emerald-600',
   },
   purple: {
-    gradient: 'from-violet-500/15 via-violet-500/8 to-transparent',
-    iconBg: 'bg-violet-500/12',
-    iconColor: 'text-violet-600 dark:text-violet-400',
-    borderColor: 'border-violet-500/15 hover:border-violet-500/30',
-  },
-  orange: {
-    gradient: 'from-amber-500/15 via-amber-500/8 to-transparent',
-    iconBg: 'bg-amber-500/12',
-    iconColor: 'text-amber-600 dark:text-amber-400',
-    borderColor: 'border-amber-500/15 hover:border-amber-500/30',
-  },
-  cyan: {
-    gradient: 'from-cyan-500/15 via-cyan-500/8 to-transparent',
-    iconBg: 'bg-cyan-500/12',
-    iconColor: 'text-cyan-600 dark:text-cyan-400',
-    borderColor: 'border-cyan-500/15 hover:border-cyan-500/30',
+    bg: 'bg-purple-50',
+    border: 'border-purple-200',
+    text: 'text-purple-900',
+    icon: 'text-purple-600',
   },
 };
 
-export function StatCard({
-  title,
-  value,
-  icon: Icon,
-  trend,
-  description,
-  variant = 'blue',
-  progress,
-  sparkles = false,
-  className,
-}: StatCardProps) {
-  const styles = variantStyles[variant];
+/**
+ * Stat Card Component
+ * Displays key metrics with optional trend and icon
+ */
+export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
+  (
+    {
+      title,
+      value,
+      unit,
+      description,
+      trend,
+      icon,
+      variant = 'default',
+      loading = false,
+      onClick,
+      className,
+    },
+    ref
+  ) => {
+    const styles = variantStyles[variant] ?? variantStyles.default;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Card
-        variant="elevated"
+    const renderIcon = () => {
+      if (!icon) {
+        return null;
+      }
+
+      if (typeof icon === 'string' || typeof icon === 'number') {
+        return <span className={cn('h-6 w-6', styles.icon)}>{icon}</span>;
+      }
+
+      // If it's already a valid React element, clone it with className
+      if (isValidElement(icon)) {
+        return cloneElement(icon as ReactElement<{ className?: string }>, {
+          className: cn('h-6 w-6', styles.icon, (icon.props as { className?: string }).className),
+        });
+      }
+
+      // If it's a function (component constructor), render it
+      if (typeof icon === 'function') {
+        const IconComponent = icon as ElementType;
+        return <IconComponent className={cn('h-6 w-6', styles.icon)} />;
+      }
+
+      // If it's an object that's not a React element (e.g., forward ref, memo, etc.)
+      // treat it as a component and render it
+      if (typeof icon === 'object' && icon !== null) {
+        const IconComponent = icon as ElementType;
+        return <IconComponent className={cn('h-6 w-6', styles.icon)} />;
+      }
+
+      // Unsupported type; avoid rendering raw objects
+      return null;
+    };
+
+    return (
+      <div
+        ref={ref}
+        onClick={onClick}
         className={cn(
-          'relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl',
-          styles.borderColor,
+          'p-6 rounded-lg border transition-all duration-200',
+          styles.bg,
+          styles.border,
+          onClick && 'cursor-pointer hover:shadow-md hover:border-slate-300',
           className
         )}
+        role="region"
+        aria-label={`${title}: ${value} ${unit || ''}`}
       >
-        {/* Gradient Background */}
-        <div className={cn('absolute inset-0 bg-gradient-to-br opacity-50', styles.gradient)} />
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-slate-600 mb-2">{title}</p>
 
-        {/* Sparkles Effect */}
-        {sparkles && (
-          <div className="absolute inset-0 overflow-hidden">
-            <motion.div
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.3, 0.8, 0.3],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute top-4 right-4"
-            >
-              <Sparkles className="h-4 w-4 text-yellow-400" />
-            </motion.div>
-          </div>
-        )}
-
-        {/* Content */}
-        <div className="relative">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-            <div
-              className={cn(
-                'p-2.5 rounded-xl transition-transform duration-300 hover:scale-110',
-                styles.iconBg
-              )}
-            >
-              <Icon className={cn('h-5 w-5', styles.iconColor)} />
-            </div>
-          </CardHeader>
-          <CardContent>
-          <div className="flex items-baseline justify-between">
-          <div className="text-3xl font-bold tracking-tight">{value}</div>
-          {trend && (
-          <Badge
-          variant={
-          trend.direction === 'up'
-          ? 'default'
-          : trend.direction === 'down'
-          ? 'destructive'
-          : 'secondary'
-          }
-          className="gap-1 text-xs"
-          >
-          {trend.direction === 'up' && <TrendingUp className="h-3 w-3" />}
-          {trend.direction === 'down' && <TrendingDown className="h-3 w-3" />}
-          {trend.value}
-          </Badge>
-          )}
-          </div>
-
-            {/* Progress Bar */}
-            {progress !== undefined && (
-              <div className="mt-3 space-y-1">
-                <Progress value={progress} className="h-1.5" />
-                <p className="text-xs text-muted-foreground text-right">
-                  {progress}% tamamlandı
-                </p>
+            {loading ? (
+              <div className="space-y-2">
+                <div className="h-8 w-24 bg-slate-200 rounded animate-pulse" />
+                <div className="h-4 w-32 bg-slate-200 rounded animate-pulse" />
               </div>
+            ) : (
+              <>
+                <div className="flex items-baseline gap-2">
+                  <p className={cn('text-3xl font-bold', styles.text)}>
+                    {typeof value === 'number' ? value.toLocaleString('tr-TR') : value}
+                  </p>
+                  {unit && <span className="text-sm text-slate-600">{unit}</span>}
+                </div>
+
+                {description && (
+                  <p className="text-sm text-slate-600 mt-2">{description}</p>
+                )}
+              </>
             )}
 
-            {description && <p className="text-xs text-muted-foreground mt-2">{description}</p>}
-          </CardContent>
+            {trend && (
+              <div className="mt-3 flex items-center gap-2">
+                {trend.isPositive ? (
+                  <TrendingUp className="h-4 w-4 text-green-600" aria-hidden="true" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-red-600" aria-hidden="true" />
+                )}
+                <span
+                  className={cn(
+                    'text-sm font-medium',
+                    trend.isPositive ? 'text-green-600' : 'text-red-600'
+                  )}
+                >
+                  {trend.isPositive ? '+' : '-'}
+                  {Math.abs(trend.value)}%
+                </span>
+                <span className="text-xs text-slate-500">{trend.label}</span>
+              </div>
+            )}
+          </div>
+
+          {icon && (
+            <div
+              className={cn(
+                'p-3 rounded-lg',
+                styles.bg,
+                'border',
+                styles.border
+              )}
+            >
+              {renderIcon()}
+            </div>
+          )}
         </div>
-      </Card>
-    </motion.div>
+      </div>
+    );
+  }
+);
+
+StatCard.displayName = 'StatCard';
+
+/**
+ * Skeleton version for loading states
+ */
+export function StatCardSkeleton() {
+  return (
+    <div className="p-6 rounded-lg border border-slate-200 bg-slate-50">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="h-4 w-24 bg-slate-200 rounded animate-pulse mb-3" />
+          <div className="h-8 w-32 bg-slate-200 rounded animate-pulse mb-2" />
+          <div className="h-4 w-48 bg-slate-200 rounded animate-pulse" />
+        </div>
+        <div className="h-12 w-12 bg-slate-200 rounded-lg animate-pulse" />
+      </div>
+    </div>
   );
 }
+
+/**
+ * Container for multiple stat cards
+ */
+interface StatCardsGridProps {
+  children: ReactNode;
+  columns?: 1 | 2 | 3 | 4;
+  gap?: 'sm' | 'md' | 'lg';
+  className?: string;
+}
+
+export function StatCardsGrid({
+  children,
+  columns = 4,
+  gap = 'md',
+  className,
+}: StatCardsGridProps) {
+  const gapStyles = {
+    sm: 'gap-3',
+    md: 'gap-4',
+    lg: 'gap-6',
+  };
+
+  const colStyles = {
+    1: 'grid-cols-1',
+    2: 'grid-cols-1 sm:grid-cols-2',
+    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+    4: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4',
+  };
+
+  return (
+    <div
+      className={cn(
+        'grid',
+        colStyles[columns],
+        gapStyles[gap],
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Comparison stat card (shows before/after)
+ */
+interface ComparisonStatCardProps extends Omit<StatCardProps, 'trend'> {
+  previousValue: string | number;
+  label?: string;
+}
+
+export const ComparisonStatCard = forwardRef<
+  HTMLDivElement,
+  ComparisonStatCardProps
+>(
+  (
+    {
+      title,
+      value,
+      unit,
+      previousValue,
+      label,
+      icon,
+      variant,
+      loading,
+      onClick,
+      className,
+    },
+    ref
+  ) => {
+    const isPositive = Number(value) >= Number(previousValue);
+    const difference = Math.abs(Number(value) - Number(previousValue));
+    const percentChange = previousValue !== 0
+      ? ((difference / Number(previousValue)) * 100).toFixed(1)
+      : '0';
+
+    return (
+      <StatCard
+        ref={ref}
+        title={title}
+        value={value}
+        unit={unit}
+        icon={icon}
+        variant={variant}
+        loading={loading}
+        onClick={onClick}
+        className={className}
+        trend={{
+          value: parseFloat(percentChange),
+          label: label || 'Son döneme göre',
+          isPositive,
+        }}
+        description={
+          label ? `Önceki: ${previousValue} ${unit || ''}` : undefined
+        }
+      />
+    );
+  }
+);
+
+ComparisonStatCard.displayName = 'ComparisonStatCard';

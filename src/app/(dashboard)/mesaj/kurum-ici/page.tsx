@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -56,27 +56,26 @@ export default function InternalMessagingPage() {
     queryFn: async () => {
       if (!user?.id) return { data: [], total: 0 };
 
-      switch (activeTab) {
-        case 'inbox':
-          // return api.messages.getInboxMessages(user.id);
-          return { data: [], total: 0 };
-        case 'sent':
-          // return api.messages.getMessagesBySender(user.id);
-          return { data: [], total: 0 };
-        case 'drafts':
-          // return api.messages.getMessages({
-          //   filters: {
-          //     sender: user.id,
-          //     status: 'draft',
-          //     message_type: 'internal'
-          //   },
-          //   page,
-          //   limit
-          // });
-          return { data: [], total: 0 };
-        default:
-          return { data: [], total: 0 };
+      const fetchLimit = limit; // server-side sayfalama ile eşleşmesi için
+      const filters: Record<string, string> = {
+        tab: activeTab, // Add tab parameter
+        message_type: 'internal', // Add message_type parameter
+      };
+
+      const response = await api.messages.getMessages({
+        page,
+        limit: fetchLimit,
+        search: search.trim() || undefined,
+        filters,
+      });
+
+      if (response.error) {
+        throw new Error(response.error);
       }
+
+      const serverMessages = (response.data as MessageDocument[]) || [];
+      const totalItems = response.total ?? serverMessages.length;
+      return { data: serverMessages, total: totalItems };
     },
     enabled: !!user?.id,
   });
@@ -99,7 +98,13 @@ export default function InternalMessagingPage() {
 
   // Mutations
   const deleteMessageMutation = useMutation({
-    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // api.messages.deleteMessage(id),
+    mutationFn: async (id: string) => {
+      const response = await api.messages.deleteMessage(id);
+      if (response?.error) {
+        throw new Error(response.error);
+      }
+      return response?.data ?? null;
+    },
     onSuccess: () => {
       toast.success('Mesaj silindi.');
       queryClient.invalidateQueries({ queryKey: ['internal-messages'] });
@@ -111,22 +116,12 @@ export default function InternalMessagingPage() {
     },
   });
 
-  const markAsReadMutation = useMutation({
-    mutationFn: (_id: string) => Promise.resolve({ data: null, error: null }), // api.messages.markAsRead(id, user?.id || ''),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['internal-messages'] });
-    },
-  });
+  // Okundu bilgisi henüz desteklenmiyor; yer tutucu kaldırıldı
 
   // Event handlers
   const handleMessageClick = (message: MessageDocument) => {
     setSelectedMessage(message);
     setShowMessageDetail(true);
-
-    // Mark as read if it's an inbox message
-    if (activeTab === 'inbox') {
-      markAsReadMutation.mutate(message._id);
-    }
   };
 
   const handleDeleteMessage = (messageId: string) => {
@@ -135,14 +130,24 @@ export default function InternalMessagingPage() {
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedMessages.length === 0) return;
 
     if (window.confirm(`${selectedMessages.length} mesajı silmek istediğinizden emin misiniz?`)) {
-      selectedMessages.forEach((messageId) => {
-        deleteMessageMutation.mutate(messageId);
-      });
-      setSelectedMessages([]);
+      try {
+        await Promise.all(
+          selectedMessages.map((messageId) => deleteMessageMutation.mutateAsync(messageId))
+        );
+        toast.success('Seçili mesajlar silindi.');
+      } catch (bulkError) {
+        const errorMessage =
+          bulkError instanceof Error
+            ? bulkError.message
+            : 'Seçili mesajlar silinirken bir hata oluştu.';
+        toast.error(errorMessage);
+      } finally {
+        setSelectedMessages([]);
+      }
     }
   };
 
@@ -176,6 +181,17 @@ export default function InternalMessagingPage() {
     setSearch('');
     setPage(1);
   };
+
+  // Sekme değişince seçimleri temizle ve sayfayı 1'e al
+  useEffect(() => {
+    setSelectedMessages([]);
+    setPage(1);
+  }, [activeTab]);
+
+  // Yeni veri geldiğinde seçimleri temizle (sayfa, arama değişimi vb.)
+  useEffect(() => {
+    setSelectedMessages([]);
+  }, [messages]);
 
   if (error) {
     return (
@@ -357,10 +373,8 @@ export default function InternalMessagingPage() {
                           <div className="flex items-start gap-3">
                             <Checkbox
                               checked={selectedMessages.includes(message._id)}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                handleMessageSelect(message._id);
-                              }}
+                              onClick={(event) => event.stopPropagation()}
+                              onCheckedChange={() => handleMessageSelect(message._id)}
                             />
                             <div className="flex-1">
                               <div className="flex items-start justify-between">

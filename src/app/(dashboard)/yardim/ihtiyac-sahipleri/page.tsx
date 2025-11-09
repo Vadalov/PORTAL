@@ -8,7 +8,7 @@ import { VirtualizedDataTable, type DataTableColumn } from '@/components/ui/virt
 import { PageLayout } from '@/components/layouts/PageLayout';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import api from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import type { BeneficiaryDocument } from '@/types/database';
 import { toast } from 'sonner';
 import { ArrowUpRight, Download, Plus } from 'lucide-react';

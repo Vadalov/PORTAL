@@ -17,7 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { toast } from 'sonner';
 import {
   Search,

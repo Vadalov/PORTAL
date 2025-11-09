@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     try {
       // Test Convex connectivity by querying users
       const startTime = Date.now();
-      await convexHttp.query(api.users.list);
+      await convexHttp.query(api.users.list, {});
       const responseTime = Date.now() - startTime;
 
       connectivityReport = {

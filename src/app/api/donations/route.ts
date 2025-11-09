@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexDonations, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import type { DonationDocument, Document } from '@/types/database';
-import { Permission } from '@/types/auth';
 import {
-  requireAuthenticatedUser,
   verifyCsrfToken,
   buildErrorResponse,
+  requireModuleAccess,
 } from '@/lib/api/auth-utils';
 
 /**
@@ -54,9 +53,7 @@ function validateDonation(data: Partial<DonationDocument>): {
  */
 export async function GET(request: NextRequest) {
   try {
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DONATIONS_READ,
-    });
+    await requireModuleAccess('donations');
 
     const { searchParams } = new URL(request.url);
     const params = normalizeQueryParams(searchParams);
@@ -93,9 +90,7 @@ async function createDonationHandler(request: NextRequest) {
   let body: unknown = null;
   try {
     await verifyCsrfToken(request);
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DONATIONS_CREATE,
-    });
+    await requireModuleAccess('donations');
 
     body = await request.json();
     const validation = validateDonation(body as Record<string, unknown>);

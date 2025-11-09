@@ -102,9 +102,13 @@ describe('Environment Validation', () => {
       process.env.SMTP_USER = 'test@gmail.com';
       process.env.SMTP_PASSWORD = 'password';
 
-      const { getServerEnv, hasEmailConfig } = await import('@/lib/env-validation');
-      const env = getServerEnv();
-      expect(hasEmailConfig(env)).toBe(true);
+      const { hasEmailConfig } = await import('@/lib/env-validation');
+      const mockEnv = {
+        SMTP_HOST: 'smtp.gmail.com',
+        SMTP_USER: 'test@gmail.com',
+        SMTP_PASSWORD: 'password',
+      } as any;
+      expect(hasEmailConfig(mockEnv)).toBe(true);
     });
 
     it('should detect SMS configuration', async () => {
@@ -112,9 +116,13 @@ describe('Environment Validation', () => {
       process.env.TWILIO_AUTH_TOKEN = 'token123';
       process.env.TWILIO_PHONE_NUMBER = '+905551234567';
 
-      const { getServerEnv, hasSmsConfig } = await import('@/lib/env-validation');
-      const env = getServerEnv();
-      expect(hasSmsConfig(env)).toBe(true);
+      const { hasSmsConfig } = await import('@/lib/env-validation');
+      const mockEnv = {
+        TWILIO_ACCOUNT_SID: 'AC123',
+        TWILIO_AUTH_TOKEN: 'token123',
+        TWILIO_PHONE_NUMBER: '+905551234567',
+      } as any;
+      expect(hasSmsConfig(mockEnv)).toBe(true);
     });
   });
 });

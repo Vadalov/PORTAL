@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateCsrfToken } from '@/lib/csrf';
 import { cookies } from 'next/headers';
-import { UserRole, ROLE_PERMISSIONS } from '@/types/auth';
 import { authRateLimit } from '@/lib/rate-limit';
 import logger from '@/lib/logger';
 import { convexHttp } from '@/lib/convex/server';
@@ -77,18 +76,17 @@ export const POST = authRateLimit(async (request: NextRequest) => {
       );
     }
 
-    // Map Convex user to our user format
-    const role = (user.role || 'MEMBER') as UserRole;
-    
     const userData = {
       id: user._id,
       email: user.email,
       name: user.name,
-      role,
-      permissions: ROLE_PERMISSIONS[role] || [],
+      role: user.role || 'Personel',
+      permissions: Array.isArray(user.permissions) ? user.permissions : [],
       isActive: user.isActive,
       createdAt: user._creationTime,
       updatedAt: user._creationTime,
+      phone: user.phone,
+      labels: user.labels ?? [],
     };
 
     // Generate CSRF token
@@ -141,7 +139,7 @@ export const POST = authRateLimit(async (request: NextRequest) => {
     logger.info('User logged in successfully', {
       userId: user._id,
       email: `${email?.substring(0, 3)}***`,
-      role,
+      role: userData.role,
     });
 
     return NextResponse.json({

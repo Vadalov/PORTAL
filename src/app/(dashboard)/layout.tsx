@@ -5,6 +5,10 @@ import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/authStore';
 import { ModernSidebar } from '@/components/ui/modern-sidebar';
+import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav';
+import { AnalyticsTrackerComponent } from '@/components/ui/analytics-tracker';
+import { KeyboardShortcuts } from '@/components/ui/keyboard-shortcuts';
+import { AdvancedSearchModal, useAdvancedSearch } from '@/components/ui/advanced-search-modal';
 import {
   LogOut,
   Menu,
@@ -23,7 +27,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { UserRole } from '@/types/auth';
 import Link from 'next/link';
 import logger from '@/lib/logger';
 import { useQueryClient } from '@tanstack/react-query';
@@ -37,6 +40,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const { isAuthenticated, isInitialized, user, logout, initializeAuth } = useAuthStore();
+  const { isOpen: isSearchOpen, onOpen: openSearch, onClose: closeSearch } = useAdvancedSearch();
+
+  // Keyboard shortcuts
+  const keyboardShortcuts = [
+    {
+      key: 's',
+      ctrl: true,
+      description: 'Ayarlar',
+      callback: () => {
+        router.push('/settings');
+      },
+    },
+  ];
 
   // Performance monitoring
   const handlePerformanceMetrics = useCallback(
@@ -76,21 +92,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   const getRoleBadgeVariant = useCallback(
-    (role: UserRole): 'default' | 'secondary' | 'destructive' | 'outline' => {
-      switch (role) {
-        case UserRole.SUPER_ADMIN:
-        case UserRole.ADMIN:
-          return 'destructive';
-        case UserRole.MANAGER:
-          return 'default';
-        case UserRole.MEMBER:
-        case UserRole.VOLUNTEER:
-          return 'secondary';
-        case UserRole.VIEWER:
-          return 'outline';
-        default:
-          return 'default';
-      }
+    (role?: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+      const normalized = (role || '').toLowerCase();
+      if (normalized.includes('başkan')) return 'destructive';
+      if (normalized.includes('yönetici') || normalized.includes('muhasebe')) return 'default';
+      if (normalized.includes('gönüllü') || normalized.includes('üye')) return 'secondary';
+      if (normalized.includes('izleyici') || normalized.includes('görüntüleyici')) return 'outline';
+      return 'default';
     },
     []
   );
@@ -253,6 +261,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             },
             'MEETINGS'
           );
+        } else if (pathname.startsWith('/is/yonetim')) {
+          await Promise.allSettled([
+            prefetchData(
+              queryClient,
+              [CACHE_KEYS.MEETINGS],
+              async () => {
+                const response = await fetch('/api/meetings?limit=10');
+                return response.json();
+              },
+              'MEETINGS'
+            ),
+            prefetchData(
+              queryClient,
+              [CACHE_KEYS.MEETING_DECISIONS],
+              async () => {
+                const response = await fetch('/api/meeting-decisions?limit=10');
+                return response.json();
+              },
+              'MEETING_DECISIONS'
+            ),
+            prefetchData(
+              queryClient,
+              [CACHE_KEYS.MEETING_ACTION_ITEMS],
+              async () => {
+                const response = await fetch('/api/meeting-action-items?limit=20');
+                return response.json();
+              },
+              'MEETING_ACTION_ITEMS'
+            ),
+          ]);
         }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
@@ -365,7 +403,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       </p>
                       <p className="text-xs text-slate-500 truncate mt-0.5">{user?.email || ''}</p>
                       <Badge
-                        variant={getRoleBadgeVariant(user?.role || UserRole.VIEWER)}
+                        variant={getRoleBadgeVariant(user?.role)}
                         className="text-xs mt-2"
                       >
                         {user?.role || 'Viewer'}
@@ -419,32 +457,53 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
 
         {/* Main Content - OPTIMIZED PAGE TRANSITIONS */}
-        <main className="flex-1 p-6 lg:p-8 max-w-7xl mx-auto w-full min-h-[calc(100vh-4rem)]">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 8, scale: 0.995 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.995 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              style={{
-                willChange: 'transform, opacity',
-                backfaceVisibility: 'hidden',
-              }}
-            >
-              <SuspenseBoundary
-                loadingVariant="pulse"
-                loadingText=""
-                onSuspend={handlePageSuspend}
-                onResume={handlePageResume}
+        <main className="flex-1 w-full min-h-[calc(100vh-4rem)]">
+          <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+            <BreadcrumbNav />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 8, scale: 0.995 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.995 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                style={{
+                  willChange: 'transform, opacity',
+                  backfaceVisibility: 'hidden',
+                }}
               >
-                {children}
-              </SuspenseBoundary>
-            </motion.div>
-          </AnimatePresence>
+                <SuspenseBoundary
+                  loadingVariant="pulse"
+                  loadingText=""
+                  onSuspend={handlePageSuspend}
+                  onResume={handlePageResume}
+                >
+                  {children}
+                </SuspenseBoundary>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </main>
 
-        {/* Performance Monitoring */}
+        {/* Advanced Search Modal */}
+        <AdvancedSearchModal
+          isOpen={isSearchOpen}
+          onClose={closeSearch}
+        />
+
+        {/* Analytics & Performance Monitoring */}
+        <AnalyticsTrackerComponent
+          enabled={true}
+          trackCoreWebVitals={true}
+          trackUserInteractions={true}
+        />
+
+        <KeyboardShortcuts
+          shortcuts={keyboardShortcuts}
+          enabled={true}
+          showHelpDialog={true}
+        />
+
         <PerformanceMonitor
           enableWebVitals={true}
           enableCustomMetrics={true}

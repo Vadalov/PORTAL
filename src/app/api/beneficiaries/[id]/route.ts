@@ -4,12 +4,7 @@ import logger from '@/lib/logger';
 import { BeneficiaryFormData } from '@/types/beneficiary';
 import { extractParams } from '@/lib/api/route-helpers';
 import { Id } from '@/convex/_generated/dataModel';
-import { Permission } from '@/types/auth';
-import {
-  requireAuthenticatedUser,
-  verifyCsrfToken,
-  buildErrorResponse,
-} from '@/lib/api/auth-utils';
+import { verifyCsrfToken, buildErrorResponse, requireModuleAccess } from '@/lib/api/auth-utils';
 
 /**
  * Validate beneficiary data for updates
@@ -84,9 +79,7 @@ async function getBeneficiaryHandler(
   const { id } = await extractParams(params);
 
   try {
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.BENEFICIARIES_READ,
-    });
+    await requireModuleAccess('beneficiaries');
 
     const beneficiary = await convexBeneficiaries.get(id as Id<'beneficiaries'>);
 
@@ -129,9 +122,7 @@ async function updateBeneficiaryHandler(
 
   try {
     await verifyCsrfToken(request);
-    const { user } = await requireAuthenticatedUser({
-      requiredPermission: Permission.BENEFICIARIES_UPDATE,
-    });
+    const { user } = await requireModuleAccess('beneficiaries');
 
     const body = (await request.json()) as Partial<BeneficiaryFormData>;
 
@@ -144,7 +135,7 @@ async function updateBeneficiaryHandler(
     }
 
     const updated = await convexBeneficiaries.update(id as Id<'beneficiaries'>, body, {
-      auth: { userId: user.id, role: user.role },
+      auth: { userId: user.id, role: user.role ?? 'Personel' },
     });
 
     return NextResponse.json({
@@ -191,9 +182,7 @@ async function deleteBeneficiaryHandler(
 
   try {
     await verifyCsrfToken(request);
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.BENEFICIARIES_DELETE,
-    });
+    await requireModuleAccess('beneficiaries');
 
     await convexBeneficiaries.remove(id as Id<'beneficiaries'>);
 

@@ -2,7 +2,7 @@
 
 import { use } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { aidApplicationsApi } from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,7 +47,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
   const queryResult = useQuery({
     queryKey: ['aid-application', id],
     queryFn: async () => {
-      const result = await aidApplicationsApi.getAidApplication(id);
+      const result = await api.aidApplications.getAidApplication(id);
       return result;
     },
   });
@@ -56,7 +56,7 @@ export default function AidApplicationDetailPage({ params }: { params: Promise<{
 
   const updateStageMutation = useMutation({
     mutationFn: ({ stage }: { stage: AidApplicationDocument['stage'] }) =>
-      aidApplicationsApi.updateStage(id, stage),
+      api.aidApplications.updateStage(id, stage),
     onSuccess: () => {
       toast.success('Aşama güncellendi');
       queryClient.invalidateQueries({ queryKey: ['aid-application', id] });

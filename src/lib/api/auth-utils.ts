@@ -7,7 +7,7 @@ import {
   type SessionUser,
 } from '@/lib/auth/session';
 import { getCsrfTokenHeader, validateCsrfToken } from '@/lib/csrf';
-import { Permission, UserRole } from '@/types/auth';
+import type { PermissionValue } from '@/types/permissions';
 
 export class ApiAuthError extends Error {
   status: number;
@@ -21,41 +21,45 @@ export class ApiAuthError extends Error {
 }
 
 export interface RequireUserOptions {
-  requiredPermission?: Permission;
-  requiredAnyPermission?: Permission[];
-  requiredRole?: UserRole;
+  requiredPermission?: PermissionValue | string;
+  requiredAnyPermission?: Array<PermissionValue | string>;
+  requiredRole?: string;
 }
 
-const hasPermission = (user: SessionUser, permission?: Permission): boolean => {
+const hasPermission = (user: SessionUser, permission?: PermissionValue | string): boolean => {
   if (!permission) {
     return true;
   }
 
-  return user.permissions.includes(permission) || user.role === UserRole.SUPER_ADMIN;
+  return (user.permissions || []).includes(permission as PermissionValue);
 };
 
-const hasAnyPermission = (user: SessionUser, permissions?: Permission[]): boolean => {
+const hasAnyPermission = (
+  user: SessionUser,
+  permissions?: Array<PermissionValue | string>
+): boolean => {
   if (!permissions || permissions.length === 0) {
     return true;
   }
 
-  if (user.role === UserRole.SUPER_ADMIN) {
-    return true;
-  }
-
-  return permissions.some((perm) => user.permissions.includes(perm));
+  return permissions.some((perm) => (user.permissions || []).includes(perm as PermissionValue));
 };
 
-const hasRole = (user: SessionUser, role?: UserRole): boolean => {
+const hasRole = (user: SessionUser, role?: string): boolean => {
   if (!role) {
     return true;
   }
 
-  if (user.role === UserRole.SUPER_ADMIN) {
-    return true;
+  if (!user.role) {
+    return false;
   }
 
-  return user.role === role;
+  return user.role.toLowerCase() === role.toLowerCase();
+};
+
+const appendAccessSuffix = (module: string) => {
+  if (!module) return module;
+  return module.endsWith(':access') ? module : `${module}:access`;
 };
 
 export async function verifyCsrfToken(request: NextRequest): Promise<void> {
@@ -67,6 +71,38 @@ export async function verifyCsrfToken(request: NextRequest): Promise<void> {
   if (!headerToken || !validateCsrfToken(headerToken, cookieToken)) {
     throw new ApiAuthError('CSRF doğrulaması başarısız', 403, 'INVALID_CSRF');
   }
+}
+
+export async function requirePermission(permission: string): Promise<{
+  session: AuthSession;
+  user: SessionUser;
+}> {
+  const { session, user } = await requireAuthenticatedUser();
+  if (!hasPermission(user, permission)) {
+    throw new ApiAuthError('İzin bulunamadı', 403, 'FORBIDDEN');
+  }
+  return { session, user };
+}
+
+export async function requireModuleAccess(module: string): Promise<{
+  session: AuthSession;
+  user: SessionUser;
+}> {
+  if (!module) {
+    throw new ApiAuthError('Geçersiz modül erişimi', 400, 'INVALID_MODULE');
+  }
+  return requirePermission(appendAccessSuffix(module));
+}
+
+export async function requireAnyPermission(permissions: string[]): Promise<{
+  session: AuthSession;
+  user: SessionUser;
+}> {
+  const { session, user } = await requireAuthenticatedUser();
+  if (!hasAnyPermission(user, permissions)) {
+    throw new ApiAuthError('İzin bulunamadı', 403, 'FORBIDDEN');
+  }
+  return { session, user };
 }
 
 export async function requireAuthenticatedUser(

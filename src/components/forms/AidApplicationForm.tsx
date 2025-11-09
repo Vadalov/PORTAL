@@ -19,7 +19,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { aidApplicationsApi, api } from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { toast } from 'sonner';
 import { Loader2, FileText, DollarSign, Package, Utensils, Stethoscope } from 'lucide-react';
 
@@ -81,7 +81,7 @@ export function AidApplicationForm({ onSuccess, onCancel }: AidApplicationFormPr
 
   const createApplicationMutation = useMutation({
     mutationFn: (data: AidApplicationFormData) =>
-      aidApplicationsApi.createAidApplication({
+      api.aidApplications.createAidApplication({
         ...data,
         application_date: new Date().toISOString(),
         stage: 'draft',

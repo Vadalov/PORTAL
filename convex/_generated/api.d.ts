@@ -17,15 +17,18 @@ import type * as dependents from "../dependents.js";
 import type * as documents from "../documents.js";
 import type * as donations from "../donations.js";
 import type * as finance_records from "../finance_records.js";
+import type * as meeting_action_items from "../meeting_action_items.js";
+import type * as meeting_decisions from "../meeting_decisions.js";
 import type * as meetings from "../meetings.js";
 import type * as messages from "../messages.js";
 import type * as partners from "../partners.js";
 import type * as scholarships from "../scholarships.js";
+import type * as seed from "../seed.js";
 import type * as storage from "../storage.js";
 import type * as system_settings from "../system_settings.js";
 import type * as tasks from "../tasks.js";
-import type * as tc_security from "../tc_security.js";
 import type * as users from "../users.js";
+import type * as workflow_notifications from "../workflow_notifications.js";
 
 import type {
   ApiFromModules,
@@ -51,15 +54,18 @@ declare const fullApi: ApiFromModules<{
   documents: typeof documents;
   donations: typeof donations;
   finance_records: typeof finance_records;
+  meeting_action_items: typeof meeting_action_items;
+  meeting_decisions: typeof meeting_decisions;
   meetings: typeof meetings;
   messages: typeof messages;
   partners: typeof partners;
   scholarships: typeof scholarships;
+  seed: typeof seed;
   storage: typeof storage;
   system_settings: typeof system_settings;
   tasks: typeof tasks;
-  tc_security: typeof tc_security;
   users: typeof users;
+  workflow_notifications: typeof workflow_notifications;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

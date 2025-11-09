@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { aidApplicationsApi } from '@/lib/api';
+import { convexApiClient as api } from '@/lib/api/convex-api-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -58,7 +58,7 @@ export default function AidApplicationsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['aid-applications', page, search, stageFilter, statusFilter],
     queryFn: () =>
-      aidApplicationsApi.getAidApplications({
+      api.aidApplications.getAidApplications({
         page,
         limit,
         search,

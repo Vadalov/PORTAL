@@ -1,13 +1,7 @@
 import { query, mutation } from './_generated/server';
 import { v } from 'convex/values';
-import {
-  hashTcNumber,
-  requireTcNumberAccess,
-  maskTcNumber,
-  validateTcNumber,
-  logTcNumberAccess,
-  canAccessTcNumber,
-} from './tc_security';
+
+const isValidTcNumber = (value: string): boolean => /^\d{11}$/.test(value);
 
 // List beneficiaries with pagination and filters
 export const list = query({
@@ -41,21 +35,11 @@ export const list = query({
     let filtered = beneficiaries;
     if (args.search) {
       const searchLower = args.search.toLowerCase();
-      // For TC number search, we need to hash the search term
-      let hashedSearch: string | null = null;
-      if (/^\d{11}$/.test(args.search)) {
-        try {
-          hashedSearch = await hashTcNumber(ctx, args.search);
-        } catch {
-          // Invalid TC number format, skip hashing
-        }
-      }
 
       filtered = beneficiaries.filter(
         (b) =>
           b.name.toLowerCase().includes(searchLower) ||
-          (hashedSearch && b.tc_no === hashedSearch) ||
-          (hashedSearch === null && b.tc_no.includes(searchLower)) || // Support legacy plain values during migration
+          b.tc_no.includes(searchLower) ||
           b.phone.includes(searchLower) ||
           (b.email && b.email.toLowerCase().includes(searchLower))
       );
@@ -86,43 +70,16 @@ export const get = query({
 export const getByTcNo = query({
   args: { tc_no: v.string() },
   handler: async (ctx, args) => {
-    // Require authentication and proper role
-    const userInfo = await requireTcNumberAccess(ctx);
-
-    // Validate TC number format
-    if (!validateTcNumber(args.tc_no)) {
+    if (!isValidTcNumber(args.tc_no)) {
       throw new Error('Invalid TC number format');
     }
 
-    // Hash TC number for lookup
-    const hashedTc = await hashTcNumber(ctx, args.tc_no);
-
-    // Log access for audit trail
-    logTcNumberAccess('TC number lookup', userInfo, maskTcNumber(args.tc_no));
-
-    // Search using hashed value
-    // Note: For migration, we check both hashed and plain values
     const beneficiary = await ctx.db
       .query('beneficiaries')
-      .withIndex('by_tc_no', (q) => q.eq('tc_no', hashedTc))
+      .withIndex('by_tc_no', (q) => q.eq('tc_no', args.tc_no))
       .first();
 
-    // If not found with hash, try plain (for backward compatibility during migration)
-    // Note: Migration to hashed values should be done via a separate migration script
-    // For now, we just return null if not found with hash
-    if (!beneficiary) {
-      const plainBeneficiary = await ctx.db
-        .query('beneficiaries')
-        .withIndex('by_tc_no', (q) => q.eq('tc_no', args.tc_no))
-        .first();
-
-      // Return plain beneficiary if found (migration will happen separately)
-      if (plainBeneficiary) {
-        return plainBeneficiary;
-      }
-    }
-
-    return beneficiary;
+    return beneficiary ?? null;
   },
 });
 
@@ -186,51 +143,25 @@ export const create = mutation({
     ),
     approved_by: v.optional(v.string()),
     approved_at: v.optional(v.string()),
-    auth: v.optional(
-      v.object({
-        userId: v.string(),
-        role: v.string(),
-      })
-    ),
   },
   handler: async (ctx, args) => {
-    const { auth, ...payload } = args;
+    const payload = args;
 
-    // Require authentication and proper role for TC number access
-    const userInfo = auth
-      ? (() => {
-          if (!canAccessTcNumber(auth.role)) {
-            throw new Error('Unauthorized: Insufficient permissions to access TC number data');
-          }
-          return auth;
-        })()
-      : await requireTcNumberAccess(ctx);
-
-    // Validate TC number format
-    if (!validateTcNumber(payload.tc_no)) {
+    if (!isValidTcNumber(payload.tc_no)) {
       throw new Error('Invalid TC number format');
     }
 
-    // Hash TC number before storing
-    const hashedTc = await hashTcNumber(ctx, payload.tc_no);
-
-    // Log access for audit trail
-    logTcNumberAccess('Beneficiary creation with TC number', userInfo, maskTcNumber(payload.tc_no));
-
-    // Check if TC number already exists (using hashed value)
     const existing = await ctx.db
       .query('beneficiaries')
-      .withIndex('by_tc_no', (q) => q.eq('tc_no', hashedTc))
+      .withIndex('by_tc_no', (q) => q.eq('tc_no', payload.tc_no))
       .first();
 
     if (existing) {
       throw new Error('Beneficiary with this TC number already exists');
     }
 
-    // Insert with hashed TC number
     return await ctx.db.insert('beneficiaries', {
       ...payload,
-      tc_no: hashedTc,
     });
   },
 });
@@ -246,49 +177,25 @@ export const update = mutation({
     status: v.optional(
       v.union(v.literal('TASLAK'), v.literal('AKTIF'), v.literal('PASIF'), v.literal('SILINDI'))
     ),
-    auth: v.optional(
-      v.object({
-        userId: v.string(),
-        role: v.string(),
-      })
-    ),
     // Add other optional fields as needed
   },
   handler: async (ctx, args) => {
-    const { id, auth, ...rawUpdates } = args;
-
-    // Require authentication and proper role for TC number access
-    const userInfo = auth
-      ? (() => {
-          if (!canAccessTcNumber(auth.role)) {
-            throw new Error('Unauthorized: Insufficient permissions to access TC number data');
-          }
-          return auth;
-        })()
-      : await requireTcNumberAccess(ctx);
-
+    const { id, ...rawUpdates } = args;
     const updates = { ...rawUpdates };
     const beneficiary = await ctx.db.get(id);
     if (!beneficiary) {
       throw new Error('Beneficiary not found');
     }
 
-    // If TC number is being updated, validate and hash it
     if (updates.tc_no) {
-      if (!validateTcNumber(updates.tc_no)) {
+      if (!isValidTcNumber(updates.tc_no)) {
         throw new Error('Invalid TC number format');
       }
 
-      const hashedTc = await hashTcNumber(ctx, updates.tc_no);
-
-      // Log access for audit trail
-      logTcNumberAccess('Beneficiary TC number update', userInfo, maskTcNumber(updates.tc_no));
-
-      // Check for duplicates using hashed value
-      if (hashedTc !== beneficiary.tc_no) {
+      if (updates.tc_no !== beneficiary.tc_no) {
         const existing = await ctx.db
           .query('beneficiaries')
-          .withIndex('by_tc_no', (q) => q.eq('tc_no', hashedTc))
+          .withIndex('by_tc_no', (q) => q.eq('tc_no', updates.tc_no!))
           .first();
 
         if (existing) {
@@ -296,8 +203,7 @@ export const update = mutation({
         }
       }
 
-      // Replace with hashed value
-      updates.tc_no = hashedTc;
+      // value already set on updates.tc_no
     }
 
     await ctx.db.patch(id, updates);

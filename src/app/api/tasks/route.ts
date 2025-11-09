@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexTasks, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import { Id } from '@/convex/_generated/dataModel';
-import { Permission } from '@/types/auth';
-import {
-  requireAuthenticatedUser,
-  verifyCsrfToken,
-  buildErrorResponse,
-} from '@/lib/api/auth-utils';
+import { verifyCsrfToken, buildErrorResponse, requireModuleAccess } from '@/lib/api/auth-utils';
 
 function validateTask(data: Record<string, unknown>): {
   isValid: boolean;
@@ -46,9 +41,7 @@ function validateTask(data: Record<string, unknown>): {
  */
 export async function GET(request: NextRequest) {
   try {
-    await requireAuthenticatedUser({
-      requiredPermission: Permission.DASHBOARD_READ,
-    });
+    await requireModuleAccess('workflow');
 
     const { searchParams } = new URL(request.url);
     const params = normalizeQueryParams(searchParams);
@@ -85,13 +78,7 @@ export async function POST(request: NextRequest) {
   let body: unknown = null;
   try {
     await verifyCsrfToken(request);
-    await requireAuthenticatedUser({
-      requiredAnyPermission: [
-        Permission.DONATIONS_CREATE,
-        Permission.BENEFICIARIES_CREATE,
-        Permission.AID_REQUESTS_CREATE,
-      ],
-    });
+    await requireModuleAccess('workflow');
 
     body = await request.json();
     const validation = validateTask(body as Record<string, unknown>);
