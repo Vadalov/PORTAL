@@ -10,6 +10,8 @@ import { useState } from 'react';
 import { createOptimizedQueryClient, cacheUtils } from '@/lib/cache-config';
 import { persistentCache } from '@/lib/persistent-cache';
 import { convex, shouldUseConvex } from '@/lib/convex/client';
+import { initGlobalErrorHandlers } from '@/lib/global-error-handler';
+import { initErrorTracker } from '@/lib/error-tracker';
 
 import { SuspenseBoundary } from '@/components/ui/suspense-boundary';
 
@@ -41,6 +43,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }
     }
   }, [queryClient]);
+
+  // Initialize error tracking system
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Initialize global error handlers
+      initGlobalErrorHandlers();
+      
+      // Initialize error tracker (retry pending errors)
+      initErrorTracker();
+      
+      // Error tracking system initialized
+    }
+  }, []);
 
   // Periodic cache cleanup
   useEffect(() => {

@@ -1026,4 +1026,132 @@ export default defineSchema({
     .index('by_resource', ['resource', 'resourceId'])
     .index('by_action', ['action'])
     .index('by_timestamp', ['timestamp']),
+
+  /**
+   * @collection errors
+   * @description Main error tracking table for capturing and managing application errors
+   */
+  errors: defineTable({
+    /** @type {string} - Machine-readable error code (e.g., ERR_AUTH_001) */
+    error_code: v.string(),
+    /** @type {string} - Human-readable error title */
+    title: v.string(),
+    /** @type {string} - Detailed error description */
+    description: v.string(),
+    /** @type {'runtime'|'ui_ux'|'design_bug'|'system'|'data'|'security'|'performance'|'integration'} - Error category */
+    category: v.union(
+      v.literal('runtime'),
+      v.literal('ui_ux'),
+      v.literal('design_bug'),
+      v.literal('system'),
+      v.literal('data'),
+      v.literal('security'),
+      v.literal('performance'),
+      v.literal('integration')
+    ),
+    /** @type {'critical'|'high'|'medium'|'low'} - Severity level */
+    severity: v.union(
+      v.literal('critical'),
+      v.literal('high'),
+      v.literal('medium'),
+      v.literal('low')
+    ),
+    /** @type {'new'|'assigned'|'in_progress'|'resolved'|'closed'|'reopened'} - Current status */
+    status: v.union(
+      v.literal('new'),
+      v.literal('assigned'),
+      v.literal('in_progress'),
+      v.literal('resolved'),
+      v.literal('closed'),
+      v.literal('reopened')
+    ),
+    /** @type {string} - Technical stack trace (for runtime errors) */
+    stack_trace: v.optional(v.string()),
+    /** @type {any} - Additional context data */
+    error_context: v.optional(v.any()),
+    /** @type {Id<'users'>} - User who encountered the error */
+    user_id: v.optional(v.id('users')),
+    /** @type {string} - User session identifier */
+    session_id: v.optional(v.string()),
+    /** @type {any} - Browser, OS, device information */
+    device_info: v.optional(v.any()),
+    /** @type {string} - Page URL where error occurred */
+    url: v.optional(v.string()),
+    /** @type {string} - React component or module name */
+    component: v.optional(v.string()),
+    /** @type {string} - Function or method that failed */
+    function_name: v.optional(v.string()),
+    /** @type {number} - Number of times error occurred */
+    occurrence_count: v.number(),
+    /** @type {string} - First occurrence timestamp */
+    first_seen: v.string(),
+    /** @type {string} - Most recent occurrence timestamp */
+    last_seen: v.string(),
+    /** @type {Id<'users'>} - User responsible for fixing */
+    assigned_to: v.optional(v.id('users')),
+    /** @type {Id<'users'>} - User who reported the error */
+    reporter_id: v.optional(v.id('users')),
+    /** @type {string[]} - Custom tags for categorization */
+    tags: v.optional(v.array(v.string())),
+    /** @type {any} - Additional flexible metadata */
+    metadata: v.optional(v.any()),
+    /** @type {string} - Notes on how error was resolved */
+    resolution_notes: v.optional(v.string()),
+    /** @type {string} - Resolution timestamp */
+    resolved_at: v.optional(v.string()),
+    /** @type {Id<'users'>} - User who resolved the error */
+    resolved_by: v.optional(v.id('users')),
+    /** @type {string} - Error fingerprint for deduplication */
+    fingerprint: v.optional(v.string()),
+    /** @type {string} - Sentry event ID reference */
+    sentry_event_id: v.optional(v.string()),
+    /** @type {Id<'tasks'>} - Linked task for fixing the error */
+    task_id: v.optional(v.id('tasks')),
+  })
+    .index('by_status', ['status'])
+    .index('by_severity', ['severity'])
+    .index('by_category', ['category'])
+    .index('by_assigned_to', ['assigned_to'])
+    .index('by_fingerprint', ['fingerprint'])
+    .index('by_first_seen', ['first_seen'])
+    .index('by_last_seen', ['last_seen'])
+    .index('by_status_severity', ['status', 'severity'])
+    .searchIndex('by_search', {
+      searchField: 'title',
+      filterFields: ['error_code', 'component'],
+    }),
+
+  /**
+   * @collection error_occurrences
+   * @description Individual error occurrence records for pattern analysis
+   */
+  error_occurrences: defineTable({
+    /** @type {Id<'errors'>} - Reference to parent error record */
+    error_id: v.id('errors'),
+    /** @type {string} - Exact occurrence time */
+    timestamp: v.string(),
+    /** @type {Id<'users'>} - User experiencing the error */
+    user_id: v.optional(v.id('users')),
+    /** @type {string} - Session identifier */
+    session_id: v.optional(v.string()),
+    /** @type {string} - Page URL */
+    url: v.optional(v.string()),
+    /** @type {string} - Action user was performing */
+    user_action: v.optional(v.string()),
+    /** @type {string} - API request identifier */
+    request_id: v.optional(v.string()),
+    /** @type {string} - Client IP address */
+    ip_address: v.optional(v.string()),
+    /** @type {string} - Browser user agent string */
+    user_agent: v.optional(v.string()),
+    /** @type {any} - Application state at error time */
+    context_snapshot: v.optional(v.any()),
+    /** @type {string} - Reference to Sentry event */
+    sentry_event_id: v.optional(v.string()),
+    /** @type {string} - Stack trace for this occurrence */
+    stack_trace: v.optional(v.string()),
+  })
+    .index('by_error', ['error_id'])
+    .index('by_timestamp', ['timestamp'])
+    .index('by_user', ['user_id']),
 });

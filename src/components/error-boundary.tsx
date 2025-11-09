@@ -3,6 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw, Home } from 'lucide-react';
+import { captureError } from '@/lib/error-tracker';
 
 interface Props {
   children: ReactNode;
@@ -68,6 +69,25 @@ export class ErrorBoundary extends Component<Props, State> {
 
     // Track error
     ErrorBoundary.errors.push(error);
+
+    // Capture error with full context using error tracker
+    captureError({
+      title: `React Error: ${error.message}`,
+      description: error.stack || error.message,
+      category: 'runtime',
+      severity: 'high',
+      error,
+      context: {
+        component: this.props.name || 'ErrorBoundary',
+        additional_data: {
+          componentStack: errorInfo.componentStack,
+          retryCount: this.state.retryCount,
+        },
+      },
+      tags: ['react', 'error-boundary', this.props.name || 'unnamed'],
+    }).catch((trackingError) => {
+      console.error('Failed to track error:', trackingError);
+    });
 
     // Send error to Sentry if available
     if (typeof window !== 'undefined') {
