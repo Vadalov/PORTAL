@@ -15,7 +15,8 @@ export const healthCheck = query({
 
     try {
       // Check database connectivity
-      const users = await ctx.db.query("users").take(1);
+      // const users = await ctx.db.query("users").take(1);
+      await ctx.db.query("users").take(1);
       checks.database.latency = Date.now() - startTime;
       checks.database.status = "healthy";
 
@@ -31,19 +32,20 @@ export const healthCheck = query({
 
       for (const collection of collections) {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const count = (await ctx.db.query(collection as any).collect()).length;
           checks.collections[collection] = {
             count,
             status: "healthy",
           };
-        } catch (error) {
+        } catch {
           checks.collections[collection] = {
             count: 0,
             status: "unhealthy",
           };
         }
       }
-    } catch (error) {
+    } catch {
       checks.database.status = "unhealthy";
     }
 
@@ -67,6 +69,7 @@ export const logPerformanceMetric = mutation({
     metricName: v.string(),
     value: v.number(),
     unit: v.string(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
@@ -164,6 +167,7 @@ export const logError = mutation({
     errorMessage: v.string(),
     stackTrace: v.optional(v.string()),
     userId: v.optional(v.id("users")),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     context: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
@@ -272,6 +276,7 @@ export const createAlert = mutation({
     severity: v.union(v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("critical")),
     title: v.string(),
     description: v.string(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
