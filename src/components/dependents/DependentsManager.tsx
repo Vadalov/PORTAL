@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Users, Trash2, Edit, Loader2, User } from 'lucide-react';
+import { Plus, Users, Trash2, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -270,8 +270,15 @@ export function DependentsManager({ beneficiaryId }: DependentsManagerProps) {
                 <Button variant="outline" onClick={() => setShowForm(false)}>
                   İptal
                 </Button>
-                <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !formData.name}>
-                  {createMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Kaydet'}
+                <Button
+                  onClick={() => createMutation.mutate()}
+                  disabled={createMutation.isPending || !formData.name}
+                >
+                  {createMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Kaydet'
+                  )}
                 </Button>
               </div>
             </div>
@@ -293,7 +300,9 @@ export function DependentsManager({ beneficiaryId }: DependentsManagerProps) {
                     <div className="flex items-center gap-2 mb-2">
                       <User className="h-4 w-4 text-muted-foreground" />
                       <span className="font-medium">{dependent.name}</span>
-                      <Badge variant="secondary">{getRelationshipLabel(dependent.relationship)}</Badge>
+                      <Badge variant="secondary">
+                        {getRelationshipLabel(dependent.relationship)}
+                      </Badge>
                     </div>
                     <div className="space-y-1 text-sm text-muted-foreground">
                       {dependent.birth_date && (
@@ -336,4 +345,3 @@ export function DependentsManager({ beneficiaryId }: DependentsManagerProps) {
     </div>
   );
 }
-

@@ -100,7 +100,7 @@ export class RateLimitMonitor {
     }
 
     const recentViolations = this.violations.filter((v) => v.timestamp >= cutoffTime);
-    const totalRequests = this.getTotalRequests(cutoffTime);
+    const totalRequests = this.getTotalRequests();
     const blockedRequests = recentViolations.length;
 
     // Top violators
@@ -138,7 +138,7 @@ export class RateLimitMonitor {
     });
 
     // Tüm endpoint request'lerini say (approximate)
-    this.addRequestCounts(endpointMap, cutoffTime);
+    this.addRequestCounts(endpointMap);
 
     const endpointStats = Array.from(endpointMap.entries()).map(([endpoint, data]) => ({
       endpoint,
@@ -256,18 +256,17 @@ export class RateLimitMonitor {
   }
 
   // Yardımcı methodlar
-  private static getTotalRequests(cutoffTime: Date): number {
+  private static getTotalRequests(): number {
     // Bu basit bir approximation - gerçek uygulamada bir log sisteminden gelecek
     return RateLimiter.getStats().totalRequests;
   }
 
   private static addRequestCounts(
-    endpointMap: Map<string, { requests: number; violations: number }>,
-    cutoffTime: Date
+    endpointMap: Map<string, { requests: number; violations: number }>
   ): void {
     // Bu method gerçek request log'larından beslenecek
     // Şimdilik violation sayısından türetilmiş bir approximation kullanıyoruz
-    endpointMap.forEach((data, endpoint) => {
+    endpointMap.forEach((data) => {
       data.requests = Math.max(data.violations * 10, 1); // Minimum 1 request
     });
   }
@@ -282,9 +281,10 @@ export class RateLimitMonitor {
 
   // Monitoring reset
   static reset(): void {
+    const previousViolationCount = this.violations.length;
     this.violations = [];
     logger.info('Rate limit monitoring data reset', {
-      previousViolationCount: this.violations.length,
+      previousViolationCount,
     });
   }
 

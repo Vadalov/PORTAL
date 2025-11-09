@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,17 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Handshake,
-  Users,
-  Building2,
-  User,
-  Star,
-} from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Handshake, Users, Building2, User, Star } from 'lucide-react';
 import api from '@/lib/api';
 
 interface Partner {
@@ -80,10 +70,21 @@ export default function PartnersPage() {
     address: '',
     website: '',
     tax_number: '',
-    partnership_type: 'donor' as 'donor' | 'supplier' | 'volunteer' | 'sponsor' | 'service_provider',
+    partnership_type: 'donor' as
+      | 'donor'
+      | 'supplier'
+      | 'volunteer'
+      | 'sponsor'
+      | 'service_provider',
     status: 'active' as 'active' | 'inactive' | 'pending',
     notes: '',
   });
+
+  const handleSelectChange =
+    <K extends 'type' | 'partnership_type' | 'status'>(key: K) =>
+    (value: string) => {
+      setFormData((prev) => ({ ...prev, [key]: value as (typeof formData)[K] }));
+    };
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['partners', searchTerm, typeFilter, statusFilter],
@@ -137,7 +138,7 @@ export default function PartnersPage() {
       setIsCreateModalOpen(false);
       toast.success('Partner başarıyla oluşturuldu');
       refetch();
-    } catch (error) {
+    } catch (_error) {
       toast.error('Partner oluşturulurken hata oluştu');
     }
   };
@@ -198,7 +199,7 @@ export default function PartnersPage() {
       await api.partners.updatePartner(partnerId, { status: newStatus });
       toast.success('Partner durumu güncellendi');
       refetch();
-    } catch (error) {
+    } catch (_error) {
       toast.error('Durum güncellenirken hata oluştu');
     }
   };
@@ -249,11 +250,19 @@ export default function PartnersPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">Aktif</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">
+            Aktif
+          </Badge>
+        );
       case 'inactive':
         return <Badge variant="secondary">Pasif</Badge>;
       case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">Beklemede</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">
+            Beklemede
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -296,10 +305,7 @@ export default function PartnersPage() {
                   </div>
                   <div>
                     <Label htmlFor="create-type">Tür</Label>
-                    <Select
-                      value={formData.type}
-                      onValueChange={(value: any) => setFormData((prev) => ({ ...prev, type: value }))}
-                    >
+                    <Select value={formData.type} onValueChange={handleSelectChange('type')}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -314,7 +320,7 @@ export default function PartnersPage() {
                     <Label htmlFor="create-partnership-type">İşbirliği Türü</Label>
                     <Select
                       value={formData.partnership_type}
-                      onValueChange={(value: any) => setFormData((prev) => ({ ...prev, partnership_type: value }))}
+                      onValueChange={handleSelectChange('partnership_type')}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -333,7 +339,9 @@ export default function PartnersPage() {
                     <Input
                       id="create-contact-person"
                       value={formData.contact_person}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, contact_person: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, contact_person: e.target.value }))
+                      }
                     />
                   </div>
                   <div>
@@ -355,10 +363,7 @@ export default function PartnersPage() {
                   </div>
                   <div>
                     <Label htmlFor="create-status">Durum</Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(value: any) => setFormData((prev) => ({ ...prev, status: value }))}
-                    >
+                    <Select value={formData.status} onValueChange={handleSelectChange('status')}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -374,7 +379,9 @@ export default function PartnersPage() {
                     <Input
                       id="create-address"
                       value={formData.address}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, address: e.target.value }))
+                      }
                     />
                   </div>
                   <div className="col-span-2">
@@ -480,7 +487,9 @@ export default function PartnersPage() {
                     <TableCell>
                       <div className="text-sm">
                         {partner.contact_person && <div>{partner.contact_person}</div>}
-                        {partner.email && <div className="text-muted-foreground">{partner.email}</div>}
+                        {partner.email && (
+                          <div className="text-muted-foreground">{partner.email}</div>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(partner.status)}</TableCell>
@@ -540,10 +549,7 @@ export default function PartnersPage() {
             </div>
             <div>
               <Label htmlFor="edit-type">Tür</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value: any) => setFormData((prev) => ({ ...prev, type: value }))}
-              >
+              <Select value={formData.type} onValueChange={handleSelectChange('type')}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -558,7 +564,7 @@ export default function PartnersPage() {
               <Label htmlFor="edit-partnership-type">İşbirliği Türü</Label>
               <Select
                 value={formData.partnership_type}
-                onValueChange={(value: any) => setFormData((prev) => ({ ...prev, partnership_type: value }))}
+                onValueChange={handleSelectChange('partnership_type')}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -577,7 +583,9 @@ export default function PartnersPage() {
               <Input
                 id="edit-contact-person"
                 value={formData.contact_person}
-                onChange={(e) => setFormData((prev) => ({ ...prev, contact_person: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, contact_person: e.target.value }))
+                }
               />
             </div>
             <div>
@@ -599,10 +607,7 @@ export default function PartnersPage() {
             </div>
             <div>
               <Label htmlFor="edit-status">Durum</Label>
-              <Select
-                value={formData.status}
-                onValueChange={(value: any) => setFormData((prev) => ({ ...prev, status: value }))}
-              >
+              <Select value={formData.status} onValueChange={handleSelectChange('status')}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

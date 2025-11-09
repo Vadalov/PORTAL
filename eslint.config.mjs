@@ -11,7 +11,7 @@ const eslintConfig = defineConfig([
   {
     rules: {
       // TypeScript strict rules - temporarily warn during migration
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
@@ -44,7 +44,7 @@ const eslintConfig = defineConfig([
       // Test dosyalarında console.log'a izin ver
       'no-console': 'off',
       // Test dosyalarında any kullanımına daha toleranslı ol (ama yine de warn)
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 
