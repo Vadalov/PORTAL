@@ -187,7 +187,7 @@ export const updateContribution = mutation({
     amount: v.number(),
   },
   handler: async (ctx, args) => {
-    const { id, amount } = args;
+    const { id, amount: _amount } = args;
     const partner = await ctx.db.get(id);
 
     if (!partner) {
