@@ -69,7 +69,11 @@ export const navigationModules: NavigationModule[] = [
     description: 'Yardım süreçlerini koordine et',
     permission: MODULE_PERMISSIONS.BENEFICIARIES,
     subPages: [
-      { name: 'İhtiyaç Sahipleri', href: '/yardim/ihtiyac-sahipleri', description: 'Kayıtlı ihtiyaç sahipleri' },
+      {
+        name: 'İhtiyaç Sahipleri',
+        href: '/yardim/ihtiyac-sahipleri',
+        description: 'Kayıtlı ihtiyaç sahipleri',
+      },
       {
         name: 'Başvurular',
         href: '/yardim/basvurular',
@@ -120,6 +124,7 @@ export const navigationModules: NavigationModule[] = [
     subPages: [
       { name: 'Kurum İçi', href: '/mesaj/kurum-ici', description: 'İç iletişim' },
       { name: 'Toplu Mesaj', href: '/mesaj/toplu', description: 'Toplu bildirimler' },
+      { name: 'İletişim Geçmişi', href: '/mesaj/gecmis', description: 'E-posta ve SMS kayıtları' },
     ],
   },
   {
@@ -130,7 +135,11 @@ export const navigationModules: NavigationModule[] = [
     description: 'Görev ve toplantı yönetimi',
     permission: MODULE_PERMISSIONS.WORKFLOW,
     subPages: [
-      { name: 'Yönetim Paneli', href: '/is/yonetim', description: 'Toplantı sonrası görev dağılımı' },
+      {
+        name: 'Yönetim Paneli',
+        href: '/is/yonetim',
+        description: 'Toplantı sonrası görev dağılımı',
+      },
       { name: 'Görevler', href: '/is/gorevler', description: 'Proje görevleri' },
       { name: 'Toplantılar', href: '/is/toplantilar', description: 'Toplantı takvimi' },
     ],
@@ -142,7 +151,9 @@ export const navigationModules: NavigationModule[] = [
     category: 'management',
     description: 'Partner kuruluş yönetimi',
     permission: MODULE_PERMISSIONS.PARTNERS,
-    subPages: [{ name: 'Ortak Listesi', href: '/partner/liste', description: 'Partner kuruluşlar' }],
+    subPages: [
+      { name: 'Ortak Listesi', href: '/partner/liste', description: 'Partner kuruluşlar' },
+    ],
   },
   {
     id: 'kullanici',
@@ -151,7 +162,13 @@ export const navigationModules: NavigationModule[] = [
     category: 'settings',
     description: 'Kullanıcı ve yetki yönetimi',
     permission: SPECIAL_PERMISSIONS.USERS_MANAGE,
-    subPages: [{ name: 'Kullanıcı Yönetimi', href: '/kullanici', description: 'Kullanıcı rolleri ve yetkileri' }],
+    subPages: [
+      {
+        name: 'Kullanıcı Yönetimi',
+        href: '/kullanici',
+        description: 'Kullanıcı rolleri ve yetkileri',
+      },
+    ],
   },
   {
     id: 'ayarlar',
@@ -163,4 +180,3 @@ export const navigationModules: NavigationModule[] = [
     subPages: [{ name: 'Ayarlar', href: '/settings', description: 'Sistem ayarları' }],
   },
 ];
-
