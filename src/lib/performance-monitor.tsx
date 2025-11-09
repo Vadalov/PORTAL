@@ -2,23 +2,25 @@
 'use client';
 
 import React, { useEffect, useRef, useCallback } from 'react';
+import { createLogger } from './logger';
 
 interface PerformanceMetrics {
   // Core Web Vitals
   lcp?: number; // Largest Contentful Paint
   fid?: number; // First Input Delay
   cls?: number; // Cumulative Layout Shift
-  
+
   // Custom metrics
   routeTransitionTime?: number;
   modalOpenTime?: number;
   scrollPerformance?: number;
   memoryUsage?: number;
-  
+
   // Navigation timing
   pageLoadTime?: number;
   domContentLoaded?: number;
   resourceLoadTime?: number;
+  route?: string;
 }
 
 interface PerformanceMonitorProps {
@@ -34,49 +36,46 @@ export function PerformanceMonitor({
   onMetrics,
   routeName = 'unknown',
 }: PerformanceMonitorProps) {
-  const routeStartTime = useRef<number>(0);
-  const modalOpenTime = useRef<number>(0);
-  const scrollStartTime = useRef<number>(0);
+  const routeStartTime = useRef<number | null>(null);
 
-  // Web Vitals monitoring
   useEffect(() => {
     if (!enableWebVitals) return;
+    if (typeof window === 'undefined' || typeof PerformanceObserver === 'undefined') {
+      return;
+    }
 
-    // Largest Contentful Paint
+    type LayoutShiftEntry = PerformanceEntry & { value: number; hadRecentInput: boolean };
+
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1] as PerformanceEntry;
-      
+      const lastEntry = entries[entries.length - 1];
+
       if (lastEntry) {
-        const metrics: PerformanceMetrics = { lcp: lastEntry.startTime };
-        onMetrics?.(metrics);
+        onMetrics?.({ lcp: lastEntry.startTime, route: routeName });
       }
     });
 
     observer.observe({ entryTypes: ['largest-contentful-paint'] });
 
-    // First Input Delay
     const fidObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         const firstInputEntry = entry as PerformanceEventTiming;
-        const metrics: PerformanceMetrics = { fid: firstInputEntry.processingStart - firstInputEntry.startTime };
-        onMetrics?.(metrics);
+        const fid = firstInputEntry.processingStart - firstInputEntry.startTime;
+        onMetrics?.({ fid, route: routeName });
       }
     });
 
     fidObserver.observe({ entryTypes: ['first-input'] });
 
-    // Cumulative Layout Shift
     let clsValue = 0;
     const clsObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
-        const layoutShiftEntry = entry as LayoutShift;
+        const layoutShiftEntry = entry as LayoutShiftEntry;
         if (!layoutShiftEntry.hadRecentInput) {
           clsValue += layoutShiftEntry.value;
         }
       }
-      const metrics: PerformanceMetrics = { cls: clsValue };
-      onMetrics?.(metrics);
+      onMetrics?.({ cls: clsValue, route: routeName });
     });
 
     clsObserver.observe({ entryTypes: ['layout-shift'] });
@@ -86,19 +85,23 @@ export function PerformanceMonitor({
       fidObserver.disconnect();
       clsObserver.disconnect();
     };
-  }, [enableWebVitals, onMetrics]);
+  }, [enableWebVitals, onMetrics, routeName]);
 
   // Route transition timing
   useEffect(() => {
     if (!enableCustomMetrics) return;
 
+    if (typeof performance === 'undefined' || !performance.now) {
+      return undefined;
+    }
+
     routeStartTime.current = performance.now();
 
     return () => {
-      if (routeStartTime.current) {
-        const routeTransitionTime = performance.now() - routeStartTime.current;
-        const metrics: PerformanceMetrics = { routeTransitionTime };
-        onMetrics?.(metrics);
+      if (routeStartTime.current !== null) {
+        const endTime = performance.now();
+        const routeTransitionTime = endTime - routeStartTime.current;
+        onMetrics?.({ routeTransitionTime, route: routeName });
       }
     };
   }, [routeName, enableCustomMetrics, onMetrics]);
@@ -109,27 +112,38 @@ export function PerformanceMonitor({
 // Custom hooks for performance tracking
 export const usePerformanceTracking = () => {
   const trackModalOpen = useCallback(() => {
-    return performance.now();
+    return typeof performance !== 'undefined' ? performance.now() : 0;
   }, []);
 
   const trackModalClose = useCallback((startTime: number) => {
-    const modalOpenTime = performance.now() - startTime;
-    return modalOpenTime;
+    if (typeof performance === 'undefined') {
+      return 0;
+    }
+    return performance.now() - startTime;
   }, []);
 
   const trackScrollPerformance = useCallback((callback: () => void) => {
+    if (typeof performance === 'undefined') {
+      callback();
+      return 0;
+    }
     const startTime = performance.now();
     callback();
-    const scrollPerformance = performance.now() - startTime;
-    return scrollPerformance;
+    return performance.now() - startTime;
   }, []);
 
+  type PerformanceWithMemory = Performance & {
+    memory?: {
+      usedJSHeapSize: number;
+    };
+  };
+
   const getMemoryUsage = useCallback(() => {
-    if ('memory' in performance) {
-      const memoryInfo = (performance as any).memory;
-      return memoryInfo.usedJSHeapSize;
+    if (typeof performance === 'undefined') {
+      return null;
     }
-    return null;
+    const performanceWithMemory = performance as PerformanceWithMemory;
+    return performanceWithMemory.memory?.usedJSHeapSize ?? null;
   }, []);
 
   return {
@@ -146,12 +160,16 @@ export const usePerformanceMonitor = (routeName: string) => {
   const { trackModalOpen, trackModalClose, getMemoryUsage } = usePerformanceTracking();
 
   const trackRouteTransition = useCallback(() => {
+    if (typeof performance === 'undefined') {
+      return () => {};
+    }
     const startTime = performance.now();
     return () => {
       const routeTransitionTime = performance.now() - startTime;
       metricsRef.current.routeTransitionTime = routeTransitionTime;
+      metricsRef.current.route = routeName;
     };
-  }, []);
+  }, [routeName]);
 
   const trackModalPerformance = useCallback(() => {
     const startTime = trackModalOpen();
@@ -163,7 +181,7 @@ export const usePerformanceMonitor = (routeName: string) => {
 
   const updateMemoryUsage = useCallback(() => {
     const memoryUsage = getMemoryUsage();
-    if (memoryUsage) {
+    if (typeof memoryUsage === 'number') {
       metricsRef.current.memoryUsage = memoryUsage;
     }
   }, [getMemoryUsage]);
@@ -206,7 +224,7 @@ export class PerformanceBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Performance Boundary Error:', error, errorInfo);
-    
+
     // Track performance errors
     if (typeof performance !== 'undefined' && performance.mark) {
       performance.mark('performance-error');
@@ -243,15 +261,20 @@ export const useFPSMonitor = (enabled = true) => {
 
   useEffect(() => {
     if (!enabled) return;
+    if (typeof performance === 'undefined') {
+      return undefined;
+    }
 
     lastTimeRef.current = performance.now();
 
     const measureFPS = () => {
       frameCountRef.current++;
-      
+
       const currentTime = performance.now();
       if (currentTime - lastTimeRef.current >= 1000) {
-        fpsRef.current = Math.round((frameCountRef.current * 1000) / (currentTime - lastTimeRef.current));
+        fpsRef.current = Math.round(
+          (frameCountRef.current * 1000) / (currentTime - lastTimeRef.current)
+        );
         frameCountRef.current = 0;
         lastTimeRef.current = currentTime;
       }
@@ -281,20 +304,22 @@ export const useFPSMonitor = (enabled = true) => {
 };
 
 // Performance optimized console logger
+const perfLogger = createLogger('performance');
+
+type PerfLogContext = Record<string, unknown> | undefined;
+
 export const perfLog = {
-  info: (message: string, data?: any) => {
+  info: (message: string, context?: PerfLogContext) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`🚀 [PERF] ${message}`, data);
+      perfLogger.debug(message, context);
     }
   },
-  
-  warn: (message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn(`⚠️ [PERF] ${message}`, data);
-    }
+
+  warn: (message: string, context?: PerfLogContext) => {
+    perfLogger.warn(message, context);
   },
-  
-  error: (message: string, data?: any) => {
-    console.error(`❌ [PERF] ${message}`, data);
+
+  error: (message: string, context?: PerfLogContext) => {
+    perfLogger.error(message, undefined, context);
   },
 };

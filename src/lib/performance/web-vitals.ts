@@ -5,14 +5,22 @@
  */
 
 import { onCLS, onLCP, onFCP, onTTFB, onINP, Metric } from 'web-vitals';
+import { createLogger } from '@/lib/logger';
 
-interface VitalMetric {
-  name: string;
-  value: number;
-  id: string;
-  delta: number;
-  rating: 'good' | 'needs-improvement' | 'poor';
-}
+const webVitalsLogger = createLogger('web-vitals');
+
+type WindowWithAnalytics = Window & {
+  gtag?: (command: 'event', eventName: string, params: Record<string, unknown>) => void;
+  Sentry?: {
+    metrics?: {
+      distribution: (
+        name: string,
+        value: number,
+        options?: { tags?: Record<string, string>; unit?: string }
+      ) => void;
+    };
+  };
+};
 
 /**
  * Send metric to analytics (custom implementation)
@@ -20,45 +28,46 @@ interface VitalMetric {
 function sendToAnalytics(metric: Metric): void {
   const rating = getRating(metric.name, metric.value);
 
-  // Log in development
   if (process.env.NODE_ENV === 'development') {
     const metricData = {
       name: metric.name,
-      value: Math.round(metric.value * 100) / 100, // Round to 2 decimal places
+      value: Math.round(metric.value * 100) / 100,
       id: metric.id,
       delta: Math.round(metric.delta * 100) / 100,
       rating,
     };
-    console.log(`📊 Web Vital: ${metricData.name} = ${metricData.value}ms (${metricData.rating})`, metricData);
+    webVitalsLogger.debug(`Web Vital: ${metricData.name}`, metricData);
   }
 
-  // Send to Google Analytics 4 (if configured)
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    const gtag = (window as any).gtag;
-    gtag('event', metric.name, {
-      event_category: 'Web Vitals',
-      event_label: metric.id,
-      value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
-      non_interaction: true,
-      custom_map: {
-        metric_rating: rating,
-        metric_delta: metric.delta,
-      },
-    });
+  if (typeof window !== 'undefined') {
+    const analyticsWindow = window as WindowWithAnalytics;
+
+    if (analyticsWindow.gtag) {
+      const value = metric.name === 'CLS' ? metric.value * 1000 : metric.value;
+      analyticsWindow.gtag('event', metric.name, {
+        event_category: 'Web Vitals',
+        event_label: metric.id,
+        value: Math.round(value),
+        non_interaction: true,
+        custom_map: {
+          metric_rating: rating,
+          metric_delta: metric.delta,
+        },
+      });
+    }
+
+    analyticsWindow.Sentry?.metrics?.distribution(
+      `web_vital.${metric.name.toLowerCase()}`,
+      metric.value,
+      {
+        tags: {
+          rating,
+          id: metric.id,
+        },
+      }
+    );
   }
 
-  // Send to Sentry (if configured)
-  if (typeof window !== 'undefined' && (window as any).Sentry) {
-    const Sentry = (window as any).Sentry;
-    Sentry.metrics?.distribution(`web_vital.${metric.name.toLowerCase()}`, metric.value, {
-      tags: {
-        rating,
-        id: metric.id,
-      },
-    });
-  }
-
-  // Send to custom analytics endpoint (if configured)
   const analyticsEndpoint = process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT;
   if (analyticsEndpoint && typeof window !== 'undefined') {
     fetch(analyticsEndpoint, {
@@ -74,11 +83,12 @@ function sendToAnalytics(metric: Metric): void {
         rating,
         timestamp: Date.now(),
       }),
-      keepalive: true, // Send even if page is unloading
+      keepalive: true,
     }).catch((error) => {
-      // Silently fail - analytics should not block the app
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Failed to send analytics:', error);
+        webVitalsLogger.warn('Failed to send analytics', {
+          error: error instanceof Error ? error.message : error,
+        });
       }
     });
   }
@@ -107,29 +117,22 @@ function getRating(name: string, value: number): 'good' | 'needs-improvement' | 
  * Call this function in your root layout or _app file
  */
 export function trackWebVitals() {
-  // Largest Contentful Paint (LCP) - should be < 2.5s
   onLCP((metric) => {
     sendToAnalytics(metric);
   });
 
-  // First Input Delay (FID) - deprecated, using INP instead
-
-  // Cumulative Layout Shift (CLS) - should be < 0.1
   onCLS((metric) => {
     sendToAnalytics(metric);
   });
 
-  // First Contentful Paint (FCP) - should be < 1.8s
   onFCP((metric) => {
     sendToAnalytics(metric);
   });
 
-  // Time to First Byte (TTFB) - should be < 800ms
   onTTFB((metric) => {
     sendToAnalytics(metric);
   });
 
-  // Interaction to Next Paint (INP) - should be < 200ms
   onINP((metric) => {
     sendToAnalytics(metric);
   });

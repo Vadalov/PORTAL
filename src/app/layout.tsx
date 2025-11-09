@@ -42,7 +42,7 @@ const LazyGoogleAnalytics = lazyLoadComponent(
     import('@/components/analytics/GoogleAnalytics').then((mod) => ({
       default: mod.GoogleAnalytics,
     })),
-  () => <div>Loading analytics...</div>
+  <div>Loading analytics...</div>
 );
 
 const LazyWebVitalsTracker = lazyLoadComponent(
@@ -50,7 +50,7 @@ const LazyWebVitalsTracker = lazyLoadComponent(
     import('@/components/analytics/WebVitalsTracker').then((mod) => ({
       default: mod.WebVitalsTracker,
     })),
-  () => <div>Loading performance tracker...</div>
+  <div>Loading performance tracker...</div>
 );
 
 export const metadata: Metadata = {
