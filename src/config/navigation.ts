@@ -12,6 +12,7 @@ import {
   Users,
   Building2,
   Settings,
+  BarChart3,
 } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { MODULE_PERMISSIONS, SPECIAL_PERMISSIONS, type PermissionValue } from '@/types/permissions';
@@ -154,6 +155,15 @@ export const navigationModules: NavigationModule[] = [
     subPages: [
       { name: 'Ortak Listesi', href: '/partner/liste', description: 'Partner kuruluşlar' },
     ],
+  },
+  {
+    id: 'analitik',
+    name: 'Analitik',
+    icon: BarChart3,
+    category: 'reports',
+    description: 'Kullanıcı davranışı ve performans takibi',
+    permission: MODULE_PERMISSIONS.REPORTS,
+    subPages: [{ name: 'Dashboard', href: '/analitik', description: 'Analitik raporları' }],
   },
   {
     id: 'kullanici',
