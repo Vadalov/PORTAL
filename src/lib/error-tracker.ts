@@ -52,9 +52,9 @@ export function generateErrorFingerprint(
 ): string {
   const errorMessage = error instanceof Error ? error.message : String(error);
   const stack = error instanceof Error ? error.stack?.split('\n').slice(0, 3).join('') : '';
-  
+
   const fingerprint = `${component || 'unknown'}-${functionName || 'unknown'}-${errorMessage}-${stack}`;
-  
+
   // Simple hash function
   let hash = 0;
   for (let i = 0; i < fingerprint.length; i++) {
@@ -62,7 +62,7 @@ export function generateErrorFingerprint(
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
   }
-  
+
   return Math.abs(hash).toString(16);
 }
 
@@ -327,7 +327,7 @@ export async function retryPendingErrors(): Promise<void> {
         }
       } catch (error) {
         // Keep for next retry
-        logger.warn('Failed to retry error report', error);
+        logger.error('Failed to retry error report', error);
       }
     }
 

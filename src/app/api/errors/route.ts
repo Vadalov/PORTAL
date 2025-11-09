@@ -10,6 +10,7 @@ import { api } from '@/convex/_generated/api';
 import { createLogger } from '@/lib/logger';
 import { createErrorNotification } from '@/lib/error-notifications';
 import { z } from 'zod';
+import { toOptionalConvexId } from '@/lib/convex/id-helpers';
 
 const logger = createLogger('api:errors');
 
@@ -76,8 +77,8 @@ export async function POST(request: NextRequest) {
     // Create error in Convex
     const errorId = await fetchMutation(api.errors.create, {
       ...data,
-      user_id: data.user_id ? (data.user_id as any) : undefined,
-      reporter_id: data.reporter_id ? (data.reporter_id as any) : undefined,
+      user_id: toOptionalConvexId(data.user_id, 'users'),
+      reporter_id: toOptionalConvexId(data.reporter_id, 'users'),
     });
 
     // Send notification for critical/high severity errors
@@ -153,7 +154,7 @@ export async function GET(request: NextRequest) {
       status,
       severity,
       category,
-      assigned_to: assigned_to ? (assigned_to as any) : undefined,
+      assigned_to: toOptionalConvexId(assigned_to, 'users'),
       start_date: start_date || undefined,
       end_date: end_date || undefined,
       limit: limit ? parseInt(limit) : undefined,

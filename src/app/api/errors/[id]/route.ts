@@ -12,6 +12,7 @@ import { fetchMutation, fetchQuery } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
 import { createLogger } from '@/lib/logger';
 import { z } from 'zod';
+import { toConvexId } from '@/lib/convex/id-helpers';
 
 const logger = createLogger('api:errors:detail');
 
@@ -19,16 +20,13 @@ const logger = createLogger('api:errors:detail');
  * GET /api/errors/[id]
  * Get error details by ID
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
 
     logger.info('Fetching error details', { id });
 
-    const error = await fetchQuery(api.errors.get, { id: id as any });
+    const error = await fetchQuery(api.errors.get, { id: toConvexId(id, 'errors') });
 
     if (!error) {
       return NextResponse.json(
@@ -62,10 +60,7 @@ export async function GET(
  * PATCH /api/errors/[id]
  * Update error details
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
     const body = await request.json();
@@ -96,7 +91,7 @@ export async function PATCH(
     }
 
     const updatedError = await fetchMutation(api.errors.update, {
-      id: id as any,
+      id: toConvexId(id, 'errors'),
       ...validationResult.data,
     });
 

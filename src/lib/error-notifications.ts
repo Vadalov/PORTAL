@@ -4,6 +4,8 @@
  */
 
 import { createLogger } from '@/lib/logger';
+import { fetchMutation, fetchQuery } from 'convex/nextjs';
+import { api } from '@/convex/_generated/api';
 
 const logger = createLogger('error-notifications');
 
@@ -21,9 +23,7 @@ export interface ErrorNotificationOptions {
  * Create notification for error
  * Sends to admins for critical/high severity errors
  */
-export async function createErrorNotification(
-  options: ErrorNotificationOptions
-): Promise<void> {
+export async function createErrorNotification(options: ErrorNotificationOptions): Promise<void> {
   const { errorId, errorCode, title, severity, category, component, url } = options;
 
   // Only create notifications for critical and high severity
@@ -33,8 +33,22 @@ export async function createErrorNotification(
 
   try {
     // Get all admin and super admin users
-    // Note: This would need to query users by role
-    // For now, we'll create a general notification structure
+    const adminUsers = await fetchQuery(api.users.list, {
+      role: 'admin',
+      isActive: true,
+    });
+
+    const superAdminUsers = await fetchQuery(api.users.list, {
+      role: 'super_admin',
+      isActive: true,
+    });
+
+    const allAdmins = [...adminUsers.documents, ...superAdminUsers.documents];
+
+    if (allAdmins.length === 0) {
+      logger.warn('No admin users found to notify', { errorId });
+      return;
+    }
 
     const severityEmoji = severity === 'critical' ? '🚨' : '⚠️';
     const categoryLabel = getCategoryLabel(category);
@@ -50,34 +64,53 @@ Kod: ${errorCode}
 ${component ? `Bileşen: ${component}` : ''}
 ${url ? `URL: ${url}` : ''}
 
-Lütfen acilen kontrol edin.
+Lütfen ${severity === 'critical' ? 'acilen' : ''} kontrol edin.
     `.trim();
 
-    logger.warn('Error notification created', {
-      errorId,
-      severity,
-      title,
+    // Create notification for each admin user
+    const notificationPromises = allAdmins.map(async (admin) => {
+      try {
+        const notificationId = await fetchMutation(api.workflow_notifications.create, {
+          recipient: admin._id,
+          category: 'hatirlatma',
+          title: notificationTitle,
+          body: notificationBody,
+          status: 'beklemede',
+          reference: {
+            type: 'error' as any, // Error type not in current schema, using 'hatirlatma' instead
+            id: errorId,
+          },
+          metadata: {
+            error_severity: severity,
+            error_category: category,
+            error_code: errorCode,
+            priority: severity === 'critical' ? 'urgent' : 'high',
+          },
+        });
+
+        logger.info('Error notification created', {
+          notificationId,
+          recipient: admin._id,
+          errorId,
+        });
+
+        return notificationId;
+      } catch (err) {
+        logger.error('Failed to create notification for admin', err, {
+          adminId: admin._id,
+          errorId,
+        });
+        return null;
+      }
     });
 
-    // TODO: Integrate with workflow_notifications table
-    // This would require querying for admin users and creating notifications
-    // Example:
-    // await fetchMutation(api.workflow_notifications.create, {
-    //   recipient: adminUserId,
-    //   category: 'hatirlatma',
-    //   title: notificationTitle,
-    //   body: notificationBody,
-    //   status: 'beklemede',
-    //   created_at: new Date().toISOString(),
-    //   reference: {
-    //     type: 'error',
-    //     id: errorId,
-    //   },
-    // });
+    const results = await Promise.allSettled(notificationPromises);
+    const successCount = results.filter((r) => r.status === 'fulfilled' && r.value).length;
 
-    logger.warn('Error notification would be sent', {
-      title: notificationTitle,
-      body: notificationBody,
+    logger.info('Error notifications created', {
+      errorId,
+      totalAdmins: allAdmins.length,
+      successCount,
     });
   } catch (error) {
     logger.error('Failed to create error notification', error, {
@@ -109,9 +142,7 @@ function getCategoryLabel(category: string): string {
  * Send email notification for critical errors
  * (Placeholder - would integrate with email service)
  */
-export async function sendCriticalErrorEmail(
-  options: ErrorNotificationOptions
-): Promise<void> {
+export async function sendCriticalErrorEmail(options: ErrorNotificationOptions): Promise<void> {
   if (options.severity !== 'critical') {
     return;
   }

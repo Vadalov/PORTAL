@@ -8,6 +8,7 @@ import { fetchMutation, fetchQuery } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
 import { createLogger } from '@/lib/logger';
 import { z } from 'zod';
+import { toConvexId } from '@/lib/convex/id-helpers';
 
 const logger = createLogger('api:errors:assign');
 
@@ -20,10 +21,7 @@ const assignSchema = z.object({
  * POST /api/errors/[id]/assign
  * Assign error to user and optionally create a task
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
     const body = await request.json();
@@ -46,7 +44,7 @@ export async function POST(
     logger.info('Assigning error', { id, assigned_to, create_task });
 
     // Get error details
-    const error = await fetchQuery(api.errors.get, { id: id as any });
+    const error = await fetchQuery(api.errors.get, { id: toConvexId(id, 'errors') });
     if (!error) {
       return NextResponse.json(
         {
@@ -59,8 +57,8 @@ export async function POST(
 
     // Assign error
     const updatedError = await fetchMutation(api.errors.assign, {
-      id: id as any,
-      assigned_to: assigned_to as any,
+      id: toConvexId(id, 'errors'),
+      assigned_to: toConvexId(assigned_to, 'users'),
     });
 
     // Create task if requested
@@ -82,8 +80,8 @@ export async function POST(
 Hata Kodu: ${error.error_code}
 Kategori: ${error.category}
 ${error.component ? `Bileşen: ${error.component}` : ''}`,
-          assigned_to: assigned_to as any,
-          created_by: assigned_to as any, // In real scenario, would be current user
+          assigned_to: toConvexId(assigned_to, 'users'),
+          created_by: toConvexId(assigned_to, 'users'), // In real scenario, would be current user
           priority: taskPriority,
           status: 'pending',
           category: 'bug_fix',
@@ -94,8 +92,8 @@ ${error.component ? `Bileşen: ${error.component}` : ''}`,
         // Link task to error
         if (taskId) {
           await fetchMutation(api.errors.linkTask, {
-            id: id as any,
-            task_id: taskId as any,
+            id: toConvexId(id, 'errors'),
+            task_id: taskId,
           });
         }
 
