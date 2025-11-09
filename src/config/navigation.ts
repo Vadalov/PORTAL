@@ -178,6 +178,12 @@ export const navigationModules: NavigationModule[] = [
         href: '/kullanici',
         description: 'Kullanıcı rolleri ve yetkileri',
       },
+      {
+        name: 'Denetim Kayıtları',
+        href: '/denetim-kayitlari',
+        description: 'KVKK/GDPR uyumluluk kayıtları',
+        permission: SPECIAL_PERMISSIONS.USERS_MANAGE,
+      },
     ],
   },
   {
