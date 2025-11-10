@@ -32,7 +32,9 @@
       "Bash(do sed -i 's/console\\.error(\\([^,]\\+,\\s*\\)error\\s*)/console.error(\\1_error)/g' \"$file\":*)",
       "Bash(tee:*)",
       "Bash(npm test:*)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "Bash(kill:*)",
+      "Bash(ss:*)"
     ],
     "deny": [],
     "ask": []

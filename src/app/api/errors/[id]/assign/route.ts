@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchMutation, fetchQuery } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
+import type { Id } from '@/convex/_generated/dataModel';
 import { createLogger } from '@/lib/logger';
 import { z } from 'zod';
 import { toConvexId } from '@/lib/convex/id-helpers';
@@ -21,12 +22,9 @@ const assignSchema = z.object({
  * POST /api/errors/[id]/assign
  * Assign error to user and optionally create a task
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Validate request
@@ -36,7 +34,7 @@ export async function POST(
         {
           success: false,
           error: 'Validation failed',
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       );
@@ -65,7 +63,7 @@ export async function POST(
     });
 
     // Create task if requested
-    let taskId = null;
+    let taskId: Id<'tasks'> | null = null;
     if (create_task) {
       try {
         // Determine task priority based on error severity

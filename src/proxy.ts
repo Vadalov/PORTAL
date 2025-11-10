@@ -131,9 +131,9 @@ function hasRequiredPermission(user: SessionUser | null, route: RouteRule): bool
 }
 
 /**
- * Main middleware function
+ * Main proxy function (Next.js 16 middleware replacement)
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public routes

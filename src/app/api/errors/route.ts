@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Validation failed',
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       );
@@ -133,9 +133,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     // Parse query parameters
-    const status = searchParams.get('status') as any;
-    const severity = searchParams.get('severity') as any;
-    const category = searchParams.get('category') as any;
+    const status = searchParams.get('status') as string | null;
+    const severity = searchParams.get('severity') as string | null;
+    const category = searchParams.get('category') as string | null;
     const assigned_to = searchParams.get('assigned_to');
     const start_date = searchParams.get('start_date');
     const end_date = searchParams.get('end_date');

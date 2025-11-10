@@ -1,15 +1,15 @@
-import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { v } from 'convex/values';
+import { query, mutation } from './_generated/server';
 
 // Get all documents for a beneficiary
 export const getBeneficiaryDocuments = query({
   args: {
-    beneficiaryId: v.id("beneficiaries"),
+    beneficiaryId: v.id('beneficiaries'),
   },
   handler: async (ctx, args) => {
     const documents = await ctx.db
-      .query("files")
-      .withIndex("by_beneficiary", (q) => q.eq("beneficiary_id", args.beneficiaryId))
+      .query('files')
+      .withIndex('by_beneficiary', (q) => q.eq('beneficiary_id', args.beneficiaryId))
       .collect();
 
     // Get file URLs for each document
@@ -27,12 +27,12 @@ export const getBeneficiaryDocuments = query({
 // Get file by storage ID
 export const getFileByStorageId = query({
   args: {
-    storageId: v.id("_storage"),
+    storageId: v.id('_storage'),
   },
   handler: async (ctx, args) => {
     const file = await ctx.db
-      .query("files")
-      .withIndex("by_storage_id", (q) => q.eq("storageId", args.storageId))
+      .query('files')
+      .withIndex('by_storage_id', (q) => q.eq('storageId', args.storageId))
       .first();
 
     if (!file) {
@@ -55,20 +55,20 @@ export const createDocument = mutation({
     fileSize: v.number(),
     fileType: v.string(),
     bucket: v.string(),
-    storageId: v.id("_storage"),
-    beneficiaryId: v.id("beneficiaries"),
+    storageId: v.id('_storage'),
+    beneficiaryId: v.id('beneficiaries'),
     documentType: v.optional(v.string()),
-    uploadedBy: v.optional(v.id("users")),
+    uploadedBy: v.optional(v.id('users')),
   },
   handler: async (ctx, args) => {
-    const documentId = await ctx.db.insert("files", {
+    const documentId = await ctx.db.insert('files', {
       fileName: args.fileName,
       fileSize: args.fileSize,
       fileType: args.fileType,
       bucket: args.bucket,
       storageId: args.storageId,
       beneficiary_id: args.beneficiaryId,
-      document_type: args.documentType || "other",
+      document_type: args.documentType || 'other',
       uploadedBy: args.uploadedBy,
       uploadedAt: new Date().toISOString(),
     });
@@ -80,12 +80,12 @@ export const createDocument = mutation({
 // Delete document
 export const deleteDocument = mutation({
   args: {
-    documentId: v.id("files"),
+    documentId: v.id('files'),
   },
   handler: async (ctx, args) => {
     const document = await ctx.db.get(args.documentId);
     if (!document) {
-      throw new Error("Document not found");
+      throw new Error('Document not found');
     }
 
     // Delete from storage
@@ -109,22 +109,22 @@ export const generateUploadUrl = mutation({
 // Create new document version
 export const createDocumentVersion = mutation({
   args: {
-    originalDocumentId: v.id("files"),
+    originalDocumentId: v.id('files'),
     fileName: v.string(),
     fileSize: v.number(),
     fileType: v.string(),
-    storageId: v.id("_storage"),
+    storageId: v.id('_storage'),
     versionNotes: v.optional(v.string()),
-    uploadedBy: v.optional(v.id("users")),
+    uploadedBy: v.optional(v.id('users')),
   },
   handler: async (ctx, args) => {
     const originalDoc = await ctx.db.get(args.originalDocumentId);
     if (!originalDoc) {
-      throw new Error("Original document not found");
+      throw new Error('Original document not found');
     }
 
     // Determine version number
-    const currentVersion = originalDoc.version || 1;
+    const currentVersion = (originalDoc as typeof originalDoc & { version?: number }).version ?? 1;
     const newVersion = currentVersion + 1;
 
     // Update original document to point to new version
@@ -139,7 +139,7 @@ export const createDocumentVersion = mutation({
     });
 
     // Create version history entry
-    const versionId = await ctx.db.insert("document_versions", {
+    const versionId = await ctx.db.insert('document_versions', {
       document_id: args.originalDocumentId,
       version_number: currentVersion,
       storage_id: originalDoc.storageId,
@@ -162,12 +162,12 @@ export const createDocumentVersion = mutation({
 // Get document version history
 export const getDocumentVersions = query({
   args: {
-    documentId: v.id("files"),
+    documentId: v.id('files'),
   },
   handler: async (ctx, args) => {
     const versions = await ctx.db
-      .query("document_versions")
-      .withIndex("by_document", (q) => q.eq("document_id", args.documentId))
+      .query('document_versions')
+      .withIndex('by_document', (q) => q.eq('document_id', args.documentId))
       .collect();
 
     // Get URLs for each version
@@ -185,28 +185,28 @@ export const getDocumentVersions = query({
 // Rollback to previous version
 export const rollbackToVersion = mutation({
   args: {
-    documentId: v.id("files"),
-    versionId: v.id("document_versions"),
-    uploadedBy: v.optional(v.id("users")),
+    documentId: v.id('files'),
+    versionId: v.id('document_versions'),
+    uploadedBy: v.optional(v.id('users')),
   },
   handler: async (ctx, args) => {
     const document = await ctx.db.get(args.documentId);
     const version = await ctx.db.get(args.versionId);
 
     if (!document || !version) {
-      throw new Error("Document or version not found");
+      throw new Error('Document or version not found');
     }
 
     // Create new version entry for current state before rollback
     const currentVersion = document.version || 1;
-    await ctx.db.insert("document_versions", {
+    await ctx.db.insert('document_versions', {
       document_id: args.documentId,
       version_number: currentVersion,
       storage_id: document.storageId,
       file_name: document.fileName,
       file_size: document.fileSize,
       file_type: document.fileType,
-      version_notes: "Auto-saved before rollback",
+      version_notes: 'Auto-saved before rollback',
       created_by: document.uploadedBy,
       created_at: document.uploadedAt || new Date().toISOString(),
     });
@@ -229,23 +229,21 @@ export const rollbackToVersion = mutation({
 // Update document metadata (tags, category, access control)
 export const updateDocumentMetadata = mutation({
   args: {
-    documentId: v.id("files"),
+    documentId: v.id('files'),
     tags: v.optional(v.array(v.string())),
     category: v.optional(v.string()),
     description: v.optional(v.string()),
-    accessLevel: v.optional(v.union(
-      v.literal("public"),
-      v.literal("private"),
-      v.literal("restricted")
-    )),
-    sharedWith: v.optional(v.array(v.id("users"))),
+    accessLevel: v.optional(
+      v.union(v.literal('public'), v.literal('private'), v.literal('restricted'))
+    ),
+    sharedWith: v.optional(v.array(v.id('users'))),
   },
   handler: async (ctx, args) => {
     const { documentId, ...updates } = args;
     const document = await ctx.db.get(documentId);
-    
+
     if (!document) {
-      throw new Error("Document not found");
+      throw new Error('Document not found');
     }
 
     await ctx.db.patch(documentId, updates);
@@ -259,54 +257,51 @@ export const searchDocuments = query({
     searchTerm: v.optional(v.string()),
     category: v.optional(v.string()),
     tags: v.optional(v.array(v.string())),
-    uploadedBy: v.optional(v.id("users")),
-    beneficiaryId: v.optional(v.id("beneficiaries")),
+    uploadedBy: v.optional(v.id('users')),
+    beneficiaryId: v.optional(v.id('beneficiaries')),
     startDate: v.optional(v.string()),
     endDate: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let documents = await ctx.db.query("files").collect();
+    let documents = await ctx.db.query('files').collect();
 
     // Apply filters
     if (args.beneficiaryId) {
-      documents = documents.filter(doc => doc.beneficiary_id === args.beneficiaryId);
+      documents = documents.filter((doc) => doc.beneficiary_id === args.beneficiaryId);
     }
 
     if (args.uploadedBy) {
-      documents = documents.filter(doc => doc.uploadedBy === args.uploadedBy);
+      documents = documents.filter((doc) => doc.uploadedBy === args.uploadedBy);
     }
 
     if (args.category) {
-      documents = documents.filter(doc => doc.category === args.category);
+      documents = documents.filter((doc) => doc.category === args.category);
     }
 
     if (args.tags && args.tags.length > 0) {
-      documents = documents.filter(doc => 
-        doc.tags && args.tags!.some(tag => doc.tags!.includes(tag))
+      documents = documents.filter(
+        (doc) => doc.tags && args.tags!.some((tag) => doc.tags!.includes(tag))
       );
     }
 
     if (args.searchTerm) {
       const term = args.searchTerm.toLowerCase();
-      documents = documents.filter(doc => 
-        doc.fileName.toLowerCase().includes(term) ||
-        (doc.description && doc.description.toLowerCase().includes(term))
+      documents = documents.filter(
+        (doc) =>
+          doc.fileName.toLowerCase().includes(term) ||
+          (doc.description && doc.description.toLowerCase().includes(term))
       );
     }
 
     if (args.startDate) {
       const start = new Date(args.startDate);
-      documents = documents.filter(doc => 
-        new Date(doc.uploadedAt || 0) >= start
-      );
+      documents = documents.filter((doc) => new Date(doc.uploadedAt || 0) >= start);
     }
 
     if (args.endDate) {
       const end = new Date(args.endDate);
-      documents = documents.filter(doc => 
-        new Date(doc.uploadedAt || 0) <= end
-      );
+      documents = documents.filter((doc) => new Date(doc.uploadedAt || 0) <= end);
     }
 
     // Apply limit
@@ -333,8 +328,8 @@ export const getDocumentsByCategory = query({
   },
   handler: async (ctx, args) => {
     const documents = await ctx.db
-      .query("files")
-      .filter(q => q.eq(q.field("category"), args.category))
+      .query('files')
+      .filter((q) => q.eq(q.field('category'), args.category))
       .take(args.limit || 50);
 
     const documentsWithUrls = await Promise.all(
@@ -351,26 +346,26 @@ export const getDocumentsByCategory = query({
 // Get shared documents for a user
 export const getSharedDocuments = query({
   args: {
-    userId: v.id("users"),
+    userId: v.id('users'),
   },
   handler: async (ctx, args) => {
     const documents = await ctx.db
-      .query("files")
-      .filter(q => 
+      .query('files')
+      .filter((q) =>
         q.or(
-          q.eq(q.field("uploadedBy"), args.userId),
+          q.eq(q.field('uploadedBy'), args.userId),
           q.and(
-            q.neq(q.field("uploadedBy"), args.userId),
+            q.neq(q.field('uploadedBy'), args.userId),
             // Check if user is in sharedWith array
-            q.eq(q.field("accessLevel"), "restricted")
+            q.eq(q.field('accessLevel'), 'restricted')
           )
         )
       )
       .collect();
 
     // Filter to only include documents where user is in sharedWith
-    const sharedDocs = documents.filter(doc => 
-      doc.sharedWith && doc.sharedWith.includes(args.userId)
+    const sharedDocs = documents.filter(
+      (doc) => doc.sharedWith && doc.sharedWith.includes(args.userId)
     );
 
     const documentsWithUrls = await Promise.all(
@@ -388,12 +383,12 @@ export const getSharedDocuments = query({
 export const getDocumentStatsByCategory = query({
   args: {},
   handler: async (ctx) => {
-    const documents = await ctx.db.query("files").collect();
+    const documents = await ctx.db.query('files').collect();
 
     const stats: Record<string, { count: number; totalSize: number }> = {};
 
-    documents.forEach(doc => {
-      const category = doc.category || "Uncategorized";
+    documents.forEach((doc) => {
+      const category = doc.category || 'Uncategorized';
       if (!stats[category]) {
         stats[category] = { count: 0, totalSize: 0 };
       }
@@ -406,4 +401,3 @@ export const getDocumentStatsByCategory = query({
       .sort((a, b) => b.count - a.count);
   },
 });
-

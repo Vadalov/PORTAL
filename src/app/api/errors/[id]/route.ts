@@ -20,12 +20,9 @@ const logger = createLogger('api:errors:detail');
  * GET /api/errors/[id]
  * Get error details by ID
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     logger.info('Fetching error details', { id });
 
@@ -63,12 +60,9 @@ export async function GET(
  * PATCH /api/errors/[id]
  * Update error details
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     logger.info('Updating error', { id, updates: Object.keys(body) });
@@ -90,7 +84,7 @@ export async function PATCH(
         {
           success: false,
           error: 'Validation failed',
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
         { status: 400 }
       );

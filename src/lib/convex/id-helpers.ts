@@ -3,7 +3,7 @@
  * Provides type-safe utilities for converting strings to Convex ID types
  */
 
-import { Id } from '@/convex/_generated/dataModel';
+import { Id, TableNames } from '@/convex/_generated/dataModel';
 
 /**
  * Convert a string to a Convex ID with type safety
@@ -12,7 +12,7 @@ import { Id } from '@/convex/_generated/dataModel';
  * @returns Typed Convex ID
  * @throws Error if value is not a valid Convex ID format
  */
-export function toConvexId<TableName extends string>(
+export function toConvexId<TableName extends TableNames>(
   value: string,
   tableName: TableName
 ): Id<TableName> {
@@ -38,7 +38,7 @@ export function toConvexId<TableName extends string>(
  * @returns Typed Convex ID or undefined
  * @throws Error if value is present but not valid
  */
-export function toOptionalConvexId<TableName extends string>(
+export function toOptionalConvexId<TableName extends TableNames>(
   value: string | undefined | null,
   tableName: TableName
 ): Id<TableName> | undefined {
@@ -74,16 +74,16 @@ export function validateConvexId(value: unknown): value is string {
  */
 export function convertOptionalIds<T extends Record<string, string | undefined | null>>(
   ids: T,
-  tableNames: { [K in keyof T]: string }
-): { [K in keyof T]: Id<string> | undefined } {
-  const result: any = {};
-  
+  tableNames: { [K in keyof T]: TableNames }
+): Record<string, Id<TableNames> | undefined> {
+  const result: Record<string, Id<TableNames> | undefined> = {};
+
   for (const key in ids) {
     const tableName = tableNames[key];
     if (tableName) {
       result[key] = toOptionalConvexId(ids[key], tableName);
     }
   }
-  
+
   return result;
 }

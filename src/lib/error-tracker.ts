@@ -52,9 +52,9 @@ export function generateErrorFingerprint(
 ): string {
   const errorMessage = error instanceof Error ? error.message : String(error);
   const stack = error instanceof Error ? error.stack?.split('\n').slice(0, 3).join('') : '';
-  
+
   const fingerprint = `${component || 'unknown'}-${functionName || 'unknown'}-${errorMessage}-${stack}`;
-  
+
   // Simple hash function
   let hash = 0;
   for (let i = 0; i < fingerprint.length; i++) {
@@ -62,7 +62,7 @@ export function generateErrorFingerprint(
     hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
   }
-  
+
   return Math.abs(hash).toString(16);
 }
 
@@ -119,7 +119,8 @@ export function collectPerformanceMetrics(): Record<string, unknown> {
   if (typeof window === 'undefined' || !window.performance) return {};
 
   const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-  const memory = (performance as any).memory;
+  const memory = (performance as { memory?: { usedJSHeapSize?: number; jsHeapSizeLimit?: number } })
+    .memory;
 
   return {
     loadTime: navigation?.loadEventEnd - navigation?.fetchStart,
@@ -334,7 +335,7 @@ export async function retryPendingErrors(): Promise<void> {
     // Remove successfully reported errors
     if (successfulReports.length > 0) {
       const remainingErrors = pendingErrors.filter(
-        (_: any, index: number) => !successfulReports.includes(index)
+        (_: unknown, index: number) => !successfulReports.includes(index)
       );
       localStorage.setItem('pending_errors', JSON.stringify(remainingErrors));
       logger.info('Successfully retried error reports', { count: successfulReports.length });

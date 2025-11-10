@@ -5,6 +5,7 @@
 
 import { v } from 'convex/values';
 import { mutation, query } from './_generated/server';
+import { Doc } from './_generated/dataModel';
 
 /**
  * Create a new error record or update existing if duplicate found
@@ -143,12 +144,7 @@ export const list = query({
       )
     ),
     severity: v.optional(
-      v.union(
-        v.literal('critical'),
-        v.literal('high'),
-        v.literal('medium'),
-        v.literal('low')
-      )
+      v.union(v.literal('critical'), v.literal('high'), v.literal('medium'), v.literal('low'))
     ),
     category: v.optional(
       v.union(
@@ -200,11 +196,7 @@ export const list = query({
         .withIndex('by_assigned_to', (q) => q.eq('assigned_to', args.assigned_to!))
         .collect();
     } else {
-      errors = await ctx.db
-        .query('errors')
-        .withIndex('by_last_seen')
-        .order('desc')
-        .collect();
+      errors = await ctx.db.query('errors').withIndex('by_last_seen').order('desc').collect();
     }
 
     // Additional filtering
@@ -242,25 +234,25 @@ export const get = query({
     if (!error) return null;
 
     // Get assigned user details
-    let assignedUser = null;
+    let assignedUser: Doc<'users'> | null = null;
     if (error.assigned_to) {
       assignedUser = await ctx.db.get(error.assigned_to);
     }
 
     // Get reporter details
-    let reporter = null;
+    let reporter: Doc<'users'> | null = null;
     if (error.reporter_id) {
       reporter = await ctx.db.get(error.reporter_id);
     }
 
     // Get resolved by user details
-    let resolvedByUser = null;
+    let resolvedByUser: Doc<'users'> | null = null;
     if (error.resolved_by) {
       resolvedByUser = await ctx.db.get(error.resolved_by);
     }
 
     // Get linked task
-    let task = null;
+    let task: Doc<'tasks'> | null = null;
     if (error.task_id) {
       task = await ctx.db.get(error.task_id);
     }
@@ -294,12 +286,7 @@ export const update = mutation({
       )
     ),
     severity: v.optional(
-      v.union(
-        v.literal('critical'),
-        v.literal('high'),
-        v.literal('medium'),
-        v.literal('low')
-      )
+      v.union(v.literal('critical'), v.literal('high'), v.literal('medium'), v.literal('low'))
     ),
     tags: v.optional(v.array(v.string())),
     metadata: v.optional(v.any()),

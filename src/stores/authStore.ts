@@ -48,6 +48,7 @@ interface AuthActions {
   setShowLoginModal: (show: boolean) => void;
   clearError: () => void;
   setRememberMe: (remember: boolean) => void;
+  setHydrated: (hydrated: boolean) => void;
 
   // Internal actions
   setUser: (user: User | null) => void;
@@ -320,6 +321,12 @@ export const useAuthStore = create<AuthStore>()(
             });
           },
 
+          setHydrated: (hydrated: boolean) => {
+            set((state) => {
+              state._hasHydrated = hydrated;
+            });
+          },
+
           // Internal actions
           setUser: (user: User | null) => {
             set((state) => {
@@ -362,6 +369,7 @@ export const useAuthStore = create<AuthStore>()(
               state._hasHydrated = true;
             }
           },
+          skipHydration: false,
         }
       )
     ),

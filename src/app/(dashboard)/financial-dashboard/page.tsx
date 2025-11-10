@@ -6,16 +6,47 @@ import { api } from '@/convex/_generated/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+// import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { CalendarIcon, Download, TrendingUp, TrendingDown, DollarSign, CreditCard } from 'lucide-react';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  CalendarIcon,
+  Download,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  CreditCard,
+} from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import type { PieLabelRenderProps } from 'recharts';
 import { PageLayout } from '@/components/layouts/PageLayout';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B9D'];
+const COLORS = [
+  '#0088FE',
+  '#00C49F',
+  '#FFBB28',
+  '#FF8042',
+  '#8884D8',
+  '#82CA9D',
+  '#FFC658',
+  '#FF6B9D',
+];
 
 export default function FinancialDashboardPage() {
   const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({
@@ -46,6 +77,7 @@ export default function FinancialDashboardPage() {
   });
 
   // Fetch all records for table view
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const financeRecords = useQuery(api.finance_records.list, { limit: 100 });
 
   // Calculate cumulative data
@@ -53,7 +85,7 @@ export default function FinancialDashboardPage() {
     if (!monthlyData) return [];
     let cumulativeIncome = 0;
     let cumulativeExpenses = 0;
-    return monthlyData.map(item => {
+    return monthlyData.map((item) => {
       cumulativeIncome += item.income;
       cumulativeExpenses += item.expenses;
       return {
@@ -67,6 +99,7 @@ export default function FinancialDashboardPage() {
 
   const handleExport = () => {
     // TODO: Implement export functionality
+    // eslint-disable-next-line no-console
     console.log('Exporting financial data...');
   };
 
@@ -84,10 +117,7 @@ export default function FinancialDashboardPage() {
   };
 
   return (
-    <PageLayout
-      title="Finansal Dashboard"
-      description="Mali durumu görsel olarak takip edin"
-    >
+    <PageLayout title="Finansal Dashboard" description="Mali durumu görsel olarak takip edin">
       {/* Header with Date Range Picker */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <Popover>
@@ -119,10 +149,12 @@ export default function FinancialDashboardPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setDateRange({
-                  from: startOfMonth(new Date()),
-                  to: endOfMonth(new Date()),
-                })}
+                onClick={() =>
+                  setDateRange({
+                    from: startOfMonth(new Date()),
+                    to: endOfMonth(new Date()),
+                  })
+                }
                 className="w-full"
               >
                 Bu Ay
@@ -130,10 +162,12 @@ export default function FinancialDashboardPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setDateRange({
-                  from: startOfMonth(subMonths(new Date(), 1)),
-                  to: endOfMonth(subMonths(new Date(), 1)),
-                })}
+                onClick={() =>
+                  setDateRange({
+                    from: startOfMonth(subMonths(new Date(), 1)),
+                    to: endOfMonth(subMonths(new Date(), 1)),
+                  })
+                }
                 className="w-full"
               >
                 Geçen Ay
@@ -141,10 +175,12 @@ export default function FinancialDashboardPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setDateRange({
-                  from: startOfMonth(subMonths(new Date(), 11)),
-                  to: endOfMonth(new Date()),
-                })}
+                onClick={() =>
+                  setDateRange({
+                    from: startOfMonth(subMonths(new Date(), 11)),
+                    to: endOfMonth(new Date()),
+                  })
+                }
                 className="w-full"
               >
                 Son 12 Ay
@@ -201,10 +237,12 @@ export default function FinancialDashboardPage() {
             <DollarSign className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className={cn(
-              'text-2xl font-bold',
-              metrics && metrics.netBalance >= 0 ? 'text-green-600' : 'text-red-600'
-            )}>
+            <div
+              className={cn(
+                'text-2xl font-bold',
+                metrics && metrics.netBalance >= 0 ? 'text-green-600' : 'text-red-600'
+              )}
+            >
               {metrics ? formatCurrency(metrics.netBalance) : '...'}
             </div>
           </CardContent>
@@ -216,9 +254,7 @@ export default function FinancialDashboardPage() {
             <CreditCard className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {metrics?.recordCount || 0}
-            </div>
+            <div className="text-2xl font-bold">{metrics?.recordCount || 0}</div>
           </CardContent>
         </Card>
       </div>
@@ -236,18 +272,13 @@ export default function FinancialDashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Aylık Gelir-Gider Trendi</CardTitle>
-              <CardDescription>
-                Son 12 ayın gelir ve gider karşılaştırması
-              </CardDescription>
+              <CardDescription>Son 12 ayın gelir ve gider karşılaştırması</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
               <ResponsiveContainer width="100%" height={350}>
                 <BarChart data={monthlyData || []}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="month"
-                    tickFormatter={formatMonth}
-                  />
+                  <XAxis dataKey="month" tickFormatter={formatMonth} />
                   <YAxis tickFormatter={(value) => formatCurrency(value)} />
                   <Tooltip
                     formatter={(value: number) => formatCurrency(value)}
@@ -266,18 +297,13 @@ export default function FinancialDashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Kümülatif Nakit Akışı</CardTitle>
-              <CardDescription>
-                Zaman içindeki biriken gelir ve gider
-              </CardDescription>
+              <CardDescription>Zaman içindeki biriken gelir ve gider</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
               <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={cumulativeData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="month"
-                    tickFormatter={formatMonth}
-                  />
+                  <XAxis dataKey="month" tickFormatter={formatMonth} />
                   <YAxis tickFormatter={(value) => formatCurrency(value)} />
                   <Tooltip
                     formatter={(value: number) => formatCurrency(value)}
@@ -316,9 +342,7 @@ export default function FinancialDashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Gelir Kategorileri</CardTitle>
-              <CardDescription>
-                Kategorilere göre gelir dağılımı
-              </CardDescription>
+              <CardDescription>Kategorilere göre gelir dağılımı</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
               <ResponsiveContainer width="100%" height={350}>
@@ -328,7 +352,11 @@ export default function FinancialDashboardPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    label={({ name, percent }: PieLabelRenderProps) => {
+                      const labelName = typeof name === 'string' ? name : String(name ?? '');
+                      const value = ((typeof percent === 'number' ? percent : 0) * 100).toFixed(0);
+                      return `${labelName} (${value}%)`;
+                    }}
                     outerRadius={120}
                     fill="#8884d8"
                     dataKey="value"
@@ -348,9 +376,7 @@ export default function FinancialDashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Gider Kategorileri</CardTitle>
-              <CardDescription>
-                Kategorilere göre gider dağılımı
-              </CardDescription>
+              <CardDescription>Kategorilere göre gider dağılımı</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
               <ResponsiveContainer width="100%" height={350}>
@@ -360,7 +386,11 @@ export default function FinancialDashboardPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    label={({ name, percent }: PieLabelRenderProps) => {
+                      const labelName = typeof name === 'string' ? name : String(name ?? '');
+                      const value = ((typeof percent === 'number' ? percent : 0) * 100).toFixed(0);
+                      return `${labelName} (${value}%)`;
+                    }}
                     outerRadius={120}
                     fill="#8884d8"
                     dataKey="value"

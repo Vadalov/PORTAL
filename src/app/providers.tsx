@@ -29,6 +29,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted] = useState(true);
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
   const initializeAuth = useAuthStore((state) => state?.initializeAuth);
+  const setHydrated = useAuthStore((state) => state.setHydrated);
 
   // Initialize debug utilities (development only)
   useEffect(() => {
@@ -49,10 +50,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       // Initialize global error handlers
       initGlobalErrorHandlers();
-      
+
       // Initialize error tracker (retry pending errors)
       initErrorTracker();
-      
+
       // Error tracking system initialized
     }
   }, []);
@@ -73,6 +74,41 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return () => clearInterval(cleanupInterval);
   }, []);
 
+  // Wait for Zustand persist hydration to finish and update store flag
+  useEffect(() => {
+    const markHydrated = () => {
+      setHydrated(true);
+    };
+
+    const persistApi = useAuthStore.persist;
+
+    // Check if already hydrated
+    if (persistApi?.hasHydrated?.()) {
+      markHydrated();
+      return;
+    }
+
+    // Subscribe to hydration completion
+    if (persistApi?.onFinishHydration) {
+      const unsub = persistApi.onFinishHydration(() => {
+        markHydrated();
+      });
+
+      return () => {
+        if (typeof unsub === 'function') {
+          unsub();
+        }
+      };
+    }
+
+    // Fallback: mark as hydrated after a short delay if no persist API
+    const fallbackTimer = setTimeout(() => {
+      markHydrated();
+    }, 100);
+
+    return () => clearTimeout(fallbackTimer);
+  }, [setHydrated]);
+
   // Wait for both mounted and hydration complete before initializing auth
   useEffect(() => {
     if (mounted && hasHydrated && initializeAuth) {
@@ -84,7 +120,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Show loading spinner until hydration complete (prevents hydration mismatch)
   if (!hasHydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-blue-50">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
           <p className="text-sm text-gray-600">Uygulama yükleniyor...</p>

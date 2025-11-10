@@ -29,6 +29,8 @@ export default defineSchema({
     lastLogin: v.optional(v.string()),
     /** @type {string} - Hashed password for the user account. */
     passwordHash: v.optional(v.string()),
+    /** @type {boolean | undefined} - Indicates whether two-factor authentication is enabled. */
+    two_factor_enabled: v.optional(v.boolean()),
   })
     .index('by_email', ['email'])
     .index('by_role', ['role'])
@@ -593,6 +595,20 @@ export default defineSchema({
     uploadedBy: v.optional(v.id('users')),
     /** @type {string} - The timestamp when the file was uploaded. */
     uploadedAt: v.string(),
+    /** @type {number} - The current version number of the document. */
+    version: v.optional(v.number()),
+    /** @type {string | undefined} - Optional description for the document. */
+    description: v.optional(v.string()),
+    /** @type {string | undefined} - Optional category for categorizing documents. */
+    category: v.optional(v.string()),
+    /** @type {Array<string> | undefined} - Tag list for quick filtering. */
+    tags: v.optional(v.array(v.string())),
+    /** @type {"public" | "private" | "restricted" | undefined} - Document visibility level. */
+    accessLevel: v.optional(
+      v.union(v.literal('public'), v.literal('private'), v.literal('restricted'))
+    ),
+    /** @type {Array<Id<'users'>> | undefined} - Users with whom the document is shared. */
+    sharedWith: v.optional(v.array(v.id('users'))),
     /** @type {Id<'beneficiaries'>} - A link to a beneficiary if the file is a document related to them. */
     beneficiary_id: v.optional(v.id('beneficiaries')), // Link to beneficiary for documents
     /** @type {string} - The type of document (e.g., 'identity', 'photo', 'other'). */
@@ -602,6 +618,180 @@ export default defineSchema({
     .index('by_bucket', ['bucket'])
     .index('by_uploaded_by', ['uploadedBy'])
     .index('by_beneficiary', ['beneficiary_id']),
+
+  /**
+   * @collection document_versions
+   * @description Stores historical versions of documents for audit and rollback.
+   */
+  document_versions: defineTable({
+    /** @type {Id<'files'>} - Reference to the original document. */
+    document_id: v.id('files'),
+    /** @type {number} - The version number associated with the document. */
+    version_number: v.number(),
+    /** @type {Id<'_storage'>} - Storage identifier for the specific version. */
+    storage_id: v.id('_storage'),
+    /** @type {string} - File name snapshot for this version. */
+    file_name: v.string(),
+    /** @type {number} - File size snapshot for this version. */
+    file_size: v.number(),
+    /** @type {string} - MIME type snapshot for this version. */
+    file_type: v.string(),
+    /** @type {string | undefined} - Optional notes describing the version. */
+    version_notes: v.optional(v.string()),
+    /** @type {Id<'users'> | undefined} - User who created this version. */
+    created_by: v.optional(v.id('users')),
+    /** @type {string} - Timestamp when this version was created. */
+    created_at: v.string(),
+  }).index('by_document', ['document_id']),
+
+  /**
+   * @collection report_configs
+   * @description Stores saved report configurations and schedules.
+   */
+  report_configs: defineTable({
+    /** @type {string} - Human readable name for the report configuration. */
+    name: v.string(),
+    /** @type {string} - The type of report this configuration generates. */
+    report_type: v.string(),
+    /** @type {any} - Serialized filters applied when generating the report. */
+    filters: v.any(),
+    /** @type {{frequency: 'daily' | 'weekly' | 'monthly', recipients: Id<'users'>[]}} - Optional scheduling settings. */
+    schedule: v.optional(
+      v.object({
+        frequency: v.union(v.literal('daily'), v.literal('weekly'), v.literal('monthly')),
+        recipients: v.array(v.id('users')),
+      })
+    ),
+    /** @type {Id<'users'>} - User who created the configuration. */
+    created_by: v.id('users'),
+    /** @type {string} - Creation timestamp. */
+    created_at: v.string(),
+    /** @type {boolean} - Whether the configuration is currently active. */
+    is_active: v.boolean(),
+  })
+    .index('by_created_by', ['created_by'])
+    .index('by_active', ['is_active']),
+
+  /**
+   * @collection security_events
+   * @description Logs security-related activities for auditing purposes.
+   */
+  security_events: defineTable({
+    /** @type {'login_attempt'|'login_success'|'login_failure'|'logout'|'permission_denied'|'suspicious_activity'|'password_change'|'2fa_enabled'|'2fa_disabled'|'data_access'|'data_modification'} */
+    event_type: v.string(),
+    /** @type {Id<'users'> | undefined} - User associated with the event, if any. */
+    user_id: v.optional(v.id('users')),
+    /** @type {string | undefined} - Source IP address. */
+    ip_address: v.optional(v.string()),
+    /** @type {string | undefined} - User agent string. */
+    user_agent: v.optional(v.string()),
+    /** @type {any} - Additional contextual details. */
+    details: v.optional(v.any()),
+    /** @type {'low'|'medium'|'high'|'critical'} - Severity level. */
+    severity: v.union(
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('critical')
+    ),
+    /** @type {string} - ISO timestamp when the event occurred. */
+    occurred_at: v.string(),
+    /** @type {boolean} - Whether the event has been reviewed. */
+    reviewed: v.boolean(),
+  })
+    .index('by_user', ['user_id'])
+    .index('by_occurred_at', ['occurred_at'])
+    .index('by_event_type', ['event_type']),
+
+  /**
+   * @collection user_sessions
+   * @description Tracks active user sessions for security monitoring.
+   */
+  user_sessions: defineTable({
+    /** @type {Id<'users'>} - User owning the session. */
+    user_id: v.id('users'),
+    /** @type {string | undefined} - Device information summary. */
+    device_info: v.optional(v.string()),
+    /** @type {string | undefined} - IP address associated with the session. */
+    ip_address: v.optional(v.string()),
+    /** @type {string | undefined} - User agent string. */
+    user_agent: v.optional(v.string()),
+    /** @type {boolean} - Whether the session is currently active. */
+    is_active: v.boolean(),
+    /** @type {string} - Timestamp of the last activity. */
+    last_activity: v.string(),
+    /** @type {string} - Timestamp when the session was created. */
+    created_at: v.string(),
+    /** @type {string | undefined} - Timestamp when the session was revoked. */
+    revoked_at: v.optional(v.string()),
+    /** @type {string | undefined} - Reason for revocation. */
+    revocation_reason: v.optional(v.string()),
+  })
+    .index('by_user', ['user_id'])
+    .index('by_active', ['is_active']),
+
+  /**
+   * @collection rate_limit_log
+   * @description Stores rate limit attempts to detect abusive behavior.
+   */
+  rate_limit_log: defineTable({
+    /** @type {string} - Identifier for the rate limit (IP or user). */
+    identifier: v.string(),
+    /** @type {string} - Action being rate limited. */
+    action: v.string(),
+    /** @type {string} - Timestamp for when the attempt occurred. */
+    timestamp: v.string(),
+  }).index('by_identifier_action', ['identifier', 'action', 'timestamp']),
+
+  /**
+   * @collection two_factor_settings
+   * @description Stores 2FA configuration and backup codes for users.
+   */
+  two_factor_settings: defineTable({
+    /** @type {Id<'users'>} - User that owns the 2FA settings. */
+    user_id: v.id('users'),
+    /** @type {string} - Encrypted shared secret for TOTP. */
+    secret: v.string(),
+    /** @type {Array<{code: string; used: boolean; used_at?: string}>} - Backup codes and usage state. */
+    backup_codes: v.array(
+      v.object({
+        code: v.string(),
+        used: v.boolean(),
+        used_at: v.optional(v.string()),
+      })
+    ),
+    /** @type {boolean} - Whether 2FA is currently enabled. */
+    enabled: v.boolean(),
+    /** @type {string} - Timestamp when 2FA was enabled. */
+    enabled_at: v.string(),
+    /** @type {string | undefined} - Timestamp when 2FA was disabled. */
+    disabled_at: v.optional(v.string()),
+    /** @type {string | undefined} - Timestamp of the last successful verification. */
+    last_verified: v.optional(v.string()),
+  }).index('by_user', ['user_id']),
+
+  /**
+   * @collection trusted_devices
+   * @description Keeps track of trusted devices for bypassing 2FA prompts.
+   */
+  trusted_devices: defineTable({
+    /** @type {Id<'users'>} - Owner of the trusted device. */
+    user_id: v.id('users'),
+    /** @type {string} - Unique fingerprint representing the device. */
+    device_fingerprint: v.string(),
+    /** @type {string | undefined} - Human-readable device name. */
+    device_name: v.optional(v.string()),
+    /** @type {string} - Timestamp when the device was added. */
+    added_at: v.string(),
+    /** @type {string | undefined} - Timestamp when the device was last used. */
+    last_used: v.optional(v.string()),
+    /** @type {boolean} - Whether the device is currently trusted. */
+    is_active: v.boolean(),
+    /** @type {string | undefined} - Timestamp when the device was removed from trust. */
+    removed_at: v.optional(v.string()),
+  })
+    .index('by_user', ['user_id'])
+    .index('by_fingerprint', ['device_fingerprint']),
 
   /**
    * @collection partners
@@ -1154,4 +1344,102 @@ export default defineSchema({
     .index('by_error', ['error_id'])
     .index('by_timestamp', ['timestamp'])
     .index('by_user', ['user_id']),
+
+  /**
+   * @collection performance_metrics
+   * @description Performance monitoring metrics for system optimization
+   */
+  performance_metrics: defineTable({
+    /** @type {'page_load'|'api_call'|'database_query'|'render_time'} - Type of metric */
+    metric_type: v.union(
+      v.literal('page_load'),
+      v.literal('api_call'),
+      v.literal('database_query'),
+      v.literal('render_time')
+    ),
+    /** @type {string} - Name of the metric */
+    metric_name: v.string(),
+    /** @type {number} - Metric value */
+    value: v.number(),
+    /** @type {string} - Unit of measurement */
+    unit: v.string(),
+    /** @type {any} - Additional metadata */
+    metadata: v.optional(v.any()),
+    /** @type {string} - Timestamp when recorded */
+    recorded_at: v.string(),
+  })
+    .index('by_metric_type', ['metric_type'])
+    .index('by_metric_name', ['metric_name'])
+    .index('by_recorded_at', ['recorded_at']),
+
+  /**
+   * @collection error_logs
+   * @description Application error logs for monitoring and debugging
+   */
+  error_logs: defineTable({
+    /** @type {string} - Type of error */
+    error_type: v.string(),
+    /** @type {string} - Error message */
+    error_message: v.string(),
+    /** @type {string} - Stack trace */
+    stack_trace: v.optional(v.string()),
+    /** @type {Id<'users'>} - User who encountered the error */
+    user_id: v.optional(v.id('users')),
+    /** @type {any} - Additional context */
+    context: v.optional(v.any()),
+    /** @type {string} - Timestamp when error occurred */
+    occurred_at: v.string(),
+    /** @type {boolean} - Whether error is resolved */
+    resolved: v.boolean(),
+    /** @type {Id<'users'>} - User who resolved the error */
+    resolved_by: v.optional(v.id('users')),
+    /** @type {string} - Resolution timestamp */
+    resolved_at: v.optional(v.string()),
+    /** @type {string} - Resolution notes */
+    resolution: v.optional(v.string()),
+  })
+    .index('by_resolved', ['resolved'])
+    .index('by_error_type', ['error_type'])
+    .index('by_occurred_at', ['occurred_at']),
+
+  /**
+   * @collection system_alerts
+   * @description System-wide alerts and notifications for administrators
+   */
+  system_alerts: defineTable({
+    /** @type {'error'|'performance'|'security'|'system'} - Type of alert */
+    alert_type: v.union(
+      v.literal('error'),
+      v.literal('performance'),
+      v.literal('security'),
+      v.literal('system')
+    ),
+    /** @type {'low'|'medium'|'high'|'critical'} - Severity level */
+    severity: v.union(
+      v.literal('low'),
+      v.literal('medium'),
+      v.literal('high'),
+      v.literal('critical')
+    ),
+    /** @type {string} - Alert title */
+    title: v.string(),
+    /** @type {string} - Alert description */
+    description: v.string(),
+    /** @type {any} - Additional metadata */
+    metadata: v.optional(v.any()),
+    /** @type {string} - Creation timestamp */
+    created_at: v.string(),
+    /** @type {boolean} - Whether alert is acknowledged */
+    acknowledged: v.boolean(),
+    /** @type {Id<'users'>} - User who acknowledged */
+    acknowledged_by: v.optional(v.id('users')),
+    /** @type {string} - Acknowledgment timestamp */
+    acknowledged_at: v.optional(v.string()),
+    /** @type {boolean} - Whether alert is resolved */
+    resolved: v.boolean(),
+  })
+    .index('by_resolved', ['resolved'])
+    .index('by_severity', ['severity'])
+    .index('by_alert_type', ['alert_type'])
+    .index('by_created_at', ['created_at']),
 });
