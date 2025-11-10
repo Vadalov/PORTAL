@@ -38,13 +38,13 @@
 
 **Durum:** ✅ Production-ready  
 **Tamamlanma:** 9 Kasım 2025  
-**Detay:** [PROGRESS_REPORT.md](./PROGRESS_REPORT.md)
+**Detay:** [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md)
 
 ### 2. ~~SMS Servisi~~ ✅ TAMAMLANDI
 
 **Durum:** ✅ Production-ready (Twilio)  
 **Tamamlanma:** 9 Kasım 2025  
-**Detay:** [PROGRESS_REPORT.md](./PROGRESS_REPORT.md)
+**Detay:** [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md)
 
 ### 3. ~~Analytics Endpoint~~ ✅ TAMAMLANDI
 
@@ -243,7 +243,7 @@ npm run convex:deploy   # Convex production
 - **Detaylı Checklist:** [FULLSTACK_CHECKLIST.md](./FULLSTACK_CHECKLIST.md)
 - **Tam Dokümantasyon:** [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md)
 - **Agent Kılavuzu:** [docs/CLAUDE.md](./docs/CLAUDE.md)
-- **Deployment:** [docs/VERCEL_DEPLOYMENT.md](./docs/VERCEL_DEPLOYMENT.md)
+- **Deployment:** [docs/DEPLOYMENT_QUICKSTART.md](./docs/DEPLOYMENT_QUICKSTART.md)
 
 ---
 
