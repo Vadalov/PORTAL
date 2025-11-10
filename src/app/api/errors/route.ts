@@ -132,15 +132,55 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
 
-    // Parse query parameters
-    const status = searchParams.get('status') as string | null;
-    const severity = searchParams.get('severity') as string | null;
-    const category = searchParams.get('category') as string | null;
+    // Parse query parameters with type validation
+    const statusParam = searchParams.get('status');
+    const severityParam = searchParams.get('severity');
+    const categoryParam = searchParams.get('category');
     const assigned_to = searchParams.get('assigned_to');
     const start_date = searchParams.get('start_date');
     const end_date = searchParams.get('end_date');
     const limit = searchParams.get('limit');
     const skip = searchParams.get('skip');
+
+    // Validate and type-cast status
+    const validStatuses = [
+      'new',
+      'assigned',
+      'in_progress',
+      'resolved',
+      'closed',
+      'reopened',
+    ] as const;
+    type ValidStatus = (typeof validStatuses)[number];
+    const status =
+      statusParam && validStatuses.includes(statusParam as ValidStatus)
+        ? (statusParam as ValidStatus)
+        : undefined;
+
+    // Validate and type-cast severity
+    const validSeverities = ['critical', 'high', 'medium', 'low'] as const;
+    type ValidSeverity = (typeof validSeverities)[number];
+    const severity =
+      severityParam && validSeverities.includes(severityParam as ValidSeverity)
+        ? (severityParam as ValidSeverity)
+        : undefined;
+
+    // Validate and type-cast category
+    const validCategories = [
+      'runtime',
+      'ui_ux',
+      'design_bug',
+      'system',
+      'data',
+      'security',
+      'performance',
+      'integration',
+    ] as const;
+    type ValidCategory = (typeof validCategories)[number];
+    const category =
+      categoryParam && validCategories.includes(categoryParam as ValidCategory)
+        ? (categoryParam as ValidCategory)
+        : undefined;
 
     logger.info('Listing errors', {
       status,

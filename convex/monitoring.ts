@@ -32,8 +32,7 @@ export const healthCheck = query({
 
       for (const collection of collections) {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const count = (await ctx.db.query(collection as any).collect()).length;
+          const count = (await ctx.db.query(collection as never).collect()).length;
           checks.collections[collection] = {
             count,
             status: 'healthy',
@@ -69,7 +68,7 @@ export const logPerformanceMetric = mutation({
     metricName: v.string(),
     value: v.number(),
     unit: v.string(),
-
+    // Note: v.any() is required for Convex validators with dynamic metadata
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
@@ -113,10 +112,12 @@ export const getPerformanceMetrics = query({
 
     // Filter by date range
     if (args.startDate) {
-      metrics = metrics.filter((m) => m.recorded_at >= args.startDate!);
+      const startDate = args.startDate;
+      metrics = metrics.filter((m) => m.recorded_at >= startDate);
     }
     if (args.endDate) {
-      metrics = metrics.filter((m) => m.recorded_at <= args.endDate!);
+      const endDate = args.endDate;
+      metrics = metrics.filter((m) => m.recorded_at <= endDate);
     }
 
     return metrics.slice(0, limit);
@@ -170,7 +171,7 @@ export const logError = mutation({
     errorMessage: v.string(),
     stackTrace: v.optional(v.string()),
     userId: v.optional(v.id('users')),
-
+    // Note: v.any() is required for Convex validators with dynamic context
     context: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
