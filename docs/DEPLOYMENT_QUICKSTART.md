@@ -205,9 +205,41 @@ const nextConfig = {
 
 Sonra redeploy yap: `vercel --prod`
 
-## 📚 Detaylı Dokümantasyon
+## 🔒 Branch Koruma Kuralları (Önerilen)
 
-- **[Vercel Deployment Guide](./VERCEL_DEPLOYMENT.md)** - Kapsamlı adım adım rehber
+GitHub repository ayarlarından production branch’i koruyun:
+
+- Require status checks to pass
+- Require branches to be up to date
+- CI (GitHub Actions) ve Vercel preview kontrolleri aktif olsun
+
+Ayar Yolu: `Settings → Branches → Add rule → Branch name pattern: main`
+
+## 🌐 Domain Ayarları (Opsiyonel)
+
+- Project Settings → Domains → "Add Domain"
+- `yoursite.com` ekleyin ve DNS kayıtlarını (A veya CNAME) yapılandırın
+- SSL: Vercel otomatik olarak Let's Encrypt sertifikası sağlar
+
+## 🧭 Sentry Hata İzleme (Opsiyonel)
+
+Sentry kullanıyorsanız Vercel ortam değişkenlerine şunları ekleyin:
+
+```
+SENTRY_AUTH_TOKEN=your-sentry-token
+NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
+```
+
+## 📉 Vercel Limitleri ve İpuçları
+
+- Execution time: 10 saniye (ücretsiz plan)
+- Bandwidth: 100 GB/ay
+- Builds: 100 build/gün
+
+İpuçları: Ağ çağrılarını optimize edin, resimleri CDN üzerinden servis edin, ISR/SSG tercih edin.
+
+## 📚 İlgili Dokümanlar
+
 - **[Complete Documentation](./DOCUMENTATION.md)** - Tüm teknik detaylar
 - **[Agent Guidelines](./CLAUDE.md)** - Geliştirme best practices
 
@@ -215,10 +247,9 @@ Sonra redeploy yap: `vercel --prod`
 
 Sorun yaşıyorsanız:
 
-1. **Dokümantasyon:** `docs/VERCEL_DEPLOYMENT.md` dosyasını inceleyin
-2. **Logs:** Vercel Dashboard → Deployments → Logs
-3. **GitHub Issues:** https://github.com/Vadalov/PORTAL/issues
-4. **Convex Dashboard:** https://dashboard.convex.dev
+1. **Logs:** Vercel Dashboard → Deployments → Logs
+2. **GitHub Issues:** https://github.com/Vadalov/PORTAL/issues
+3. **Convex Dashboard:** https://dashboard.convex.dev
 
 ---
 
