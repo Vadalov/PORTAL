@@ -42,9 +42,10 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Plus, Trash2, FileText, Loader2, MapPin, Route, Paperclip } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, FileText, Loader2, Printer, MapPin, Route, Paperclip, Download, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import type { KumbaraCreateInput } from '@/lib/validations/kumbara';
 import { KumbaraForm } from './KumbaraForm';
 import { KumbaraPrintQR } from './KumbaraPrintQR';
 
@@ -77,6 +78,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [locationFilter, setLocationFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedKumbara, setSelectedKumbara] = useState<KumbaraDonation | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery<{
@@ -103,7 +105,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
     },
   });
 
-  const { mutate: deleteKumbara } = useMutation({
+  const { mutate: deleteKumbara, isPending: isDeleting } = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/kumbara/${id}`, {
         method: 'DELETE',
@@ -206,7 +208,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
             </Select>
             <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button onClick={() => setSelectedKumbara(null)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Yeni Kumbara
                 </Button>

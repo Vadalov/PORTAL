@@ -52,11 +52,11 @@ async function createDemoData() {
     try {
       const beneficiaryId = await convex.mutation(api.beneficiaries.create, beneficiaryData);
       console.log(`✅ Created beneficiary: ${beneficiaryId}\n`);
-    } catch (_e: any) {
-      if (_e.message.includes('already exists')) {
+    } catch (e: any) {
+      if (e.message.includes('already exists')) {
         console.log('⚠️ Beneficiary already exists, skipping...\n');
       } else {
-        throw _e;
+        throw e;
       }
     }
 
@@ -80,11 +80,11 @@ async function createDemoData() {
     try {
       const donationId = await convex.mutation(api.donations.create, donationData);
       console.log(`✅ Created donation: ${donationId}\n`);
-    } catch (_e: any) {
-      if (_e.message.includes('already exists') || _e.message.includes('duplicate')) {
+    } catch (e: any) {
+      if (e.message.includes('already exists') || e.message.includes('duplicate')) {
         console.log('⚠️ Donation already exists, skipping...\n');
       } else {
-        throw _e;
+        throw e;
       }
     }
 
@@ -102,7 +102,7 @@ async function createDemoData() {
         tags: ['gıda', 'acil', 'aile'],
       });
       console.log(`✅ Created task: ${taskId}\n`);
-    } catch (_e) {
+    } catch (e) {
       console.log('⚠️ Tasks create mutation not available or failed\n');
     }
 
@@ -119,7 +119,7 @@ async function createDemoData() {
         priority: 'NORMAL',
       });
       console.log(`✅ Created message: ${messageId}\n`);
-    } catch (_e) {
+    } catch (e) {
       console.log('⚠️ Messages create mutation not available or failed\n');
     }
 

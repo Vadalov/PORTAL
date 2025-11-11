@@ -14,7 +14,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Transaction, TransactionType, CreateTransactionInput } from '@/types/financial';
-import { Loader2, CheckCircle, DollarSign } from 'lucide-react';
+import { Loader2, CheckCircle, DollarSign, Tag } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
   // Income Categories

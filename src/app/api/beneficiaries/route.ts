@@ -3,6 +3,7 @@ import { convexBeneficiaries, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import type { QueryParams } from '@/types/database';
 import {
+  requireAuthenticatedUser,
   verifyCsrfToken,
   buildErrorResponse,
   requireModuleAccess,

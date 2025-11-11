@@ -6,6 +6,7 @@ import { Upload, FileText, Download, Trash2, Image, File, Loader2 } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { FileUpload } from '@/components/ui/file-upload';
 import { convex } from '@/lib/convex/client';
 import { api as convexApi } from '@/convex/_generated/api';
 
@@ -32,7 +33,7 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
   const isConvexReady = !!convex;
 
   // Fetch documents - Optimized with caching and immediate UI
-  const { data: documents, isLoading } = useQuery({
+  const { data: documents, isLoading, isFetching } = useQuery({
     queryKey: ['documents', beneficiaryId],
     queryFn: async () => {
       if (!convex) {
