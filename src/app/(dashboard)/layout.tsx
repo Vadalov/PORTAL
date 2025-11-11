@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const { isAuthenticated, isInitialized, user, logout, initializeAuth } = useAuthStore();
-  const { isOpen: isSearchOpen, onOpen: openSearch, onClose: closeSearch } = useAdvancedSearch();
+  const { isOpen: isSearchOpen, onClose: closeSearch } = useAdvancedSearch();
 
   // Keyboard shortcuts
   const keyboardShortcuts = [

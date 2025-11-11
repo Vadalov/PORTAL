@@ -138,7 +138,7 @@ export class RateLimitMonitor {
     });
 
     // Tüm endpoint request'lerini say (approximate)
-    this.addRequestCounts(endpointMap, cutoffTime);
+    this.addRequestCounts(endpointMap);
 
     const endpointStats = Array.from(endpointMap.entries()).map(([endpoint, data]) => ({
       endpoint,
@@ -262,12 +262,11 @@ export class RateLimitMonitor {
   }
 
   private static addRequestCounts(
-    endpointMap: Map<string, { requests: number; violations: number }>,
-    cutoffTime: Date
+    endpointMap: Map<string, { requests: number; violations: number }>
   ): void {
     // Bu method gerçek request log'larından beslenecek
     // Şimdilik violation sayısından türetilmiş bir approximation kullanıyoruz
-    endpointMap.forEach((data, endpoint) => {
+    endpointMap.forEach((data) => {
       data.requests = Math.max(data.violations * 10, 1); // Minimum 1 request
     });
   }

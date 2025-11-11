@@ -137,7 +137,7 @@ export default function PartnersPage() {
       setIsCreateModalOpen(false);
       toast.success('Partner başarıyla oluşturuldu');
       refetch();
-    } catch (error) {
+    } catch (_error) {
       toast.error('Partner oluşturulurken hata oluştu');
     }
   };
