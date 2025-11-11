@@ -103,6 +103,14 @@ const protectedRoutes: RouteRule[] = [
 function hasRequiredPermission(user: SessionUser | null, route: RouteRule): boolean {
   if (!user) return false;
 
+  // Admin-level bypass: allow ADMIN/SUPER_ADMIN or users with admin manage permission
+  const roleUpper = (user.role || '').toUpperCase();
+  const isAdminByRole = roleUpper === 'ADMIN' || roleUpper === 'SUPER_ADMIN';
+  const isAdminByPermission = (user.permissions || []).includes(SPECIAL_PERMISSIONS.USERS_MANAGE);
+  if (isAdminByRole || isAdminByPermission) {
+    return true;
+  }
+
   // Check role requirement first
   if (route.requiredRole) {
     if (!user.role || user.role.toLowerCase() !== route.requiredRole.toLowerCase()) {
@@ -201,8 +209,12 @@ export async function proxy(request: NextRequest) {
   if (isProtectedApiRoute) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-user-id', user.id);
-    requestHeaders.set('x-user-role', user.role ?? '');
-    requestHeaders.set('x-user-permissions', (user.permissions ?? []).join(','));
+    // Ensure header values are ASCII-safe to avoid ByteString errors
+    const safeRole = encodeURIComponent(user.role ?? '');
+    const safePermissions = encodeURIComponent((user.permissions ?? []).join(','));
+
+    requestHeaders.set('x-user-role', safeRole);
+    requestHeaders.set('x-user-permissions', safePermissions);
 
     return NextResponse.next({
       request: {

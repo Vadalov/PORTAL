@@ -9,7 +9,7 @@ test.describe('Error Tracking System', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the application
     await page.goto('/');
-    
+
     // Wait for application to load
     await page.waitForLoadState('networkidle');
   });
@@ -60,7 +60,7 @@ test.describe('Error Tracking System', () => {
 
     // Look for "Hata Bildir" button (might be in navigation or on page)
     const reportButton = page.getByRole('button', { name: 'Hata Bildir' });
-    
+
     if (await reportButton.isVisible()) {
       await reportButton.click();
 
@@ -74,7 +74,7 @@ test.describe('Error Tracking System', () => {
     await page.goto('/errors');
 
     const reportButton = page.getByRole('button', { name: 'Hata Bildir' });
-    
+
     if (await reportButton.isVisible()) {
       await reportButton.click();
 
@@ -107,10 +107,10 @@ test.describe('Error Tracking System', () => {
   test('should handle error capture on error boundary', async ({ page }) => {
     // This test would require a test page that throws an error
     // For now, we'll just verify the error boundary exists
-    
+
     // Check if error boundary is in place by looking for its elements
     await page.goto('/');
-    
+
     // The error boundary would catch errors and show error UI
     // In a real test, you would navigate to a page that triggers an error
   });
@@ -137,7 +137,7 @@ test.describe('Error API Integration', () => {
       description: 'This is a test error',
       category: 'runtime',
       severity: 'medium',
-      fingerprint: 'test-fingerprint-' + Date.now(),
+      fingerprint: `test-fingerprint-${Date.now()}`,
     };
 
     const response = await request.post('/api/errors', {

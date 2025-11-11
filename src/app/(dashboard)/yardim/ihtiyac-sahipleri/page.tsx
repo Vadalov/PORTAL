@@ -21,7 +21,11 @@ import { useCachedQuery, usePrefetchWithCache } from '@/lib/api-cache';
 import { TableSkeleton } from '@/components/ui/skeleton-optimized';
 
 // Stub function for beneficiary export
-const exportBeneficiaries = async (_params: { search?: string; beneficiaries?: BeneficiaryDocument[]; format?: 'csv' | 'excel' | 'pdf' }) => {
+const exportBeneficiaries = async (_params: {
+  search?: string;
+  beneficiaries?: BeneficiaryDocument[];
+  format?: 'csv' | 'excel' | 'pdf';
+}) => {
   toast.info('Dışa aktarma özelliği yakında eklenecek');
   return Promise.resolve({ success: true, data: null, error: null });
 };
@@ -38,21 +42,26 @@ export default function BeneficiariesPage() {
 
   // Performance monitoring
   const { getFPS, isGoodPerformance } = useFPSMonitor();
-  
+
   // Smart caching
   const { prefetch } = usePrefetchWithCache();
-  
+
   const [search, setSearch] = useState('');
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
 
   // Use cached query with performance optimization
-  const { data: cachedData, isLoading, error, refetch } = useCachedQuery<{ success: boolean; data: BeneficiaryDocument[]; total: number }>({
+  const {
+    data: cachedData,
+    isLoading,
+    error,
+    refetch,
+  } = useCachedQuery<{ success: boolean; data: BeneficiaryDocument[]; total: number }>({
     queryKey: ['beneficiaries-cached', search],
     endpoint: '/api/beneficiaries',
-    params: { 
+    params: {
       page: 1,
       limit: 10000, // Load all data for virtual scrolling
-      search 
+      search,
     },
     dataType: 'beneficiaries',
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -62,15 +71,18 @@ export default function BeneficiariesPage() {
   // Fallback to direct API if cached query fails
   const fallbackQuery = useQuery({
     queryKey: ['beneficiaries', search],
-    queryFn: () => api.beneficiaries.getBeneficiaries({
-      page: 1,
-      limit: 10000,
-      search
-    }),
+    queryFn: () =>
+      api.beneficiaries.getBeneficiaries({
+        page: 1,
+        limit: 10000,
+        search,
+      }),
     enabled: !cachedData && !isLoading,
   });
 
-  const beneficiaries = (cachedData?.data || fallbackQuery.data?.data || []) as BeneficiaryDocument[];
+  const beneficiaries = (cachedData?.data ||
+    fallbackQuery.data?.data ||
+    []) as BeneficiaryDocument[];
 
   // Memoized handlers
   const handleModalClose = useCallback(() => {
@@ -116,124 +128,153 @@ export default function BeneficiariesPage() {
   }, [prefetch]);
 
   // Memoized columns
-  const columns: DataTableColumn<BeneficiaryDocument>[] = useMemo(() => [
-    {
-      key: 'actions',
-      label: '',
-      render: (item) => (
-        <Link href={`/yardim/ihtiyac-sahipleri/${item._id}`}>
-          <Button variant="ghost" size="icon-sm" className="h-8 w-8">
-            <ArrowUpRight className="h-4 w-4" />
-          </Button>
-        </Link>
-      ),
-      className: 'w-12',
-    },
-    {
-      key: 'type',
-      label: 'Tür',
-      render: () => (
-        <Badge variant="secondary" className="font-medium">
-          İhtiyaç Sahibi
-        </Badge>
-      ),
-    },
-    {
-      key: 'name',
-      label: 'İsim',
-      render: (item) => <span className="font-medium text-foreground">{item.name || '-'}</span>,
-    },
-    {
-      key: 'nationality',
-      label: 'Uyruk',
-      render: (item) => item.nationality || '-',
-    },
-    {
-      key: 'tc_no',
-      label: 'Kimlik No',
-      render: (item) => item.tc_no || '-',
-    },
-    {
-      key: 'phone',
-      label: 'Telefon',
-      render: (item) => item.phone || '-',
-    },
-    {
-      key: 'city',
-      label: 'Şehir',
-      render: (item) => item.city || '-',
-    },
-    {
-      key: 'district',
-      label: 'İlçe',
-      render: (item) => item.district || '-',
-    },
-    {
-      key: 'address',
-      label: 'Adres',
-      render: (item) => (
-        <span className="max-w-xs truncate block" title={item.address || '-'}>
-          {item.address || '-'}
-        </span>
-      ),
-    },
-    {
-      key: 'family_size',
-      label: 'Aile Büyüklüğü',
-      render: (item) => <Badge variant="outline">{item.family_size ?? '-'}</Badge>,
-    },
-  ], []);
+  const columns: DataTableColumn<BeneficiaryDocument>[] = useMemo(
+    () => [
+      {
+        key: 'actions',
+        label: '',
+        render: (item) => (
+          <Link href={`/yardim/ihtiyac-sahipleri/${item._id}`}>
+            <Button variant="ghost" size="icon-sm" className="h-8 w-8">
+              <ArrowUpRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        ),
+        className: 'w-12',
+      },
+      {
+        key: 'type',
+        label: 'Tür',
+        className: 'whitespace-nowrap flex-none text-xs',
+        render: () => (
+          <Badge variant="secondary" className="font-medium">
+            İhtiyaç Sahibi
+          </Badge>
+        ),
+      },
+      {
+        key: 'name',
+        label: 'İsim',
+        className: 'flex-none w-[420px] shrink-0 whitespace-nowrap text-sm',
+        render: (item) => (
+          <span
+            className="font-medium text-foreground whitespace-nowrap block truncate"
+            title={item.name || '-'}
+          >
+            {(item.name || '-').replace(/\s+/g, ' ')}
+          </span>
+        ),
+      },
+      {
+        key: 'nationality',
+        label: 'Uyruk',
+        className: 'whitespace-nowrap text-xs',
+        render: (item) => item.nationality || '-',
+      },
+      {
+        key: 'tc_no',
+        label: 'Kimlik No',
+        className: 'whitespace-nowrap text-xs',
+        render: (item) => item.tc_no || '-',
+      },
+      {
+        key: 'phone',
+        label: 'Telefon',
+        className: 'flex-none w-[240px] whitespace-nowrap text-xs',
+        render: (item) => (
+          <span
+            className="whitespace-nowrap inline-block overflow-hidden text-ellipsis"
+            title={item.phone || '-'}
+          >
+            {item.phone || '-'}
+          </span>
+        ),
+      },
+      {
+        key: 'city',
+        label: 'Şehir',
+        className: 'whitespace-nowrap text-xs',
+        render: (item) => item.city || '-',
+      },
+      {
+        key: 'district',
+        label: 'İlçe',
+        className: 'whitespace-nowrap text-xs',
+        render: (item) => item.district || '-',
+      },
+      {
+        key: 'address',
+        label: 'Adres',
+        className: 'flex-none shrink-0 whitespace-nowrap overflow-visible min-w-[480px] text-xs',
+        render: (item) => (
+          <span className="whitespace-nowrap block" title={item.address || '-'}>
+            {item.address || '-'}
+          </span>
+        ),
+      },
+      {
+        key: 'family_size',
+        label: 'Aile Büyüklüğü',
+        className: 'whitespace-nowrap text-xs',
+        render: (item) => <Badge variant="outline">{item.family_size ?? '-'}</Badge>,
+      },
+    ],
+    []
+  );
 
   return (
     <PageLayout
       title="İhtiyaç Sahipleri"
-      description="Kayıtlı ihtiyaç sahiplerini görüntüleyin ve yönetin"
+      description="Kayıtları yönetin"
+      className="space-y-3"
       actions={
         <>
-          <Button variant="outline" onClick={handleExport} className="gap-2">
+          <Button variant="outline" size="sm" onClick={handleExport} className="gap-1">
             <Download className="h-4 w-4" />
             Dışa Aktar
           </Button>
-          <Button onClick={handleShowModal} className="gap-2">
+          <Button size="sm" onClick={handleShowModal} className="gap-1">
             <Plus className="h-4 w-4" />
             Yeni Ekle
           </Button>
         </>
       }
     >
-        {showQuickAddModal && (
-          <Suspense fallback={
+      {showQuickAddModal && (
+        <Suspense
+          fallback={
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
               <div className="bg-background rounded-lg shadow-lg border p-6 max-w-md w-full mx-4">
                 <TableSkeleton rows={4} />
               </div>
             </div>
-          }>
-            <BeneficiaryQuickAddModal open={showQuickAddModal} onOpenChange={handleModalClose} />
-          </Suspense>
-        )}
+          }
+        >
+          <BeneficiaryQuickAddModal open={showQuickAddModal} onOpenChange={handleModalClose} />
+        </Suspense>
+      )}
 
-        <VirtualizedDataTable<BeneficiaryDocument>
-          data={beneficiaries}
-          columns={columns}
-          isLoading={isLoading || fallbackQuery.isLoading}
-          error={(error || fallbackQuery.error) as Error}
-          emptyMessage="İhtiyaç sahibi bulunamadı"
-          emptyDescription="Henüz kayıt eklenmemiş"
-          searchable={true}
-          searchValue={search}
-          onSearchChange={(value) => {
-            setSearch(value);
-          }}
-          searchPlaceholder="İsim, TC No veya telefon ile ara..."
-          onRowClick={(item) => router.push(`/yardim/ihtiyac-sahipleri/${item._id}`)}
-          refetch={() => {
-            refetch();
-            fallbackQuery.refetch();
-          }}
-          rowHeight={65}
-          containerHeight={600}
-        />
-      </PageLayout>
+      <VirtualizedDataTable<BeneficiaryDocument>
+        data={beneficiaries}
+        columns={columns}
+        isLoading={isLoading || fallbackQuery.isLoading}
+        error={(error || fallbackQuery.error) as Error}
+        emptyMessage="İhtiyaç sahibi bulunamadı"
+        emptyDescription="Henüz kayıt eklenmemiş"
+        searchable={true}
+        searchValue={search}
+        onSearchChange={(value) => {
+          setSearch(value);
+        }}
+        searchPlaceholder="İsim/TC/Telefon ara..."
+        onRowClick={(item) => router.push(`/yardim/ihtiyac-sahipleri/${item._id}`)}
+        refetch={() => {
+          refetch();
+          fallbackQuery.refetch();
+        }}
+        rowHeight={64}
+        containerHeight={600}
+      />
+    </PageLayout>
   );
 }

@@ -94,23 +94,44 @@ function VirtualizedDataTable<T extends Record<string, any>>({
           boxSizing: 'border-box',
         }}
         className={cn(
-          'px-4 border-b border-slate-100 hover:bg-slate-50/80 transition-colors duration-150',
+          'px-4 border-b border-slate-100 hover:bg-slate-50/80 transition-colors duration-150 flex-nowrap',
           onRowClick && 'cursor-pointer'
         )}
         onClick={() => onRowClick?.(item)}
         role="row"
         aria-rowindex={index + 2}
+        data-row
       >
-        {columns.map((column) => (
-          <div
-            key={column.key}
-            className={cn('flex-1 px-2 overflow-hidden', column.className)}
-            role="cell"
-            aria-colindex={columns.findIndex((col) => col.key === column.key) + 1}
-          >
-            {column.render ? column.render(item) : item[column.key] || '-'}
-          </div>
-        ))}
+        {columns.map((column) => {
+          const hasFixed = Boolean(
+            column.className &&
+              (column.className.includes('flex-none') ||
+                column.className.includes('w-[') ||
+                column.className.includes('basis-') ||
+                column.className.includes('grow-0') ||
+                column.className.includes('shrink-0'))
+          );
+
+          // Allow column-level overflow control. If the column explicitly sets
+          // any overflow utility, do NOT force overflow-hidden here.
+          const columnHasOverflowUtility = Boolean(
+            column.className && column.className.includes('overflow-')
+          );
+
+          const baseCell = hasFixed ? 'px-2' : 'flex-1 px-2';
+          const defaultOverflow = columnHasOverflowUtility ? '' : 'overflow-hidden';
+
+          return (
+            <div
+              key={column.key}
+              className={cn(baseCell, defaultOverflow, column.className)}
+              role="cell"
+              aria-colindex={columns.findIndex((col) => col.key === column.key) + 1}
+            >
+              {column.render ? column.render(item) : item[column.key] || '-'}
+            </div>
+          );
+        })}
       </div>
     );
   });
@@ -191,6 +212,7 @@ function VirtualizedDataTable<T extends Record<string, any>>({
               value={searchValue}
               onChange={(e) => onSearchChange?.(e.target.value)}
               className="w-full h-9 pl-9 pr-3 text-sm bg-white border border-slate-200 rounded-lg text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+              data-testid="search-input"
             />
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
@@ -218,10 +240,11 @@ function VirtualizedDataTable<T extends Record<string, any>>({
         role="table"
         aria-rowcount={data.length + 1}
         aria-colcount={columns.length}
+        data-testid="virtualizedTable"
       >
         {/* Header */}
         <div
-          className="flex items-center px-4 border-b border-slate-200 bg-slate-50/80 font-medium text-sm text-slate-600 sticky top-0 z-10"
+          className="flex items-center flex-nowrap px-4 border-b border-slate-200 bg-slate-50/80 font-medium text-sm text-slate-600 sticky top-0 z-10"
           style={{
             height: rowHeight,
             willChange: 'transform',
@@ -231,16 +254,29 @@ function VirtualizedDataTable<T extends Record<string, any>>({
           }}
           role="row"
         >
-          {columns.map((column, columnIndex) => (
-            <div
-              key={column.key}
-              className={cn('flex-1 px-2 overflow-hidden', column.className)}
-              role="columnheader"
-              aria-colindex={columnIndex + 1}
-            >
-              {column.label}
-            </div>
-          ))}
+          {columns.map((column, columnIndex) => {
+            const hasFixed = Boolean(
+              column.className &&
+                (column.className.includes('flex-none') ||
+                  column.className.includes('w-[') ||
+                  column.className.includes('basis-') ||
+                  column.className.includes('grow-0') ||
+                  column.className.includes('shrink-0'))
+            );
+            return (
+              <div
+                key={column.key}
+                className={cn(
+                  hasFixed ? 'px-2 overflow-hidden' : 'flex-1 px-2 overflow-hidden',
+                  column.className
+                )}
+                role="columnheader"
+                aria-colindex={columnIndex + 1}
+              >
+                {column.label}
+              </div>
+            );
+          })}
         </div>
 
         {/* Virtual Scrolling Container */}

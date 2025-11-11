@@ -473,9 +473,9 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                     <FormLabel className="text-xs font-medium">
                       Para Birimi <span className="text-red-500">*</span>
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value ?? ''}>
                       <FormControl>
-                        <SelectTrigger className="h-8 text-sm">
+                        <SelectTrigger className="h-8 text-sm" data-testid="currencySelect">
                           <SelectValue placeholder="Seçiniz" />
                         </SelectTrigger>
                       </FormControl>
@@ -498,9 +498,9 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                     <FormLabel className="text-xs font-medium">
                       Ödeme <span className="text-red-500">*</span>
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value ?? ''}>
                       <FormControl>
-                        <SelectTrigger className="h-8 text-sm">
+                        <SelectTrigger className="h-8 text-sm" data-testid="paymentMethodSelect">
                           <SelectValue placeholder="Seçiniz" />
                         </SelectTrigger>
                       </FormControl>
@@ -617,9 +617,9 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
                     <FormLabel className="text-xs font-medium">
                       Durum <span className="text-red-500">*</span>
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value ?? ''}>
                       <FormControl>
-                        <SelectTrigger className="h-8 text-sm">
+                        <SelectTrigger className="h-8 text-sm" data-testid="statusSelect">
                           <SelectValue placeholder="Seçiniz" />
                         </SelectTrigger>
                       </FormControl>
@@ -753,6 +753,7 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
               type="submit"
               disabled={isPending || !form.formState.isValid}
               className="flex-1 h-8 text-xs font-semibold"
+              data-testid="saveButton"
             >
               {isPending ? (
                 <>
@@ -772,6 +773,7 @@ export function KumbaraForm({ onSuccess, onCancel }: KumbaraFormProps) {
               onClick={onCancel}
               disabled={isPending}
               className="h-8 px-4 text-xs"
+              data-testid="cancelButton"
             >
               <span className="mr-1.5">✖️</span>
               İptal

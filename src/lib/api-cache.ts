@@ -41,7 +41,7 @@ class SmartCache<T> implements APIResponseCache<T> {
 
   get(key: string): T | null {
     const entry = this.cache.get(key);
-    
+
     if (!entry) {
       this.stats.misses++;
       return null;
@@ -58,7 +58,7 @@ class SmartCache<T> implements APIResponseCache<T> {
     entry.accessCount++;
     entry.lastAccessed = Date.now();
     this.stats.hits++;
-    
+
     return entry.data;
   }
 
@@ -133,7 +133,7 @@ class SmartCache<T> implements APIResponseCache<T> {
       }
     }
 
-    expiredKeys.forEach(key => this.cache.delete(key));
+    expiredKeys.forEach((key) => this.cache.delete(key));
   }
 
   destroy(): void {
@@ -212,9 +212,7 @@ export function useCachedQuery<T>({
   gcTime?: number;
 } & Parameters<typeof useQuery<T>>[0]) {
   const cache = getCache<T>(dataType);
-  const queryClient = useQueryClient();
   const cacheKey = generateCacheKey(endpoint, params);
-  const requestId = useRef<string>('');
 
   const query = useQuery<T>({
     ...queryOptions,
@@ -227,16 +225,18 @@ export function useCachedQuery<T>({
       }
 
       // Fetch fresh data
-      const response = await fetch(`${endpoint}${params ? `?${  new URLSearchParams(params).toString()}` : ''}`);
+      const response = await fetch(
+        `${endpoint}${params ? `?${new URLSearchParams(params).toString()}` : ''}`
+      );
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       // Cache the response
       cache.set(cacheKey, data);
-      
+
       return data;
     },
     enabled,
@@ -252,59 +252,74 @@ export function usePrefetchWithCache() {
   const queryClient = useQueryClient();
   const prefetchControllers = useRef(new Map<string, AbortController>());
 
-  const prefetch = useCallback(async <T>({
-    endpoint,
-    params,
-    dataType = 'default',
-    priority = 'low', // 'low' | 'normal' | 'high'
-  }: {
-    endpoint: string;
-    params?: Record<string, any>;
-    dataType?: string;
-    priority?: 'low' | 'normal' | 'high';
-  }) => {
-    const cacheKey = generateCacheKey(endpoint, params);
-    const cache = getCache<T>(dataType);
-    
-    // Skip if already cached and fresh
-    if (cache.get(cacheKey)) {
-      return;
-    }
+  const prefetch = useCallback(
+    async <T>({
+      endpoint,
+      params,
+      dataType = 'default',
+      priority = 'low', // 'low' | 'normal' | 'high'
+    }: {
+      endpoint: string;
+      params?: Record<string, any>;
+      dataType?: string;
+      priority?: 'low' | 'normal' | 'high';
+    }) => {
+      const cacheKey = generateCacheKey(endpoint, params);
+      const cache = getCache<T>(dataType);
 
-    // Cancel previous prefetch if exists
-    const controller = prefetchControllers.current.get(cacheKey);
-    if (controller) {
-      controller.abort();
-    }
-
-    // Create new controller
-    const newController = new AbortController();
-    prefetchControllers.current.set(cacheKey, newController);
-
-    try {
-      const response = await fetch(`${endpoint}${params ? `?${  new URLSearchParams(params).toString()}` : ''}`, {
-        signal: newController.signal,
-        priority: priority as any,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Prefetch Error: ${response.status}`);
+      // Skip if already cached and fresh
+      if (cache.get(cacheKey)) {
+        return;
       }
 
-      const data = await response.json();
-      cache.set(cacheKey, data);
-      
-      // Update React Query cache
-      queryClient.setQueryData([endpoint, params], data);
-      
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.warn('Prefetch failed:', error);
+      // Cancel previous prefetch if exists
+      const controller = prefetchControllers.current.get(cacheKey);
+      if (controller) {
+        controller.abort();
       }
-    } finally {
-      prefetchControllers.current.delete(cacheKey);
-    }
-  }, [queryClient]);
+
+      // Create new controller
+      const newController = new AbortController();
+      prefetchControllers.current.set(cacheKey, newController);
+
+      try {
+        const url = `${endpoint}${params ? `?${new URLSearchParams(params).toString()}` : ''}`;
+        const init: RequestInit = { signal: newController.signal };
+
+        // Safely attempt to set fetch priority if the environment supports it
+        try {
+          // Some browsers throw when unknown init fields are provided; probe support first
+          // Using Request constructor to detect support without sending a network request
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          new Request(url, { priority: priority as any });
+          // If we reach here, assign priority to init for fetch
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (init as any).priority = priority;
+        } catch {
+          // Ignore unsupported priority; proceed without it
+        }
+
+        const response = await fetch(url, init);
+
+        if (!response.ok) {
+          throw new Error(`Prefetch Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        cache.set(cacheKey, data);
+
+        // Update React Query cache
+        queryClient.setQueryData([endpoint, params], data);
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.warn('Prefetch failed:', error);
+        }
+      } finally {
+        prefetchControllers.current.delete(cacheKey);
+      }
+    },
+    [queryClient]
+  );
 
   const clearPrefetch = useCallback((endpoint: string, params?: Record<string, any>) => {
     const cacheKey = generateCacheKey(endpoint, params);
@@ -322,14 +337,14 @@ export function usePrefetchWithCache() {
 export function useCacheStats() {
   const getCacheStats = useCallback(() => {
     const stats: Record<string, any> = {};
-    
+
     for (const [dataType, cache] of cacheInstances.entries()) {
       stats[dataType] = {
         size: cache.size(),
         ...cache.getStats(),
       };
     }
-    
+
     return stats;
   }, []);
 
@@ -340,38 +355,44 @@ export function useCacheStats() {
 export function useInvalidateCache() {
   const queryClient = useQueryClient();
 
-  const invalidateEndpoint = useCallback((endpoint: string, dataType?: string) => {
-    // Clear cache
-    if (dataType) {
-      const cache = getCache(dataType);
-      cache.clear();
-    } else {
-      // Clear all caches
-      for (const cache of cacheInstances.values()) {
+  const invalidateEndpoint = useCallback(
+    (endpoint: string, dataType?: string) => {
+      // Clear cache
+      if (dataType) {
+        const cache = getCache(dataType);
         cache.clear();
+      } else {
+        // Clear all caches
+        for (const cache of cacheInstances.values()) {
+          cache.clear();
+        }
       }
-    }
 
-    // Invalidate React Query cache
-    queryClient.invalidateQueries({ queryKey: [endpoint] });
-  }, [queryClient]);
+      // Invalidate React Query cache
+      queryClient.invalidateQueries({ queryKey: [endpoint] });
+    },
+    [queryClient]
+  );
 
-  const invalidatePattern = useCallback((pattern: string) => {
-    // Clear matching caches
-    for (const [dataType, cache] of cacheInstances.entries()) {
-      if (dataType.includes(pattern)) {
-        cache.clear();
+  const invalidatePattern = useCallback(
+    (pattern: string) => {
+      // Clear matching caches
+      for (const [dataType, cache] of cacheInstances.entries()) {
+        if (dataType.includes(pattern)) {
+          cache.clear();
+        }
       }
-    }
 
-    // Invalidate matching queries
-    queryClient.invalidateQueries({ 
-      predicate: (query) => {
-        const firstKey = query.queryKey[0];
-        return typeof firstKey === 'string' && firstKey.includes(pattern);
-      }
-    });
-  }, [queryClient]);
+      // Invalidate matching queries
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const firstKey = query.queryKey[0];
+          return typeof firstKey === 'string' && firstKey.includes(pattern);
+        },
+      });
+    },
+    [queryClient]
+  );
 
   return { invalidateEndpoint, invalidatePattern };
 }

@@ -62,7 +62,7 @@ function FieldWithValidation({
   validation,
   required,
   children,
-  errorId
+  errorId,
 }: FieldWithValidationProps) {
   const getValidationIcon = () => {
     switch (validation) {
@@ -87,11 +87,7 @@ function FieldWithValidation({
         </div>
       </div>
       {error && (
-        <p
-          id={errorId}
-          className="text-sm text-red-600 flex items-center gap-1"
-          role="alert"
-        >
+        <p id={errorId} className="text-sm text-red-600 flex items-center gap-1" role="alert">
           <AlertCircle className="h-4 w-4" />
           {error}
         </p>
@@ -104,15 +100,17 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
-  const [fieldValidation, setFieldValidation] = useState<Record<string, 'valid' | 'invalid' | 'pending'>>({});
+  const [fieldValidation, setFieldValidation] = useState<
+    Record<string, 'valid' | 'invalid' | 'pending'>
+  >({});
 
   // Real-time field validation
   const validateField = async (fieldName: keyof DonationFormData, value: unknown) => {
     try {
       await donationSchema.shape[fieldName].parseAsync(value);
-      setFieldValidation(prev => ({ ...prev, [fieldName]: 'valid' }));
+      setFieldValidation((prev) => ({ ...prev, [fieldName]: 'valid' }));
     } catch {
-      setFieldValidation(prev => ({ ...prev, [fieldName]: 'invalid' }));
+      setFieldValidation((prev) => ({ ...prev, [fieldName]: 'invalid' }));
     }
   };
 
@@ -156,12 +154,12 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
           const formData = new FormData();
           formData.append('file', receiptFile);
           formData.append('bucket', 'receipts');
-          
+
           const response = await fetch('/api/storage/upload', {
             method: 'POST',
             body: formData,
           });
-          
+
           if (response.ok) {
             const result = await response.json();
             uploadedFileId = result.data?.fileId;
@@ -185,13 +183,13 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
   };
 
   return (
-  <Card className="w-full max-w-2xl mx-auto relative">
-  <CardHeader>
-  <CardTitle>Yeni Bağış Ekle</CardTitle>
-  <CardDescription>Bağış bilgilerini girerek yeni kayıt oluşturun</CardDescription>
-  </CardHeader>
-  <CardContent className="relative">
-  {/* Loading Overlay */}
+    <Card className="w-full max-w-2xl mx-auto relative">
+      <CardHeader>
+        <CardTitle>Yeni Bağış Ekle</CardTitle>
+        <CardDescription>Bağış bilgilerini girerek yeni kayıt oluşturun</CardDescription>
+      </CardHeader>
+      <CardContent className="relative">
+        {/* Loading Overlay */}
         {isSubmitting && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
             <div className="flex flex-col items-center gap-3 p-6 bg-background rounded-lg shadow-lg border">
@@ -207,21 +205,21 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
             <h3 className="text-lg font-medium">Donör Bilgileri</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FieldWithValidation
-            label="Donör Adı"
-            error={errors.donor_name?.message}
-            validation={fieldValidation.donor_name}
-            required
-            errorId="donor_name-error"
-            >
+              <FieldWithValidation
+                label="Donör Adı"
+                error={errors.donor_name?.message}
+                validation={fieldValidation.donor_name}
+                required
+                errorId="donor_name-error"
+              >
                 <Input
-                id="donor_name"
-              {...register('donor_name')}
-              placeholder="Ahmet Yılmaz"
-              onChange={(e) => {
-              register('donor_name').onChange(e);
-                if (e.target.value.length > 0) {
-                    validateField('donor_name', e.target.value);
+                  id="donor_name"
+                  {...register('donor_name')}
+                  placeholder="Ahmet Yılmaz"
+                  onChange={(e) => {
+                    register('donor_name').onChange(e);
+                    if (e.target.value.length > 0) {
+                      validateField('donor_name', e.target.value);
                     }
                   }}
                   aria-describedby={errors.donor_name ? 'donor_name-error' : undefined}
@@ -248,13 +246,13 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
 
                     // Format as 0555 123 45 67
                     if (value.length >= 4) {
-                      value = `${value.slice(0, 4)  } ${  value.slice(4)}`;
+                      value = `${value.slice(0, 4)} ${value.slice(4)}`;
                     }
                     if (value.length >= 7) {
-                      value = `${value.slice(0, 8)  } ${  value.slice(8)}`;
+                      value = `${value.slice(0, 8)} ${value.slice(8)}`;
                     }
                     if (value.length >= 10) {
-                      value = `${value.slice(0, 11)  } ${  value.slice(11)}`;
+                      value = `${value.slice(0, 11)} ${value.slice(11)}`;
                     }
 
                     e.target.value = value;
@@ -272,16 +270,16 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
             </div>
 
             <FieldWithValidation
-            label="Email"
-            error={errors.donor_email?.message}
-            validation={fieldValidation.donor_email}
-            errorId="donor_email-error"
+              label="Email"
+              error={errors.donor_email?.message}
+              validation={fieldValidation.donor_email}
+              errorId="donor_email-error"
             >
-            <Input
-              id="donor_email"
-              type="email"
-            {...register('donor_email')}
-              placeholder="ahmet@example.com"
+              <Input
+                id="donor_email"
+                type="email"
+                {...register('donor_email')}
+                placeholder="ahmet@example.com"
                 onChange={(e) => {
                   register('donor_email').onChange(e);
                   if (e.target.value.length > 0) {
@@ -301,16 +299,16 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FieldWithValidation
-              label="Tutar"
-              error={errors.amount?.message}
-              validation={fieldValidation.amount}
-              required
-              errorId="amount-error"
+                label="Tutar"
+                error={errors.amount?.message}
+                validation={fieldValidation.amount}
+                required
+                errorId="amount-error"
               >
-              <Input
-              id="amount"
-                {...register('amount', { valueAsNumber: true })}
-                placeholder="1.000,00"
+                <Input
+                  id="amount"
+                  {...register('amount', { valueAsNumber: true })}
+                  placeholder="1.000,00"
                   onChange={(e) => {
                     // Format currency input for Turkish locale
                     let value = e.target.value.replace(/[^\d,]/g, '');
@@ -318,12 +316,12 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
                     // Allow only one comma
                     const parts = value.split(',');
                     if (parts.length > 2) {
-                      value = `${parts[0]  },${  parts.slice(1).join('')}`;
+                      value = `${parts[0]},${parts.slice(1).join('')}`;
                     }
 
                     // Limit decimal places to 2
                     if (parts[1] && parts[1].length > 2) {
-                      value = `${parts[0]  },${  parts[1].substring(0, 2)}`;
+                      value = `${parts[0]},${parts[1].substring(0, 2)}`;
                     }
 
                     e.target.value = value;
@@ -342,23 +340,23 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
               </FieldWithValidation>
 
               <FieldWithValidation
-              label="Para Birimi"
-              error={errors.currency?.message}
-              validation={fieldValidation.currency}
-              required
-              errorId="currency-error"
+                label="Para Birimi"
+                error={errors.currency?.message}
+                validation={fieldValidation.currency}
+                required
+                errorId="currency-error"
               >
-              <Select
-              value={watch('currency')}
-              onValueChange={(value) => {
-              setValue('currency', value as 'TRY' | 'USD' | 'EUR');
-              validateField('currency', value);
-              }}
-              disabled={isSubmitting}
-              >
-                <SelectTrigger aria-describedby={errors.currency ? 'currency-error' : undefined}>
-                <SelectValue placeholder="Para birimi seçin" />
-                </SelectTrigger>
+                <Select
+                  value={watch('currency')}
+                  onValueChange={(value) => {
+                    setValue('currency', value as 'TRY' | 'USD' | 'EUR');
+                    validateField('currency', value);
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger aria-describedby={errors.currency ? 'currency-error' : undefined}>
+                    <SelectValue placeholder="Para birimi seçin" />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="TRY">₺ TRY</SelectItem>
                     <SelectItem value="USD">$ USD</SelectItem>
@@ -368,15 +366,15 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
               </FieldWithValidation>
 
               <FieldWithValidation
-              label="Makbuz No"
-              error={errors.receipt_number?.message}
-              validation={fieldValidation.receipt_number}
-              required
-              errorId="receipt_number-error"
+                label="Makbuz No"
+                error={errors.receipt_number?.message}
+                validation={fieldValidation.receipt_number}
+                required
+                errorId="receipt_number-error"
               >
-              <Input
-              id="receipt_number"
-                {...register('receipt_number')}
+                <Input
+                  id="receipt_number"
+                  {...register('receipt_number')}
                   placeholder="MB2024001"
                   onChange={(e) => {
                     register('receipt_number').onChange(e);
@@ -392,52 +390,54 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FieldWithValidation
-            label="Bağış Türü"
-            error={errors.donation_type?.message}
-            validation={fieldValidation.donation_type}
-            required
-            errorId="donation_type-error"
-            >
-            <Input
-            id="donation_type"
-              {...register('donation_type')}
-                placeholder="Nakdi, Ayni, Gıda..."
+              <FieldWithValidation
+                label="Bağış Türü"
+                error={errors.donation_type?.message}
+                validation={fieldValidation.donation_type}
+                required
+                errorId="donation_type-error"
+              >
+                <Input
+                  id="donation_type"
+                  {...register('donation_type')}
+                  placeholder="Nakdi, Ayni, Gıda..."
                   onChange={(e) => {
-                  register('donation_type').onChange(e);
-                if (e.target.value.length > 0) {
-                  validateField('donation_type', e.target.value);
-              }
-            }}
-              aria-describedby={errors.donation_type ? 'donation_type-error' : undefined}
-            aria-invalid={!!errors.donation_type}
-            disabled={isSubmitting}
-            />
-            </FieldWithValidation>
+                    register('donation_type').onChange(e);
+                    if (e.target.value.length > 0) {
+                      validateField('donation_type', e.target.value);
+                    }
+                  }}
+                  aria-describedby={errors.donation_type ? 'donation_type-error' : undefined}
+                  aria-invalid={!!errors.donation_type}
+                  disabled={isSubmitting}
+                />
+              </FieldWithValidation>
 
-            <FieldWithValidation
-            label="Ödeme Yöntemi"
-            error={errors.payment_method?.message}
-            validation={fieldValidation.payment_method}
-            required
-            errorId="payment_method-error"
-            >
-            <Select
-            value={watch('payment_method')}
-              onValueChange={(value) => {
-                  setValue('payment_method', value);
+              <FieldWithValidation
+                label="Ödeme Yöntemi"
+                error={errors.payment_method?.message}
+                validation={fieldValidation.payment_method}
+                required
+                errorId="payment_method-error"
+              >
+                <Select
+                  value={watch('payment_method')}
+                  onValueChange={(value) => {
+                    setValue('payment_method', value);
                     validateField('payment_method', value);
                   }}
                   disabled={isSubmitting}
-              >
-                <SelectTrigger aria-describedby={errors.payment_method ? 'payment_method-error' : undefined}>
-                <SelectValue placeholder="Ödeme yöntemi seçin" />
-              </SelectTrigger>
-              <SelectContent>
-                  <SelectItem value="Nakit">Nakit</SelectItem>
-                  <SelectItem value="Kredi Kartı">Kredi Kartı</SelectItem>
-                <SelectItem value="Banka Transferi">Banka Transferi</SelectItem>
-                  <SelectItem value="Havale">Havale</SelectItem>
+                >
+                  <SelectTrigger
+                    aria-describedby={errors.payment_method ? 'payment_method-error' : undefined}
+                  >
+                    <SelectValue placeholder="Ödeme yöntemi seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Nakit">Nakit</SelectItem>
+                    <SelectItem value="Kredi Kartı">Kredi Kartı</SelectItem>
+                    <SelectItem value="Banka Transferi">Banka Transferi</SelectItem>
+                    <SelectItem value="Havale">Havale</SelectItem>
                     <SelectItem value="EFT">EFT</SelectItem>
                     <SelectItem value="Çek">Çek</SelectItem>
                   </SelectContent>
@@ -495,28 +495,34 @@ export function DonationForm({ onSuccess, onCancel }: DonationFormProps) {
 
           {/* Form Actions */}
           <div className="flex flex-col sm:flex-row gap-4 pt-6">
-          <Button type="submit" disabled={isSubmitting} className="flex-1 sm:flex-none">
-          {isSubmitting ? (
-          <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Kaydediliyor...
-          </>
-          ) : (
-          'Bağış Ekle'
-          )}
-          </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 sm:flex-none"
+              data-testid="saveButton"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Kaydediliyor...
+                </>
+              ) : (
+                'Bağış Ekle'
+              )}
+            </Button>
 
-          {onCancel && (
-          <Button
-          type="button"
-          variant="outline"
-          onClick={onCancel}
-          disabled={isSubmitting}
-          className="flex-1 sm:flex-none"
-          >
-          İptal
-          </Button>
-          )}
+            {onCancel && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={isSubmitting}
+                className="flex-1 sm:flex-none"
+                data-testid="cancelButton"
+              >
+                İptal
+              </Button>
+            )}
           </div>
         </form>
       </CardContent>

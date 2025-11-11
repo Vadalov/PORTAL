@@ -7,7 +7,13 @@
 
 import { convexApiClient } from './convex-api-client';
 import { convexSystemSettings } from '@/lib/convex/api';
-import type { AidApplicationDocument } from '@/types/database';
+import type {
+  AidApplicationDocument,
+  CreateDocumentData,
+  UpdateDocumentData,
+  ConvexResponse,
+  QueryParams,
+} from '@/types/database';
 import type { Id } from '@/convex/_generated/dataModel';
 
 // Export as default for backward compatibility
@@ -15,12 +21,7 @@ const api = convexApiClient;
 
 export default api;
 export { convexApiClient as api };
-export type {
-  ConvexResponse,
-  QueryParams,
-  CreateDocumentData,
-  UpdateDocumentData,
-} from '@/types/database';
+export type { ConvexResponse, QueryParams, CreateDocumentData, UpdateDocumentData };
 
 // Export empty objects for removed APIs to prevent import errors
 // TODO: Implement these or remove usage from components
@@ -130,8 +131,10 @@ export const aidApplicationsApi = {
   getAidApplication: (id: string) => api.aidApplications.getAidApplication(id),
   updateStage: (id: string, stage: AidApplicationDocument['stage']) =>
     api.aidApplications.updateStage(id, stage),
-  getAidApplications: (params?: any) => api.aidApplications.getAidApplications(params),
-  createAidApplication: (data: any) => api.aidApplications.createAidApplication(data),
+  getAidApplications: (params?: Record<string, unknown>) =>
+    api.aidApplications.getAidApplications(params),
+  createAidApplication: (data: CreateDocumentData<AidApplicationDocument>) =>
+    api.aidApplications.createAidApplication(data),
 };
 
 // Export scholarship APIs

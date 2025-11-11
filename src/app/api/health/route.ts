@@ -48,9 +48,9 @@ export async function GET(request: Request) {
   }
 
   // Run comprehensive checks
-  let connectivityReport: any = null;
+  let connectivityReport: Record<string, unknown> | null = null;
   let connectivityError: string | null = null;
-  let validationReport: any = null;
+  let validationReport: Record<string, unknown> | null = null;
 
   if (provider === 'convex' && convexUrl) {
     try {
@@ -131,12 +131,24 @@ export async function GET(request: Request) {
   // Aggregate recommendations
   const recommendations: string[] = [];
 
-  if (validationReport?.summary.errors > 0) {
+  if (
+    validationReport?.summary &&
+    typeof validationReport.summary === 'object' &&
+    'errors' in validationReport.summary &&
+    (validationReport.summary as { errors: number }).errors > 0
+  ) {
     recommendations.push('Fix environment variable configuration errors');
   }
 
-  if (connectivityReport && connectivityReport.summary.failedTests > 0) {
-    recommendations.push(...connectivityReport.recommendations);
+  if (
+    connectivityReport &&
+    connectivityReport.summary &&
+    typeof connectivityReport.summary === 'object' &&
+    'failedTests' in connectivityReport.summary &&
+    (connectivityReport.summary as { failedTests: number }).failedTests > 0
+  ) {
+    const recs = connectivityReport.recommendations as string[] | undefined;
+    if (recs) recommendations.push(...recs);
   }
 
   // Determine status code
@@ -144,7 +156,10 @@ export async function GET(request: Request) {
   if (
     provider === 'convex' &&
     connectivityReport &&
-    connectivityReport.summary.overallHealth < 50
+    connectivityReport.summary &&
+    typeof connectivityReport.summary === 'object' &&
+    'overallHealth' in connectivityReport.summary &&
+    (connectivityReport.summary as { overallHealth: number }).overallHealth < 50
   ) {
     statusCode = 503; // Service unavailable
   }

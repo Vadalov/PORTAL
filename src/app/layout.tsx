@@ -75,8 +75,12 @@ export default function RootLayout({
           <LazyWebVitalsTracker />
           {children}
         </Providers>
-        <SpeedInsights />
-        <Analytics />
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            <SpeedInsights />
+            <Analytics />
+          </>
+        )}
       </body>
     </html>
   );

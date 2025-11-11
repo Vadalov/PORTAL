@@ -8,9 +8,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { PageLayout } from '@/components/layouts/PageLayout';
@@ -19,6 +40,7 @@ import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { Id } from '@/convex/_generated/dataModel';
+import { useAuthStore } from '@/stores/authStore';
 
 type TransactionType = 'deposit' | 'withdrawal' | 'transfer';
 
@@ -76,12 +98,18 @@ export default function CashVaultPage() {
     }
 
     try {
+      const currentUser = useAuthStore.getState().user;
+      if (!currentUser?.id) {
+        toast.error('Kullanıcı bilgisi bulunamadı');
+        return;
+      }
+
       await createTransaction({
         transaction_type: transactionType,
         amount: amountNumber,
         category,
         receipt_number: receiptNumber || undefined,
-        authorized_by: 'TODO_USER_ID' as Id<'users'>, // TODO: Get from auth context
+        authorized_by: currentUser.id as Id<'users'>,
         notes: notes || undefined,
       });
 
@@ -108,24 +136,20 @@ export default function CashVaultPage() {
     }).format(amount);
   };
 
-  const cashTransactions = recentTransactions?.documents?.filter(
-    (record) => record.payment_method === 'cash'
-  ) || [];
+  const cashTransactions =
+    recentTransactions?.documents?.filter((record) => record.payment_method === 'cash') || [];
 
   const isLowBalance = vaultBalance && vaultBalance.balance < MINIMUM_BALANCE_THRESHOLD;
 
   return (
-    <PageLayout
-      title="Nakdi Vezne"
-      description="Nakdi yardım kasasını yönetin"
-    >
+    <PageLayout title="Nakdi Vezne" description="Nakdi yardım kasasını yönetin">
       {/* Low Balance Alert */}
       {isLowBalance && (
         <Alert variant="destructive" className="mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Kasa bakiyesi minimum eşik değerin ({formatCurrency(MINIMUM_BALANCE_THRESHOLD)}) altında!
-            Mevcut bakiye: {formatCurrency(vaultBalance.balance)}
+            Kasa bakiyesi minimum eşik değerin ({formatCurrency(MINIMUM_BALANCE_THRESHOLD)})
+            altında! Mevcut bakiye: {formatCurrency(vaultBalance.balance)}
           </AlertDescription>
         </Alert>
       )}
@@ -185,9 +209,7 @@ export default function CashVaultPage() {
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Kasa İşlemi</DialogTitle>
-              <DialogDescription>
-                Kasa giriş veya çıkış işlemi oluşturun
-              </DialogDescription>
+              <DialogDescription>Kasa giriş veya çıkış işlemi oluşturun</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
@@ -274,9 +296,7 @@ export default function CashVaultPage() {
       <Card>
         <CardHeader>
           <CardTitle>İşlem Geçmişi</CardTitle>
-          <CardDescription>
-            Son {cashTransactions.length} kasa işlemi
-          </CardDescription>
+          <CardDescription>Son {cashTransactions.length} kasa işlemi</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -302,7 +322,9 @@ export default function CashVaultPage() {
                 cashTransactions.map((transaction) => (
                   <TableRow key={transaction._id}>
                     <TableCell>
-                      {format(new Date(transaction.transaction_date), 'dd MMM yyyy HH:mm', { locale: tr })}
+                      {format(new Date(transaction.transaction_date), 'dd MMM yyyy HH:mm', {
+                        locale: tr,
+                      })}
                     </TableCell>
                     <TableCell>
                       {transaction.record_type === 'income' ? (
@@ -326,9 +348,7 @@ export default function CashVaultPage() {
                       {transaction.description}
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={transaction.status === 'approved' ? 'default' : 'secondary'}
-                      >
+                      <Badge variant={transaction.status === 'approved' ? 'default' : 'secondary'}>
                         {transaction.status === 'approved' ? 'Onaylı' : 'Beklemede'}
                       </Badge>
                     </TableCell>
