@@ -55,14 +55,14 @@ yargs(hideBin(process.argv))
     },
     (argv: unknown) => {
       const args = argv as Argv;
-      console.log('Generating documentation with the following options:');
-      console.log(args);
+      console.warn('Generating documentation with the following options:');
+      console.warn(args);
 
       if (args.type === 'structure') {
         if (args.format === 'md') {
           const markdown = generateStructureMarkdown(args.target);
           fs.writeFileSync('geminidocs/structure.md', markdown);
-          console.log('Successfully generated structure.md in geminidocs/');
+          console.warn('Successfully generated structure.md in geminidocs/');
         } else {
           console.error('JSON and YAML formats are not yet supported for structure documentation.');
         }

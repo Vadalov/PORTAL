@@ -289,6 +289,7 @@ export function FileUpload({
           onChange={handleInputChange}
           disabled={disabled}
           className="hidden"
+          data-testid="fileUploadInput"
         />
 
         {/* Upload Area */}
@@ -305,10 +306,16 @@ export function FileUpload({
           onDragOver={handleDrag}
           onDrop={handleDrop}
           onClick={() => !disabled && fileInputRef.current?.click()}
+          data-testid="fileUploadDropzone"
         >
           {selectedFile ? (
             <div className={cn(compact ? 'space-y-1' : 'space-y-4')}>
-              <div className={cn('flex items-center justify-center', compact ? 'space-x-2' : 'space-x-4')}>
+              <div
+                className={cn(
+                  'flex items-center justify-center',
+                  compact ? 'space-x-2' : 'space-x-4'
+                )}
+              >
                 {preview ? (
                   <div className={cn('relative group', compact ? 'w-8 h-8' : 'w-16 h-16')}>
                     <NextImage
@@ -316,7 +323,10 @@ export function FileUpload({
                       alt="Preview"
                       width={compact ? 32 : 64}
                       height={compact ? 32 : 64}
-                      className={cn('object-cover rounded-lg border', compact ? 'w-8 h-8' : 'w-16 h-16')}
+                      className={cn(
+                        'object-cover rounded-lg border',
+                        compact ? 'w-8 h-8' : 'w-16 h-16'
+                      )}
                       unoptimized
                     />
                     <Button
@@ -338,14 +348,21 @@ export function FileUpload({
                   </div>
                 )}
                 <div className="text-left flex-1">
-                  <p className={cn('font-medium text-foreground', compact && 'text-[10px]')}>{selectedFile.name}</p>
+                  <p className={cn('font-medium text-foreground', compact && 'text-[10px]')}>
+                    {selectedFile.name}
+                  </p>
                   <p className={cn(compact ? 'text-[9px]' : 'text-sm', 'text-muted-foreground')}>
                     {formatFileSize(selectedFile.size)}
                   </p>
                   {uploading && (
                     <div className={cn('mt-2', compact && 'mt-1')}>
                       <Progress value={uploadProgress} className={cn(compact ? 'h-0.5' : 'h-1')} />
-                      <p className={cn(compact ? 'text-[9px]' : 'text-xs', 'text-muted-foreground flex items-center gap-1')}>
+                      <p
+                        className={cn(
+                          compact ? 'text-[9px]' : 'text-xs',
+                          'text-muted-foreground flex items-center gap-1'
+                        )}
+                      >
                         <Loader2 className={cn(compact ? 'h-2 w-2' : 'h-3 w-3', 'animate-spin')} />
                         Yükleniyor... {uploadProgress}%
                       </p>
@@ -371,9 +388,15 @@ export function FileUpload({
             </div>
           ) : (
             <div className={cn(compact ? 'space-y-1' : 'space-y-2')}>
-              <Upload className={cn('mx-auto text-muted-foreground', compact ? 'h-6 w-6' : 'h-12 w-12')} />
+              <Upload
+                className={cn('mx-auto text-muted-foreground', compact ? 'h-6 w-6' : 'h-12 w-12')}
+              />
               <div>
-                <p className={cn('font-medium text-foreground', compact ? 'text-[10px]' : 'text-sm')}>{placeholder}</p>
+                <p
+                  className={cn('font-medium text-foreground', compact ? 'text-[10px]' : 'text-sm')}
+                >
+                  {placeholder}
+                </p>
                 {!compact && (
                   <p className="text-xs text-muted-foreground">
                     Maksimum {maxSize}MB • Desteklenen formatlar: {accept}
@@ -385,7 +408,9 @@ export function FileUpload({
         </div>
 
         {/* Error Message */}
-        {error && <p className={cn(compact ? 'text-[10px]' : 'text-sm', 'text-destructive')}>{error}</p>}
+        {error && (
+          <p className={cn(compact ? 'text-[10px]' : 'text-sm', 'text-destructive')}>{error}</p>
+        )}
       </div>
 
       {/* Preview Modal - XSS Safe */}

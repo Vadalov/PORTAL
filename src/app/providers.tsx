@@ -120,7 +120,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   // Show loading spinner until hydration complete (prevents hydration mismatch)
   if (!hasHydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
           <p className="text-sm text-gray-600">Uygulama yükleniyor...</p>

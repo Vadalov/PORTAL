@@ -151,14 +151,31 @@ export async function getUserFromSession(session: AuthSession | null): Promise<S
       return null;
     }
 
+    const roleString = (user.role || '').toString();
+    const roleUpper = roleString.toUpperCase();
+    const baseModulePermissions = Object.values(MODULE_PERMISSIONS);
+
+    let effectivePermissions: PermissionValue[] = Array.isArray(user.permissions)
+      ? (user.permissions as PermissionValue[])
+      : [];
+
+    // Admin-level fallback: if role indicates ADMIN or BAŞKAN, grant base module access and user management
+    const looksAdmin = roleUpper.includes('ADMIN') || roleUpper.includes('BAŞKAN');
+    if (looksAdmin) {
+      const withAdmin = new Set<PermissionValue>([
+        ...effectivePermissions,
+        ...baseModulePermissions,
+        SPECIAL_PERMISSIONS.USERS_MANAGE,
+      ]);
+      effectivePermissions = Array.from(withAdmin);
+    }
+
     return {
       id: user._id,
       email: user.email || '',
       name: user.name || '',
-      role: user.role || 'Personel',
-      permissions: Array.isArray(user.permissions)
-        ? (user.permissions as PermissionValue[])
-        : [],
+      role: roleString || 'Personel',
+      permissions: effectivePermissions,
       isActive: user.isActive,
       labels: user.labels || [],
     };

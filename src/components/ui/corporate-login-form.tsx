@@ -12,17 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { 
-  Eye, 
-  EyeOff, 
-  Mail, 
-  Lock, 
-  Shield, 
-  Building2,
-  AlertCircle,
-  CheckCircle2,
-  ArrowRight
-} from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Shield, Building2, AlertCircle, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -32,10 +22,10 @@ interface CorporateLoginFormProps {
   redirectTo?: string;
 }
 
-export function CorporateLoginForm({ 
-  className = '', 
+export function CorporateLoginForm({
+  className = '',
   showCorporateBranding = true,
-  redirectTo = '/genel' 
+  redirectTo = '/genel',
 }: CorporateLoginFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -46,11 +36,11 @@ export function CorporateLoginForm({
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const initRef = useRef(false);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
-  
+
   const { login, isAuthenticated, initializeAuth } = useAuthStore();
 
   // Handle hydration
@@ -125,7 +115,11 @@ export function CorporateLoginForm({
     if (/[^A-Za-z\d]/.test(password)) strength += 1;
     else feedback.push('Özel karakter');
 
-    return { strength, feedback, level: strength <= 2 ? 'weak' : strength <= 3 ? 'medium' : 'strong' };
+    return {
+      strength,
+      feedback,
+      level: strength <= 2 ? 'weak' : strength <= 3 ? 'medium' : 'strong',
+    };
   };
 
   const validatePassword = (password: string): boolean => {
@@ -155,10 +149,10 @@ export function CorporateLoginForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const isEmailValid = validateEmail(email);
     const isPasswordValid = validatePassword(password);
-    
+
     if (!isEmailValid || !isPasswordValid) {
       return;
     }
@@ -173,7 +167,7 @@ export function CorporateLoginForm({
         const rememberData = {
           email,
           timestamp: Date.now(),
-          expires: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days
+          expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
         };
         localStorage.setItem('rememberMe', JSON.stringify(rememberData));
       } else {
@@ -181,16 +175,16 @@ export function CorporateLoginForm({
       }
 
       toast.success('Başarıyla giriş yaptınız', {
-        description: 'Sisteme hoş geldiniz!'
+        description: 'Sisteme hoş geldiniz!',
       });
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : typeof err === 'string' ? err : 'Giriş başarısız';
-      
+
       toast.error('Giriş hatası', {
-        description: errorMessage
+        description: errorMessage,
       });
-      
+
       // Focus on the email field if there's an error
       emailInputRef.current?.focus();
     } finally {
@@ -218,7 +212,7 @@ export function CorporateLoginForm({
           <div className="relative">
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
               className="w-12 h-12 border-4 border-slate-200 border-t-blue-600 rounded-full"
             />
             <motion.div
@@ -236,7 +230,9 @@ export function CorporateLoginForm({
   }
 
   return (
-    <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-50 p-4 ${className}`}>
+    <div
+      className={`min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-50 p-4 ${className}`}
+    >
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -270,12 +266,8 @@ export function CorporateLoginForm({
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg">
               <Building2 className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
-              Dernek Yönetim Sistemi
-            </h1>
-            <p className="text-slate-600">
-              Profesyonel yönetim platformu
-            </p>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Dernek Yönetim Sistemi</h1>
+            <p className="text-slate-600">Profesyonel yönetim platformu</p>
           </motion.div>
         )}
 
@@ -288,9 +280,14 @@ export function CorporateLoginForm({
               Güvenli giriş için bilgilerinizi girin
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+              data-testid="login-form"
+              aria-live="polite"
+            >
               {/* Email Field */}
               <motion.div
                 initial={{ opacity: 0, x: -10 }}
@@ -314,10 +311,13 @@ export function CorporateLoginForm({
                     onKeyPress={(e) => handleKeyPress(e, () => passwordInputRef.current?.focus())}
                     placeholder="ornek@sirket.com"
                     className={cn(
-                      "pl-10 h-11 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20",
-                      emailError && "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                      'pl-10 h-11 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20',
+                      emailError && 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
                     )}
                     required
+                    aria-invalid={!!emailError}
+                    aria-describedby={emailError ? 'email-error' : undefined}
+                    data-testid="login-email"
                   />
                   <AnimatePresence>
                     {emailError && (
@@ -339,6 +339,8 @@ export function CorporateLoginForm({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
                       className="text-sm text-red-600 flex items-center gap-1"
+                      role="alert"
+                      id="email-error"
                     >
                       <AlertCircle className="h-4 w-4" />
                       {emailError}
@@ -370,37 +372,38 @@ export function CorporateLoginForm({
                     onKeyPress={(e) => e.key === 'Enter' && handleSubmit(e)}
                     placeholder="••••••••"
                     className={cn(
-                      "pl-10 pr-10 h-11 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20",
-                      passwordError && "border-red-300 focus:border-red-500 focus:ring-red-500/20"
+                      'pl-10 pr-10 h-11 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500/20',
+                      passwordError && 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
                     )}
                     required
+                    aria-invalid={!!passwordError}
+                    aria-describedby={passwordError ? 'password-error' : undefined}
+                    data-testid="login-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+                    aria-label={showPassword ? 'Parolayı gizle' : 'Parolayı göster'}
+                    aria-pressed={showPassword}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
-                  </div>
+                </div>
 
-                  {/* Password Strength Indicator */}
-                  <AnimatePresence>
+                {/* Password Strength Indicator */}
+                <AnimatePresence>
                   {password && !passwordError && (
-                  <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                  className="space-y-2"
-                  >
-                    <div className="flex gap-1">
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-2"
+                    >
+                      <div className="flex gap-1">
                         {Array.from({ length: 5 }).map((_, i) => {
-                            const strength = getPasswordStrength(password);
-                              return (
+                          const strength = getPasswordStrength(password);
+                          return (
                             <div
                               key={i}
                               className={`h-1 flex-1 rounded-full transition-colors ${
@@ -408,26 +411,29 @@ export function CorporateLoginForm({
                                   ? strength.level === 'weak'
                                     ? 'bg-red-500'
                                     : strength.level === 'medium'
-                                    ? 'bg-yellow-500'
-                                    : 'bg-green-500'
+                                      ? 'bg-yellow-500'
+                                      : 'bg-green-500'
                                   : 'bg-gray-200'
                               }`}
                             />
                           );
                         })}
                       </div>
-                      <p className={`text-xs ${
-                        getPasswordStrength(password).level === 'weak'
-                          ? 'text-red-600'
-                          : getPasswordStrength(password).level === 'medium'
-                          ? 'text-yellow-600'
-                          : 'text-green-600'
-                      }`}>
+                      <p
+                        className={`text-xs ${
+                          getPasswordStrength(password).level === 'weak'
+                            ? 'text-red-600'
+                            : getPasswordStrength(password).level === 'medium'
+                              ? 'text-yellow-600'
+                              : 'text-green-600'
+                        }`}
+                        data-testid="password-strength-label"
+                      >
                         {getPasswordStrength(password).level === 'weak'
                           ? 'Zayıf şifre'
                           : getPasswordStrength(password).level === 'medium'
-                          ? 'Orta seviye şifre'
-                          : 'Güçlü şifre'}
+                            ? 'Orta seviye şifre'
+                            : 'Güçlü şifre'}
                       </p>
                     </motion.div>
                   )}
@@ -440,6 +446,8 @@ export function CorporateLoginForm({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -5 }}
                       className="text-sm text-red-600 flex items-center gap-1"
+                      role="alert"
+                      id="password-error"
                     >
                       <AlertCircle className="h-4 w-4" />
                       {passwordError}
@@ -450,21 +458,19 @@ export function CorporateLoginForm({
 
               {/* Remember Me */}
               <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.35 }}
-              className="flex items-center space-x-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.35 }}
+                className="flex items-center space-x-2"
               >
-              <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked === true)}
-                disabled={isLoading}
-              />
-                <Label
-                  htmlFor="remember"
-                  className="text-sm text-slate-700 cursor-pointer"
-                >
+                <Checkbox
+                  id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  disabled={isLoading}
+                  data-testid="login-remember"
+                />
+                <Label htmlFor="remember" className="text-sm text-slate-700 cursor-pointer">
                   Beni hatırla (7 gün)
                 </Label>
               </motion.div>
@@ -492,12 +498,13 @@ export function CorporateLoginForm({
                   type="submit"
                   disabled={isLoading}
                   className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
+                  data-testid="login-submit"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2">
                       <motion.div
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                         className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
                       />
                       Giriş yapılıyor...
@@ -520,10 +527,8 @@ export function CorporateLoginForm({
               className="mt-6 pt-6 border-t border-slate-200 text-center"
             >
               <p className="text-sm text-slate-600">
-                Destek için: 
-                <span className="text-blue-600 font-medium ml-1">
-                  destek@dernek.com
-                </span>
+                Destek için:
+                <span className="text-blue-600 font-medium ml-1">destek@dernek.com</span>
               </p>
             </motion.div>
           </CardContent>
@@ -532,4 +537,3 @@ export function CorporateLoginForm({
     </div>
   );
 }
-

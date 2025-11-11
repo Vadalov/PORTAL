@@ -7,6 +7,7 @@ import {
   type SessionUser,
 } from '@/lib/auth/session';
 import { getCsrfTokenHeader, validateCsrfToken } from '@/lib/csrf';
+import { SPECIAL_PERMISSIONS } from '@/types/permissions';
 import type { PermissionValue } from '@/types/permissions';
 
 export class ApiAuthError extends Error {
@@ -30,6 +31,12 @@ const hasPermission = (user: SessionUser, permission?: PermissionValue | string)
   if (!permission) {
     return true;
   }
+  const roleUpper = (user.role || '').toUpperCase();
+  const isAdminByRole = roleUpper === 'ADMIN' || roleUpper === 'SUPER_ADMIN';
+  const isAdminByPermission = (user.permissions || []).includes(SPECIAL_PERMISSIONS.USERS_MANAGE);
+  if (isAdminByRole || isAdminByPermission) {
+    return true;
+  }
 
   return (user.permissions || []).includes(permission as PermissionValue);
 };
@@ -39,6 +46,12 @@ const hasAnyPermission = (
   permissions?: Array<PermissionValue | string>
 ): boolean => {
   if (!permissions || permissions.length === 0) {
+    return true;
+  }
+  const roleUpper = (user.role || '').toUpperCase();
+  const isAdminByRole = roleUpper === 'ADMIN' || roleUpper === 'SUPER_ADMIN';
+  const isAdminByPermission = (user.permissions || []).includes(SPECIAL_PERMISSIONS.USERS_MANAGE);
+  if (isAdminByRole || isAdminByPermission) {
     return true;
   }
 

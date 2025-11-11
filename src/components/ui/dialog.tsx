@@ -54,6 +54,8 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
 }) {
+  const autoDescriptionId = React.useId();
+  const describedBy = (props as any)['aria-describedby'] ?? autoDescriptionId;
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -74,8 +76,15 @@ function DialogContent({
           transform: 'translateZ(0)', // GPU acceleration
           backfaceVisibility: 'hidden',
         }}
+        aria-describedby={describedBy}
         {...props}
       >
+        {/* Provide an accessible description if none is supplied */}
+        {!(props as any)['aria-describedby'] && (
+          <DialogDescription id={autoDescriptionId} className="sr-only">
+            Dialog içerik alanı. Lütfen başlık ve içeriği inceleyin.
+          </DialogDescription>
+        )}
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close

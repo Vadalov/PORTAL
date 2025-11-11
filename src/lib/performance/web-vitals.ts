@@ -6,14 +6,6 @@
 
 import { onCLS, onLCP, onFCP, onTTFB, onINP, Metric } from 'web-vitals';
 
-interface VitalMetric {
-  name: string;
-  value: number;
-  id: string;
-  delta: number;
-  rating: 'good' | 'needs-improvement' | 'poor';
-}
-
 /**
  * Send metric to analytics (custom implementation)
  */

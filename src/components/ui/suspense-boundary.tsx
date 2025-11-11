@@ -1,9 +1,9 @@
 'use client';
 
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef } from 'react';
 import { Suspense } from 'react';
 import { LoadingOverlay } from './loading-overlay';
-import { ErrorBoundary } from '../error-boundary';
+import { ErrorBoundary } from './error-boundary';
 
 interface SuspenseBoundaryProps {
   children: ReactNode;
@@ -63,7 +63,6 @@ const FallbackWrapper: React.FC<{
         }
       }
     };
-     
   }, []); // Empty dependency array - only run once when component mounts
 
   if (fallback) {

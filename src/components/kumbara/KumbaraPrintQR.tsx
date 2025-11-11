@@ -1,9 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Download, Printer } from 'lucide-react';
+import { Printer } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface KumbaraQRCode {
@@ -23,7 +21,6 @@ interface KumbaraPrintQRProps {
 }
 
 export function KumbaraPrintQR({ kumbara, qrDataUrl }: KumbaraPrintQRProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('tr-TR', {
@@ -41,7 +38,7 @@ export function KumbaraPrintQR({ kumbara, qrDataUrl }: KumbaraPrintQRProps) {
     toast.success('Yazdırma işlemi başlatıldı');
   };
 
-  const handleDownload = () => {
+  const _handleDownload = () => {
     if (!qrDataUrl) {
       toast.error('QR kod bulunamadı');
       return;

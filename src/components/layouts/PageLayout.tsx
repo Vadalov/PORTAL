@@ -61,7 +61,7 @@ export function PageLayout({
                   <Icon className="h-6 w-6" />
                 </div>
               )}
-              <h1 className="text-3xl font-heading font-bold tracking-tight text-foreground">
+              <h1 className="text-3xl font-heading font-bold tracking-tight text-foreground truncate whitespace-nowrap">
                 {title}
               </h1>
               {badge && (
@@ -71,7 +71,9 @@ export function PageLayout({
               )}
             </div>
             {description && (
-              <p className="text-muted-foreground mt-2 text-sm sm:text-base">{description}</p>
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base truncate">
+                {description}
+              </p>
             )}
           </div>
         </div>

@@ -31,7 +31,7 @@ npm run deploy:vercel
 # 3. Vercel Dashboard'da environment variables ekle ve deploy!
 ```
 
-📖 **[Deployment Rehberi](./DEPLOYMENT_QUICKSTART.md)** | **[Detaylı Dokümantasyon](./docs/VERCEL_DEPLOYMENT.md)**
+📖 **[Deployment Rehberi](./docs/DEPLOYMENT_QUICKSTART.md)**
 
 ## 🏗️ Architecture
 
@@ -56,6 +56,7 @@ npm run deploy:vercel
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Next.js 16**: React framework with App Router
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling
@@ -64,12 +65,14 @@ npm run deploy:vercel
 - **Zod**: Runtime type validation
 
 ### Backend
+
 - **Convex**: Real-time database and API
 - **Zustand**: Lightweight state management
 - **TanStack Query**: Server state management
 - **Sentry**: Error monitoring
 
 ### Development
+
 - **Vitest**: Unit testing framework
 - **Playwright**: End-to-end testing
 - **ESLint + Prettier**: Code quality
@@ -132,14 +135,14 @@ npm run clean:all        # Clean all build artifacts
 
 ## 👥 User Roles & Permissions
 
-| Role | Permissions |
-|------|-------------|
-| **SUPER_ADMIN** | Full system access |
-| **ADMIN** | Administrative functions |
-| **MANAGER** | Business operations |
-| **MEMBER** | Standard user access |
-| **VIEWER** | Read-only access |
-| **VOLUNTEER** | Limited functionality |
+| Role            | Permissions              |
+| --------------- | ------------------------ |
+| **SUPER_ADMIN** | Full system access       |
+| **ADMIN**       | Administrative functions |
+| **MANAGER**     | Business operations      |
+| **MEMBER**      | Standard user access     |
+| **VIEWER**      | Read-only access         |
+| **VOLUNTEER**   | Limited functionality    |
 
 ## 🔐 Security Features
 
@@ -176,6 +179,7 @@ npm run deploy:vercel
 ```
 
 Bu script:
+
 - ✅ Convex backend'i production'a deploy eder
 - ✅ Security secrets oluşturur
 - ✅ Vercel ortam değişkenlerini hazırlar
@@ -184,12 +188,15 @@ Bu script:
 **Manuel Deploy:**
 
 1. **Convex Backend Deploy:**
+
    ```bash
    npx convex deploy --prod
    ```
+
    Production URL'i not alın.
 
 2. **Vercel Deploy:**
+
    ```bash
    vercel --prod
    ```
@@ -200,16 +207,19 @@ Bu script:
    - `SESSION_SECRET` - 32+ karakter random secret
 
 **Detaylı Rehber:**
-- 📖 **[Vercel Deployment Guide](./docs/VERCEL_DEPLOYMENT.md)** - Adım adım deployment talimatları
+
+- 📖 **[Deployment Quickstart](./docs/DEPLOYMENT_QUICKSTART.md)** - Adım adım deployment talimatları
 - 📖 **[Complete Documentation](./docs/DOCUMENTATION.md)** - Tüm teknik detaylar
 
 **Desteklenen Platformlar:**
+
 - ✅ **Vercel** (önerilen - otomatik CI/CD)
 - ✅ **Railway** (nixpacks.toml dahil)
 - ✅ **Netlify**
 - ✅ **Self-hosted** (Docker/standalone mode)
 
 **Deployment Scriptleri:**
+
 ```bash
 npm run deploy:vercel    # Otomatik Vercel + Convex deploy
 npm run vercel:prod      # Production deploy
@@ -218,6 +228,7 @@ npm run convex:deploy    # Sadece Convex deploy
 ```
 
 **Documentation:**
+
 - [Kapsamlı Dokümantasyon](./docs/DOCUMENTATION.md) - Tüm teknik detaylar ve deployment rehberi
 
 ## 📚 Documentation
