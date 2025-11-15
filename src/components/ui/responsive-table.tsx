@@ -198,7 +198,7 @@ export function ResponsiveGrid({
     );
   }
 
-  const gridCols = `grid-cols-${itemsPerRow.mobile} md:grid-cols-${itemsPerRow.tablet} lg:grid-cols-${itemsPerRow.desktop}`;
+  const _gridCols = `grid-cols-${itemsPerRow.mobile} md:grid-cols-${itemsPerRow.tablet} lg:grid-cols-${itemsPerRow.desktop}`;
 
   return (
     <div
