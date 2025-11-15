@@ -42,10 +42,9 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Plus, Edit, Trash2, FileText, Loader2, Printer, MapPin, Route, Paperclip, Download, Eye } from 'lucide-react';
+import { Search, Plus, Trash2, FileText, Loader2, MapPin, Route, Paperclip } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import type { KumbaraCreateInput } from '@/lib/validations/kumbara';
 import { KumbaraForm } from './KumbaraForm';
 import { KumbaraPrintQR } from './KumbaraPrintQR';
 
@@ -78,7 +77,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [locationFilter, setLocationFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedKumbara, setSelectedKumbara] = useState<KumbaraDonation | null>(null);
+  const [_selectedKumbara, setSelectedKumbara] = useState<KumbaraDonation | null>(null);
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery<{
@@ -105,7 +104,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
     },
   });
 
-  const { mutate: deleteKumbara, isPending: isDeleting } = useMutation({
+  const { mutate: deleteKumbara, isPending: _isDeleting } = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/kumbara/${id}`, {
         method: 'DELETE',
@@ -132,11 +131,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
       cancelled: { label: 'İptal', className: 'bg-red-100 text-red-800' },
     };
     const config = statusConfig[status as keyof typeof statusConfig];
-    return (
-      <Badge className={cn('font-normal', config.className)}>
-        {config.label}
-      </Badge>
-    );
+    return <Badge className={cn('font-normal', config.className)}>{config.label}</Badge>;
   };
 
   const formatCurrency = (amount: number, currency: string) => {
@@ -167,9 +162,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
       <Card>
         <CardHeader>
           <CardTitle>Kumbara Listesi</CardTitle>
-          <CardDescription>
-            Tüm kumbara bağışlarını görüntüleyin ve yönetin
-          </CardDescription>
+          <CardDescription>Tüm kumbara bağışlarını görüntüleyin ve yönetin</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -264,16 +257,16 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
                       <TableCell>
                         <div>
                           <p className="font-medium">{donation.donor_name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {donation.donor_phone}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{donation.donor_phone}</p>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
                           <p className="font-medium text-sm">{donation.kumbara_location}</p>
                           {donation.location_address && (
-                            <p className="text-xs text-muted-foreground">{donation.location_address}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {donation.location_address}
+                            </p>
                           )}
                         </div>
                       </TableCell>
@@ -283,7 +276,8 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <MapPin className="h-3 w-3" />
                               <span>
-                                {donation.location_coordinates.lat.toFixed(4)}, {donation.location_coordinates.lng.toFixed(4)}
+                                {donation.location_coordinates.lat.toFixed(4)},{' '}
+                                {donation.location_coordinates.lng.toFixed(4)}
                               </span>
                             </div>
                           ) : (
@@ -294,15 +288,14 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
                               <Route className="h-3 w-3" />
                               <span>
                                 {donation.route_points.length} nokta
-                                {donation.route_distance && ` (${donation.route_distance.toFixed(1)} km)`}
+                                {donation.route_distance &&
+                                  ` (${donation.route_distance.toFixed(1)} km)`}
                               </span>
                             </div>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        {formatCurrency(donation.amount, donation.currency)}
-                      </TableCell>
+                      <TableCell>{formatCurrency(donation.amount, donation.currency)}</TableCell>
                       <TableCell>
                         {donation.receipt_file_id ? (
                           <div className="flex items-center gap-1">
@@ -313,7 +306,10 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
                               className="h-auto p-0 text-blue-600 hover:text-blue-700"
                               onClick={() => {
                                 // Open file in new tab
-                                window.open(`/api/storage/files/${donation.receipt_file_id}?download=true`, '_blank');
+                                window.open(
+                                  `/api/storage/files/${donation.receipt_file_id}?download=true`,
+                                  '_blank'
+                                );
                               }}
                             >
                               <span className="text-xs">Belge var</span>
@@ -384,11 +380,7 @@ export function KumbaraList({ onCreate }: KumbaraListProps) {
           {/* Sayfalama */}
           {data?.pagination && data.pagination.totalPages > 1 && (
             <div className="flex items-center justify-end gap-2 pt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={data.pagination.page === 1}
-              >
+              <Button variant="outline" size="sm" disabled={data.pagination.page === 1}>
                 Önceki
               </Button>
               <span className="text-sm text-muted-foreground">

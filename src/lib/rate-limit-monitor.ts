@@ -256,26 +256,26 @@ export class RateLimitMonitor {
   }
 
   // Yardımcı methodlar
-  private static getTotalRequests(cutoffTime: Date): number {
+  private static getTotalRequests(_cutoffTime: Date): number {
     // Bu basit bir approximation - gerçek uygulamada bir log sisteminden gelecek
     return RateLimiter.getStats().totalRequests;
   }
 
   private static addRequestCounts(
     endpointMap: Map<string, { requests: number; violations: number }>,
-    cutoffTime: Date
+    _cutoffTime: Date
   ): void {
     // Bu method gerçek request log'larından beslenecek
     // Şimdilik violation sayısından türetilmiş bir approximation kullanıyoruz
-    endpointMap.forEach((data, endpoint) => {
+    endpointMap.forEach((data, _endpoint) => {
       data.requests = Math.max(data.violations * 10, 1); // Minimum 1 request
     });
   }
 
-  private static getIPRequestCount(ipAddress: string, cutoffTime: Date): number {
+  private static getIPRequestCount(ipAddress: string, _cutoffTime: Date): number {
     // IP bazında request count - gerçek log sisteminden gelecek
     const violations = this.violations.filter(
-      (v) => v.ipAddress === ipAddress && v.timestamp >= cutoffTime
+      (v) => v.ipAddress === ipAddress && v.timestamp >= _cutoffTime
     );
     return violations.length * 10; // Approximation
   }

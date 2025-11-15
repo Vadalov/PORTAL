@@ -8,13 +8,13 @@ interface PerformanceMetrics {
   lcp?: number; // Largest Contentful Paint
   fid?: number; // First Input Delay
   cls?: number; // Cumulative Layout Shift
-  
+
   // Custom metrics
   routeTransitionTime?: number;
   modalOpenTime?: number;
   scrollPerformance?: number;
   memoryUsage?: number;
-  
+
   // Navigation timing
   pageLoadTime?: number;
   domContentLoaded?: number;
@@ -35,8 +35,8 @@ export function PerformanceMonitor({
   routeName = 'unknown',
 }: PerformanceMonitorProps) {
   const routeStartTime = useRef<number>(0);
-  const modalOpenTime = useRef<number>(0);
-  const scrollStartTime = useRef<number>(0);
+  const _modalOpenTime = useRef<number>(0);
+  const _scrollStartTime = useRef<number>(0);
 
   // Web Vitals monitoring
   useEffect(() => {
@@ -46,7 +46,7 @@ export function PerformanceMonitor({
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       const lastEntry = entries[entries.length - 1] as PerformanceEntry;
-      
+
       if (lastEntry) {
         const metrics: PerformanceMetrics = { lcp: lastEntry.startTime };
         onMetrics?.(metrics);
@@ -59,7 +59,9 @@ export function PerformanceMonitor({
     const fidObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         const firstInputEntry = entry as PerformanceEventTiming;
-        const metrics: PerformanceMetrics = { fid: firstInputEntry.processingStart - firstInputEntry.startTime };
+        const metrics: PerformanceMetrics = {
+          fid: firstInputEntry.processingStart - firstInputEntry.startTime,
+        };
         onMetrics?.(metrics);
       }
     });
@@ -141,7 +143,7 @@ export const usePerformanceTracking = () => {
 };
 
 // Performance monitoring hook
-export const usePerformanceMonitor = (routeName: string) => {
+export const usePerformanceMonitor = (_routeName: string) => {
   const metricsRef = useRef<PerformanceMetrics>({});
   const { trackModalOpen, trackModalClose, getMemoryUsage } = usePerformanceTracking();
 
@@ -206,7 +208,7 @@ export class PerformanceBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Performance Boundary Error:', error, errorInfo);
-    
+
     // Track performance errors
     if (typeof performance !== 'undefined' && performance.mark) {
       performance.mark('performance-error');
@@ -248,10 +250,12 @@ export const useFPSMonitor = (enabled = true) => {
 
     const measureFPS = () => {
       frameCountRef.current++;
-      
+
       const currentTime = performance.now();
       if (currentTime - lastTimeRef.current >= 1000) {
-        fpsRef.current = Math.round((frameCountRef.current * 1000) / (currentTime - lastTimeRef.current));
+        fpsRef.current = Math.round(
+          (frameCountRef.current * 1000) / (currentTime - lastTimeRef.current)
+        );
         frameCountRef.current = 0;
         lastTimeRef.current = currentTime;
       }
@@ -287,13 +291,13 @@ export const perfLog = {
       console.log(`🚀 [PERF] ${message}`, data);
     }
   },
-  
+
   warn: (message: string, data?: any) => {
     if (process.env.NODE_ENV === 'development') {
       console.warn(`⚠️ [PERF] ${message}`, data);
     }
   },
-  
+
   error: (message: string, data?: any) => {
     console.error(`❌ [PERF] ${message}`, data);
   },

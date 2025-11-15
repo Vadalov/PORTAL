@@ -6,13 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -23,19 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import {
-  FileText,
-  Plus,
-  Edit,
-  Trash2,
-  Star,
-  StarOff,
-  MessageSquare,
-  Mail,
-  Users,
-  Phone,
-  AtSign,
-} from 'lucide-react';
+import { FileText, Plus, Star, StarOff, MessageSquare, Mail, Users, Phone } from 'lucide-react';
 import {
   getMessageTypeLabel,
   extractTemplateVariables,

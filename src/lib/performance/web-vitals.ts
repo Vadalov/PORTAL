@@ -6,7 +6,7 @@
 
 import { onCLS, onLCP, onFCP, onTTFB, onINP, Metric } from 'web-vitals';
 
-interface VitalMetric {
+interface _VitalMetric {
   name: string;
   value: number;
   id: string;
@@ -29,7 +29,10 @@ function sendToAnalytics(metric: Metric): void {
       delta: Math.round(metric.delta * 100) / 100,
       rating,
     };
-    console.log(`📊 Web Vital: ${metricData.name} = ${metricData.value}ms (${metricData.rating})`, metricData);
+    console.log(
+      `📊 Web Vital: ${metricData.name} = ${metricData.value}ms (${metricData.rating})`,
+      metricData
+    );
   }
 
   // Send to Google Analytics 4 (if configured)
