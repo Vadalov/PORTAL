@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { convexBeneficiaries, normalizeQueryParams } from '@/lib/convex/api';
 import logger from '@/lib/logger';
 import type { QueryParams } from '@/types/database';
-import {
-  requireAuthenticatedUser,
-  verifyCsrfToken,
-  buildErrorResponse,
-  requireModuleAccess,
-} from '@/lib/api/auth-utils';
+import { verifyCsrfToken, buildErrorResponse, requireModuleAccess } from '@/lib/api/auth-utils';
 
 // TypeScript interfaces
 interface BeneficiaryFilters {

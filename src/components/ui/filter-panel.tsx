@@ -34,8 +34,8 @@ export function FilterPanel({
   fields,
   onFiltersChange,
   onReset,
-  isOpen = true,
-  onToggle,
+  isOpen: _isOpen = true,
+  onToggle: _onToggle,
 }: FilterPanelProps) {
   const [filters, setFilters] = useState<Record<string, string | string[]>>({});
   const [expandedSections, setExpandedSections] = useState<Set<string>>(

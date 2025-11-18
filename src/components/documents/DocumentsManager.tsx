@@ -6,7 +6,6 @@ import { Upload, FileText, Download, Trash2, Image, File, Loader2 } from 'lucide
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { FileUpload } from '@/components/ui/file-upload';
 import { convex } from '@/lib/convex/client';
 import { api as convexApi } from '@/convex/_generated/api';
 
@@ -33,7 +32,11 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
   const isConvexReady = !!convex;
 
   // Fetch documents - Optimized with caching and immediate UI
-  const { data: documents, isLoading, isFetching } = useQuery({
+  const {
+    data: documents,
+    isLoading,
+    isFetching: _isFetching,
+  } = useQuery({
     queryKey: ['documents', beneficiaryId],
     queryFn: async () => {
       if (!convex) {
@@ -107,9 +110,9 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes  } B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)  } KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)  } MB`;
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const getFileIcon = (fileType: string) => {
@@ -120,7 +123,7 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
 
   const handleDownload = async (file: Document) => {
     if (!file.url) {
-      toast.error('Dosya URL\'si bulunamadı');
+      toast.error("Dosya URL'si bulunamadı");
       return;
     }
 
@@ -184,9 +187,10 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
             border rounded-lg 
             cursor-pointer transition-all duration-200
             px-4 py-2.5 
-            ${dragActive 
-              ? 'border-blue-400 border-solid bg-blue-50/50' 
-              : 'border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-100/50 hover:border-blue-400 hover:border-solid'
+            ${
+              dragActive
+                ? 'border-blue-400 border-solid bg-blue-50/50'
+                : 'border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-100/50 hover:border-blue-400 hover:border-solid'
             }
             ${uploading ? 'opacity-50 cursor-not-allowed' : ''}
           `}
@@ -199,7 +203,9 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
           ) : (
             <>
               <Upload className={`h-4 w-4 ${dragActive ? 'text-blue-600' : 'text-slate-500'}`} />
-              <span className={`text-sm font-medium ${dragActive ? 'text-blue-700' : 'text-slate-700'}`}>
+              <span
+                className={`text-sm font-medium ${dragActive ? 'text-blue-700' : 'text-slate-700'}`}
+              >
                 Dosya seç veya sürükle
               </span>
               <span className="text-xs text-slate-500">• Max 10MB</span>
@@ -229,7 +235,8 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm truncate">{doc.fileName}</p>
                         <p className="text-xs text-muted-foreground">
-                          {formatFileSize(doc.fileSize)} • {new Date(doc.uploadedAt).toLocaleDateString('tr-TR')}
+                          {formatFileSize(doc.fileSize)} •{' '}
+                          {new Date(doc.uploadedAt).toLocaleDateString('tr-TR')}
                         </p>
                       </div>
                     </div>
@@ -274,4 +281,3 @@ export function DocumentsManager({ beneficiaryId }: DocumentsManagerProps) {
     </div>
   );
 }
-

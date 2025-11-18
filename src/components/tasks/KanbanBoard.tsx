@@ -7,9 +7,7 @@ import { User, Calendar, AlertCircle, Clock } from 'lucide-react';
 import type { TaskDocument } from '@/types/database';
 import {
   getPriorityColor,
-  getStatusColor,
   getPriorityLabel,
-  getStatusLabel,
   isTaskOverdue,
   isTaskDueSoon,
 } from '@/lib/validations/task';
@@ -58,7 +56,7 @@ const COLUMNS = [
   },
 ];
 
-function TaskCard({ task, onTaskMove, onTaskClick }: TaskCardProps) {
+function TaskCard({ task, onTaskMove: _onTaskMove, onTaskClick }: TaskCardProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragStart = (e: React.DragEvent) => {

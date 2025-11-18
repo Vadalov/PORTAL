@@ -66,7 +66,7 @@ async function createDemoData() {
       donor_name: 'Fatma Kaya',
       donor_phone: '+90 534 111 22 33',
       donor_email: 'fatma.kaya@example.com',
-      amount: 250.00,
+      amount: 250.0,
       currency: 'TRY',
       donation_type: 'BANKA_HAVALESI',
       payment_method: 'BANKA_HAVALESI',
@@ -102,7 +102,7 @@ async function createDemoData() {
         tags: ['gıda', 'acil', 'aile'],
       });
       console.log(`✅ Created task: ${taskId}\n`);
-    } catch (e) {
+    } catch (_e) {
       console.log('⚠️ Tasks create mutation not available or failed\n');
     }
 
@@ -111,7 +111,8 @@ async function createDemoData() {
     try {
       const messageId = await convex.mutation(api.messages.create, {
         subject: 'Kumbara Bağışı Hakkında Bilgilendirme',
-        content: 'Sayın Mehmet Özkan, bağışınız için teşekkür ederiz. Kumbara bağışınız Ahmet Yılmaz ailesine ulaştırılmıştır.',
+        content:
+          'Sayın Mehmet Özkan, bağışınız için teşekkür ederiz. Kumbara bağışınız Ahmet Yılmaz ailesine ulaştırılmıştır.',
         sender_id: 'admin',
         recipient_ids: ['user123'],
         message_type: 'INFO',
@@ -119,18 +120,17 @@ async function createDemoData() {
         priority: 'NORMAL',
       });
       console.log(`✅ Created message: ${messageId}\n`);
-    } catch (e) {
+    } catch (_e) {
       console.log('⚠️ Messages create mutation not available or failed\n');
     }
 
     console.log('🎉 Demo data creation completed successfully!');
     console.log('\n📊 Created:');
     console.log('  - 1 Beneficiary (İhtiyaç Sahibi): Ayşe Demir');
-    console.log('  - 1 Donation (Bağış): Fatma Kaya\'dan 250 TL');
+    console.log("  - 1 Donation (Bağış): Fatma Kaya'dan 250 TL");
     console.log('  - 1 Task (Görev) - skipped');
     console.log('  - 1 Message (Mesaj) - skipped');
     console.log('\n🔍 You can now check the data in the Convex dashboard or via the UI');
-
   } catch (error: any) {
     console.error('❌ Error creating demo data:', error);
     throw error;

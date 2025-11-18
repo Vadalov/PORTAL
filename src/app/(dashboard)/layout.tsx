@@ -40,7 +40,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const { isAuthenticated, isInitialized, user, logout, initializeAuth } = useAuthStore();
-  const { isOpen: isSearchOpen, onOpen: openSearch, onClose: closeSearch } = useAdvancedSearch();
+  const { isOpen: isSearchOpen, onOpen: _openSearch, onClose: closeSearch } = useAdvancedSearch();
 
   // Keyboard shortcuts
   const keyboardShortcuts = [
@@ -402,10 +402,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         {user?.name || 'Kullanıcı'}
                       </p>
                       <p className="text-xs text-slate-500 truncate mt-0.5">{user?.email || ''}</p>
-                      <Badge
-                        variant={getRoleBadgeVariant(user?.role)}
-                        className="text-xs mt-2"
-                      >
+                      <Badge variant={getRoleBadgeVariant(user?.role)} className="text-xs mt-2">
                         {user?.role || 'Viewer'}
                       </Badge>
                     </div>
@@ -486,10 +483,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
 
         {/* Advanced Search Modal */}
-        <AdvancedSearchModal
-          isOpen={isSearchOpen}
-          onClose={closeSearch}
-        />
+        <AdvancedSearchModal isOpen={isSearchOpen} onClose={closeSearch} />
 
         {/* Analytics & Performance Monitoring */}
         <AnalyticsTrackerComponent
@@ -498,11 +492,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           trackUserInteractions={true}
         />
 
-        <KeyboardShortcuts
-          shortcuts={keyboardShortcuts}
-          enabled={true}
-          showHelpDialog={true}
-        />
+        <KeyboardShortcuts shortcuts={keyboardShortcuts} enabled={true} showHelpDialog={true} />
 
         <PerformanceMonitor
           enableWebVitals={true}
